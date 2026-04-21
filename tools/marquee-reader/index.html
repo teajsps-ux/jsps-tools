@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📺 下課跑馬燈播報員</title>
+
+<!-- 3 個免費開源注音字型(字型本身內建注音符號,不需額外標注) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bpmf+Huninn&family=Bpmf+Iansui&family=Bpmf+Zihi+Kai+Std&display=swap" rel="stylesheet">
+
+<!-- p5.js:用來畫會搖曳的森林動態背景 -->
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-1: #0f0524;
+    --bg-2: #2d0a5f;
+    --bg-3: #0a1a4d;
+    --fg: #f5f0ff;
+    --accent: #ff6fd4;
+    --accent-2: #6fb4ff;
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --radius: 20px;
+    --radius-sm: 12px;
+    --font-display: 'Bpmf Huninn', 'Huninn', 'Noto Sans TC', sans-serif;
+    --char-size: 120px;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Noto Sans TC', "Microsoft JhengHei", sans-serif;
+    color: var(--fg);
+    overflow: hidden;
+  }
+
+  body {
+    background: linear-gradient(180deg, #0b0824 0%, #1a0f3d 40%, #2a1850 70%, #1a0a2d 100%);
+  }
+
+  /* p5.js 森林動態背景 canvas */
+  #forestBg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* ======== 設定模式 ======== */
+  #setupMode {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: clamp(16px, 3vw, 28px) clamp(12px, 3vw, 20px) 40px;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  #setupMode::-webkit-scrollbar { width: 8px; }
+  #setupMode::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+  }
+
+  .title-wrap {
+    text-align: center;
+    padding: 8px 0 20px;
+  }
+
+  h1 {
+    font-size: clamp(1.6rem, 5vw, 3rem);
+    font-weight: 900;
+    background: linear-gradient(120deg, #ff6fd4 0%, #c084fc 40%, #6fb4ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 60px rgba(255,111,212,0.35);
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    color: rgba(245,240,255,0.65);
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    margin-top: 6px;
+    letter-spacing: 0.08em;
+  }
+
+  /* Glass 卡片 */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: clamp(14px, 2.5vw, 20px) clamp(14px, 2.5vw, 22px);
+    margin-bottom: 16px;
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.25),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .panel-title {
+    font-size: clamp(0.95rem, 2vw, 1.05rem);
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.92);
+  }
+
+  /* ======== 常用句 ======== */
+  .presets-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+    min-height: 42px;
+  }
+
+  .preset-empty {
+    color: rgba(245,240,255,0.4);
+    font-size: 0.9rem;
+    padding: 10px 0;
+  }
+
+  .preset-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 6px 6px 14px;
+    background: linear-gradient(135deg, rgba(255,111,212,0.18), rgba(111,180,255,0.18));
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 999px;
+    font-size: 0.92rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+    color: var(--fg);
+    max-width: 100%;
+  }
+
+  .preset-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(255,111,212,0.25);
+  }
+
+  .preset-chip .label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+    cursor: pointer;
+  }
+
+  .preset-chip .icon-btn {
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0.6;
+    font-size: 0.85rem;
+    transition: all 0.15s;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+  }
+
+  .preset-chip .icon-btn:hover { opacity: 1; background: rgba(255,255,255,0.15); }
+  .preset-chip .icon-btn.del:hover { background: rgba(255,80,80,0.3); }
+
+  .preset-save-btn {
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #ff6fd4, #c084fc);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: inherit;
+  }
+
+  .preset-save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255,111,212,0.4);
+  }
+
+  /* ======== 文字輸入 ======== */
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 14px 16px;
+    font-size: clamp(1rem, 2.4vw, 1.1rem);
+    line-height: 1.8;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--radius-sm);
+    color: var(--fg);
+    resize: vertical;
+    font-family: var(--font-display);
+    transition: border 0.15s, box-shadow 0.15s;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,111,212,0.2);
+  }
+
+  /* ======== 設定列 ======== */
+  .setting-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+
+  .setting-row .row-label {
+    min-width: 90px;
+    font-size: 0.94rem;
+    color: rgba(255,255,255,0.82);
+    font-weight: 500;
+  }
+
+  .setting-row input[type="range"] {
+    flex: 1;
+    min-width: 140px;
+    height: 6px;
+    accent-color: var(--accent);
+  }
+
+  .setting-row .value-display {
+    min-width: 64px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.92rem;
+  }
+
+  .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pill-btn {
+    padding: 7px 13px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    color: var(--fg);
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.15s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .pill-btn:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-1px);
+  }
+
+  .pill-btn.active {
+    background: linear-gradient(135deg, rgba(255,111,212,0.3), rgba(111,180,255,0.3));
+    border-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(255,111,212,0.3);
+  }
+
+  .pill-btn.theme-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pill-btn.theme-btn::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--preview-color, #fff);
+    border: 1px solid rgba(255,255,255,0.3);
+    flex-shrink: 0;
+  }
+
+  /* 播放按鈕 */
+  .play-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: clamp(14px, 3vw, 20px);
+    font-size: clamp(1.1rem, 3vw, 1.4rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff6fd4 0%, #c084fc 50%, #6fb4ff 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    letter-spacing: 0.15em;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    font-family: inherit;
+  }
+
+  .play-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(255,111,212,0.4), 0 6px 16px rgba(111,180,255,0.3);
+    filter: brightness(1.08);
+  }
+
+  .play-btn:active { transform: translateY(0); }
+
+  .hint {
+    text-align: center;
+    color: rgba(245,240,255,0.4);
+    font-size: 0.82rem;
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
+  /* ======== 播放模式 ======== */
+  #playMode {
+    position: fixed;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    background: var(--playback-bg, #000);
+    color: var(--playback-fg, #fff);
+  }
+
+  #playMode.active { display: flex; }
+
+  .marquee-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .marquee-row {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .marquee-track {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100vw;
+    animation: scroll linear infinite;
+    will-change: transform;
+    font-family: var(--font-display);
+    font-size: var(--char-size);
+    font-weight: bold;
+    line-height: 1.1;
+  }
+
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-100%); }
+  }
+
+  .marquee-track .sep {
+    color: var(--playback-accent, #ff6fd4);
+    margin: 0 0.4em;
+    vertical-align: middle;
+  }
+
+  /* 大字報靜態模式 */
+  .poster-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: clamp(24px, 4vw, 60px);
+    overflow: auto;
+    text-align: center;
+    gap: 0.4em;
+  }
+
+  .poster-line {
+    font-family: var(--font-display);
+    font-size: var(--char-size);
+    font-weight: bold;
+    line-height: 1.3;
+    word-break: break-word;
+    max-width: 100%;
+  }
+
+  .poster-line .sep {
+    display: none;
+  }
+
+  .play-controls {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+    opacity: 0.35;
+    transition: opacity 0.3s;
+  }
+
+  .play-controls:hover { opacity: 1; }
+
+  .play-controls button {
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    backdrop-filter: blur(10px);
+  }
+
+  .play-controls button:hover { background: rgba(255,255,255,0.2); }
+
+  .tts-status {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    padding: 6px 12px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    z-index: 10;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  /* 彈窗 */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 16px;
+  }
+
+  .modal-backdrop.active { display: flex; }
+
+  .modal {
+    background: linear-gradient(135deg, rgba(45,10,95,0.95), rgba(10,26,77,0.95));
+    padding: clamp(20px, 4vw, 28px);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.15);
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .modal h3 {
+    margin-bottom: 14px;
+    font-size: 1.15rem;
+  }
+
+  .modal input, .modal textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.25);
+    border-radius: var(--radius-sm);
+    color: var(--fg);
+    font-size: 1rem;
+    margin-bottom: 12px;
+    font-family: inherit;
+  }
+
+  .modal textarea {
+    min-height: 100px;
+    resize: vertical;
+    font-family: var(--font-display);
+  }
+
+  .modal input:focus, .modal textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .modal-buttons button {
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: inherit;
+    font-size: 0.92rem;
+  }
+
+  .btn-cancel {
+    background: rgba(255,255,255,0.1);
+    color: var(--fg);
+  }
+
+  .btn-confirm {
+    background: linear-gradient(135deg, #ff6fd4, #c084fc);
+    color: #fff;
+  }
+
+  /* ======== 響應式 ======== */
+  @media (max-width: 640px) {
+    .setting-row { flex-direction: column; align-items: stretch; gap: 8px; }
+    .setting-row .row-label { min-width: unset; }
+    .setting-row input[type="range"] { width: 100%; }
+    .setting-row .value-display { text-align: left; }
+    .preset-chip .label { max-width: 140px; }
+  }
+
+  @media (max-width: 420px) {
+    h1 { font-size: 1.5rem; }
+    .pill-btn { font-size: 0.82rem; padding: 6px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 🌳 p5.js 森林動態背景 -->
+<div id="forestBg"></div>
+
+<!-- ======== 設定模式 ======== -->
+<div id="setupMode">
+
+  <div class="title-wrap">
+    <h1>📺 下課跑馬燈播報員</h1>
+    <p class="subtitle">給國小小朋友看的極光跑馬燈 · 注音 · 台灣國語朗讀</p>
+  </div>
+
+  <!-- 常用句 -->
+  <div class="glass">
+    <div class="panel-title">💾 我的常用句(點藍色文字載入 / 點 ✎ 編輯 / 點 × 刪除)</div>
+    <div class="presets-list" id="presetsList">
+      <span class="preset-empty">還沒有儲存的句子,在下方輸入後點「存下這段」即可</span>
+    </div>
+    <button class="preset-save-btn" id="savePresetBtn">+ 存下這段文字</button>
+  </div>
+
+  <!-- 文字輸入 -->
+  <div class="glass">
+    <div class="panel-title">📝 要播報的文字(一行一句)</div>
+    <textarea id="textInput">下課要先上廁所、喝水,才玩遊戲
+玩遊戲要注意身體界限喔,不要弄痛別人
+書本翻到電子書這一頁</textarea>
+  </div>
+
+  <!-- 顯示設定 -->
+  <div class="glass">
+    <div class="panel-title">⚙️ 顯示設定</div>
+
+    <div class="setting-row">
+      <span class="row-label">注音字型</span>
+      <div class="btn-group" id="fontGroup"></div>
+    </div>
+
+    <div class="setting-row">
+      <span class="row-label">字級大小</span>
+      <input type="range" id="charSize" min="60" max="380" value="120" step="10">
+      <span class="value-display" id="charSizeValue">120 px</span>
+    </div>
+
+    <div class="setting-row">
+      <span class="row-label">顯示模式</span>
+      <div class="btn-group" id="modeGroup"></div>
+    </div>
+
+    <div class="setting-row" id="rowsRow">
+      <span class="row-label">播放列數</span>
+      <div class="btn-group" id="rowsGroup"></div>
+    </div>
+
+    <div class="setting-row" id="speedRow">
+      <span class="row-label">跑馬燈速度</span>
+      <input type="range" id="marqueeSpeed" min="8" max="120" value="20" step="1">
+      <span class="value-display" id="marqueeSpeedValue">20 秒</span>
+    </div>
+
+    <div class="setting-row">
+      <span class="row-label">配色主題</span>
+      <div class="btn-group" id="themeGroup"></div>
+    </div>
+  </div>
+
+  <!-- 播報員 -->
+  <div class="glass">
+    <div class="panel-title">🎙️ 播報員聲音</div>
+
+    <div class="setting-row">
+      <span class="row-label">選擇聲音</span>
+      <div class="btn-group" id="voiceGroup">
+        <span style="opacity:0.6; font-size:0.9rem;">載入可用聲音中...</span>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <span class="row-label">朗讀速度</span>
+      <input type="range" id="ttsSpeed" min="0.5" max="1.2" value="0.7" step="0.05">
+      <span class="value-display" id="ttsSpeedValue">0.70×</span>
+    </div>
+
+    <div class="setting-row">
+      <span class="row-label">語氣(音高)</span>
+      <input type="range" id="ttsPitch" min="0.8" max="1.3" value="1.05" step="0.05">
+      <span class="value-display" id="ttsPitchValue">1.05</span>
+    </div>
+
+    <button class="preset-save-btn" id="testVoiceBtn" style="margin-top:6px;">🔊 試聽「下課囉,記得喝水哦」</button>
+  </div>
+
+  <button class="play-btn" id="playBtn">▶  開 始 播 放</button>
+
+  <p class="hint">💡 播放中按 ESC 回到設定畫面 | F11 可進入全螢幕</p>
+</div>
+
+<!-- ======== 播放模式 ======== -->
+<div id="playMode">
+  <div class="tts-status" id="ttsStatus">🔊 朗讀中</div>
+  <div class="marquee-container" id="marqueeContainer"></div>
+  <div class="poster-container" id="posterContainer" style="display:none;"></div>
+  <div class="play-controls">
+    <button id="fullscreenBtn">⛶ 全螢幕</button>
+    <button id="stopBtn">⏸ 停止</button>
+  </div>
+</div>
+
+<!-- 存檔彈窗(新增 or 編輯) -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h3 id="modalTitle">💾 為這段常用句命名</h3>
+    <input type="text" id="presetNameInput" placeholder="例:下課提醒、安靜排隊..." maxlength="30">
+    <textarea id="presetTextInput" placeholder="這段句子的內容"></textarea>
+    <div class="modal-buttons">
+      <button class="btn-cancel" id="modalCancel">取消</button>
+      <button class="btn-confirm" id="modalConfirm">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 常數
+// ============================================================
+const LS = {
+  font:    'marqueeReader_font',
+  theme:   'marqueeReader_theme',
+  voice:   'marqueeReader_voice',
+  rows:    'marqueeReader_rows',
+  mode:    'marqueeReader_mode',
+  presets: 'marqueeReader_presets',
+};
+
+// ============================================================
+// 注音字型
+// ============================================================
+const fonts = [
+  { id: 'huninn',  name: '粉圓 Huninn',     family: "'Bpmf Huninn', 'Huninn', 'Noto Sans TC', sans-serif" },
+  { id: 'iansui',  name: '芫荽 Iansui',     family: "'Bpmf Iansui', 'Iansui', 'Noto Serif TC', serif" },
+  { id: 'zihikai', name: '字醴楷 Zihi Kai', family: "'Bpmf Zihi Kai Std', 'Zihi Kai Std', 'DFKai-SB', '標楷體', serif" },
+];
+let currentFont = fonts[0];
+
+function applyFont(font) {
+  currentFont = font;
+  document.documentElement.style.setProperty('--font-display', font.family);
+  document.querySelectorAll('#fontGroup .pill-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.id === font.id);
+  });
+  localStorage.setItem(LS.font, font.id);
+}
+
+function renderFonts() {
+  const g = document.getElementById('fontGroup');
+  g.innerHTML = '';
+  fonts.forEach(f => {
+    const b = document.createElement('button');
+    b.className = 'pill-btn';
+    b.dataset.id = f.id;
+    b.textContent = f.name;
+    b.style.fontFamily = f.family;
+    b.onclick = () => applyFont(f);
+    g.appendChild(b);
+  });
+  const saved = fonts.find(f => f.id === localStorage.getItem(LS.font));
+  applyFont(saved || fonts[0]);
+}
+
+// ============================================================
+// 配色主題
+// ============================================================
+const themes = [
+  { id: 'aurora',  name: '極光粉紫', bg: 'linear-gradient(135deg,#1a0533 0%,#3d0a5f 50%,#0a2d4f 100%)', fg: '#fff',    accent: '#ff6fd4' },
+  { id: 'neon',    name: '霓虹青綠', bg: 'linear-gradient(135deg,#001a1a 0%,#0a3d3d 50%,#002d1a 100%)', fg: '#eaffea', accent: '#00ffc8' },
+  { id: 'sunset',  name: '夕陽橘紅', bg: 'linear-gradient(135deg,#2d1b00 0%,#5f1a0a 50%,#3d0a1a 100%)', fg: '#fff3b0', accent: '#ffb84d' },
+  { id: 'ocean',   name: '海洋深藍', bg: 'linear-gradient(135deg,#001a33 0%,#002d5f 50%,#0a1a3d 100%)', fg: '#e0f0ff', accent: '#4fc3f7' },
+  { id: 'forest',  name: '森林綠意', bg: 'linear-gradient(135deg,#0d2818 0%,#1a3d2d 50%,#0a3d1a 100%)', fg: '#eaffea', accent: '#ffd54f' },
+  { id: 'classic', name: '經典黑板', bg: '#000',                                                         fg: '#fff',    accent: '#ff8c00' },
+  { id: 'paper',   name: '書本紙張', bg: '#fdf6e3',                                                      fg: '#333',    accent: '#d32f2f' },
+];
+let currentTheme = themes[0];
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.documentElement.style.setProperty('--playback-bg',     theme.bg);
+  document.documentElement.style.setProperty('--playback-fg',     theme.fg);
+  document.documentElement.style.setProperty('--playback-accent', theme.accent);
+  document.querySelectorAll('#themeGroup .pill-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.id === theme.id);
+  });
+  localStorage.setItem(LS.theme, theme.id);
+}
+
+function renderThemes() {
+  const g = document.getElementById('themeGroup');
+  g.innerHTML = '';
+  themes.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'pill-btn theme-btn';
+    b.dataset.id = t.id;
+    b.textContent = t.name;
+    b.style.setProperty('--preview-color', t.accent);
+    b.onclick = () => applyTheme(t);
+    g.appendChild(b);
+  });
+  const saved = themes.find(t => t.id === localStorage.getItem(LS.theme));
+  applyTheme(saved || themes[0]);
+}
+
+// ============================================================
+// 顯示模式(跑馬燈 / 大字報)
+// ============================================================
+let currentMode = 'marquee';
+
+function applyMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('#modeGroup .pill-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  // 大字報不需要「列數」「速度」設定,隱藏它們
+  const rowsRow  = document.getElementById('rowsRow');
+  const speedRow = document.getElementById('speedRow');
+  if (mode === 'poster') {
+    rowsRow.style.display  = 'none';
+    speedRow.style.display = 'none';
+  } else {
+    rowsRow.style.display  = '';
+    speedRow.style.display = '';
+  }
+  localStorage.setItem(LS.mode, mode);
+}
+
+function renderModes() {
+  const g = document.getElementById('modeGroup');
+  g.innerHTML = '';
+  [
+    { id: 'marquee', name: '🎞 跑馬燈(滾動)' },
+    { id: 'poster',  name: '📰 大字報(靜態)' },
+  ].forEach(m => {
+    const b = document.createElement('button');
+    b.className = 'pill-btn';
+    b.dataset.mode = m.id;
+    b.textContent = m.name;
+    b.onclick = () => applyMode(m.id);
+    g.appendChild(b);
+  });
+  const saved = localStorage.getItem(LS.mode);
+  applyMode(saved === 'poster' ? 'poster' : 'marquee');
+}
+
+// ============================================================
+// 列數
+// ============================================================
+let currentRows = 1;
+
+function applyRows(n) {
+  currentRows = n;
+  document.querySelectorAll('#rowsGroup .pill-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.rows) === n);
+  });
+  localStorage.setItem(LS.rows, String(n));
+}
+
+function renderRows() {
+  const g = document.getElementById('rowsGroup');
+  g.innerHTML = '';
+  [1, 2, 3, 4].forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'pill-btn';
+    b.dataset.rows = n;
+    b.textContent = n === 1 ? '1 列' : n + ' 列';
+    b.onclick = () => applyRows(n);
+    g.appendChild(b);
+  });
+  const saved = parseInt(localStorage.getItem(LS.rows));
+  applyRows([1,2,3,4].includes(saved) ? saved : 1);
+}
+
+// ============================================================
+// 播報員聲音
+// ============================================================
+const VOICE_PROFILES = {
+  'HsiaoChen': { gender: 'female', nice: '曉臻' },
+  'HsiaoYu':   { gender: 'female', nice: '曉雨' },
+  'Yating':    { gender: 'female', nice: '雅婷' },
+  'HanHan':    { gender: 'female', nice: '涵涵' },
+  'Tracy':     { gender: 'female', nice: 'Tracy' },
+  'Mei-Jia':   { gender: 'female', nice: '美嘉' },
+  'Zhiwei':    { gender: 'male',   nice: '志偉' },
+  'YunJhe':    { gender: 'male',   nice: '雲哲' },
+  'Bowen':     { gender: 'male',   nice: '博文' },
+  'Hanson':    { gender: 'male',   nice: '漢森' },
+};
+
+function detectVoiceProfile(voice) {
+  const name = voice.name;
+  for (const key in VOICE_PROFILES) {
+    if (name.includes(key)) return VOICE_PROFILES[key];
+  }
+  // 對於 Google/其他未知聲音,用通用標籤
+  return { gender: 'unknown', nice: name.replace(/Microsoft|Google|Desktop|Online|\(.*?\)/g, '').trim() || '播報員' };
+}
+
+let availableVoices = [];
+let selectedVoice = null;
+
+function loadVoices() {
+  const all = speechSynthesis.getVoices();
+  // 只挑中文聲音(zh-TW 優先,其次任何 zh)
+  const zhTW = all.filter(v => v.lang === 'zh-TW' || v.lang.startsWith('zh-TW'));
+  const zh   = all.filter(v => v.lang.startsWith('zh') && !zhTW.includes(v));
+
+  availableVoices = [...zhTW, ...zh];
+
+  // 分類男女,各取前兩個
+  const females = [];
+  const males = [];
+  const others = [];
+
+  availableVoices.forEach(v => {
+    const p = detectVoiceProfile(v);
+    if (p.gender === 'female' && females.length < 2) females.push({ voice: v, profile: p });
+    else if (p.gender === 'male' && males.length < 2) males.push({ voice: v, profile: p });
+    else if (others.length < 2) others.push({ voice: v, profile: p });
+  });
+
+  // 最終清單:2女 + 2男,不足就補 others
+  const picked = [...females, ...males];
+  while (picked.length < 4 && others.length) picked.push(others.shift());
+
+  renderVoiceButtons(picked);
+}
+
+function renderVoiceButtons(pickedList) {
+  const g = document.getElementById('voiceGroup');
+  g.innerHTML = '';
+
+  if (pickedList.length === 0) {
+    g.innerHTML = '<span style="opacity:0.6; font-size:0.9rem;">⚠️ 找不到中文播報員聲音,請確認作業系統已安裝中文語音包</span>';
+    return;
+  }
+
+  pickedList.forEach((item, idx) => {
+    const b = document.createElement('button');
+    b.className = 'pill-btn';
+    b.dataset.voice = item.voice.name;
+    const emoji = item.profile.gender === 'female' ? '👩' : item.profile.gender === 'male' ? '👨' : '🎙️';
+    b.textContent = `${emoji} ${item.profile.nice}`;
+    b.onclick = () => {
+      selectedVoice = item.voice;
+      document.querySelectorAll('#voiceGroup .pill-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      localStorage.setItem(LS.voice, item.voice.name);
+    };
+    g.appendChild(b);
+  });
+
+  // 載入上次選擇
+  const savedName = localStorage.getItem(LS.voice);
+  const savedBtn = g.querySelector(`[data-voice="${CSS.escape(savedName || '')}"]`);
+  if (savedBtn) savedBtn.click();
+  else g.querySelector('.pill-btn')?.click();
+}
+
+if (typeof speechSynthesis !== 'undefined') {
+  speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+  // 某些瀏覽器(尤其 Chrome)需延遲再載一次
+  setTimeout(loadVoices, 500);
+}
+
+// ============================================================
+// 常用句(含編輯)
+// ============================================================
+function loadPresets() {
+  try { return JSON.parse(localStorage.getItem(LS.presets) || '[]'); }
+  catch { return []; }
+}
+
+function savePresets(list) {
+  localStorage.setItem(LS.presets, JSON.stringify(list));
+}
+
+function renderPresets() {
+  const list = loadPresets();
+  const container = document.getElementById('presetsList');
+  if (list.length === 0) {
+    container.innerHTML = '<span class="preset-empty">還沒有儲存的句子,在下方輸入後點「存下這段」即可</span>';
+    return;
+  }
+  container.innerHTML = '';
+  list.forEach((p, idx) => {
+    const chip = document.createElement('span');
+    chip.className = 'preset-chip';
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'label';
+    labelSpan.textContent = p.label;
+    labelSpan.title = p.text;
+    labelSpan.onclick = () => {
+      document.getElementById('textInput').value = p.text;
+    };
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'icon-btn';
+    editBtn.textContent = '✎';
+    editBtn.title = '編輯';
+    editBtn.onclick = (e) => { e.stopPropagation(); openEditModal(idx); };
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'icon-btn del';
+    delBtn.textContent = '×';
+    delBtn.title = '刪除';
+    delBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (confirm(`刪除「${p.label}」?`)) {
+        const arr = loadPresets();
+        arr.splice(idx, 1);
+        savePresets(arr);
+        renderPresets();
+      }
+    };
+
+    chip.append(labelSpan, editBtn, delBtn);
+    container.appendChild(chip);
+  });
+}
+
+// 彈窗狀態:-1 = 新增,>=0 = 編輯該 index
+let editingIndex = -1;
+
+function openSaveModal() {
+  const text = document.getElementById('textInput').value.trim();
+  if (!text) { alert('請先輸入要儲存的文字'); return; }
+  editingIndex = -1;
+  document.getElementById('modalTitle').textContent = '💾 為這段常用句命名';
+  document.getElementById('presetNameInput').value = text.split('\n')[0].slice(0, 15);
+  document.getElementById('presetTextInput').value = text;
+  showModal();
+}
+
+function openEditModal(idx) {
+  const list = loadPresets();
+  const p = list[idx];
+  if (!p) return;
+  editingIndex = idx;
+  document.getElementById('modalTitle').textContent = `✎ 編輯「${p.label}」`;
+  document.getElementById('presetNameInput').value = p.label;
+  document.getElementById('presetTextInput').value = p.text;
+  showModal();
+}
+
+function showModal() {
+  document.getElementById('modalBackdrop').classList.add('active');
+  setTimeout(() => document.getElementById('presetNameInput').focus(), 50);
+}
+
+function closeSaveModal() {
+  document.getElementById('modalBackdrop').classList.remove('active');
+  editingIndex = -1;
+}
+
+function confirmSave() {
+  const label = document.getElementById('presetNameInput').value.trim();
+  const text  = document.getElementById('presetTextInput').value.trim();
+  if (!label) { alert('請輸入名稱'); return; }
+  if (!text)  { alert('內容不能為空'); return; }
+  const list = loadPresets();
+  if (editingIndex >= 0) {
+    list[editingIndex] = { ...list[editingIndex], label, text };
+  } else {
+    list.push({ label, text, ts: Date.now() });
+  }
+  savePresets(list);
+  renderPresets();
+  closeSaveModal();
+}
+
+// ============================================================
+// 產出播放 HTML(純文字,由字型自帶注音)
+// ============================================================
+function buildDisplayHTML(text) {
+  // BPMF 字型內建注音,只要純文字就會自動顯示注音,
+  // 把換行轉成可見分隔符,其餘直接輸出。
+  return escapeHtml(text).replace(/\n/g, '<span class="sep">✨</span>');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+// ============================================================
+// TTS
+// ============================================================
+let isPlaying = false;
+
+function speakLoop(text, rate, pitch) {
+  if (!isPlaying) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-TW';
+  u.rate = rate;
+  u.pitch = pitch;
+  if (selectedVoice) u.voice = selectedVoice;
+  u.onend = () => {
+    if (isPlaying) setTimeout(() => speakLoop(text, rate, pitch), 800);
+  };
+  u.onerror = () => {
+    if (isPlaying) setTimeout(() => speakLoop(text, rate, pitch), 1500);
+  };
+  speechSynthesis.speak(u);
+}
+
+function stopTTS() {
+  isPlaying = false;
+  if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+}
+
+function testVoice() {
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance('下課囉,記得喝水哦');
+  u.lang = 'zh-TW';
+  u.rate = parseFloat(document.getElementById('ttsSpeed').value);
+  u.pitch = parseFloat(document.getElementById('ttsPitch').value);
+  if (selectedVoice) u.voice = selectedVoice;
+  speechSynthesis.speak(u);
+}
+
+// ============================================================
+// 播放 / 停止
+// ============================================================
+const setupMode        = document.getElementById('setupMode');
+const playMode         = document.getElementById('playMode');
+const container        = document.getElementById('marqueeContainer');
+const posterContainer  = document.getElementById('posterContainer');
+
+function startPlay() {
+  const raw = document.getElementById('textInput').value.trim();
+  if (!raw) { alert('請先輸入要播報的文字'); return; }
+
+  const lines = raw.split('\n').filter(l => l.trim());
+
+  const charSize = document.getElementById('charSize').value;
+  document.documentElement.style.setProperty('--char-size', charSize + 'px');
+
+  if (currentMode === 'poster') {
+    // 🧾 大字報靜態模式:每行一個大字塊,置中顯示
+    container.style.display = 'none';
+    posterContainer.style.display = '';
+    posterContainer.innerHTML = '';
+    lines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'poster-line';
+      div.innerHTML = escapeHtml(line);
+      posterContainer.appendChild(div);
+    });
+  } else {
+    // 🎞 跑馬燈模式
+    posterContainer.style.display = 'none';
+    container.style.display = '';
+
+    const joinedText = lines.join('　　✨　　');
+    const marqueeSeconds = parseInt(document.getElementById('marqueeSpeed').value);
+    const innerHTML = buildDisplayHTML(joinedText) + '<span class="sep">　　　　</span>';
+
+    container.innerHTML = '';
+    for (let i = 0; i < currentRows; i++) {
+      const row = document.createElement('div');
+      row.className = 'marquee-row';
+      const track = document.createElement('div');
+      track.className = 'marquee-track';
+      track.style.animationDuration = marqueeSeconds + 's';
+      track.style.animationDelay = (-i * marqueeSeconds / currentRows) + 's';
+      track.innerHTML = innerHTML;
+      row.appendChild(track);
+      container.appendChild(row);
+    }
+  }
+
+  setupMode.style.display = 'none';
+  playMode.classList.add('active');
+
+  isPlaying = true;
+  const rate  = parseFloat(document.getElementById('ttsSpeed').value);
+  const pitch = parseFloat(document.getElementById('ttsPitch').value);
+  const ttsText = lines.join('。 ');
+  setTimeout(() => speakLoop(ttsText, rate, pitch), 500);
+}
+
+function stopPlay() {
+  stopTTS();
+  playMode.classList.remove('active');
+  setupMode.style.display = '';
+  container.innerHTML = '';
+  posterContainer.innerHTML = '';
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
+// ============================================================
+// 事件綁定
+// ============================================================
+document.getElementById('playBtn').onclick       = startPlay;
+document.getElementById('stopBtn').onclick       = stopPlay;
+document.getElementById('fullscreenBtn').onclick = toggleFullscreen;
+document.getElementById('savePresetBtn').onclick = openSaveModal;
+document.getElementById('testVoiceBtn').onclick  = testVoice;
+document.getElementById('modalCancel').onclick   = closeSaveModal;
+document.getElementById('modalConfirm').onclick  = confirmSave;
+document.getElementById('modalBackdrop').onclick = (e) => {
+  if (e.target.id === 'modalBackdrop') closeSaveModal();
+};
+document.getElementById('presetNameInput').onkeydown = (e) => {
+  if (e.key === 'Escape') closeSaveModal();
+};
+
+document.getElementById('charSize').oninput = (e) => {
+  document.getElementById('charSizeValue').textContent = e.target.value + ' px';
+};
+document.getElementById('marqueeSpeed').oninput = (e) => {
+  document.getElementById('marqueeSpeedValue').textContent = e.target.value + ' 秒';
+};
+document.getElementById('ttsSpeed').oninput = (e) => {
+  document.getElementById('ttsSpeedValue').textContent = Number(e.target.value).toFixed(2) + '×';
+};
+document.getElementById('ttsPitch').oninput = (e) => {
+  document.getElementById('ttsPitchValue').textContent = Number(e.target.value).toFixed(2);
+};
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && playMode.classList.contains('active')) stopPlay();
+});
+
+// 初始化
+renderFonts();
+renderThemes();
+renderModes();
+renderRows();
+renderPresets();
+
+// ============================================================
+// 🌳 p5.js 森林動態背景(大樹 + 花海 + 螢火蟲 + 月亮 + 彩虹)
+// ============================================================
+const forestSketch = (p) => {
+  let trees = [];
+  let flowers = [];
+  let fireflies = [];
+  let stars = [];
+  let windPhase = 0;
+  let moonAngle = 0;
+
+  // ---------- 樹(用遞迴分枝 + 風擺)----------
+  class Tree {
+    constructor(x, groundY, scale) {
+      this.x = x;
+      this.y = groundY;
+      this.scale = scale; // 大小(近景大、遠景小)
+      this.trunkLen = p.random(120, 200) * scale;
+      this.hue = p.random(95, 135);            // 綠色色相
+      this.sat = p.random(35, 70);
+      this.seed = p.random(1000);               // 給樹一個獨特「風搖相位」
+      this.depth = 7;                           // 分枝層數
+    }
+
+    draw(wind) {
+      p.push();
+      p.translate(this.x, this.y);
+      p.stroke(60, 40, 25, 220);
+      p.strokeWeight(8 * this.scale);
+      this.branch(this.trunkLen, this.depth, wind, 0);
+      p.pop();
+    }
+
+    branch(len, depth, wind, branchIndex) {
+      if (depth <= 0 || len < 2) return;
+
+      // 風擺:越高越搖,depth 越小(越頂端)搖得越誇張
+      // 幅度縮小到 0.004(原 0.010 的 40%),只有樹梢微微呼吸的程度
+      const swayAmount = (7 - depth) * 0.004;
+      const sway = p.sin(wind + this.seed + branchIndex * 0.5) * swayAmount;
+
+      p.strokeWeight(p.max(1, depth * 1.2 * this.scale));
+      const brown = p.lerpColor(p.color(50,30,20), p.color(110,70,45), (7-depth)/7);
+      p.stroke(brown);
+      p.line(0, 0, 0, -len);
+      p.translate(0, -len);
+
+      // 葉簇 / 花(在末端)
+      if (depth <= 2) {
+        p.noStroke();
+        for (let i = 0; i < 6; i++) {
+          const lx = p.random(-15, 15) * this.scale;
+          const ly = p.random(-15, 15) * this.scale;
+          const r  = p.random(6, 14) * this.scale;
+          p.fill(this.hue + p.random(-10,10), this.sat, 55 + p.random(-8,8), 180);
+          p.ellipse(lx, ly, r, r);
+        }
+      }
+
+      p.push();
+      p.rotate(-0.35 + sway);
+      this.branch(len * 0.72, depth - 1, wind, branchIndex * 2 + 1);
+      p.pop();
+
+      p.push();
+      p.rotate(0.35 + sway);
+      this.branch(len * 0.72, depth - 1, wind, branchIndex * 2 + 2);
+      p.pop();
+
+      // 中間偶爾多一枝
+      if (depth > 3 && p.random() < 0.4) {
+        p.push();
+        p.rotate(sway * 1.5);
+        this.branch(len * 0.6, depth - 1, wind, branchIndex * 2 + 3);
+        p.pop();
+      }
+    }
+  }
+
+  // ---------- 地上的花 ----------
+  class Flower {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.size = p.random(8, 18);
+      this.color = p.random([
+        [330, 70, 85], [280, 55, 85], [45, 85, 90],
+        [200, 60, 90], [10, 75, 85], [180, 55, 88],
+      ]);
+      this.seed = p.random(1000);
+    }
+    draw(wind) {
+      const sway = p.sin(wind * 2 + this.seed) * 3;
+      p.push();
+      p.translate(this.x + sway, this.y);
+      p.noStroke();
+      // 花瓣 5 片
+      const [h, s, b] = this.color;
+      for (let i = 0; i < 5; i++) {
+        p.fill(h, s, b, 220);
+        p.push();
+        p.rotate(i * p.TWO_PI / 5);
+        p.ellipse(0, -this.size * 0.35, this.size * 0.5, this.size * 0.75);
+        p.pop();
+      }
+      // 花心
+      p.fill(50, 90, 95);
+      p.ellipse(0, 0, this.size * 0.35);
+      p.pop();
+    }
+  }
+
+  // ---------- 螢火蟲 ----------
+  class Firefly {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = p.random(p.width);
+      this.y = p.random(p.height * 0.2, p.height * 0.9);
+      this.vx = p.random(-0.3, 0.3);
+      this.vy = p.random(-0.2, 0.2);
+      this.size = p.random(2, 5);
+      this.phase = p.random(p.TWO_PI);
+      this.speed = p.random(0.02, 0.05);
+    }
+    update() {
+      this.x += this.vx + p.sin(p.frameCount * 0.01 + this.phase) * 0.4;
+      this.y += this.vy + p.cos(p.frameCount * 0.012 + this.phase) * 0.3;
+      this.phase += this.speed;
+      if (this.x < -20 || this.x > p.width + 20 || this.y < -20 || this.y > p.height + 20) {
+        this.reset();
+      }
+    }
+    draw() {
+      const glow = (p.sin(this.phase) + 1) * 0.5;
+      p.noStroke();
+      // 外光暈
+      for (let i = 3; i >= 1; i--) {
+        p.fill(55, 90, 100, 30 * glow / i);
+        p.ellipse(this.x, this.y, this.size * i * 4);
+      }
+      // 核心
+      p.fill(55, 60, 100, 200 + glow * 55);
+      p.ellipse(this.x, this.y, this.size);
+    }
+  }
+
+  // ---------- 星星 ----------
+  class Star {
+    constructor() {
+      this.x = p.random(p.width);
+      this.y = p.random(p.height * 0.6);
+      this.size = p.random(1, 2.5);
+      this.phase = p.random(p.TWO_PI);
+    }
+    draw() {
+      const blink = (p.sin(p.frameCount * 0.03 + this.phase) + 1) * 0.5;
+      p.noStroke();
+      p.fill(55, 20, 100, 100 + blink * 155);
+      p.ellipse(this.x, this.y, this.size);
+    }
+  }
+
+  // ---------- 彩虹(淡淡弧) ----------
+  function drawRainbow() {
+    const cx = p.width * 0.78;
+    const cy = p.height * 1.05;
+    const radius = p.min(p.width, p.height) * 0.65;
+    const bands = [
+      [0,  80, 90],   // 紅
+      [25, 85, 92],   // 橙
+      [50, 85, 95],   // 黃
+      [110,70, 85],   // 綠
+      [200,75, 90],   // 藍
+      [230,65, 85],   // 靛
+      [280,60, 85],   // 紫
+    ];
+    p.noFill();
+    p.strokeWeight(10);
+    for (let i = 0; i < bands.length; i++) {
+      const [h, s, b] = bands[i];
+      p.stroke(h, s, b, 40);
+      p.arc(cx, cy, (radius - i*12) * 2, (radius - i*12) * 2, p.PI + 0.2, p.TWO_PI - 0.3);
+    }
+  }
+
+  // ---------- 月亮 ----------
+  function drawMoon() {
+    const mx = p.width * 0.18;
+    const my = p.height * 0.18 + p.sin(moonAngle) * 4;
+    const r = p.min(p.width, p.height) * 0.07;
+    // 光暈
+    for (let i = 6; i >= 1; i--) {
+      p.noStroke();
+      p.fill(50, 30, 100, 10);
+      p.ellipse(mx, my, r * 2 * i * 0.5);
+    }
+    p.fill(50, 15, 100, 240);
+    p.ellipse(mx, my, r * 2);
+    // 月球陰影(讓它有立體感)
+    p.fill(50, 25, 92, 60);
+    p.ellipse(mx + r * 0.25, my - r * 0.15, r * 1.6);
+  }
+
+  // ---------- 地面 ----------
+  function drawGround(groundY) {
+    p.noStroke();
+    // 地表漸層
+    for (let y = groundY; y < p.height; y += 3) {
+      const t = (y - groundY) / (p.height - groundY);
+      p.fill(130, 40, 15 + t * 10, 230);
+      p.rect(0, y, p.width, 3);
+    }
+  }
+
+  // ---------- 天空漸層 ----------
+  function drawSky(groundY) {
+    for (let y = 0; y < groundY; y += 3) {
+      const t = y / groundY;
+      const c1 = p.color(260, 70, 12);   // 深紫
+      const c2 = p.color(290, 55, 22);   // 紫紅
+      const c3 = p.color(220, 60, 18);   // 暗藍
+      let col;
+      if (t < 0.5) col = p.lerpColor(c1, c2, t * 2);
+      else         col = p.lerpColor(c2, c3, (t - 0.5) * 2);
+      p.stroke(col);
+      p.line(0, y, p.width, y);
+    }
+  }
+
+  // ---------- 初始化場景 ----------
+  function buildScene() {
+    trees = [];
+    flowers = [];
+    fireflies = [];
+    stars = [];
+
+    const groundY = p.height * 0.72;
+
+    // 遠景樹(小、暗)
+    for (let i = 0; i < 8; i++) {
+      const x = p.random(p.width);
+      const t = new Tree(x, groundY + p.random(-10, 20), p.random(0.35, 0.55));
+      t.hue = p.random(200, 260); // 遠樹偏藍紫
+      t.sat = 30;
+      trees.push(t);
+    }
+    // 中景樹
+    for (let i = 0; i < 5; i++) {
+      const x = p.random(p.width);
+      const t = new Tree(x, groundY + p.random(0, 30), p.random(0.6, 0.85));
+      trees.push(t);
+    }
+    // 近景樹(大)
+    for (let i = 0; i < 3; i++) {
+      const x = p.random(p.width);
+      const t = new Tree(x, groundY + p.random(20, 60), p.random(0.95, 1.3));
+      trees.push(t);
+    }
+
+    // 遍地花海
+    const flowerCount = p.floor(p.width * p.height / 9000);
+    for (let i = 0; i < flowerCount; i++) {
+      const fx = p.random(p.width);
+      const fy = p.random(groundY + 10, p.height - 5);
+      flowers.push(new Flower(fx, fy));
+    }
+
+    // 螢火蟲
+    const fireflyCount = p.floor(p.width / 25);
+    for (let i = 0; i < fireflyCount; i++) fireflies.push(new Firefly());
+
+    // 星星
+    for (let i = 0; i < 80; i++) stars.push(new Star());
+  }
+
+  p.setup = () => {
+    const cnv = p.createCanvas(window.innerWidth, window.innerHeight);
+    cnv.parent('forestBg');
+    p.colorMode(p.HSB, 360, 100, 100, 255);
+    p.noStroke();
+    buildScene();
+  };
+
+  p.windowResized = () => {
+    p.resizeCanvas(window.innerWidth, window.innerHeight);
+    buildScene();
+  };
+
+  p.draw = () => {
+    const groundY = p.height * 0.72;
+
+    // 天空
+    drawSky(groundY);
+
+    // 星星
+    stars.forEach(s => s.draw());
+
+    // 月亮
+    moonAngle += 0.005;
+    drawMoon();
+
+    // 彩虹
+    drawRainbow();
+
+    // 地面
+    drawGround(groundY);
+
+    // 風:近乎靜止(約 80 秒才擺一次,只有久看才察覺在動)
+    windPhase += 0.0002;
+    const wind = windPhase;
+
+    // 遠 -> 近 畫樹(scale 小 → scale 大),讓近景蓋住遠景
+    trees.sort((a, b) => a.scale - b.scale).forEach(t => t.draw(wind));
+
+    // 花海
+    flowers.forEach(f => f.draw(wind));
+
+    // 螢火蟲在最上層
+    fireflies.forEach(f => { f.update(); f.draw(); });
+  };
+};
+
+// 啟動 p5
+new p5(forestSketch);
+</script>
+</body>
+</html>
