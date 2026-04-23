@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>老師的教學工具箱 · jsps-tools</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --header-bg: #1e3a8a;
+    --header-bg-light: #2d4ba0;
+    --page-bg: #f6f4ee;
+  }
+  html, body {
+    min-height: 100%;
+    font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC", sans-serif;
+    color: #2d2d2d;
+    background: var(--page-bg);
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* 頂部深藍區 */
+  .hero {
+    background: linear-gradient(135deg, var(--header-bg) 0%, var(--header-bg-light) 100%);
+    color: white;
+    padding: clamp(36px, 6vw, 64px) clamp(20px, 4vw, 48px) clamp(48px, 7vw, 80px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before, .hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+  .hero::before {
+    width: 260px; height: 260px;
+    top: -80px; left: -80px;
+  }
+  .hero::after {
+    width: 200px; height: 200px;
+    bottom: -60px; right: -60px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    position: relative;
+  }
+  .hero .subtitle {
+    font-size: clamp(14px, 2vw, 18px);
+    opacity: 0.88;
+    line-height: 1.7;
+    position: relative;
+  }
+
+  /* 卡片內容區 */
+  .content {
+    flex-grow: 1;
+    max-width: 1100px;
+    width: 100%;
+    margin: -40px auto 0;
+    padding: 0 clamp(16px, 3vw, 32px) clamp(40px, 5vw, 64px);
+    position: relative;
+  }
+  .panel {
+    background: white;
+    border-radius: 20px;
+    padding: clamp(20px, 3vw, 40px);
+    box-shadow: 0 10px 40px rgba(30, 58, 138, 0.12);
+  }
+  .section-title {
+    font-size: clamp(18px, 2.4vw, 22px);
+    color: #1e3a8a;
+    border-left: 6px solid #ffd93d;
+    padding-left: 12px;
+    margin-bottom: 20px;
+    margin-top: 8px;
+  }
+  .section-title:not(:first-child) {
+    margin-top: clamp(28px, 4vw, 40px);
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: clamp(14px, 2vw, 22px);
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    padding: clamp(18px, 2.5vw, 26px);
+    text-decoration: none;
+    color: white;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.12);
+    transition: transform 0.15s, box-shadow 0.15s;
+    min-height: 180px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover, .card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 0 rgba(0,0,0,0.15), 0 14px 30px rgba(0,0,0,0.12);
+    outline: none;
+  }
+  .card:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.12);
+  }
+  .emoji {
+    font-size: clamp(42px, 6vw, 60px);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .card h2 {
+    font-size: clamp(18px, 2.2vw, 22px);
+    margin-bottom: 8px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+  }
+  .card p {
+    font-size: clamp(13px, 1.6vw, 15px);
+    line-height: 1.6;
+    opacity: 0.95;
+    flex-grow: 1;
+  }
+  .tag {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 4px 12px;
+    background: rgba(255,255,255,0.25);
+    color: white;
+    font-size: 12px;
+    border-radius: 99px;
+    align-self: flex-start;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  /* 卡片色系 */
+  .c-pink   { background: linear-gradient(135deg, #ff6b9d 0%, #e94a85 100%); }
+  .c-orange { background: linear-gradient(135deg, #ffa751 0%, #ff7e47 100%); }
+  .c-yellow { background: linear-gradient(135deg, #ffd93d 0%, #f5b700 100%); color: #4a3500; }
+  .c-yellow h2, .c-yellow p, .c-yellow .tag { color: #4a3500; }
+  .c-yellow .tag { background: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.6); }
+  .c-green  { background: linear-gradient(135deg, #7ed957 0%, #4caf50 100%); }
+  .c-blue   { background: linear-gradient(135deg, #6ec5ff 0%, #3498db 100%); }
+  .c-purple { background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%); }
+  .c-teal   { background: linear-gradient(135deg, #5eead4 0%, #14b8a6 100%); }
+
+  /* 外部連結右上角小圖示 */
+  .card.external::after {
+    content: "↗";
+    position: absolute;
+    top: 14px; right: 16px;
+    font-size: 20px;
+    opacity: 0.8;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+    color: #8a8572;
+    line-height: 1.8;
+  }
+  footer a { color: #3498db; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>🎒 老師的教學工具箱</h1>
+    <p class="subtitle">為國小小朋友做的互動教學網頁 · 手機、平板、電腦、教室電視都能玩</p>
+  </div>
+
+  <div class="content">
+    <div class="panel">
+
+      <!-- 自製工具區 -->
+      <h2 class="section-title">🛠️ 自製互動教具</h2>
+      <div class="cards">
+
+        <a class="card c-yellow" href="./tools/say-the-word/">
+          <div class="emoji">🎵</div>
+          <h2>注音節拍遊戲</h2>
+          <p>跟著音樂節拍認讀注音符號卡，老師自選要上幾張卡，五回合閃動挑戰，派對氣氛炒熱全班。</p>
+          <span class="tag">✨ 新上線</span>
+        </a>
+
+        <a class="card c-green" href="./tools/marquee-reader/">
+          <div class="emoji">📺</div>
+          <h2>下課跑馬燈播報員</h2>
+          <p>大字跑馬燈＋大字報兩種顯示模式，自帶注音、會朗讀，森林動態背景，讓下課訊息好看又好讀。</p>
+          <span class="tag">🌿 日常班務</span>
+        </a>
+
+        <a class="card c-orange" href="./tools/wordcloud/">
+          <div class="emoji">☁️</div>
+          <h2>班級互動文字雲 V2</h2>
+          <p>學生即時輸入關鍵字，全班的想法立刻變成彩色文字雲飛上螢幕，支援 QR Code 分享連結，適合課堂腦力激盪。</p>
+          <span class="tag">💬 即時互動</span>
+        </a>
+
+        <a class="card c-teal" href="./tools/word-search/">
+          <div class="emoji">🔎</div>
+          <h2>Word Search 找字遊戲</h2>
+          <p>老師出題、學生用座號登入闖關，競速或時限兩種模式，本機排行榜＋芫荽注音字型，找到字會自動朗讀。</p>
+          <span class="tag">✨ 新上線</span>
+        </a>
+
+      </div>
+
+      <!-- 外部資源區 -->
+      <h2 class="section-title">🌟 外部資源</h2>
+      <div class="cards">
+
+        <a class="card c-purple external" href="https://kathy594520.github.io/new.github.io/AI/AI" target="_blank" rel="noopener">
+          <div class="emoji">🔮</div>
+          <h2>凱西仙姑的教學工具庫</h2>
+          <p>外部連結 · Kathy 老師自製 AI 教具合集，內容超級豐富。</p>
+          <span class="tag">🌟 外部資源</span>
+        </a>
+
+        <a class="card c-pink external" href="https://sites.google.com/apps.ntpc.edu.tw/teacherclassroom/%E9%A6%96%E9%A0%81" target="_blank" rel="noopener">
+          <div class="emoji">🎪</div>
+          <h2>班級經營百寶箱</h2>
+          <p>外部連結 · 新北市教師的班級經營資源網，班務管理實用工具彙整。</p>
+          <span class="tag">🌟 外部資源</span>
+        </a>
+
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <p>🛠️ jsps-tools · 用 Claude Code + GitHub Pages 打造</p>
+    <p>原始碼：<a href="https://github.com/teajsps-ux/jsps-tools" target="_blank" rel="noopener">github.com/teajsps-ux/jsps-tools</a></p>
+  </footer>
+
+</body>
+</html>

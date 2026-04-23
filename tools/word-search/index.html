@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Search 找字遊戲</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/bpmf-iansui/index.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --orange: #f97316;
+    --orange-dark: #ea580c;
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --yellow-bg: #fef3c7;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --blue: #3b82f6;
+    --red: #ef4444;
+  }
+  html, body {
+    min-height: 100%;
+    font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC", sans-serif;
+    color: var(--gray-800);
+    background: #fff7ed;
+    background-image: radial-gradient(circle at 10% 20%, rgba(249,115,22,0.08) 0, transparent 50%);
+    touch-action: manipulation;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: clamp(12px, 2vw, 24px); }
+
+  /* Header */
+  header {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 16px;
+    padding: clamp(14px, 2.5vw, 22px);
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 {
+    color: #15803d;
+    font-size: clamp(20px, 3vw, 28px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  header h1 .icon { font-size: 1.2em; }
+  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.15s, background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
+  .btn:active { transform: translateY(0); }
+  .btn-orange { background: var(--orange); color: white; }
+  .btn-orange:hover { background: var(--orange-dark); }
+  .btn-blue { background: var(--blue); color: white; }
+  .btn-gray { background: var(--gray-100); color: var(--gray-700); }
+  .btn-red { background: var(--red); color: white; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+
+  /* 設定區（老師介面才看得到） */
+  .settings-panel {
+    background: white;
+    border-radius: 16px;
+    padding: clamp(16px, 2.5vw, 24px);
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #fed7aa;
+  }
+  .settings-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 768px) {
+    .form-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .form-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+  }
+  .form-field textarea,
+  .form-field input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .form-field textarea { min-height: 80px; resize: vertical; }
+  .form-field input[type="range"] { width: 100%; accent-color: var(--orange); }
+  .form-field .hint { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+  .check-group { display: flex; flex-wrap: wrap; gap: 10px; }
+  .check-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--gray-50);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 0;
+  }
+  .check-group input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--orange); }
+
+  /* 字型選項 */
+  .font-choice { display: flex; flex-wrap: wrap; gap: 8px; }
+  .font-choice button {
+    padding: 8px 14px;
+    border: 2px solid var(--gray-200);
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+  .font-choice button.active {
+    background: var(--orange);
+    color: white;
+    border-color: var(--orange-dark);
+  }
+
+  /* 模式選項 */
+  .mode-choice { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mode-choice button {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px;
+    border: 2px solid var(--gray-200);
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .mode-choice button.active {
+    background: var(--yellow-bg);
+    border-color: var(--orange);
+  }
+
+  .time-choice { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .time-choice button {
+    padding: 8px 14px;
+    border: 2px solid var(--gray-200);
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .time-choice button.active {
+    background: var(--orange);
+    color: white;
+    border-color: var(--orange-dark);
+  }
+
+  /* 提示訊息 */
+  .message {
+    padding: 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 12px;
+    display: none;
+  }
+  .message.show { display: block; }
+
+  /* 遊戲前置：座號輸入 */
+  .student-gate {
+    background: white;
+    border-radius: 16px;
+    padding: clamp(24px, 4vw, 40px);
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .student-gate h2 {
+    color: var(--gray-800);
+    font-size: clamp(22px, 3vw, 28px);
+    margin-bottom: 8px;
+  }
+  .student-gate p { color: var(--gray-500); margin-bottom: 20px; font-size: 15px; }
+  .seat-input {
+    font-size: 36px;
+    width: 140px;
+    padding: 10px;
+    text-align: center;
+    border: 3px solid var(--orange);
+    border-radius: 14px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    font-family: monospace;
+  }
+  .seat-input:focus { outline: none; box-shadow: 0 0 0 4px rgba(249,115,22,0.2); }
+
+  /* 計時器 + 狀態列 */
+  .status-bar {
+    background: white;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .status-seat {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-seat .num {
+    background: var(--orange);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 99px;
+    font-family: monospace;
+  }
+  .timer {
+    font-family: monospace;
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: bold;
+    color: var(--orange-dark);
+    background: var(--yellow-bg);
+    padding: 6px 16px;
+    border-radius: 10px;
+  }
+  .timer.warning { color: white; background: var(--red); animation: pulse 1s infinite; }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .progress {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-700);
+  }
+  .progress .done {
+    background: var(--green-bg);
+    color: #166534;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-left: 4px;
+  }
+
+  /* 遊戲區 */
+  .game-area {
+    background: white;
+    border-radius: 16px;
+    padding: clamp(12px, 2vw, 20px);
+    border: 2px solid var(--gray-800);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  .game-title {
+    text-align: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .game-title h2 {
+    font-size: clamp(20px, 3.5vw, 32px);
+    color: var(--gray-800);
+    letter-spacing: 2px;
+  }
+  .game-title p {
+    font-size: clamp(12px, 1.8vw, 14px);
+    color: var(--gray-500);
+    margin-top: 4px;
+  }
+
+  .game-grid-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  @media (min-width: 900px) {
+    .game-grid-wrap { flex-direction: row; align-items: flex-start; }
+  }
+
+  /* 字母格 */
+  .grid-box {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    container-type: inline-size;
+  }
+  .grid {
+    display: grid;
+    border: 2px solid var(--gray-800);
+    background: white;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    width: 100%;
+    max-width: 560px;
+    /* 強制列高跟著 1fr 欄寬走，確保正方形 */
+  }
+  .grid-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border: 1px solid var(--gray-300);
+    background: white;
+    color: var(--gray-800);
+    cursor: pointer;
+    transition: background 0.1s;
+    overflow: hidden;
+    line-height: 1;
+    padding: 0;
+    min-width: 0;
+    min-height: 0;
+  }
+  .grid-cell.header {
+    background: var(--gray-100);
+    color: var(--gray-500);
+    cursor: default;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .grid-cell.selected { background: #fdba74; color: white; }
+  .grid-cell.found { background: #bbf7d0; color: #14532d; }
+  .grid-cell.solution { background: #fef3c7; color: #854d0e; }
+
+  /* 芫荽字型樣式：字+注音一起縮小塞進正方形 */
+  body.font-iansui .grid-cell:not(.header) {
+    font-family: 'Bpmf Iansui', 'Microsoft JhengHei', sans-serif;
+    line-height: 0.9;
+  }
+
+  /* 答案列表 */
+  .words-panel {
+    background: var(--gray-50);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  @media (min-width: 900px) {
+    .words-panel { width: 280px; }
+  }
+  .words-panel h3 {
+    font-size: 16px;
+    color: var(--gray-700);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .words-panel h3 .count {
+    font-size: 13px;
+    font-weight: normal;
+    color: var(--gray-500);
+    background: white;
+    padding: 2px 10px;
+    border-radius: 99px;
+  }
+  .words-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .word-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 15px;
+    color: var(--gray-800);
+  }
+  .word-item.found {
+    background: var(--green-bg);
+    border-color: #86efac;
+    color: #166534;
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+  .word-item .speak-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--orange);
+    cursor: pointer;
+    padding: 2px;
+    font-size: 18px;
+    line-height: 1;
+  }
+  .word-item .speak-btn:hover { color: var(--orange-dark); }
+
+  /* 勝利訊息 */
+  .win-banner {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--yellow-bg);
+    color: #854d0e;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    animation: bounce 1s infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* 紙花 canvas */
+  #confetti {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* 排行榜 */
+  .leaderboard {
+    background: white;
+    border-radius: 16px;
+    padding: clamp(16px, 2.5vw, 24px);
+    margin-top: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .leaderboard h3 {
+    font-size: 18px;
+    color: var(--gray-700);
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .lb-item {
+    display: grid;
+    grid-template-columns: 40px 80px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--gray-50);
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .lb-item.top1 { background: linear-gradient(90deg, #fef3c7, #fff); }
+  .lb-item.top2 { background: linear-gradient(90deg, #f3f4f6, #fff); }
+  .lb-item.top3 { background: linear-gradient(90deg, #fed7aa, #fff); }
+  .lb-rank { font-weight: bold; font-size: 16px; color: var(--gray-500); }
+  .lb-rank.top1 { color: #f59e0b; }
+  .lb-seat { font-family: monospace; font-weight: bold; font-size: 16px; background: var(--orange); color: white; padding: 2px 8px; border-radius: 99px; display: inline-block; width: max-content; }
+  .lb-time { font-family: monospace; font-weight: bold; color: var(--orange-dark); }
+  .lb-meta { font-size: 12px; color: var(--gray-500); }
+  .lb-empty { text-align: center; color: var(--gray-500); padding: 20px; font-size: 14px; }
+
+  /* 工具列浮動 */
+  .floating-controls {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 30;
+  }
+  .floating-controls .btn { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+  /* 頂端切換列 */
+  .top-switch {
+    text-align: center;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--gray-500);
+  }
+  .top-switch a { color: var(--blue); text-decoration: none; margin-left: 4px; }
+  .top-switch a:hover { text-decoration: underline; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="container">
+
+  <div class="top-switch" id="topSwitch"></div>
+
+  <header>
+    <h1><span class="icon">🔎</span> Word Search 找字遊戲</h1>
+    <div class="header-actions" id="headerActions"></div>
+  </header>
+
+  <!-- 老師端：設定區 -->
+  <div class="settings-panel hidden" id="settingsPanel">
+    <div class="settings-title">⚙️ 老師設定</div>
+
+    <div class="form-grid">
+      <div>
+        <div class="form-field">
+          <label>📝 答案清單（用空白或換行分隔）</label>
+          <textarea id="wordsInput" placeholder="例如：倫敦 改變 決心 守護員 挖空">倫敦 改變 決心 守護員 挖空 不可思議 建設 紛紛 城市 律動 付出 費用</textarea>
+          <div class="hint">同一個字可以出現多次</div>
+        </div>
+
+        <div class="form-field" style="margin-top:12px;">
+          <label>🎲 背景干擾字（選填，留空會自動用答案字）</label>
+          <textarea id="interferenceInput" placeholder="例如：附出 不可思義 成市 守護圓 健設 攻變"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="form-field">
+          <label>📐 格子大小：<span id="gridSizeLabel">10</span> × <span id="gridSizeLabel2">10</span></label>
+          <input type="range" id="gridSize" min="5" max="12" value="10">
+          <div class="hint">建議語詞數：<span id="wordCountHint">6 ~ 12</span> 組</div>
+        </div>
+
+        <div class="form-field" style="margin-top:12px;">
+          <label>🔤 格內字型</label>
+          <div class="font-choice">
+            <button data-font="normal" class="active">一般字體（中高年級）</button>
+            <button data-font="iansui" style="font-family:'Bpmf Iansui', sans-serif;">芫荽帶注音（低年級）</button>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-top:12px;">
+          <label>🏁 遊戲模式</label>
+          <div class="mode-choice">
+            <button data-mode="speed" class="active">🏁 競速<br><small>找完全部最快贏</small></button>
+            <button data-mode="timed">⏱ 時限<br><small>時間到找最多贏</small></button>
+          </div>
+          <div class="time-choice hidden" id="timeChoice">
+            <button data-time="2">2 分鐘</button>
+            <button data-time="3" class="active">3 分鐘</button>
+            <button data-time="4">4 分鐘</button>
+            <button data-time="5">5 分鐘</button>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-top:12px;">
+          <div class="check-group">
+            <label><input type="checkbox" id="allowDiagonals" checked> 包含對角線</label>
+            <label><input type="checkbox" id="showSolution"> 顯示解答</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="message" id="errorMsg"></div>
+
+    <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-orange" id="btnRegenerate">🔄 重新生成題目</button>
+      <button class="btn btn-blue" id="btnCopyLink">📋 複製學生版連結</button>
+    </div>
+  </div>
+
+  <!-- 學生端：座號輸入 -->
+  <div class="student-gate" id="studentGate">
+    <h2>👋 歡迎同學</h2>
+    <p>請輸入你的座號開始遊戲</p>
+    <input type="text" id="seatInput" class="seat-input" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}" placeholder="01">
+    <div style="margin-top:20px;">
+      <button class="btn btn-orange" id="btnStartGame" style="padding: 14px 36px; font-size: 18px;">🎮 開始遊戲</button>
+    </div>
+  </div>
+
+  <!-- 遊戲主畫面（進場後才顯示） -->
+  <div id="gameMain" class="hidden">
+    <div class="status-bar">
+      <div class="status-seat">座號 <span class="num" id="seatBadge">--</span></div>
+      <div class="timer" id="timer">00:00</div>
+      <div class="progress">進度 <span class="done" id="progressText">0 / 0</span></div>
+    </div>
+
+    <div class="game-area">
+      <div class="game-title">
+        <h2>WORD SEARCH</h2>
+        <p id="gameSubtitle">請找出單字：直向(↓)、橫向(→)或斜向(↘↙)</p>
+      </div>
+
+      <div class="game-grid-wrap">
+        <div class="grid-box">
+          <div class="grid" id="grid"></div>
+        </div>
+
+        <div class="words-panel">
+          <h3>答案列表 <span class="count" id="wordCount">0 / 0</span></h3>
+          <div class="words-list" id="wordsList"></div>
+          <div class="win-banner hidden" id="winBanner">🎉 恭喜完成！太棒了！ 🎉</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 排行榜 -->
+  <div class="leaderboard">
+    <h3>
+      🏆 本機排行榜（最快 10 名）
+      <button class="btn btn-red btn-sm" id="btnClearLB">🗑 清除紀錄</button>
+    </h3>
+    <div class="leaderboard-list" id="leaderboardList"></div>
+  </div>
+
+</div>
+
+<div class="floating-controls" id="floatingControls"></div>
+
+<script>
+// ====================================================================
+// 狀態
+// ====================================================================
+const state = {
+  // 題目
+  gridSize: 10,
+  words: [],
+  interference: '',
+  allowDiagonals: true,
+  showSolution: false,
+  font: 'normal',
+  // 計時
+  mode: 'speed',    // 'speed' | 'timed'
+  timeLimit: 3,     // 分鐘（timed 模式）
+  startTime: null,
+  elapsed: 0,
+  timerId: null,
+  running: false,
+  // 場上
+  grid: [],
+  placedWords: [],
+  foundSolutions: [],
+  // 選取
+  isSelecting: false,
+  selStart: null,
+  currentPath: [],
+  // 學生
+  seat: null,
+  // 角色
+  role: 'student',
+  // 勝利
+  won: false,
+};
+
+// URL 角色判斷
+const urlParams = new URLSearchParams(location.search);
+state.role = urlParams.get('role') === 'teacher' ? 'teacher' : 'student';
+
+// ----- 設定持久化（階段 1：localStorage + URL 參數，跨裝置靠 URL）-----
+const SETTINGS_KEY = 'jsps-wordsearch-settings-v1';
+
+function loadSettings() {
+  // 先從 localStorage 讀
+  try {
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    if (saved.words) state.words = saved.words;
+    if (saved.wordsRaw) state._wordsRaw = saved.wordsRaw;
+    if (saved.interference !== undefined) state.interference = saved.interference;
+    if (saved.gridSize) state.gridSize = saved.gridSize;
+    if (saved.font) state.font = saved.font;
+    if (saved.mode) state.mode = saved.mode;
+    if (saved.timeLimit) state.timeLimit = saved.timeLimit;
+    if (saved.allowDiagonals !== undefined) state.allowDiagonals = saved.allowDiagonals;
+  } catch (e) {}
+
+  // URL 參數覆蓋（跨裝置分享用）
+  const p = urlParams;
+  if (p.get('w')) {
+    try { state._wordsRaw = decodeURIComponent(atob(p.get('w'))); } catch (e) {}
+  }
+  if (p.get('i')) {
+    try { state.interference = decodeURIComponent(atob(p.get('i'))); } catch (e) {}
+  }
+  if (p.get('s')) state.gridSize = parseInt(p.get('s'), 10) || state.gridSize;
+  if (p.get('f')) state.font = p.get('f');
+  if (p.get('m')) state.mode = p.get('m');
+  if (p.get('t')) state.timeLimit = parseInt(p.get('t'), 10) || state.timeLimit;
+  if (p.get('d')) state.allowDiagonals = p.get('d') === '1';
+}
+
+function saveSettings() {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+      wordsRaw: state._wordsRaw || $('wordsInput').value,
+      words: state.words,
+      interference: state.interference,
+      gridSize: state.gridSize,
+      font: state.font,
+      mode: state.mode,
+      timeLimit: state.timeLimit,
+      allowDiagonals: state.allowDiagonals,
+    }));
+  } catch (e) {}
+}
+
+function buildStudentUrl() {
+  const p = new URLSearchParams();
+  const raw = $('wordsInput').value;
+  if (raw) p.set('w', btoa(encodeURIComponent(raw)));
+  if (state.interference) p.set('i', btoa(encodeURIComponent(state.interference)));
+  p.set('s', state.gridSize);
+  p.set('f', state.font);
+  p.set('m', state.mode);
+  if (state.mode === 'timed') p.set('t', state.timeLimit);
+  p.set('d', state.allowDiagonals ? '1' : '0');
+  return location.origin + location.pathname + '?' + p.toString();
+}
+
+// ====================================================================
+// 共用 DOM
+// ====================================================================
+const $ = (id) => document.getElementById(id);
+const gridEl = $('grid');
+const wordsListEl = $('wordsList');
+const timerEl = $('timer');
+const progressEl = $('progressText');
+const wordCountEl = $('wordCount');
+const winBanner = $('winBanner');
+
+// ====================================================================
+// 初始化介面（老師 vs 學生）
+// ====================================================================
+function initRole() {
+  const topSwitch = $('topSwitch');
+  const headerActions = $('headerActions');
+  const floating = $('floatingControls');
+
+  if (state.role === 'teacher') {
+    $('settingsPanel').classList.remove('hidden');
+    topSwitch.innerHTML = `👨‍🏫 老師介面 · <a href="${location.pathname}">切換到學生版 →</a>`;
+    headerActions.innerHTML = `
+      <button class="btn btn-gray btn-sm" id="btnShowSolutionHeader">👁 解答</button>
+    `;
+    $('btnShowSolutionHeader').onclick = () => {
+      $('showSolution').checked = !$('showSolution').checked;
+      state.showSolution = $('showSolution').checked;
+      renderGrid();
+    };
+  } else {
+    $('settingsPanel').classList.add('hidden');
+    topSwitch.innerHTML = `👨‍🎓 學生版 · <a href="?role=teacher">老師登入 →</a>`;
+  }
+}
+
+// ====================================================================
+// 設定區事件（老師）
+// ====================================================================
+function initSettings() {
+  // 字型切換
+  document.querySelectorAll('.font-choice button').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('.font-choice button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      state.font = b.dataset.font;
+      applyFont();
+      saveSettings();
+      renderGrid(); // 字型改變要重新算字體大小
+    };
+  });
+
+  // 模式切換
+  document.querySelectorAll('.mode-choice button').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('.mode-choice button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      state.mode = b.dataset.mode;
+      $('timeChoice').classList.toggle('hidden', state.mode !== 'timed');
+      saveSettings();
+    };
+  });
+
+  // 時限
+  document.querySelectorAll('#timeChoice button').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('#timeChoice button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      state.timeLimit = parseInt(b.dataset.time, 10);
+      saveSettings();
+    };
+  });
+
+  // 格子大小（拉桿即時變更並重生成）
+  let gridSizeDebounce = null;
+  $('gridSize').oninput = (e) => {
+    const v = parseInt(e.target.value, 10);
+    state.gridSize = v;
+    $('gridSizeLabel').textContent = v;
+    $('gridSizeLabel2').textContent = v;
+    $('wordCountHint').textContent = `${Math.floor(v * 0.6)} ~ ${Math.floor(v * 1.2)}`;
+    saveSettings();
+    // 拖動時用 debounce 避免卡頓，放開時才重新生成
+    clearTimeout(gridSizeDebounce);
+    gridSizeDebounce = setTimeout(() => {
+      readInputs();
+      generateGrid();
+    }, 250);
+  };
+
+  // 答案清單、干擾字：即時重新生成（debounce）
+  let wordsDebounce = null;
+  const triggerRebuild = () => {
+    clearTimeout(wordsDebounce);
+    wordsDebounce = setTimeout(() => {
+      readInputs();
+      saveSettings();
+      generateGrid();
+    }, 500);
+  };
+  $('wordsInput').addEventListener('input', triggerRebuild);
+  $('interferenceInput').addEventListener('input', triggerRebuild);
+
+  // checkbox
+  $('allowDiagonals').onchange = (e) => {
+    state.allowDiagonals = e.target.checked;
+    updateSubtitle();
+    saveSettings();
+    generateGrid();
+  };
+  $('showSolution').onchange = (e) => { state.showSolution = e.target.checked; renderGrid(); };
+
+  // 重新生成
+  $('btnRegenerate').onclick = () => {
+    readInputs();
+    saveSettings();
+    generateGrid();
+  };
+
+  // 複製學生版連結（含全部設定參數，跨裝置也能同步）
+  $('btnCopyLink').onclick = async () => {
+    const url = buildStudentUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+      $('btnCopyLink').textContent = '✅ 已複製完整連結（含設定）！';
+      setTimeout(() => $('btnCopyLink').innerHTML = '📋 複製學生版連結', 2000);
+    } catch (e) {
+      prompt('請手動複製這個網址：', url);
+    }
+  };
+}
+
+function readInputs() {
+  state.interference = $('interferenceInput').value;
+  state.allowDiagonals = $('allowDiagonals').checked;
+  state.showSolution = $('showSolution').checked;
+  state._wordsRaw = $('wordsInput').value;
+  const raw = $('wordsInput').value.split(/[,，\n\s]+/).map(w => w.trim()).filter(Boolean);
+  state.words = raw;
+}
+
+function applyLoadedSettingsToUI() {
+  // 把 state 裡的值填回 UI（讓老師介面能顯示儲存過的設定）
+  if (state._wordsRaw !== undefined) $('wordsInput').value = state._wordsRaw;
+  if (state.interference !== undefined) $('interferenceInput').value = state.interference;
+  $('gridSize').value = state.gridSize;
+  $('gridSizeLabel').textContent = state.gridSize;
+  $('gridSizeLabel2').textContent = state.gridSize;
+  $('wordCountHint').textContent = `${Math.floor(state.gridSize * 0.6)} ~ ${Math.floor(state.gridSize * 1.2)}`;
+  $('allowDiagonals').checked = state.allowDiagonals;
+
+  document.querySelectorAll('.font-choice button').forEach(b => {
+    b.classList.toggle('active', b.dataset.font === state.font);
+  });
+  document.querySelectorAll('.mode-choice button').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === state.mode);
+  });
+  $('timeChoice').classList.toggle('hidden', state.mode !== 'timed');
+  document.querySelectorAll('#timeChoice button').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.time, 10) === state.timeLimit);
+  });
+}
+
+function applyFont() {
+  document.body.classList.toggle('font-iansui', state.font === 'iansui');
+}
+
+function updateSubtitle() {
+  $('gameSubtitle').textContent = state.allowDiagonals
+    ? '請找出單字：直向(↓)、橫向(→)或斜向(↘↙)'
+    : '請找出單字：直向(↓)或橫向(→)';
+}
+
+// ====================================================================
+// 產生字母格（從原 JSX 邏輯改寫為原生 JS）
+// ====================================================================
+function countWordInGrid(gridToCheck, word, directions) {
+  let count = 0;
+  const size = gridToCheck.length;
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      for (let [dx, dy] of directions) {
+        let match = true;
+        for (let i = 0; i < word.length; i++) {
+          const nr = r + dy * i, nc = c + dx * i;
+          if (nr < 0 || nr >= size || nc < 0 || nc >= size) { match = false; break; }
+          if (gridToCheck[nr][nc] !== word[i]) { match = false; break; }
+        }
+        if (match) count++;
+      }
+    }
+  }
+  return count;
+}
+
+function canPlaceWord(grid, word, r, c, [dx, dy]) {
+  const size = grid.length;
+  const endR = r + dy * (word.length - 1);
+  const endC = c + dx * (word.length - 1);
+  if (endR < 0 || endR >= size || endC < 0 || endC >= size) return false;
+  for (let i = 0; i < word.length; i++) {
+    const ch = grid[r + dy * i][c + dx * i];
+    if (ch !== '' && ch !== word[i]) return false;
+  }
+  return true;
+}
+
+function placeWord(grid, word, r, c, [dx, dy]) {
+  for (let i = 0; i < word.length; i++) {
+    grid[r + dy * i][c + dx * i] = word[i];
+  }
+}
+
+function generateGrid() {
+  hideMessage();
+  state.won = false;
+  winBanner.classList.add('hidden');
+
+  const size = state.gridSize;
+  const valid = state.words.filter(w => w.length <= size);
+  const tooLong = state.words.length - valid.length;
+
+  if (valid.length === 0) {
+    showMessage(tooLong > 0
+      ? `所有單字都太長了！請把格子調大至少到 ${Math.max(...state.words.map(w => w.length))} 格。`
+      : '請輸入至少一個詞彙');
+    state.grid = [];
+    state.placedWords = [];
+    renderGrid();
+    renderWordsList();
+    return;
+  }
+
+  const expected = {};
+  valid.forEach(w => expected[w] = (expected[w] || 0) + 1);
+
+  let directions = [[1, 0], [0, 1]];
+  if (state.allowDiagonals) { directions.push([1, 1]); directions.push([-1, 1]); }
+
+  let bestStruct = null, bestPlaced = [], maxPlaced = -1;
+  const RETRIES = 20;
+
+  for (let att = 0; att < RETRIES; att++) {
+    let g = Array(size).fill(null).map(() => Array(size).fill(''));
+    let placed = [];
+    let count = 0;
+    const sorted = [...valid].sort((a, b) => b.length - a.length);
+    for (let word of sorted) {
+      let ok = false;
+      let tries = 0;
+      while (!ok && tries < 100) {
+        const dir = directions[Math.floor(Math.random() * directions.length)];
+        const r = Math.floor(Math.random() * size);
+        const c = Math.floor(Math.random() * size);
+        if (canPlaceWord(g, word, r, c, dir)) {
+          placeWord(g, word, r, c, dir);
+          const path = [];
+          for (let i = 0; i < word.length; i++) path.push(`${r + dir[1] * i}-${c + dir[0] * i}`);
+          placed.push({ word, path });
+          ok = true;
+          count++;
+        }
+        tries++;
+      }
+    }
+    if (count > maxPlaced) {
+      maxPlaced = count;
+      bestStruct = g;
+      bestPlaced = placed;
+    }
+    if (count === valid.length) break;
+  }
+
+  let charPool = '';
+  if (state.interference.trim()) {
+    charPool = state.interference.replace(/[,，\s\n]/g, '');
+  } else {
+    charPool = valid.join('');
+  }
+  if (!charPool) {
+    const hasCJK = /[^\x00-\x7F]/.test(valid.join(''));
+    charPool = hasCJK ? '普特融合探索學習快樂成長友愛希望' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  }
+
+  let finalGrid = null;
+  const FILL_RETRIES = 10;
+  for (let fa = 0; fa < FILL_RETRIES; fa++) {
+    let tg = bestStruct.map(row => [...row]);
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (tg[r][c] === '') tg[r][c] = charPool[Math.floor(Math.random() * charPool.length)];
+      }
+    }
+    let bad = false;
+    for (let w of [...new Set(valid)]) {
+      if (countWordInGrid(tg, w, directions) > (expected[w] || 0)) { bad = true; break; }
+    }
+    if (!bad) { finalGrid = tg; break; }
+    if (fa === FILL_RETRIES - 1) finalGrid = tg;
+  }
+
+  state.grid = finalGrid;
+  state.placedWords = bestPlaced;
+  state.foundSolutions = [];
+  renderGrid();
+  renderWordsList();
+  updateSubtitle();
+}
+
+// ====================================================================
+// 顯示格子
+// ====================================================================
+function renderGrid() {
+  gridEl.innerHTML = '';
+  const size = state.gridSize;
+  if (!state.grid.length) return;
+
+  gridEl.style.gridTemplateColumns = `auto repeat(${size}, 1fr)`;
+  // 先不設列高，等 DOM 進來後量測欄寬再同步設列高
+  gridEl.style.gridAutoRows = 'auto';
+
+  // 表頭（ABCDE 那列）
+  const corner = document.createElement('div');
+  corner.className = 'grid-cell header';
+  gridEl.appendChild(corner);
+  for (let c = 0; c < size; c++) {
+    const h = document.createElement('div');
+    h.className = 'grid-cell header';
+    h.textContent = String.fromCharCode(65 + c);
+    gridEl.appendChild(h);
+  }
+
+  // 內容
+  for (let r = 0; r < size; r++) {
+    // 列號
+    const rn = document.createElement('div');
+    rn.className = 'grid-cell header';
+    rn.textContent = r + 1;
+    gridEl.appendChild(rn);
+
+    for (let c = 0; c < size; c++) {
+      const cell = document.createElement('div');
+      const key = `${r}-${c}`;
+      let cls = 'grid-cell';
+      const selected = state.currentPath.includes(key);
+      const foundSol = state.foundSolutions.find(s => s.path.includes(key));
+      const isFound = !!foundSol;
+      const isSolution = state.showSolution && state.placedWords.some((pw, idx) => {
+        if (state.foundSolutions.some(s => s.index === idx)) return false;
+        return pw.path.includes(key);
+      });
+      if (selected) cls += ' selected';
+      else if (isFound) cls += ' found';
+      else if (isSolution) cls += ' solution';
+      cell.className = cls;
+      cell.textContent = state.grid[r][c];
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+
+      // 字型大小根據格子數動態調整（用 cqw 依容器寬度縮放，較穩定）
+      const pctIansui = (48 / size).toFixed(2);
+      const pctNormal = (55 / size).toFixed(2);
+      const fontSize = state.font === 'iansui'
+        ? `min(${pctIansui}cqw, ${Math.floor(560 / size * 0.70)}px)`
+        : `min(${pctNormal}cqw, ${Math.floor(560 / size * 0.70)}px)`;
+      cell.style.fontSize = fontSize;
+
+      // 事件
+      cell.addEventListener('mousedown', onCellDown);
+      cell.addEventListener('mouseenter', onCellEnter);
+      cell.addEventListener('touchstart', onTouchStart, { passive: false });
+      cell.addEventListener('touchmove', onTouchMove, { passive: false });
+
+      gridEl.appendChild(cell);
+    }
+  }
+
+  // 等 DOM 畫出來後，量欄寬 → 同步設列高（確保每格正方形，消除橫條空白）
+  requestAnimationFrame(syncRowHeights);
+}
+
+function syncRowHeights() {
+  const firstContentCell = gridEl.querySelector('.grid-cell:not(.header)');
+  if (!firstContentCell) return;
+  const w = firstContentCell.getBoundingClientRect().width;
+  if (w > 0) {
+    gridEl.style.gridAutoRows = `${w}px`;
+    // 表頭列高度留 auto（讓 A B C ... 標頭比較扁）
+    const headerH = Math.max(24, Math.min(32, w * 0.6));
+    gridEl.style.gridTemplateRows = `${headerH}px repeat(${state.gridSize}, ${w}px)`;
+  }
+}
+
+// 視窗尺寸變化時重新同步
+window.addEventListener('resize', () => {
+  if (state.grid && state.grid.length) syncRowHeights();
+});
+
+// ====================================================================
+// 選字邏輯（滑鼠 + 觸控）
+// ====================================================================
+function onCellDown(e) {
+  if (!state.running) return;
+  const r = +e.currentTarget.dataset.r, c = +e.currentTarget.dataset.c;
+  startSelect(r, c);
+}
+function onCellEnter(e) {
+  if (!state.isSelecting || !state.selStart) return;
+  const r = +e.currentTarget.dataset.r, c = +e.currentTarget.dataset.c;
+  updateSelect(r, c);
+}
+function onTouchStart(e) {
+  if (!state.running) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if (!el || !el.classList.contains('grid-cell') || el.classList.contains('header')) return;
+  startSelect(+el.dataset.r, +el.dataset.c);
+}
+function onTouchMove(e) {
+  if (!state.isSelecting) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if (!el || !el.classList.contains('grid-cell') || el.classList.contains('header')) return;
+  updateSelect(+el.dataset.r, +el.dataset.c);
+}
+
+function startSelect(r, c) {
+  state.isSelecting = true;
+  state.selStart = { r, c };
+  state.currentPath = [`${r}-${c}`];
+  renderGrid();
+}
+
+function updateSelect(r, c) {
+  const sr = state.selStart.r, sc = state.selStart.c;
+  const dy = r - sr, dx = c - sc;
+  if (dx === 0 && dy === 0) {
+    state.currentPath = [`${r}-${c}`];
+  } else if (dx === 0 || dy === 0 || Math.abs(dx) === Math.abs(dy)) {
+    const steps = Math.max(Math.abs(dx), Math.abs(dy));
+    const stepX = dx === 0 ? 0 : dx / Math.abs(dx);
+    const stepY = dy === 0 ? 0 : dy / Math.abs(dy);
+    const path = [];
+    for (let i = 0; i <= steps; i++) path.push(`${sr + stepY * i}-${sc + stepX * i}`);
+    state.currentPath = path;
+  }
+  renderGrid();
+}
+
+function finishSelect() {
+  if (!state.isSelecting) return;
+  state.isSelecting = false;
+  const path = state.currentPath;
+  if (!path.length) return;
+
+  const str = path.map(k => {
+    const [r, c] = k.split('-').map(Number);
+    return state.grid[r][c];
+  }).join('');
+  const strRev = str.split('').reverse().join('');
+
+  const dup = state.foundSolutions.some(sol => {
+    if (sol.path.length !== path.length) return false;
+    return path.every(p => sol.path.includes(p));
+  });
+
+  if (!dup) {
+    const done = new Set(state.foundSolutions.map(s => s.index));
+    const idx = state.placedWords.findIndex((pw, i) =>
+      !done.has(i) && (pw.word === str || pw.word === strRev)
+    );
+    if (idx !== -1) {
+      state.foundSolutions.push({ index: idx, path });
+      speakWord(state.placedWords[idx].word);
+      renderWordsList();
+      if (state.foundSolutions.length === state.placedWords.length) {
+        gameWin();
+      }
+    }
+  }
+
+  state.selStart = null;
+  state.currentPath = [];
+  renderGrid();
+}
+
+document.addEventListener('mouseup', finishSelect);
+document.addEventListener('touchend', finishSelect);
+document.addEventListener('touchcancel', finishSelect);
+
+// ====================================================================
+// 語音
+// ====================================================================
+function speakWord(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = /[\u4e00-\u9fa5]/.test(text) ? 'zh-TW' : 'en-US';
+  u.rate = 0.9;
+  window.speechSynthesis.speak(u);
+}
+
+// ====================================================================
+// 答案列表
+// ====================================================================
+function renderWordsList() {
+  wordsListEl.innerHTML = '';
+  state.placedWords.forEach((pw, idx) => {
+    const found = state.foundSolutions.some(s => s.index === idx);
+    const div = document.createElement('div');
+    div.className = 'word-item' + (found ? ' found' : '');
+    div.innerHTML = `
+      <span>${found ? '✓' : '•'}</span>
+      <span>${pw.word}</span>
+      <button class="speak-btn" title="播放讀音">🔊</button>
+    `;
+    div.querySelector('.speak-btn').onclick = (e) => {
+      e.stopPropagation();
+      speakWord(pw.word);
+    };
+    wordsListEl.appendChild(div);
+  });
+  const n = state.foundSolutions.length;
+  const total = state.placedWords.length;
+  wordCountEl.textContent = `${n} / ${total}`;
+  progressEl.textContent = `${n} / ${total}`;
+}
+
+// ====================================================================
+// 計時器
+// ====================================================================
+function startTimer() {
+  state.startTime = Date.now();
+  state.elapsed = 0;
+  if (state.timerId) clearInterval(state.timerId);
+  state.timerId = setInterval(tickTimer, 200);
+  tickTimer();
+}
+
+function tickTimer() {
+  const el = (Date.now() - state.startTime) / 1000;
+  state.elapsed = el;
+  let display, warn = false;
+  if (state.mode === 'timed') {
+    const total = state.timeLimit * 60;
+    const remain = Math.max(0, total - el);
+    display = fmtTime(remain);
+    if (remain <= 10) warn = true;
+    if (remain <= 0) {
+      stopTimer();
+      gameTimeout();
+      return;
+    }
+  } else {
+    display = fmtTime(el);
+  }
+  timerEl.textContent = display;
+  timerEl.classList.toggle('warning', warn);
+}
+
+function stopTimer() {
+  if (state.timerId) {
+    clearInterval(state.timerId);
+    state.timerId = null;
+  }
+  state.running = false;
+}
+
+function fmtTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+// ====================================================================
+// 勝利 / 時間到
+// ====================================================================
+function gameWin() {
+  stopTimer();
+  state.won = true;
+  winBanner.textContent = '🎉 恭喜完成！太棒了！ 🎉';
+  winBanner.classList.remove('hidden');
+  playWinSound();
+  fireConfetti();
+  saveRecord({
+    seat: state.seat,
+    elapsed: state.elapsed,
+    found: state.foundSolutions.length,
+    total: state.placedWords.length,
+    mode: state.mode,
+    completed: true,
+    date: new Date().toISOString(),
+  });
+  renderLeaderboard();
+}
+
+function gameTimeout() {
+  state.won = false;
+  const n = state.foundSolutions.length;
+  const total = state.placedWords.length;
+  winBanner.textContent = `⏰ 時間到！你找到 ${n} / ${total} 個`;
+  winBanner.classList.remove('hidden');
+  saveRecord({
+    seat: state.seat,
+    elapsed: state.timeLimit * 60,
+    found: n,
+    total,
+    mode: state.mode,
+    completed: n === total,
+    date: new Date().toISOString(),
+  });
+  renderLeaderboard();
+}
+
+function playWinSound() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const note = (f, t, d) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.frequency.value = f; o.type = 'sine';
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t);
+      g.gain.setValueAtTime(0.1, t);
+      g.gain.exponentialRampToValueAtTime(0.00001, t + d);
+      o.stop(t + d);
+    };
+    const now = ctx.currentTime;
+    note(523.25, now, 0.5);
+    note(659.25, now + 0.15, 0.5);
+    note(783.99, now + 0.30, 0.5);
+    note(1046.50, now + 0.45, 1.0);
+  } catch (e) {}
+}
+
+function fireConfetti() {
+  const canvas = $('confetti');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500'];
+  const particles = [];
+  for (let i = 0; i < 150; i++) {
+    particles.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 15,
+      vy: (Math.random() - 0.5) * 15 - 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 8 + 4,
+      rot: Math.random() * 360,
+      rs: (Math.random() - 0.5) * 10,
+    });
+  }
+  let af;
+  const render = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = 0;
+    particles.forEach(p => {
+      p.vy += 0.2;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.rs;
+      if (p.y < canvas.height) {
+        alive++;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot * Math.PI / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.restore();
+      }
+    });
+    if (alive) af = requestAnimationFrame(render);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+  render();
+}
+
+// ====================================================================
+// 排行榜（localStorage）
+// ====================================================================
+const LB_KEY = 'jsps-wordsearch-lb-v1';
+
+function saveRecord(rec) {
+  try {
+    const all = JSON.parse(localStorage.getItem(LB_KEY) || '[]');
+    all.push(rec);
+    localStorage.setItem(LB_KEY, JSON.stringify(all));
+  } catch (e) {}
+}
+
+function renderLeaderboard() {
+  const el = $('leaderboardList');
+  let all = [];
+  try { all = JSON.parse(localStorage.getItem(LB_KEY) || '[]'); } catch (e) {}
+
+  // 排序規則：完成者優先（依時間由快到慢），未完成者依找到題數多到少
+  const sorted = all.slice().sort((a, b) => {
+    if (a.completed !== b.completed) return a.completed ? -1 : 1;
+    if (a.completed) return a.elapsed - b.elapsed;
+    return b.found - a.found;
+  }).slice(0, 10);
+
+  if (sorted.length === 0) {
+    el.innerHTML = '<div class="lb-empty">還沒有紀錄，快來玩第一局！</div>';
+    return;
+  }
+
+  el.innerHTML = sorted.map((r, i) => {
+    const rank = i + 1;
+    const rankCls = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+    const time = r.completed ? fmtTime(r.elapsed) : `${r.found}/${r.total}`;
+    const meta = r.completed
+      ? (r.mode === 'speed' ? '競速完成' : '時限完成')
+      : '時間到';
+    const date = new Date(r.date).toLocaleDateString('zh-TW');
+    return `
+      <div class="lb-item ${rankCls}">
+        <div class="lb-rank ${rankCls}">${medal}</div>
+        <div class="lb-seat">${String(r.seat).padStart(2, '0')}</div>
+        <div><span class="lb-time">${time}</span> <span class="lb-meta">· ${meta} · ${date}</span></div>
+      </div>
+    `;
+  }).join('');
+}
+
+$('btnClearLB').onclick = () => {
+  if (confirm('確定要清除所有本機排行榜紀錄嗎？此動作無法復原。')) {
+    localStorage.removeItem(LB_KEY);
+    renderLeaderboard();
+  }
+};
+
+// ====================================================================
+// 錯誤訊息
+// ====================================================================
+function showMessage(msg) {
+  const el = $('errorMsg');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideMessage() {
+  $('errorMsg').classList.remove('show');
+}
+
+// ====================================================================
+// 座號入場
+// ====================================================================
+$('btnStartGame').onclick = () => {
+  const v = $('seatInput').value.trim();
+  if (!/^\d{1,2}$/.test(v)) {
+    alert('請輸入 1~2 位數的座號（例如：01、13、21）');
+    return;
+  }
+  state.seat = String(parseInt(v, 10)).padStart(2, '0');
+  $('seatBadge').textContent = state.seat;
+  $('studentGate').classList.add('hidden');
+  $('gameMain').classList.remove('hidden');
+  state.running = true;
+  startTimer();
+};
+
+// 按 Enter 快速開始
+$('seatInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') $('btnStartGame').click();
+});
+
+// 老師端要略過座號 gate，進場直接看題目
+function teacherSkipGate() {
+  if (state.role !== 'teacher') return;
+  $('studentGate').classList.add('hidden');
+  $('gameMain').classList.remove('hidden');
+  state.seat = '--';
+  $('seatBadge').textContent = '老師';
+  // 老師不計時
+  timerEl.textContent = '--:--';
+}
+
+// ====================================================================
+// 啟動
+// ====================================================================
+function boot() {
+  initRole();
+
+  // 先載入儲存的設定（localStorage + URL 參數）
+  loadSettings();
+
+  // 把設定填回 UI
+  applyLoadedSettingsToUI();
+
+  // 綁事件（放在 UI 填好後再綁，避免觸發）
+  initSettings();
+
+  // 讀 UI 現值、生成題目
+  readInputs();
+  applyFont();
+  generateGrid();
+  renderLeaderboard();
+
+  if (state.role === 'teacher') {
+    teacherSkipGate();
+  } else {
+    setTimeout(() => $('seatInput').focus(), 100);
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跟著節拍唸 - 圖卡節奏遊戲</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #fef7e0;
+    --primary: #ff6b9d;
+    --primary-dark: #e94a85;
+    --secondary: #6ec5ff;
+    --accent: #ffd93d;
+    --success: #7ed957;
+    --danger: #ff6464;
+    --text: #3d3d3d;
+    --border: #e0d8c0;
+    --shadow: 0 4px 0 rgba(0,0,0,0.1);
+  }
+  html, body {
+    height: 100%;
+    font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+  body {
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(255,217,61,0.3) 0, transparent 50%),
+      radial-gradient(circle at 90% 80%, rgba(110,197,255,0.3) 0, transparent 50%);
+  }
+  #app { height: 100vh; position: relative; }
+  .screen {
+    position: absolute; inset: 0;
+    padding: clamp(10px, 2.5vw, 24px);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .screen.active { display: flex; }
+
+  h1 { font-size: clamp(26px, 5vw, 42px); text-align: center; color: var(--primary); margin-bottom: 16px; text-shadow: 3px 3px 0 rgba(255,255,255,0.8); }
+  h2 { font-size: clamp(20px, 3.2vw, 28px); color: var(--text); margin-bottom: 12px; }
+  h3 { font-size: clamp(16px, 2.2vw, 20px); margin-bottom: 8px; color: #666; }
+
+  /* Buttons */
+  button {
+    font-family: inherit;
+    font-size: clamp(14px, 1.8vw, 18px);
+    padding: clamp(8px, 1.4vw, 12px) clamp(14px, 2.4vw, 24px);
+    border: 3px solid var(--text);
+    border-radius: 16px;
+    background: white;
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.1s, box-shadow 0.1s;
+    font-weight: bold;
+    min-height: 44px;  /* 手機觸控友善 */
+  }
+  button:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
+  button:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+  button.primary { background: var(--primary); color: white; border-color: var(--primary-dark); }
+  button.success { background: var(--success); color: white; border-color: #5ea840; }
+  button.danger  { background: var(--danger); color: white; border-color: #c84848; }
+  button.big { font-size: clamp(18px, 2.6vw, 24px); padding: clamp(12px, 2vw, 18px) clamp(24px, 4vw, 36px); border-radius: 22px; }
+  button.huge { font-size: clamp(22px, 3.2vw, 32px); padding: clamp(16px, 2.5vw, 24px) clamp(28px, 5vw, 48px); border-radius: 28px; }
+
+  .header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .header h2 { flex: 1; min-width: 140px; }
+
+  .grow { flex: 1; overflow: auto; padding: 4px; }
+
+  /* Home screen */
+  .deck-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+    gap: clamp(10px, 2vw, 16px);
+    margin-bottom: 20px;
+  }
+  .deck-card {
+    background: white;
+    border: 3px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+    position: relative;
+  }
+  .deck-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+  .deck-card .name { font-size: 22px; font-weight: bold; margin-bottom: 8px; }
+  .deck-card .meta { font-size: 14px; color: #888; }
+  .deck-card.new-deck {
+    border-style: dashed; background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--primary);
+    min-height: 120px;
+  }
+
+  /* Card grid (management) */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(110px, 30vw), 1fr));
+    gap: clamp(8px, 1.5vw, 12px);
+    padding-bottom: 80px;
+  }
+  .card-item {
+    background: white;
+    border: 3px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 1;
+    display: flex; flex-direction: column;
+  }
+  .card-item img { width: 100%; height: 70%; object-fit: contain; background: #f9f3de; }
+  .card-item .card-name {
+    padding: 6px; font-size: 14px; text-align: center;
+    border-top: 2px solid var(--border);
+    background: white;
+  }
+  .card-item .delete-btn {
+    position: absolute; top: 4px; right: 4px;
+    background: var(--danger); color: white; border: none;
+    width: 28px; height: 28px; border-radius: 50%;
+    cursor: pointer; font-size: 14px; padding: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Card pick grid (setup) */
+  .pick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(90px, 25vw), 1fr));
+    gap: clamp(6px, 1.2vw, 10px);
+    padding-bottom: 20px;
+  }
+  .pick-item {
+    background: white;
+    border: 4px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s, border-color 0.1s;
+    display: flex; flex-direction: column;
+  }
+  .pick-item:hover { transform: scale(1.03); }
+  .pick-item.selected { border-color: var(--primary); background: #ffe0ec; }
+  .pick-item.selected::after {
+    content: "✓";
+    position: absolute; top: 4px; right: 6px;
+    background: var(--primary); color: white;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: bold;
+  }
+  .pick-item img { width: 100%; height: 70%; object-fit: contain; background: #f9f3de; }
+  .pick-item .card-name { padding: 4px; font-size: 12px; text-align: center; border-top: 2px solid var(--border); }
+
+  /* Difficulty */
+  .difficulty-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .diff-btn {
+    padding: clamp(10px, 1.8vw, 14px) 8px;
+    font-size: clamp(12px, 1.6vw, 15px);
+    line-height: 1.3;
+    min-height: 54px;
+  }
+  @media (max-width: 640px) {
+    .difficulty-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  .diff-btn.active {
+    background: var(--accent);
+    border-color: #c8a900;
+  }
+  .font-btn {
+    padding: clamp(10px, 1.8vw, 14px) 8px;
+    font-size: clamp(14px, 1.8vw, 17px);
+    line-height: 1.3;
+    min-height: 54px;
+  }
+  .font-btn.active {
+    background: var(--secondary);
+    border-color: #3a96d6;
+    color: white;
+  }
+
+  .toggle-row { display: flex; gap: 16px; margin: 12px 0; flex-wrap: wrap; }
+  .toggle-row label { display: flex; align-items: center; gap: 8px; font-size: 16px; cursor: pointer; }
+  .toggle-row input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+
+  .actions-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+
+  /* Play screen */
+  #screen-play {
+    background: radial-gradient(circle at center, #fff7dc 0%, #ffd97a 100%);
+    justify-content: center; align-items: center;
+    padding: clamp(8px, 2vw, 24px);
+    position: relative;
+  }
+  .play-grid {
+    display: grid;
+    gap: clamp(6px, 1.5vw, 18px);
+    width: min(96vw, 1400px);
+    max-height: 88vh;
+    align-content: center;
+    justify-content: center;
+  }
+  .play-cell {
+    background: white;
+    border: clamp(3px, 0.7vw, 6px) solid #333;
+    border-radius: clamp(12px, 2vw, 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    overflow: hidden;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.12);
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  .play-cell img {
+    max-width: 88%;
+    max-height: 88%;
+    object-fit: contain;
+  }
+  .play-cell.current {
+    border-color: #ff3d6e;
+    box-shadow:
+      0 0 0 4px #ff3d6e,
+      0 0 40px 8px rgba(255,61,110,0.6),
+      inset 0 0 20px rgba(255,61,110,0.15);
+    transform: scale(1.06);
+    animation: pulse 0.25s ease-out;
+    z-index: 2;
+  }
+  @keyframes pulse {
+    0%   { transform: scale(0.92); }
+    55%  { transform: scale(1.12); }
+    100% { transform: scale(1.06); }
+  }
+  .play-cell.done {
+    opacity: 0.45;
+    filter: grayscale(0.3);
+  }
+  .countdown-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 247, 220, 0.85);
+    z-index: 10;
+    pointer-events: none;
+  }
+  .countdown {
+    font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif;
+    font-size: clamp(90px, 18vw, 220px);
+    font-weight: bold;
+    color: var(--primary);
+    text-shadow: 8px 8px 0 white, -3px -3px 0 white;
+    animation: pop 0.8s ease-out;
+    line-height: 1.1;
+  }
+  .countdown ruby {
+    ruby-position: over;
+    ruby-align: center;
+  }
+  .countdown rt {
+    font-size: 0.25em;
+    color: #666;
+    font-weight: normal;
+    text-shadow: 2px 2px 0 white;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.5); opacity: 0.3; }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .stop-btn {
+    position: absolute; top: clamp(8px, 1.5vw, 20px); right: clamp(8px, 1.5vw, 20px);
+    z-index: 5;
+    font-size: clamp(13px, 1.6vw, 18px);
+    padding: clamp(6px, 1.2vw, 12px) clamp(12px, 2vw, 24px);
+  }
+
+  #screen-end h1 { font-size: clamp(40px, 8vw, 64px); }
+  #screen-end .btn-group { flex-direction: row; }
+  @media (max-width: 640px) {
+    #screen-end .btn-group { flex-direction: column; width: 100%; padding: 0 20px; }
+    #screen-end .btn-group button { width: 100%; }
+  }
+
+  /* End screen */
+  #screen-end {
+    justify-content: center; align-items: center; gap: 20px;
+    text-align: center;
+  }
+  #screen-end h1 { font-size: 64px; }
+  #screen-end .btn-group { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+
+  /* Modals */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100;
+  }
+  .modal-bg.active { display: flex; }
+  .modal {
+    background: white; border-radius: 20px; padding: clamp(16px, 3vw, 24px);
+    width: min(92vw, 500px);
+    border: 3px solid var(--text);
+  }
+  .modal h3 { margin-bottom: 16px; font-size: 22px; }
+  .modal input {
+    width: 100%; padding: 12px; font-size: 18px;
+    border: 2px solid var(--border); border-radius: 10px;
+    font-family: inherit; margin-bottom: 16px;
+  }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: #888; font-size: 18px;
+  }
+
+  .hint { font-size: 14px; color: #888; margin-top: 6px; }
+
+  .bgm-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; background: #f0f0f0; border-radius: 10px;
+    font-size: 13px; color: #666;
+  }
+  #errorBox {
+    position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+    max-width: 90%; background: #ff6464; color: white;
+    padding: 12px 18px; border-radius: 10px; font-size: 14px;
+    z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: none; white-space: pre-wrap; word-break: break-all;
+  }
+  #errorBox.show { display: block; }
+
+  /* 結尾慶祝特效 */
+  #celebrate {
+    position: fixed; inset: 0; pointer-events: none; z-index: 500;
+    overflow: hidden; display: none;
+  }
+  #celebrate.show { display: block; }
+  .confetti {
+    position: absolute; top: -30px;
+    width: 12px; height: 18px;
+    animation: fall linear forwards;
+    will-change: transform, opacity;
+  }
+  @keyframes fall {
+    0%   { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0.85; }
+  }
+  .firework {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: firework 1.2s ease-out forwards;
+    will-change: transform, opacity;
+  }
+  @keyframes firework {
+    0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: var(--end-transform, translate(0, -200px)) scale(0.2); opacity: 0; }
+  }
+  .celebrate-text {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.3);
+    font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif;
+    font-size: clamp(72px, 12vw, 180px);
+    color: #ff3d6e;
+    text-shadow:
+      5px 5px 0 #fff,
+      -2px -2px 0 #fff,
+      0 0 30px rgba(255, 61, 110, 0.6),
+      0 0 60px rgba(255, 217, 61, 0.5);
+    opacity: 0;
+    z-index: 510;
+    pointer-events: none;
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+  .celebrate-text ruby { ruby-position: over; ruby-align: center; }
+  .celebrate-text rt {
+    font-size: 0.28em;
+    color: #b32c54;
+    text-shadow: 2px 2px 0 #fff;
+    font-weight: normal;
+    line-height: 1;
+  }
+  .celebrate-text.show {
+    animation: textPop 2.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes textPop {
+    0%   { transform: translate(-50%, -50%) scale(0.3) rotate(-15deg); opacity: 0; }
+    15%  { transform: translate(-50%, -50%) scale(1.25) rotate(5deg); opacity: 1; }
+    30%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    80%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.1) rotate(0deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Home -->
+  <div id="screen-home" class="screen active">
+    <h1>🎵 跟著節拍唸 🎵</h1>
+    <h3 style="text-align:center; margin-bottom: 20px;">選擇或新增卡組</h3>
+    <div class="grow">
+      <div class="deck-list" id="deckList"></div>
+    </div>
+    <div style="text-align:center;">
+      <span class="bgm-status" id="bgmStatus">🎶 背景音樂：檢查中…</span>
+    </div>
+  </div>
+
+  <!-- Deck management -->
+  <div id="screen-deck" class="screen">
+    <div class="header">
+      <button data-nav="home">← 返回</button>
+      <h2 id="deckTitle"></h2>
+      <button id="btnRenameDeck">✏ 命名</button>
+      <button class="danger" id="btnDeleteDeck">🗑 刪除卡組</button>
+    </div>
+    <div class="actions-row">
+      <input type="file" id="fileUpload" multiple accept="image/*" hidden>
+      <button class="primary" id="btnUpload">📤 上傳圖卡（可多選）</button>
+      <input type="file" id="fileImport" accept=".json" hidden>
+      <button id="btnExport">💾 匯出卡組</button>
+      <button id="btnImport">📥 匯入卡組</button>
+      <button id="btnClearCards" class="danger">清除全部圖卡</button>
+      <button class="success" id="btnToSetup" style="margin-left:auto;">➡ 進入出題設定</button>
+    </div>
+    <div class="grow">
+      <div class="card-grid" id="cardGrid"></div>
+    </div>
+  </div>
+
+  <!-- Game setup -->
+  <div id="screen-setup" class="screen">
+    <div class="header">
+      <button data-nav="deck">← 返回</button>
+      <h2>📋 出題設定</h2>
+      <span id="selCount" style="font-size:18px; color:#666;"></span>
+    </div>
+
+    <div class="actions-row">
+      <button id="btnSelectAll">全選</button>
+      <button id="btnClearSel">清除選擇</button>
+      <button id="btnInvertSel">反選</button>
+      <span class="hint" style="align-self:center; margin-left:auto;">一輪 8 張，不足則用所選張數亂數排列</span>
+    </div>
+
+    <div class="grow">
+      <div class="pick-grid" id="pickGrid"></div>
+    </div>
+
+    <h3 style="margin-top: 12px;">🎚 難度（播放速度）</h3>
+    <div class="difficulty-row">
+      <button class="diff-btn" data-speed="0.75">⭐<br>慢速<br><small>0.75×</small></button>
+      <button class="diff-btn active" data-speed="1">⭐⭐<br>正常<br><small>1×（原速）</small></button>
+      <button class="diff-btn" data-speed="1.25">⭐⭐⭐<br>快速<br><small>1.25×</small></button>
+      <button class="diff-btn" data-speed="1.5">⭐⭐⭐⭐<br>地獄<br><small>1.5×</small></button>
+    </div>
+
+    <p class="hint">📌 遊戲結構：音樂一開始 → 8 預備拍 → 5 回合（每回合 8 拍朗讀 + 8 拍閃動）→ 結尾掌聲</p>
+
+    <div style="background:#fff3cd; border:2px solid #e0c060; border-radius:12px; padding:10px 14px; margin-top:10px;">
+      <b>🎯 節拍校準</b>
+      <div style="margin-top:8px;">
+        <div style="font-size:14px; margin-bottom:4px;">① 每拍長度（紅框移動速度）</div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <button id="btnBeatSlower" style="padding:6px 12px;">紅框慢了 ← 加快</button>
+          <span id="beatMsLabel" style="font-family:monospace; min-width:90px; text-align:center; font-size:15px;"></span>
+          <button id="btnBeatFaster" style="padding:6px 12px;">紅框快了 → 放慢</button>
+          <button id="btnBeatReset" style="padding:6px 12px; background:#eee;">↻</button>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <div style="font-size:14px; margin-bottom:4px;">② 紅框起點偏移（紅框整體提前/延後）</div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <button id="btnOffsetEarlier" style="padding:6px 12px;">紅框晚了 ← 提早</button>
+          <span id="offsetMsLabel" style="font-family:monospace; min-width:90px; text-align:center; font-size:15px;"></span>
+          <button id="btnOffsetLater" style="padding:6px 12px;">紅框早了 → 延後</button>
+          <button id="btnOffsetReset" style="padding:6px 12px; background:#eee;">↻</button>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:6px;">每次 ±20 ms，校準值會記住，下次打開不用重調。</div>
+    </div>
+
+    <div style="text-align:center; margin-top: 10px;">
+      <button class="primary huge" id="btnStart">🎮 開始遊戲</button>
+    </div>
+  </div>
+
+  <!-- Play -->
+  <div id="screen-play" class="screen">
+    <button class="stop-btn danger" id="btnStop">⏹ 停止</button>
+    <div class="play-grid" id="playGrid"></div>
+    <div class="countdown-overlay" id="countdownOverlay" style="display:none;">
+      <div class="countdown" id="countdown">3</div>
+    </div>
+  </div>
+
+  <!-- End -->
+  <div id="screen-end" class="screen">
+    <h1>🎉 完成！</h1>
+    <div class="btn-group">
+      <button class="primary big" id="btnReplay">🔁 再玩一次</button>
+      <button class="big" id="btnChangeCards">🔄 重新選卡</button>
+      <button class="big" data-nav="home">🏠 回主選單</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal for text input -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalTitle">輸入名稱</h3>
+    <input type="text" id="modalInput" placeholder="...">
+    <div class="modal-actions">
+      <button id="modalCancel">取消</button>
+      <button class="primary" id="modalOK">確定</button>
+    </div>
+  </div>
+</div>
+
+<!-- Audio element for background music -->
+<audio id="bgm" loop preload="auto"></audio>
+
+<div id="errorBox"></div>
+<div id="celebrate"></div>
+<div class="celebrate-text" id="celebrateText"><ruby>不<rt>ㄅㄨˋ</rt></ruby><ruby>簡<rt>ㄐㄧㄢˇ</rt></ruby><ruby>單<rt>ㄉㄢ</rt></ruby><ruby>喔<rt>ㄛ</rt></ruby>！</div>
+
+<script>
+/* =========================
+   全域錯誤捕捉
+   ========================= */
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  if (!box) return;
+  box.textContent = '❌ ' + msg;
+  box.classList.add('show');
+  console.error(msg);
+}
+window.addEventListener('error', e => showError('錯誤: ' + (e.message || e) + '\n' + (e.filename||'') + ':' + (e.lineno||'')));
+window.addEventListener('unhandledrejection', e => showError('Promise 錯誤: ' + (e.reason?.message || e.reason)));
+
+/* =========================
+   IndexedDB 資料庫層
+   ========================= */
+const DB_NAME = 'cardRhythmDB';
+const DB_VERSION = 1;
+let db;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('decks')) {
+        d.createObjectStore('decks', { keyPath: 'id', autoIncrement: true });
+      }
+      if (!d.objectStoreNames.contains('cards')) {
+        const s = d.createObjectStore('cards', { keyPath: 'id', autoIncrement: true });
+        s.createIndex('deckId', 'deckId');
+      }
+      if (!d.objectStoreNames.contains('meta')) {
+        d.createObjectStore('meta', { keyPath: 'key' });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function promisify(req) {
+  return new Promise((res, rej) => {
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+function store(name, mode='readonly') {
+  return db.transaction(name, mode).objectStore(name);
+}
+
+// decks
+async function createDeck(name) {
+  return promisify(store('decks','readwrite').add({ name, createdAt: Date.now() }));
+}
+async function listDecks() {
+  return promisify(store('decks').getAll());
+}
+async function getDeck(id) {
+  return promisify(store('decks').get(id));
+}
+async function updateDeck(deck) {
+  return promisify(store('decks','readwrite').put(deck));
+}
+async function deleteDeck(id) {
+  // delete all cards then deck
+  const cardsToDelete = await listCards(id);
+  const tx = db.transaction(['decks','cards'],'readwrite');
+  cardsToDelete.forEach(c => tx.objectStore('cards').delete(c.id));
+  tx.objectStore('decks').delete(id);
+  return new Promise(r => tx.oncomplete = r);
+}
+
+// cards
+async function addCard(deckId, name, blob) {
+  return promisify(store('cards','readwrite').add({ deckId, name, blob, createdAt: Date.now() }));
+}
+async function listCards(deckId) {
+  const idx = store('cards').index('deckId');
+  return promisify(idx.getAll(deckId));
+}
+async function deleteCard(id) {
+  return promisify(store('cards','readwrite').delete(id));
+}
+async function updateCard(card) {
+  return promisify(store('cards','readwrite').put(card));
+}
+
+// meta
+async function setMeta(key, value) {
+  return promisify(store('meta','readwrite').put({ key, value }));
+}
+async function getMeta(key) {
+  const r = await promisify(store('meta').get(key));
+  return r ? r.value : null;
+}
+
+/* =========================
+   狀態
+   ========================= */
+const state = {
+  screen: 'home',
+  activeDeckId: null,
+  activeDeckName: '',
+  currentCards: [],          // [{id, name, blob, url}]
+  selectedIds: new Set(),
+  speed: 1,                  // 播放速度倍率
+  rounds: [],                // [[8張], [8張], [8張], [8張]]
+};
+
+// 節拍設定（仿影片結構）
+// 影片長度 29 秒 = 8預備拍 + 5回合×(8朗讀+8閃動) = 88拍
+// 每拍 ≈ 29000/88 ≈ 330 ms
+const DEFAULT_BEAT_MS = 330;
+const DEFAULT_OFFSET_MS = 0;
+const PREP_BEATS = 8;
+const READ_BEATS = 8;
+const FLASH_BEATS = 8;
+const ROUND_BEATS = READ_BEATS + FLASH_BEATS;
+const TOTAL_ROUNDS = 5;
+
+function getBeatMs() {
+  const v = parseFloat(localStorage.getItem('beatMs'));
+  return (v && v > 100 && v < 800) ? v : DEFAULT_BEAT_MS;
+}
+function setBeatMs(v) { localStorage.setItem('beatMs', v); }
+
+function getOffsetMs() {
+  const v = parseFloat(localStorage.getItem('offsetMs'));
+  return (!isNaN(v) && v >= -2000 && v <= 2000) ? v : DEFAULT_OFFSET_MS;
+}
+function setOffsetMs(v) { localStorage.setItem('offsetMs', v); }
+
+const BGM_FILE = 'bgm.mp4';
+
+/* =========================
+   畫面切換
+   ========================= */
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  state.screen = name;
+  const handlers = { home: renderHome, deck: renderDeck, setup: renderSetup };
+  if (handlers[name]) handlers[name]();
+}
+
+/* =========================
+   Home
+   ========================= */
+async function renderHome() {
+  const el = document.getElementById('deckList');
+  el.innerHTML = '';
+  let decks = [];
+  try { decks = await listDecks(); }
+  catch (e) { showError('讀取卡組失敗：' + (e.message || e)); }
+
+  decks.forEach(d => {
+    const div = document.createElement('div');
+    div.className = 'deck-card';
+    div.innerHTML = `
+      <div class="name">📚 ${escapeHtml(d.name)}</div>
+      <div class="meta">建立於 ${new Date(d.createdAt).toLocaleDateString()}</div>
+    `;
+    div.onclick = () => openDeck(d.id);
+    el.appendChild(div);
+  });
+
+  const addDiv = document.createElement('div');
+  addDiv.className = 'deck-card new-deck';
+  addDiv.textContent = '➕ 新增卡組';
+  addDiv.onclick = async () => {
+    try {
+      const defaultName = '卡組 ' + (decks.length + 1);
+      const name = await promptText('新增卡組', '卡組名稱（例如：注音符號）', defaultName);
+      if (!name) return;
+      const id = await createDeck(name);
+      console.log('建立卡組成功 id=', id);
+      await openDeck(id);
+    } catch (e) {
+      showError('新增卡組失敗：' + (e.message || e));
+    }
+  };
+  el.appendChild(addDiv);
+}
+
+async function openDeck(id) {
+  state.activeDeckId = id;
+  const d = await getDeck(id);
+  state.activeDeckName = d.name;
+  showScreen('deck');
+}
+
+/* =========================
+   Deck management
+   ========================= */
+async function renderDeck() {
+  document.getElementById('deckTitle').textContent = '📚 ' + state.activeDeckName;
+  const cards = await listCards(state.activeDeckId);
+  state.currentCards = cards.map(c => ({ ...c, url: URL.createObjectURL(c.blob) }));
+
+  const el = document.getElementById('cardGrid');
+  el.innerHTML = '';
+  if (cards.length === 0) {
+    el.innerHTML = '<div class="empty-state">尚無圖卡。點上方「📤 上傳圖卡」開始建立卡組。</div>';
+    return;
+  }
+  state.currentCards.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'card-item';
+    div.innerHTML = `
+      <button class="delete-btn" title="刪除">✕</button>
+      <img src="${c.url}" alt="${escapeHtml(c.name)}">
+      <div class="card-name">${escapeHtml(c.name)}</div>
+    `;
+    div.querySelector('.delete-btn').onclick = async (e) => {
+      e.stopPropagation();
+      if (!confirm(`刪除圖卡「${c.name}」？`)) return;
+      await deleteCard(c.id);
+      renderDeck();
+    };
+    div.querySelector('.card-name').onclick = async () => {
+      const nm = await promptText('重新命名', '圖卡名稱', c.name);
+      if (!nm) return;
+      c.name = nm;
+      await updateCard({ id: c.id, deckId: c.deckId, name: nm, blob: c.blob, createdAt: c.createdAt });
+      renderDeck();
+    };
+    el.appendChild(div);
+  });
+}
+
+/* =========================
+   Setup
+   ========================= */
+async function renderSetup() {
+  const el = document.getElementById('pickGrid');
+  el.innerHTML = '';
+  if (state.currentCards.length === 0) {
+    el.innerHTML = '<div class="empty-state">這個卡組還沒有圖卡，請先返回上一頁上傳。</div>';
+    updateSelCount();
+    return;
+  }
+  state.currentCards.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'pick-item';
+    if (state.selectedIds.has(c.id)) div.classList.add('selected');
+    div.innerHTML = `
+      <img src="${c.url}" alt="${escapeHtml(c.name)}">
+      <div class="card-name">${escapeHtml(c.name)}</div>
+    `;
+    div.onclick = () => {
+      if (state.selectedIds.has(c.id)) state.selectedIds.delete(c.id);
+      else state.selectedIds.add(c.id);
+      div.classList.toggle('selected');
+      updateSelCount();
+    };
+    el.appendChild(div);
+  });
+  updateSelCount();
+}
+function updateSelCount() {
+  const n = state.selectedIds.size;
+  const pick = Math.min(n, 8);
+  const el = document.getElementById('selCount');
+  el.textContent = n === 0 ? '（尚未選擇）' : `已選 ${n} 張，本輪將出 ${pick} 張`;
+}
+
+/* =========================
+   遊戲
+   ========================= */
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// 合成節拍音（預備拍用）
+function playClick(freq = 1800) {
+  const ctx = getAudioCtx();
+  const t = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, t);
+  osc.frequency.exponentialRampToValueAtTime(freq * 0.5, t + 0.08);
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.25, t + 0.005);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + 0.15);
+}
+
+// 合成單一次拍手音（短促 noise burst + 包絡）
+function playOneClap(ctx, at, gainVal = 0.4) {
+  const bufferSize = ctx.sampleRate * 0.12;
+  const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  // 加個帶通濾波讓它像拍手
+  const bp = ctx.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.frequency.value = 1800;
+  bp.Q.value = 1.2;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, at);
+  g.gain.exponentialRampToValueAtTime(gainVal, at + 0.003);
+  g.gain.exponentialRampToValueAtTime(0.0001, at + 0.12);
+  src.connect(bp).connect(g).connect(ctx.destination);
+  src.start(at);
+  src.stop(at + 0.15);
+}
+
+// 結尾視覺慶祝（紙花 + 煙火 + 字樣，共約 5 秒）
+function runCelebration() {
+  const layer = document.getElementById('celebrate');
+  const text = document.getElementById('celebrateText');
+  if (!layer || !text) return;
+
+  layer.innerHTML = '';
+  layer.classList.add('show');
+
+  const COLORS = ['#ff3d6e', '#ffd93d', '#6ec5ff', '#7ed957', '#ff944d', '#b36bff', '#ff6bbd', '#3dd9c9'];
+  const startTime = performance.now();
+  const DURATION = 5000;
+
+  // 持續灑紙花：每 80ms 灑一批
+  const confettiIntervalMs = 80;
+  const confettiTimer = setInterval(() => {
+    if (performance.now() - startTime > DURATION) { clearInterval(confettiTimer); return; }
+    for (let i = 0; i < 6; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
+      c.style.animationDuration = (2 + Math.random() * 2.5) + 's';
+      c.style.transform = `rotate(${Math.random() * 360}deg)`;
+      // 隨機形狀：方塊 / 長條 / 圓點
+      const shape = Math.floor(Math.random() * 3);
+      if (shape === 0) { c.style.borderRadius = '50%'; c.style.width = '10px'; c.style.height = '10px'; }
+      else if (shape === 1) { c.style.width = '6px'; c.style.height = '20px'; }
+      layer.appendChild(c);
+      setTimeout(() => c.remove(), 4500);
+    }
+  }, confettiIntervalMs);
+
+  // 放煙火：每 500ms 在隨機位置爆一顆
+  const fireworkTimer = setInterval(() => {
+    if (performance.now() - startTime > DURATION) { clearInterval(fireworkTimer); return; }
+    const cx = (10 + Math.random() * 80) + 'vw';
+    const cy = (15 + Math.random() * 55) + 'vh';
+    const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    const particleCount = 24;
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2;
+      const dist = 80 + Math.random() * 80;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      const p = document.createElement('div');
+      p.className = 'firework';
+      p.style.left = cx;
+      p.style.top = cy;
+      p.style.background = color;
+      p.style.boxShadow = `0 0 8px ${color}`;
+      p.style.setProperty('--end-transform', `translate(${dx}px, ${dy}px)`);
+      layer.appendChild(p);
+      setTimeout(() => p.remove(), 1300);
+    }
+    // 中心閃光
+    const flash = document.createElement('div');
+    flash.className = 'firework';
+    flash.style.left = cx;
+    flash.style.top = cy;
+    flash.style.width = '20px';
+    flash.style.height = '20px';
+    flash.style.background = 'white';
+    flash.style.boxShadow = `0 0 30px 10px ${color}`;
+    flash.style.setProperty('--end-transform', 'translate(0, 0)');
+    layer.appendChild(flash);
+    setTimeout(() => flash.remove(), 600);
+  }, 500);
+
+  // 「不簡單喔！」字樣
+  text.classList.remove('show');
+  void text.offsetWidth;
+  text.classList.add('show');
+
+  // 結束
+  setTimeout(() => {
+    layer.classList.remove('show');
+    layer.innerHTML = '';
+    text.classList.remove('show');
+  }, DURATION + 300);
+}
+
+// 結尾掌聲（持續約 2 秒、多人密集拍手效果）
+function playApplause() {
+  const ctx = getAudioCtx();
+  const start = ctx.currentTime;
+  const totalClaps = 48;
+  for (let i = 0; i < totalClaps; i++) {
+    const jitter = Math.random() * 0.03;
+    const t = start + i * 0.045 + jitter;
+    // 前段漸強、後段漸弱
+    const env = i < 8 ? (i + 1) / 8 : Math.max(0.25, 1 - (i - 8) / (totalClaps - 8));
+    const gain = 0.25 + Math.random() * 0.2;
+    playOneClap(ctx, t, gain * env);
+  }
+}
+
+const bgm = document.getElementById('bgm');
+let bgmReady = false;
+
+function setupBGM() {
+  bgm.src = encodeURI(BGM_FILE);
+  bgm.addEventListener('canplaythrough', () => {
+    bgmReady = true;
+    document.getElementById('bgmStatus').textContent = '🎶 背景音樂已載入';
+  });
+  bgm.addEventListener('error', () => {
+    bgmReady = false;
+    document.getElementById('bgmStatus').textContent = '⚠️ 背景音樂檔案無法載入（只會用合成節拍音）';
+  });
+  bgm.load();
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// 產生一輪 8 張卡（不足用隨機補滿，且避免相鄰重複）
+function buildOneRound(selected) {
+  const out = [];
+  let pool = shuffle(selected);
+  while (out.length < 8) {
+    // 重新洗牌，把上一張放到最前面的排除
+    if (pool.length === 0) pool = shuffle(selected);
+    const candidate = pool.shift();
+    if (out.length > 0 && candidate.id === out[out.length - 1].id && selected.length > 1) {
+      // 和前一張重複，丟回池子尾端
+      pool.push(candidate);
+      continue;
+    }
+    out.push(candidate);
+  }
+  return out;
+}
+
+// 產生 4 回合的牌組（每回合 8 張，每回合順序都不同）
+function buildRounds() {
+  const selected = state.currentCards.filter(c => state.selectedIds.has(c.id));
+  const rounds = [];
+  let last = null;
+  for (let r = 0; r < TOTAL_ROUNDS; r++) {
+    let q;
+    // 最多嘗試 5 次讓這回合跟上一回合不一樣
+    for (let t = 0; t < 5; t++) {
+      q = buildOneRound(selected);
+      if (!last || JSON.stringify(q.map(c=>c.id)) !== JSON.stringify(last.map(c=>c.id))) break;
+    }
+    rounds.push(q);
+    last = q;
+  }
+  return rounds;
+}
+
+function layoutGrid(n) {
+  const grid = document.getElementById('playGrid');
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const isPortrait = vh > vw;
+  const isSmall = vw < 640;
+
+  // 欄數決策：
+  //  - 手機直式：1張→1, 2張→2, 3-4張→2, 5-8張→2
+  //  - 手機橫式 / 平板：1→1, 2→2, 3-4→4, 5-8→4
+  //  - 電腦：同上，5-8 張 4 欄
+  let cols;
+  if (isSmall && isPortrait) {
+    if (n === 1) cols = 1;
+    else cols = 2;
+  } else {
+    if (n <= 2) cols = n;
+    else if (n <= 4) cols = n;
+    else cols = 4;
+  }
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+  // 寬度策略：
+  //  - 行數 × 寬度不能讓卡片超出可視範圍
+  const rows = Math.ceil(n / cols);
+  // 預估：每格 aspect 1:1，加 gap。確保整個格版 <= 88vh
+  // 不用寫死 px，交給 CSS max-height 夾住
+  if (isSmall) {
+    grid.style.width = '96vw';
+  } else if (n <= 4) {
+    grid.style.width = `min(${cols * 22}vw, ${cols * 260}px)`;
+  } else {
+    grid.style.width = 'min(95vw, 1400px)';
+  }
+  // 如果行數多，額外限制最大寬，避免卡片超出視窗高度
+  // 每張卡大致 = grid寬 / cols；rows 張的高度 ≈ 同寬 × rows + gap
+  // 若預估 > 85vh，縮小寬度
+  const gap = 18;
+  const measured = parseFloat(getComputedStyle(grid).width) || 0;
+  if (measured) {
+    const estCellW = (measured - gap * (cols - 1)) / cols;
+    const estTotalH = estCellW * rows + gap * (rows - 1);
+    const maxH = vh * 0.85;
+    if (estTotalH > maxH) {
+      const scale = maxH / estTotalH;
+      grid.style.width = (measured * scale) + 'px';
+    }
+  }
+}
+
+window.addEventListener('resize', () => {
+  if (state.screen === 'play' && state.rounds[lastRoundRendered]) {
+    layoutGrid(state.rounds[lastRoundRendered].length);
+  }
+});
+
+function renderRoundCards(queue) {
+  const grid = document.getElementById('playGrid');
+  grid.innerHTML = queue.map((c, i) =>
+    `<div class="play-cell" data-idx="${i}"><img src="${c.url}" alt="${escapeHtml(c.name)}"></div>`
+  ).join('');
+  layoutGrid(queue.length);
+}
+
+function highlightCard(idx) {
+  document.querySelectorAll('.play-cell').forEach((el, i) => {
+    el.classList.remove('current');
+    if (i < idx) el.classList.add('done');
+    else el.classList.remove('done');
+  });
+  const cur = document.querySelector(`.play-cell[data-idx="${idx}"]`);
+  if (cur) {
+    cur.classList.remove('current');
+    void cur.offsetWidth; // reflow → 重播動畫
+    cur.classList.add('current');
+    cur.classList.remove('done');
+  }
+}
+
+let scheduledTimers = [];
+function clearScheduled() {
+  scheduledTimers.forEach(id => clearTimeout(id));
+  scheduledTimers = [];
+}
+
+let rafId = null;
+let gameClock = null;         // { getMs: () => 目前遊戲內毫秒數 }
+let clockIsAudioTime = false; // true: 時鐘是音樂內容時間（不用再乘除速度）
+let lastFlashIdx = -1;
+let lastRoundRendered = -1;
+
+// 取得「本次 tick 該用的 beatMs」：
+//  - 音樂驅動：用原始拍長（audio.currentTime 本身已在音樂內容時間）
+//  - performance 驅動：用 原始 / speed（因為時鐘跑真實時間）
+function getEffectiveBeatMs() {
+  return clockIsAudioTime ? getBeatMs() : (getBeatMs() / state.speed);
+}
+
+async function startGame() {
+  if (state.selectedIds.size === 0) {
+    alert('請先選擇至少一張圖卡');
+    return;
+  }
+  state.rounds = buildRounds();
+  showScreen('play');
+  renderRoundCards(state.rounds[0]);
+  lastRoundRendered = 0;
+  lastFlashIdx = -1;
+  clearScheduled();
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+
+  const overlay = document.getElementById('countdownOverlay');
+  const cdEl = document.getElementById('countdown');
+  overlay.style.display = 'flex';
+  cdEl.textContent = '準備';
+
+  // -------- 音樂和預備拍「同時」開始 --------
+  if (bgmReady) {
+    bgm.currentTime = 0;
+    bgm.playbackRate = state.speed;
+    try { await bgm.play(); } catch (err) { console.warn('BGM play failed', err); }
+    gameClock = { getMs: () => bgm.currentTime * 1000 };
+    clockIsAudioTime = true;    // 時鐘是音樂內容時間
+  } else {
+    const t0 = performance.now();
+    gameClock = { getMs: () => performance.now() - t0 };
+    clockIsAudioTime = false;
+  }
+
+  // 預備拍倒數：setTimeout 跑的是真實時間，故用 真實拍長 = beatMs / speed
+  const uiBeatMs = getBeatMs() / state.speed;
+  for (let i = 0; i < PREP_BEATS; i++) {
+    const at = i * uiBeatMs;
+    scheduledTimers.push(setTimeout(() => {
+      const remain = PREP_BEATS - i;
+      if (remain <= 4) {
+        cdEl.textContent = remain;
+      } else {
+        cdEl.textContent = '準備';
+      }
+      cdEl.style.animation = 'none';
+      void cdEl.offsetWidth;
+      cdEl.style.animation = 'pop 0.35s ease-out';
+    }, at));
+  }
+  // 預備拍結束 → 隱藏覆蓋層（同樣用真實時間）
+  scheduledTimers.push(setTimeout(() => {
+    overlay.style.display = 'none';
+  }, PREP_BEATS * uiBeatMs));
+
+  // 啟動紅框時鐘迴圈（會自己判斷是否已過預備拍、該閃哪張）
+  rafId = requestAnimationFrame(tick);
+}
+
+function tick() {
+  if (!gameClock) return;
+  const beatMs = getEffectiveBeatMs();
+  const prepMs = PREP_BEATS * beatMs;
+  const roundMs = ROUND_BEATS * beatMs;
+  const totalMs = prepMs + TOTAL_ROUNDS * roundMs;
+
+  const rawT = gameClock.getMs() + getOffsetMs();
+
+  if (rawT >= totalMs) {
+    endGame();
+    return;
+  }
+
+  // 預備拍期間：紅框都不動
+  if (rawT < prepMs) {
+    rafId = requestAnimationFrame(tick);
+    return;
+  }
+
+  // 進入 5 回合階段
+  const tInRounds = rawT - prepMs;
+  let round = Math.floor(tInRounds / roundMs);
+  if (round < 0) round = 0;
+  if (round > TOTAL_ROUNDS - 1) round = TOTAL_ROUNDS - 1;
+
+  const inRound = tInRounds - round * roundMs;
+  const readEnd = READ_BEATS * beatMs;
+
+  if (round !== lastRoundRendered && state.rounds[round]) {
+    renderRoundCards(state.rounds[round]);
+    lastRoundRendered = round;
+    lastFlashIdx = -1;
+  }
+
+  if (inRound < readEnd) {
+    if (lastFlashIdx !== -1) {
+      document.querySelectorAll('.play-cell').forEach(el => el.classList.remove('current'));
+      lastFlashIdx = -1;
+    }
+  } else {
+    const flashIdx = Math.min(FLASH_BEATS - 1, Math.floor((inRound - readEnd) / beatMs));
+    if (flashIdx !== lastFlashIdx) {
+      highlightCard(flashIdx);
+      lastFlashIdx = flashIdx;
+    }
+  }
+
+  rafId = requestAnimationFrame(tick);
+}
+
+function endGame() {
+  clearScheduled();
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  gameClock = null;
+  lastRoundRendered = -1;
+  lastFlashIdx = -1;
+
+  // 音樂淡出 800ms，同時播放掌聲
+  const startVol = bgm.volume || 1;
+  const fadeMs = 800;
+  const steps = 16;
+  for (let i = 1; i <= steps; i++) {
+    setTimeout(() => {
+      bgm.volume = Math.max(0, startVol * (1 - i / steps));
+      if (i === steps) { bgm.pause(); bgm.volume = startVol; }
+    }, (i * fadeMs) / steps);
+  }
+
+  try { playApplause(); } catch (e) { console.warn(e); }
+  try { runCelebration(); } catch (e) { console.warn(e); }
+
+  document.querySelectorAll('.play-cell').forEach(el => {
+    el.classList.remove('current');
+    el.classList.add('done');
+  });
+  setTimeout(() => showScreen('end'), 5400); // 等慶祝動畫結束再切畫面
+}
+
+function stopGame() {
+  clearScheduled();
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  gameClock = null;
+  lastRoundRendered = -1;
+  lastFlashIdx = -1;
+  bgm.pause();
+  const overlay = document.getElementById('countdownOverlay');
+  if (overlay) overlay.style.display = 'none';
+  showScreen('setup');
+}
+
+/* =========================
+   工具
+   ========================= */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(blob);
+  });
+}
+async function dataURLToBlob(dataUrl) {
+  const res = await fetch(dataUrl);
+  return await res.blob();
+}
+
+// 模態視窗
+function promptText(title, placeholder, initial) {
+  return new Promise(resolve => {
+    const bg = document.getElementById('modalBg');
+    document.getElementById('modalTitle').textContent = title;
+    const input = document.getElementById('modalInput');
+    input.placeholder = placeholder || '';
+    input.value = initial || '';
+    bg.classList.add('active');
+    setTimeout(() => input.focus(), 50);
+    const ok = document.getElementById('modalOK');
+    const cancel = document.getElementById('modalCancel');
+    const done = (val) => {
+      bg.classList.remove('active');
+      ok.onclick = null; cancel.onclick = null; input.onkeydown = null;
+      resolve(val);
+    };
+    ok.onclick = () => done(input.value.trim() || null);
+    cancel.onclick = () => done(null);
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') done(input.value.trim() || null);
+      if (e.key === 'Escape') done(null);
+    };
+  });
+}
+
+/* =========================
+   事件綁定
+   ========================= */
+function bindEvents() {
+  // 導覽
+  document.querySelectorAll('[data-nav]').forEach(b => {
+    b.onclick = () => {
+      clearScheduled();
+      bgm.pause();
+      showScreen(b.dataset.nav);
+    };
+  });
+
+  // Deck screen
+  document.getElementById('btnUpload').onclick = () => document.getElementById('fileUpload').click();
+  document.getElementById('fileUpload').onchange = async (e) => {
+    const files = Array.from(e.target.files);
+    for (const f of files) {
+      const nameNoExt = f.name.replace(/\.[^.]+$/, '');
+      await addCard(state.activeDeckId, nameNoExt, f);
+    }
+    e.target.value = '';
+    renderDeck();
+  };
+  document.getElementById('btnRenameDeck').onclick = async () => {
+    const nm = await promptText('重新命名卡組', '卡組名稱', state.activeDeckName);
+    if (!nm) return;
+    await updateDeck({ id: state.activeDeckId, name: nm, createdAt: (await getDeck(state.activeDeckId)).createdAt });
+    state.activeDeckName = nm;
+    document.getElementById('deckTitle').textContent = '📚 ' + nm;
+  };
+  document.getElementById('btnDeleteDeck').onclick = async () => {
+    if (!confirm(`確定要刪除卡組「${state.activeDeckName}」及其所有圖卡？`)) return;
+    await deleteDeck(state.activeDeckId);
+    showScreen('home');
+  };
+  document.getElementById('btnClearCards').onclick = async () => {
+    if (!confirm('確定刪除此卡組內「全部」圖卡？')) return;
+    const cards = await listCards(state.activeDeckId);
+    for (const c of cards) await deleteCard(c.id);
+    renderDeck();
+  };
+
+  // 匯出卡組
+  document.getElementById('btnExport').onclick = async () => {
+    try {
+      const deck = await getDeck(state.activeDeckId);
+      const cards = await listCards(state.activeDeckId);
+      // 把 blob 轉 base64
+      const cardExports = [];
+      for (const c of cards) {
+        const dataUrl = await blobToDataURL(c.blob);
+        cardExports.push({
+          name: c.name,
+          createdAt: c.createdAt,
+          data: dataUrl
+        });
+      }
+      const payload = {
+        _format: 'card-rhythm-deck',
+        _version: 1,
+        deck: { name: deck.name, createdAt: deck.createdAt },
+        cards: cardExports
+      };
+      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = deck.name + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      showError('匯出失敗：' + (e.message || e));
+    }
+  };
+
+  // 匯入卡組
+  document.getElementById('btnImport').onclick = () => document.getElementById('fileImport').click();
+  document.getElementById('fileImport').onchange = async (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try {
+      const text = await f.text();
+      const data = JSON.parse(text);
+      if (data._format !== 'card-rhythm-deck') {
+        alert('此檔案不是卡組匯出檔');
+        return;
+      }
+      const mode = confirm(
+        `匯入「${data.deck.name}」（共 ${data.cards.length} 張圖卡）\n\n` +
+        `確定 = 匯入到目前卡組（合併）\n` +
+        `取消 = 建立為新卡組`
+      );
+      let targetDeckId;
+      if (mode) {
+        targetDeckId = state.activeDeckId;
+      } else {
+        targetDeckId = await createDeck(data.deck.name + ' (匯入)');
+      }
+      for (const c of data.cards) {
+        const blob = await dataURLToBlob(c.data);
+        await addCard(targetDeckId, c.name, blob);
+      }
+      if (mode) {
+        renderDeck();
+      } else {
+        state.activeDeckId = targetDeckId;
+        state.activeDeckName = data.deck.name + ' (匯入)';
+        showScreen('deck');
+      }
+      alert('匯入完成！');
+    } catch (err) {
+      showError('匯入失敗：' + (err.message || err));
+    }
+  };
+  document.getElementById('btnToSetup').onclick = () => {
+    if (state.currentCards.length === 0) {
+      alert('請先上傳圖卡');
+      return;
+    }
+    state.selectedIds = new Set(state.currentCards.map(c => c.id)); // 預設全選
+    showScreen('setup');
+  };
+
+  // Setup screen
+  document.getElementById('btnSelectAll').onclick = () => {
+    state.currentCards.forEach(c => state.selectedIds.add(c.id));
+    renderSetup();
+  };
+  document.getElementById('btnClearSel').onclick = () => {
+    state.selectedIds.clear();
+    renderSetup();
+  };
+  document.getElementById('btnInvertSel').onclick = () => {
+    state.currentCards.forEach(c => {
+      if (state.selectedIds.has(c.id)) state.selectedIds.delete(c.id);
+      else state.selectedIds.add(c.id);
+    });
+    renderSetup();
+  };
+  document.querySelectorAll('.diff-btn').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('.diff-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      state.speed = parseFloat(b.dataset.speed);
+    };
+  });
+
+  // （字型切換已移除：Bpmf 字型會自動顯示旁注注音，不符需求）
+
+  // 節拍校準
+  function updateBeatLabel() {
+    const lab = document.getElementById('beatMsLabel');
+    if (lab) lab.textContent = getBeatMs() + ' ms';
+  }
+  function updateOffsetLabel() {
+    const lab = document.getElementById('offsetMsLabel');
+    if (lab) {
+      const v = getOffsetMs();
+      lab.textContent = (v >= 0 ? '+' : '') + v + ' ms';
+    }
+  }
+  updateBeatLabel();
+  updateOffsetLabel();
+
+  document.getElementById('btnBeatSlower').onclick = () => {
+    setBeatMs(Math.max(100, getBeatMs() - 10));
+    updateBeatLabel();
+  };
+  document.getElementById('btnBeatFaster').onclick = () => {
+    setBeatMs(Math.min(800, getBeatMs() + 10));
+    updateBeatLabel();
+  };
+  document.getElementById('btnBeatReset').onclick = () => {
+    localStorage.removeItem('beatMs');
+    updateBeatLabel();
+  };
+  document.getElementById('btnOffsetEarlier').onclick = () => {
+    setOffsetMs(Math.max(-2000, getOffsetMs() - 20));
+    updateOffsetLabel();
+  };
+  document.getElementById('btnOffsetLater').onclick = () => {
+    setOffsetMs(Math.min(2000, getOffsetMs() + 20));
+    updateOffsetLabel();
+  };
+  document.getElementById('btnOffsetReset').onclick = () => {
+    localStorage.removeItem('offsetMs');
+    updateOffsetLabel();
+  };
+  document.getElementById('btnStart').onclick = () => {
+    getAudioCtx(); // 解鎖音訊
+    startGame();
+  };
+
+  // Play screen
+  document.getElementById('btnStop').onclick = stopGame;
+
+  // End screen
+  document.getElementById('btnReplay').onclick = () => startGame();
+  document.getElementById('btnChangeCards').onclick = () => showScreen('setup');
+}
+
+/* =========================
+   啟動
+   ========================= */
+(async function init() {
+  try {
+    db = await openDB();
+  } catch (e) {
+    showError('資料庫開啟失敗：' + (e.message || e) + '\n（此瀏覽器或預覽環境可能不支援 IndexedDB，請改用 Chrome/Edge 直接開啟此 HTML 檔）');
+    return;
+  }
+  try {
+    setupBGM();
+  } catch (e) {
+    console.warn('BGM 設定失敗', e);
+  }
+  try {
+    bindEvents();
+    showScreen('home');
+  } catch (e) {
+    showError('啟動失敗：' + (e.message || e));
+  }
+})();
+</script>
+</body>
+</html>
