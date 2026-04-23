@@ -1168,7 +1168,6 @@ function onPointerDown(e) {
   const el = cellFromPoint(e.clientX, e.clientY);
   if (!el) return;
   e.preventDefault();
-  warmUpTTS();  // 手機 Chrome: 借這次使用者手勢把 TTS 叫醒
   // 鎖定指標,即使滑出格子也持續接收事件
   try { gridEl.setPointerCapture(e.pointerId); } catch (_) {}
   startSelect(+el.dataset.r, +el.dataset.c);
@@ -1291,38 +1290,13 @@ gridEl.style.touchAction = 'none';
 // ====================================================================
 // 語音
 // ====================================================================
-// Android Chrome 的 speechSynthesis 需要先在使用者手勢中「暖機」才會穩定
-// 暖機必須用非空字串,否則引擎不會真的初始化
-let _ttsWarmedUp = false;
-function warmUpTTS() {
-  if (_ttsWarmedUp || !('speechSynthesis' in window)) return;
-  try {
-    const u = new SpeechSynthesisUtterance(' '); // 空格而非空字串
-    u.volume = 0.01;  // 幾乎靜音但非零(有些手機對 0 視同跳過)
-    u.lang = 'zh-TW';
-    window.speechSynthesis.speak(u);
-    _ttsWarmedUp = true;
-  } catch (_) {}
-}
-
 function speakWord(text) {
   if (!('speechSynthesis' in window)) return;
-  try {
-    const synth = window.speechSynthesis;
-    if (synth.paused) synth.resume();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = /[\u4e00-\u9fa5]/.test(text) ? 'zh-TW' : 'en-US';
-    u.volume = 1;
-    u.rate = 1;   // 不改速率,避免某些 Android 引擎因 0.9 直接靜音
-    u.pitch = 1;
-    // Android Chrome 時機地雷:cancel 後要延遲才能 speak,否則會被吃掉
-    if (synth.speaking || synth.pending) {
-      synth.cancel();
-      setTimeout(() => synth.speak(u), 120);
-    } else {
-      synth.speak(u);
-    }
-  } catch (e) { console.warn('TTS error', e); }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = /[\u4e00-\u9fa5]/.test(text) ? 'zh-TW' : 'en-US';
+  u.rate = 0.9;
+  window.speechSynthesis.speak(u);
 }
 
 // ====================================================================
