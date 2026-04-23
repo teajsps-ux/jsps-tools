@@ -1129,12 +1129,6 @@ function renderGrid() {
         : `min(${pctNormal}cqw, ${Math.floor(560 / size * 0.70)}px)`;
       cell.style.fontSize = fontSize;
 
-      // 事件
-      cell.addEventListener('mousedown', onCellDown);
-      cell.addEventListener('mouseenter', onCellEnter);
-      cell.addEventListener('touchstart', onTouchStart, { passive: false });
-      cell.addEventListener('touchmove', onTouchMove, { passive: false });
-
       gridEl.appendChild(cell);
     }
   }
@@ -1161,56 +1155,91 @@ window.addEventListener('resize', () => {
 });
 
 // ====================================================================
-// 選字邏輯（滑鼠 + 觸控）
+// 選字邏輯(Pointer Events 統一處理滑鼠+觸控,手機電腦都流暢穩定)
 // ====================================================================
-function onCellDown(e) {
-  if (!state.running) return;
-  const r = +e.currentTarget.dataset.r, c = +e.currentTarget.dataset.c;
-  startSelect(r, c);
+function cellFromPoint(x, y) {
+  const el = document.elementFromPoint(x, y);
+  if (!el || !el.classList.contains('grid-cell') || el.classList.contains('header')) return null;
+  return el;
 }
-function onCellEnter(e) {
-  if (!state.isSelecting || !state.selStart) return;
-  const r = +e.currentTarget.dataset.r, c = +e.currentTarget.dataset.c;
-  updateSelect(r, c);
-}
-function onTouchStart(e) {
+
+function onPointerDown(e) {
   if (!state.running) return;
+  const el = cellFromPoint(e.clientX, e.clientY);
+  if (!el) return;
   e.preventDefault();
-  const t = e.touches[0];
-  const el = document.elementFromPoint(t.clientX, t.clientY);
-  if (!el || !el.classList.contains('grid-cell') || el.classList.contains('header')) return;
+  warmUpTTS();  // 手機 Chrome: 借這次使用者手勢把 TTS 叫醒
+  // 鎖定指標,即使滑出格子也持續接收事件
+  try { gridEl.setPointerCapture(e.pointerId); } catch (_) {}
   startSelect(+el.dataset.r, +el.dataset.c);
 }
-function onTouchMove(e) {
+
+function onPointerMove(e) {
   if (!state.isSelecting) return;
+  const el = cellFromPoint(e.clientX, e.clientY);
+  if (!el) return;
   e.preventDefault();
-  const t = e.touches[0];
-  const el = document.elementFromPoint(t.clientX, t.clientY);
-  if (!el || !el.classList.contains('grid-cell') || el.classList.contains('header')) return;
   updateSelect(+el.dataset.r, +el.dataset.c);
+}
+
+function onPointerUp(e) {
+  try { gridEl.releasePointerCapture(e.pointerId); } catch (_) {}
+  finishSelect();
 }
 
 function startSelect(r, c) {
   state.isSelecting = true;
   state.selStart = { r, c };
   state.currentPath = [`${r}-${c}`];
-  renderGrid();
+  updateHighlights();
 }
 
 function updateSelect(r, c) {
   const sr = state.selStart.r, sc = state.selStart.c;
   const dy = r - sr, dx = c - sc;
+  // 拒絕「往上滑」(↖ ↑ ↗),只允許 ← → ↓ ↘ ↙
+  if (dy < 0) return;
+  let newPath = state.currentPath;
   if (dx === 0 && dy === 0) {
-    state.currentPath = [`${r}-${c}`];
+    newPath = [`${r}-${c}`];
   } else if (dx === 0 || dy === 0 || Math.abs(dx) === Math.abs(dy)) {
     const steps = Math.max(Math.abs(dx), Math.abs(dy));
     const stepX = dx === 0 ? 0 : dx / Math.abs(dx);
     const stepY = dy === 0 ? 0 : dy / Math.abs(dy);
     const path = [];
     for (let i = 0; i <= steps; i++) path.push(`${sr + stepY * i}-${sc + stepX * i}`);
-    state.currentPath = path;
+    newPath = path;
   }
-  renderGrid();
+  // 只有在 path 真的改變時才更新 highlight,避免浪費
+  if (newPath !== state.currentPath &&
+      (newPath.length !== state.currentPath.length ||
+       newPath.some((k, i) => k !== state.currentPath[i]))) {
+    state.currentPath = newPath;
+    updateHighlights();
+  }
+}
+
+// 輕量級樣式更新(不重建格子,手機也流暢)
+// 一次處理 selected / found / solution 三種狀態
+function updateHighlights() {
+  const selectedSet = new Set(state.currentPath);
+  const foundSet = new Set();
+  state.foundSolutions.forEach(s => s.path.forEach(k => foundSet.add(k)));
+  const solutionSet = new Set();
+  if (state.showSolution) {
+    state.placedWords.forEach((pw, idx) => {
+      if (state.foundSolutions.some(s => s.index === idx)) return;
+      pw.path.forEach(k => solutionSet.add(k));
+    });
+  }
+  const cells = gridEl.querySelectorAll('.grid-cell:not(.header)');
+  cells.forEach(cell => {
+    const key = cell.dataset.r + '-' + cell.dataset.c;
+    const sel = selectedSet.has(key);
+    cell.classList.toggle('selected', sel);
+    cell.classList.toggle('found', !sel && foundSet.has(key));
+    cell.classList.toggle('solution', !sel && !foundSet.has(key) && solutionSet.has(key));
+  });
 }
 
 function finishSelect() {
@@ -1230,10 +1259,11 @@ function finishSelect() {
     return path.every(p => sol.path.includes(p));
   });
 
+  // 起點必須在終點上方或同列(禁止反向滑動),只比對正向字串
   if (!dup) {
     const done = new Set(state.foundSolutions.map(s => s.index));
     const idx = state.placedWords.findIndex((pw, i) =>
-      !done.has(i) && (pw.word === str || pw.word === strRev)
+      !done.has(i) && pw.word === str
     );
     if (idx !== -1) {
       state.foundSolutions.push({ index: idx, path });
@@ -1247,23 +1277,43 @@ function finishSelect() {
 
   state.selStart = null;
   state.currentPath = [];
-  renderGrid();
+  updateHighlights();
 }
 
-document.addEventListener('mouseup', finishSelect);
-document.addEventListener('touchend', finishSelect);
-document.addEventListener('touchcancel', finishSelect);
+// Pointer events 綁在 grid 容器(滑鼠 + 觸控通吃,容器穩定)
+gridEl.addEventListener('pointerdown', onPointerDown);
+gridEl.addEventListener('pointermove', onPointerMove);
+gridEl.addEventListener('pointerup', onPointerUp);
+gridEl.addEventListener('pointercancel', onPointerUp);
+// 禁止手機上的預設觸控行為(長按選字/放大鏡)干擾
+gridEl.style.touchAction = 'none';
 
 // ====================================================================
 // 語音
 // ====================================================================
+// Android Chrome 的 speechSynthesis 需要先在使用者手勢中「暖機」才會穩定
+let _ttsWarmedUp = false;
+function warmUpTTS() {
+  if (_ttsWarmedUp || !('speechSynthesis' in window)) return;
+  try {
+    const u = new SpeechSynthesisUtterance('');
+    u.volume = 0;
+    window.speechSynthesis.speak(u);
+    _ttsWarmedUp = true;
+  } catch (_) {}
+}
+
 function speakWord(text) {
   if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = /[\u4e00-\u9fa5]/.test(text) ? 'zh-TW' : 'en-US';
-  u.rate = 0.9;
-  window.speechSynthesis.speak(u);
+  try {
+    window.speechSynthesis.cancel();
+    // 手機 Chrome: 某些情況 speech queue 會卡住,resume 能解救
+    if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = /[\u4e00-\u9fa5]/.test(text) ? 'zh-TW' : 'en-US';
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  } catch (e) { console.warn('TTS error', e); }
 }
 
 // ====================================================================
