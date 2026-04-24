@@ -54,7 +54,8 @@
   #setupMode {
     max-width: 960px;
     margin: 0 auto;
-    padding: clamp(16px, 3vw, 28px) clamp(12px, 3vw, 20px) 40px;
+    /* 底部 padding 加大,避免內容被固定在底部的「開始播放」按鈕擋住 */
+    padding: clamp(16px, 3vw, 28px) clamp(12px, 3vw, 20px) 140px;
     height: 100%;
     overflow-y: auto;
   }
@@ -331,11 +332,13 @@
     flex-shrink: 0;
   }
 
-  /* 播放按鈕 */
+  /* 播放按鈕:固定在畫面底部(浮動) */
   .play-btn {
-    display: block;
-    width: 100%;
-    margin-top: 12px;
+    position: fixed;
+    left: 50%;
+    bottom: clamp(12px, 2vw, 20px);
+    transform: translateX(-50%);
+    width: min(920px, calc(100% - clamp(24px, 6vw, 40px)));
     padding: clamp(14px, 3vw, 20px);
     font-size: clamp(1.1rem, 3vw, 1.4rem);
     font-weight: 800;
@@ -348,15 +351,17 @@
     letter-spacing: 0.15em;
     text-shadow: 0 2px 8px rgba(0,0,0,0.3);
     font-family: inherit;
+    z-index: 50;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.35), 0 6px 16px rgba(255,111,212,0.25);
   }
 
   .play-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(255,111,212,0.4), 0 6px 16px rgba(111,180,255,0.3);
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 16px 36px rgba(255,111,212,0.45), 0 8px 20px rgba(111,180,255,0.35);
     filter: brightness(1.08);
   }
 
-  .play-btn:active { transform: translateY(0); }
+  .play-btn:active { transform: translateX(-50%) translateY(0); }
 
   .hint {
     text-align: center;
@@ -677,9 +682,8 @@
     <button class="preset-save-btn" id="testVoiceBtn" style="margin-top:6px;">🔊 試聽「下課囉,記得喝水哦」</button>
   </div>
 
+  <!-- 固定在螢幕底部的浮動播放按鈕(屬於 #setupMode,進入播放畫面時會一起隱藏) -->
   <button class="play-btn" id="playBtn">▶  開 始 播 放</button>
-
-  <p class="hint">💡 播放中按 ESC 回到設定畫面 | F11 可進入全螢幕</p>
 </div>
 
 <!-- ======== 播放模式 ======== -->
