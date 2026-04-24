@@ -111,7 +111,42 @@
     align-items: center;
     gap: 8px;
     color: rgba(255,255,255,0.92);
+    flex-wrap: wrap;
   }
+
+  .panel-subtitle {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.55);
+    margin: -6px 0 12px;
+    line-height: 1.5;
+  }
+
+  .sync-indicator {
+    margin-left: auto;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .sync-indicator.synced { color: #7fe3a0; }
+  .sync-indicator.working { color: #ffd766; }
+  .sync-indicator.error { color: #ff9090; }
+
+  .sync-btn {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.06);
+    color: var(--fg);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .sync-btn:hover { background: rgba(255,255,255,0.14); transform: translateY(-1px); }
+  .sync-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* ======== 常用句 ======== */
   .presets-list {
@@ -559,7 +594,12 @@
 
   <!-- 常用句 -->
   <div class="glass">
-    <div class="panel-title">💾 我的常用句(點藍色文字載入 / 點 ✎ 編輯 / 點 × 刪除)</div>
+    <div class="panel-title">
+      <span>💾 我的常用句</span>
+      <span class="sync-indicator" id="authStatus">☁️ 未登入 · 只存在這台裝置</span>
+      <button class="sync-btn" id="authBtn" type="button">用 Google 登入同步</button>
+    </div>
+    <div class="panel-subtitle">點藍色文字載入 / 點 ✎ 編輯 / 點 × 刪除</div>
     <div class="presets-list" id="presetsList">
       <span class="preset-empty">還沒有儲存的句子,在下方輸入後點「存下這段」即可</span>
     </div>
@@ -921,12 +961,19 @@ if (typeof speechSynthesis !== 'undefined') {
 // 常用句(含編輯)
 // ============================================================
 function loadPresets() {
+  // 已登入 → 回傳雲端快取;未登入 → 回傳 localStorage
+  if (window._cloudPresets) return [...window._cloudPresets];
   try { return JSON.parse(localStorage.getItem(LS.presets) || '[]'); }
   catch { return []; }
 }
 
 function savePresets(list) {
+  // 永遠寫 localStorage(離線也能用),登入時額外推到雲端
   localStorage.setItem(LS.presets, JSON.stringify(list));
+  if (window._cloudSync) {
+    window._cloudPresets = [...list];
+    window._cloudSync.push(list);  // 非同步推雲,不阻塞 UI
+  }
 }
 
 function renderPresets() {
@@ -1192,6 +1239,9 @@ renderThemes();
 renderModes();
 renderRows();
 renderPresets();
+
+// 給 Firebase 雲端同步模組用(登入狀態變化時要重繪常用句清單)
+window.renderPresets = renderPresets;
 
 // ============================================================
 // 🌳 p5.js 森林動態背景(大樹 + 花海 + 螢火蟲 + 月亮 + 彩虹)
@@ -1520,5 +1570,139 @@ const forestSketch = (p) => {
 // 啟動 p5
 new p5(forestSketch);
 </script>
+
+<!-- ============================================================ -->
+<!-- ☁️ Firebase 雲端同步(只同步常用句,不碰其他) -->
+<!-- ============================================================ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // jsps-tools-sync 專案設定(apiKey 可公開,真正的防護靠 Firestore 安全規則)
+  const firebaseConfig = {
+    apiKey: "AIzaSyA0lSykngwrK5exy1rxD4TZ96RqeVD4x9U",
+    authDomain: "jsps-tools-sync.firebaseapp.com",
+    projectId: "jsps-tools-sync",
+    storageBucket: "jsps-tools-sync.firebasestorage.app",
+    messagingSenderId: "435781850232",
+    appId: "1:435781850232:web:bedbf1e1cd942e972b898d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  const LS_PRESETS = 'marqueeReader_presets';
+  const authStatus = document.getElementById('authStatus');
+  const authBtn = document.getElementById('authBtn');
+
+  function setStatus(text, state = '') {
+    authStatus.textContent = text;
+    authStatus.className = 'sync-indicator' + (state ? ' ' + state : '');
+  }
+
+  function presetDocRef(uid) {
+    return doc(db, 'marquee-phrases', uid);
+  }
+
+  // 簡易 debounce:連續儲存時只推最後一次,減少寫入量
+  let pushTimer = null;
+  let pendingList = null;
+  function schedulePush(uid, list) {
+    pendingList = list;
+    if (pushTimer) clearTimeout(pushTimer);
+    setStatus('☁️ 同步中...', 'working');
+    pushTimer = setTimeout(async () => {
+      try {
+        await setDoc(presetDocRef(uid), {
+          phrases: pendingList,
+          updatedAt: serverTimestamp()
+        });
+        setStatus('☁️ 已同步 · ' + (auth.currentUser?.displayName || '老師'), 'synced');
+      } catch (err) {
+        console.error('[Firebase] 同步失敗', err);
+        setStatus('⚠️ 同步失敗(已存本機)', 'error');
+      }
+    }, 600);
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // --- 已登入 ---
+      authBtn.textContent = '登出';
+      authBtn.disabled = false;
+      setStatus('☁️ 載入雲端資料中...', 'working');
+
+      try {
+        const snap = await getDoc(presetDocRef(user.uid));
+        const cloudPhrases = snap.exists() ? (snap.data().phrases || []) : null;
+        let localPhrases = [];
+        try { localPhrases = JSON.parse(localStorage.getItem(LS_PRESETS) || '[]'); } catch {}
+
+        let finalList;
+        if (cloudPhrases === null) {
+          // 雲端沒資料 → 第一次登入,把本機常用句搬上去
+          finalList = localPhrases;
+          if (finalList.length > 0) {
+            await setDoc(presetDocRef(user.uid), {
+              phrases: finalList,
+              updatedAt: serverTimestamp()
+            });
+          }
+        } else {
+          // 雲端有資料 → 以雲端為準(跨裝置語意)
+          finalList = cloudPhrases;
+        }
+
+        // 寫回 localStorage 作為離線快取
+        localStorage.setItem(LS_PRESETS, JSON.stringify(finalList));
+        window._cloudPresets = [...finalList];
+
+        // 提供給舊程式碼的「推雲」介面
+        window._cloudSync = {
+          push: (list) => schedulePush(user.uid, list)
+        };
+
+        setStatus('☁️ 已同步 · ' + (user.displayName || '老師'), 'synced');
+        if (typeof window.renderPresets === 'function') window.renderPresets();
+      } catch (err) {
+        console.error('[Firebase] 讀取失敗', err);
+        setStatus('⚠️ 雲端讀取失敗,先用本機資料', 'error');
+        window._cloudPresets = null;
+        window._cloudSync = null;
+      }
+    } else {
+      // --- 未登入 ---
+      authBtn.textContent = '用 Google 登入同步';
+      authBtn.disabled = false;
+      setStatus('☁️ 未登入 · 只存在這台裝置');
+      window._cloudPresets = null;
+      window._cloudSync = null;
+      if (typeof window.renderPresets === 'function') window.renderPresets();
+    }
+  });
+
+  authBtn.addEventListener('click', async () => {
+    authBtn.disabled = true;
+    try {
+      if (auth.currentUser) {
+        await signOut(auth);
+      } else {
+        await signInWithPopup(auth, provider);
+      }
+    } catch (err) {
+      console.error('[Firebase] 登入/登出失敗', err);
+      setStatus('⚠️ ' + (err.code === 'auth/popup-closed-by-user' ? '登入視窗被關閉' : '登入失敗'), 'error');
+      authBtn.disabled = false;
+    }
+  });
+</script>
+
 </body>
 </html>
