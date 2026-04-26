@@ -80,7 +80,7 @@
   .grow { flex: 1; overflow: auto; padding: 4px; }
 
   /* setup 頁手機版能捲動到底(看到難度/校準/開始遊戲) */
-  #screen-setup { overflow-y: auto; padding-bottom: 32px; }
+  #screen-setup { overflow-y: auto; padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)); }
   #screen-setup .grow { flex: 0 0 auto; max-height: 50vh; }
 
   /* Home screen */
