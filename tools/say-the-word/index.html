@@ -419,6 +419,64 @@
     80%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
     100% { transform: translate(-50%, -50%) scale(1.1) rotate(0deg); opacity: 0; }
   }
+
+  /* Cloud sync UI */
+  .auth-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .sync-indicator {
+    font-size: 14px;
+    color: #888;
+    background: #f1f1f1;
+    border: 2px solid #e0e0e0;
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .sync-indicator.synced  { background: #e8f7e0; border-color: #b8e0a0; color: #4a7a3a; }
+  .sync-indicator.working { background: #fff7d6; border-color: #e8d480; color: #8a6a20; }
+  .sync-indicator.error   { background: #ffe2e2; border-color: #f0a0a0; color: #b04040; }
+  .sync-btn {
+    font-size: 14px;
+    padding: 6px 14px;
+    border: 2px solid var(--primary-dark);
+    background: var(--primary);
+    color: #fff;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+    min-height: 0;
+    font-weight: bold;
+  }
+  .sync-btn:hover { transform: translateY(-1px); }
+  .sync-btn.migrate-btn { background: #ffd93d; color: #5a4a10; border-color: #d4ae20; }
+  .sync-progress {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .sync-progress .box {
+    background: #fff;
+    padding: 24px 32px;
+    border-radius: 16px;
+    border: 3px solid var(--primary);
+    text-align: center;
+    min-width: 260px;
+    max-width: 90%;
+  }
+  .sync-progress .box .label { font-size: 18px; font-weight: bold; margin-bottom: 12px; }
+  .sync-progress .box .bar { background: #eee; height: 14px; border-radius: 8px; overflow: hidden; }
+  .sync-progress .box .bar > div { background: var(--primary); height: 100%; width: 0%; transition: width 0.2s; }
+  .sync-progress .box .num { margin-top: 8px; font-size: 14px; color: #666; }
 </style>
 </head>
 <body>
@@ -427,7 +485,12 @@
   <!-- Home -->
   <div id="screen-home" class="screen active">
     <h1>🎵 跟著節拍唸 🎵</h1>
-    <h3 style="text-align:center; margin-bottom: 20px;">選擇或新增卡組</h3>
+    <h3 style="text-align:center; margin-bottom: 8px;">選擇或新增卡組</h3>
+    <div class="auth-bar">
+      <span class="sync-indicator" id="authStatus">☁️ 未登入 · 卡組只存在這台裝置</span>
+      <button class="sync-btn" id="authBtn" type="button">用 Google 登入同步</button>
+      <button class="sync-btn migrate-btn" id="migrateBtn" type="button" hidden>📤 把本機卡組上雲端</button>
+    </div>
     <div class="grow">
       <div class="deck-list" id="deckList"></div>
     </div>
@@ -607,8 +670,11 @@ function store(name, mode='readonly') {
 }
 
 // decks
-async function createDeck(name) {
-  return promisify(store('decks','readwrite').add({ name, createdAt: Date.now() }));
+async function createDeck(name, extra = {}) {
+  const obj = { name, createdAt: Date.now(), ...extra };
+  const id = await promisify(store('decks','readwrite').add(obj));
+  if (!extra._fromCloud) await window._stwSync?.afterCreateDeck?.(id, name);
+  return id;
 }
 async function listDecks() {
   return promisify(store('decks').getAll());
@@ -616,31 +682,40 @@ async function listDecks() {
 async function getDeck(id) {
   return promisify(store('decks').get(id));
 }
-async function updateDeck(deck) {
-  return promisify(store('decks','readwrite').put(deck));
+async function updateDeck(deck, fromCloud = false) {
+  await promisify(store('decks','readwrite').put(deck));
+  if (!fromCloud) await window._stwSync?.afterUpdateDeck?.(deck);
 }
-async function deleteDeck(id) {
+async function deleteDeck(id, fromCloud = false) {
   // delete all cards then deck
   const cardsToDelete = await listCards(id);
+  const deck = await getDeck(id);
   const tx = db.transaction(['decks','cards'],'readwrite');
   cardsToDelete.forEach(c => tx.objectStore('cards').delete(c.id));
   tx.objectStore('decks').delete(id);
-  return new Promise(r => tx.oncomplete = r);
+  await new Promise(r => tx.oncomplete = r);
+  if (!fromCloud) await window._stwSync?.afterDeleteDeck?.(deck, cardsToDelete);
 }
 
 // cards
-async function addCard(deckId, name, blob) {
-  return promisify(store('cards','readwrite').add({ deckId, name, blob, createdAt: Date.now() }));
+async function addCard(deckId, name, blob, extra = {}) {
+  const obj = { deckId, name, blob, createdAt: Date.now(), ...extra };
+  const id = await promisify(store('cards','readwrite').add(obj));
+  if (!extra._fromCloud) await window._stwSync?.afterAddCard?.(id, deckId, name, blob);
+  return id;
 }
 async function listCards(deckId) {
   const idx = store('cards').index('deckId');
   return promisify(idx.getAll(deckId));
 }
-async function deleteCard(id) {
-  return promisify(store('cards','readwrite').delete(id));
+async function deleteCard(id, fromCloud = false) {
+  const card = await promisify(store('cards').get(id));
+  await promisify(store('cards','readwrite').delete(id));
+  if (!fromCloud && card) await window._stwSync?.afterDeleteCard?.(card);
 }
-async function updateCard(card) {
-  return promisify(store('cards','readwrite').put(card));
+async function updateCard(card, fromCloud = false) {
+  await promisify(store('cards','readwrite').put(card));
+  if (!fromCloud) await window._stwSync?.afterUpdateCard?.(card);
 }
 
 // meta
@@ -779,7 +854,8 @@ async function renderDeck() {
       const nm = await promptText('重新命名', '圖卡名稱', c.name);
       if (!nm) return;
       c.name = nm;
-      await updateCard({ id: c.id, deckId: c.deckId, name: nm, blob: c.blob, createdAt: c.createdAt });
+      const { url, ...rest } = c;
+      await updateCard({ ...rest, name: nm });
       renderDeck();
     };
     el.appendChild(div);
@@ -1296,6 +1372,41 @@ async function dataURLToBlob(dataUrl) {
   return await res.blob();
 }
 
+// 壓縮圖片為 WebP base64,用於上雲端(Firestore 文件 < 1MB,目標 < 100KB)
+async function compressImageToBase64(blob, maxEdge = 800, quality = 0.8) {
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = await new Promise((res, rej) => {
+      const im = new Image();
+      im.onload = () => res(im);
+      im.onerror = rej;
+      im.src = url;
+    });
+    let { width, height } = img;
+    if (width > maxEdge || height > maxEdge) {
+      const r = width >= height ? maxEdge / width : maxEdge / height;
+      width = Math.round(width * r);
+      height = Math.round(height * r);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+    // 嘗試 WebP,壓不夠就降 quality
+    let q = quality;
+    let dataUrl;
+    for (let i = 0; i < 3; i++) {
+      dataUrl = canvas.toDataURL('image/webp', q);
+      if (dataUrl.length < 100 * 1024 * 1.34) break; // base64 約 1.34x
+      q -= 0.15;
+      if (q < 0.4) break;
+    }
+    return dataUrl;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 // 模態視窗
 function promptText(title, placeholder, initial) {
   return new Promise(resolve => {
@@ -1349,7 +1460,8 @@ function bindEvents() {
   document.getElementById('btnRenameDeck').onclick = async () => {
     const nm = await promptText('重新命名卡組', '卡組名稱', state.activeDeckName);
     if (!nm) return;
-    await updateDeck({ id: state.activeDeckId, name: nm, createdAt: (await getDeck(state.activeDeckId)).createdAt });
+    const cur = await getDeck(state.activeDeckId);
+    await updateDeck({ ...cur, name: nm });
     state.activeDeckName = nm;
     document.getElementById('deckTitle').textContent = '📚 ' + nm;
   };
@@ -1546,7 +1658,304 @@ function bindEvents() {
   } catch (e) {
     showError('啟動失敗：' + (e.message || e));
   }
+  // 暴露給 Firebase 同步模組
+  window.STW = {
+    get db() { return db; },
+    listDecks, getDeck, createDeck, updateDeck, deleteDeck,
+    listCards, addCard, updateCard, deleteCard,
+    blobToDataURL, dataURLToBlob, compressImageToBase64,
+    renderHome: () => { if (state.screen === 'home') renderHome(); },
+    renderDeck: () => { if (state.screen === 'deck') renderDeck(); },
+  };
+  window.dispatchEvent(new Event('stw-ready'));
 })();
+</script>
+
+<!-- ============================================================ -->
+<!-- ☁️ Firebase 雲端同步(Say the Word 卡組,jsps-tools-sync 專案) -->
+<!-- ============================================================ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // jsps-tools-sync 專案設定(apiKey 可公開,真正的防護靠 Firestore 安全規則)
+  const firebaseConfig = {
+    apiKey: "AIzaSyA0lSykngwrK5exy1rxD4TZ96RqeVD4x9U",
+    authDomain: "jsps-tools-sync.firebaseapp.com",
+    projectId: "jsps-tools-sync",
+    storageBucket: "jsps-tools-sync.firebasestorage.app",
+    messagingSenderId: "435781850232",
+    appId: "1:435781850232:web:bedbf1e1cd942e972b898d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const fdb = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  // 等本機 STW 介面就緒
+  if (!window.STW) await new Promise(res => window.addEventListener('stw-ready', res, { once: true }));
+  const STW = window.STW;
+
+  const authStatus = document.getElementById('authStatus');
+  const authBtn = document.getElementById('authBtn');
+  const migrateBtn = document.getElementById('migrateBtn');
+
+  let user = null;
+
+  function setStatus(text, state = '') {
+    authStatus.className = 'sync-indicator' + (state ? ' ' + state : '');
+    authStatus.textContent = text;
+  }
+
+  function decksColl() { return collection(fdb, `say-the-word-decks/${user.uid}/decks`); }
+  function cardsColl() { return collection(fdb, `say-the-word-decks/${user.uid}/cards`); }
+  function deckRef(cloudId) { return doc(fdb, `say-the-word-decks/${user.uid}/decks/${cloudId}`); }
+  function cardRef(cloudId) { return doc(fdb, `say-the-word-decks/${user.uid}/cards/${cloudId}`); }
+
+  // 把雲端有、本機沒有的拉下來
+  async function pullCloud() {
+    const decksSnap = await getDocs(decksColl());
+    const cardsSnap = await getDocs(cardsColl());
+
+    const localDecks = await STW.listDecks();
+    const localDeckByCloudId = {};
+    localDecks.forEach(d => { if (d.cloudId) localDeckByCloudId[d.cloudId] = d; });
+
+    for (const ds of decksSnap.docs) {
+      const cloudId = ds.id;
+      const data = ds.data();
+      if (!localDeckByCloudId[cloudId]) {
+        const localId = await STW.createDeck(data.name || '(未命名)', {
+          cloudId,
+          createdAt: data.createdAt || Date.now(),
+          _fromCloud: true,
+        });
+        localDeckByCloudId[cloudId] = { id: localId, cloudId, name: data.name };
+      }
+    }
+
+    for (const cs of cardsSnap.docs) {
+      const cloudId = cs.id;
+      const data = cs.data();
+      const localDeck = localDeckByCloudId[data.deckCloudId];
+      if (!localDeck) continue;
+      const existing = (await STW.listCards(localDeck.id)).find(c => c.cloudId === cloudId);
+      if (existing) continue;
+      try {
+        const blob = await STW.dataURLToBlob(data.image);
+        await STW.addCard(localDeck.id, data.name || '(未命名)', blob, {
+          cloudId,
+          createdAt: data.createdAt || Date.now(),
+          _fromCloud: true,
+        });
+      } catch (e) {
+        console.warn('還原圖卡失敗', cloudId, e);
+      }
+    }
+  }
+
+  async function pushDeckToCloud(localId, name) {
+    const cloudId = crypto.randomUUID();
+    const cur = await STW.getDeck(localId);
+    cur.cloudId = cloudId;
+    await STW.updateDeck(cur, true);
+    await setDoc(deckRef(cloudId), {
+      name,
+      createdAt: cur.createdAt,
+      updatedAt: serverTimestamp(),
+    });
+    return cloudId;
+  }
+
+  async function pushCardToCloud(localCardId, deckLocalId, name, blob) {
+    const deck = await STW.getDeck(deckLocalId);
+    let deckCloudId = deck.cloudId;
+    if (!deckCloudId) deckCloudId = await pushDeckToCloud(deckLocalId, deck.name);
+
+    const cloudId = crypto.randomUUID();
+    const cards = await STW.listCards(deckLocalId);
+    const card = cards.find(c => c.id === localCardId);
+    if (!card) return;
+    card.cloudId = cloudId;
+    await STW.updateCard(card, true);
+
+    const dataUrl = await STW.compressImageToBase64(blob);
+    await setDoc(cardRef(cloudId), {
+      name,
+      deckCloudId,
+      createdAt: card.createdAt,
+      image: dataUrl,
+      updatedAt: serverTimestamp(),
+    });
+    return cloudId;
+  }
+
+  function attachHooks() {
+    window._stwSync = {
+      async afterCreateDeck(localId, name) {
+        try { await pushDeckToCloud(localId, name); }
+        catch (e) { console.error('推卡組失敗', e); setStatus('⚠️ 雲端寫入失敗', 'error'); }
+      },
+      async afterUpdateDeck(deck) {
+        if (!deck.cloudId) return;
+        try {
+          await setDoc(deckRef(deck.cloudId), {
+            name: deck.name,
+            createdAt: deck.createdAt,
+            updatedAt: serverTimestamp(),
+          });
+        } catch (e) { console.error('更新卡組失敗', e); }
+      },
+      async afterDeleteDeck(deck, cardsDeleted) {
+        try {
+          if (deck && deck.cloudId) await deleteDoc(deckRef(deck.cloudId));
+          for (const c of (cardsDeleted || [])) {
+            if (c.cloudId) await deleteDoc(cardRef(c.cloudId));
+          }
+        } catch (e) { console.error('刪卡組失敗', e); }
+      },
+      async afterAddCard(localId, deckId, name, blob) {
+        try {
+          setStatus('☁️ 上傳圖卡中…', 'working');
+          await pushCardToCloud(localId, deckId, name, blob);
+          setStatus(`✅ 已同步 · ${user.displayName || user.email}`, 'synced');
+        } catch (e) { console.error('推圖卡失敗', e); setStatus('⚠️ 雲端寫入失敗', 'error'); }
+      },
+      async afterUpdateCard(card) {
+        if (!card.cloudId) return;
+        try {
+          const ref = cardRef(card.cloudId);
+          const cur = await getDoc(ref);
+          if (cur.exists()) {
+            await setDoc(ref, { ...cur.data(), name: card.name, updatedAt: serverTimestamp() });
+          }
+        } catch (e) { console.error('更新圖卡失敗', e); }
+      },
+      async afterDeleteCard(card) {
+        if (!card || !card.cloudId) return;
+        try { await deleteDoc(cardRef(card.cloudId)); }
+        catch (e) { console.error('刪圖卡失敗', e); }
+      },
+    };
+  }
+  function detachHooks() { delete window._stwSync; }
+
+  async function checkNeedMigration() {
+    const decks = await STW.listDecks();
+    const localOnlyDecks = decks.filter(d => !d.cloudId);
+    let localOnlyCards = 0;
+    for (const d of decks) {
+      const cards = await STW.listCards(d.id);
+      localOnlyCards += cards.filter(c => !c.cloudId).length;
+    }
+    return { decks: localOnlyDecks.length, cards: localOnlyCards };
+  }
+
+  async function runMigration() {
+    const decks = await STW.listDecks();
+    let totalCards = 0;
+    for (const d of decks) {
+      const cs = await STW.listCards(d.id);
+      totalCards += cs.filter(c => !c.cloudId).length;
+    }
+    const totalSteps = decks.filter(d => !d.cloudId).length + totalCards;
+    if (totalSteps === 0) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'sync-progress';
+    overlay.innerHTML = `<div class="box">
+      <div class="label">📤 上傳卡組到雲端…</div>
+      <div class="bar"><div></div></div>
+      <div class="num">0 / ${totalSteps}</div>
+    </div>`;
+    document.body.appendChild(overlay);
+    const barEl = overlay.querySelector('.bar > div');
+    const numEl = overlay.querySelector('.num');
+    let done = 0;
+    const tick = () => {
+      done++;
+      barEl.style.width = (done / totalSteps * 100) + '%';
+      numEl.textContent = `${done} / ${totalSteps}`;
+    };
+
+    try {
+      for (const deck of decks) {
+        if (!deck.cloudId) { await pushDeckToCloud(deck.id, deck.name); tick(); }
+        const cards = await STW.listCards(deck.id);
+        for (const card of cards) {
+          if (!card.cloudId) {
+            await pushCardToCloud(card.id, deck.id, card.name, card.blob);
+            tick();
+          }
+        }
+      }
+    } finally {
+      overlay.remove();
+    }
+  }
+
+  authBtn.onclick = async () => {
+    if (user) {
+      try { await signOut(auth); } catch (e) { console.error(e); }
+    } else {
+      try { await signInWithPopup(auth, provider); }
+      catch (e) {
+        if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+          alert('登入失敗:' + (e.message || e));
+        }
+      }
+    }
+  };
+
+  migrateBtn.onclick = async () => {
+    migrateBtn.hidden = true;
+    setStatus('☁️ 上傳中…', 'working');
+    try {
+      await runMigration();
+      setStatus(`✅ 已同步 · ${user.displayName || user.email}`, 'synced');
+      STW.renderHome();
+    } catch (e) {
+      console.error(e);
+      setStatus('❌ 上傳失敗', 'error');
+      migrateBtn.hidden = false;
+    }
+  };
+
+  onAuthStateChanged(auth, async u => {
+    user = u;
+    if (u) {
+      authBtn.textContent = '登出';
+      setStatus('☁️ 同步中…', 'working');
+      try {
+        await pullCloud();
+        attachHooks();
+        const need = await checkNeedMigration();
+        if (need.decks > 0 || need.cards > 0) {
+          setStatus(`⚠️ 本機 ${need.decks} 卡組、${need.cards} 張圖卡尚未上雲端`, 'working');
+          migrateBtn.hidden = false;
+          migrateBtn.textContent = `📤 上傳到雲端(${need.decks}+${need.cards})`;
+        } else {
+          setStatus(`✅ 已同步 · ${u.displayName || u.email}`, 'synced');
+          migrateBtn.hidden = true;
+        }
+        STW.renderHome();
+      } catch (e) {
+        console.error(e);
+        setStatus('❌ 同步失敗:' + (e.message || e), 'error');
+      }
+    } else {
+      detachHooks();
+      authBtn.textContent = '用 Google 登入同步';
+      migrateBtn.hidden = true;
+      setStatus('☁️ 未登入 · 卡組只存在這台裝置');
+    }
+  });
 </script>
 </body>
 </html>
