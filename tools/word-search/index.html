@@ -605,6 +605,49 @@
     padding: 8px;
     border-radius: 8px;
   }
+
+  /* 雲端排行榜 */
+  .lb-body { max-height: 60vh; overflow-y: auto; text-align: left; }
+  .lb-row {
+    display: grid;
+    grid-template-columns: 38px 56px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    border-radius: 10px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+  }
+  .lb-row.finished { background: #f0fdf4; border-color: #bbf7d0; }
+  .lb-row .rank {
+    font-size: 18px; font-weight: bold; text-align: center;
+    color: var(--gray-500);
+  }
+  .lb-row.r1 .rank { color: #eab308; }
+  .lb-row.r2 .rank { color: #94a3b8; }
+  .lb-row.r3 .rank { color: #b45309; }
+  .lb-row .seat {
+    font-weight: bold; font-size: 18px;
+    background: var(--orange);
+    color: white;
+    border-radius: 8px;
+    text-align: center;
+    padding: 4px 0;
+  }
+  .lb-row .info { font-size: 14px; color: var(--gray-700); }
+  .lb-row .info b { color: var(--gray-800); }
+  .lb-row .time {
+    font-family: ui-monospace, "Cascadia Code", monospace;
+    font-weight: bold;
+    color: var(--green);
+    font-size: 16px;
+  }
+  .lb-row.unfinished .time { color: var(--gray-500); }
+  .lb-empty {
+    color: var(--gray-500); padding: 24px; text-align: center;
+    background: var(--gray-50); border-radius: 10px;
+  }
 </style>
 </head>
 <body>
@@ -710,7 +753,24 @@
         <input type="text" id="roomUrlInput" readonly>
         <button class="btn btn-blue btn-sm" id="btnCopyRoomUrl">📋 複製連結</button>
       </div>
+      <div style="margin: 8px 0;">
+        <button class="btn btn-orange" id="btnShowLeaderboard" style="width:100%;">📊 看即時排行榜</button>
+      </div>
       <div class="room-tip">⚠ 關掉這個視窗後，題目仍然有效；房號保持到老師按「重新生成題目」前。</div>
+    </div>
+  </div>
+
+  <!-- 雲端排行榜彈窗 -->
+  <div class="room-modal hidden" id="lbModal">
+    <div class="room-modal-inner" style="max-width: 560px;">
+      <button class="room-modal-close" id="btnCloseLb" aria-label="關閉">✖</button>
+      <h2>🏆 即時排行榜</h2>
+      <div style="display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:8px;">
+        <span style="color:var(--gray-500); font-size:14px;">房號</span>
+        <span id="lbRoomCode" style="font-weight:bold; color:var(--orange-dark); letter-spacing:2px;"></span>
+        <button class="btn btn-blue btn-sm" id="btnRefreshLb">🔄 更新</button>
+      </div>
+      <div id="lbBody" class="lb-body">載入中…</div>
     </div>
   </div>
 
@@ -1044,6 +1104,64 @@ function initSettings() {
   $('roomModal').addEventListener('click', (e) => {
     if (e.target === $('roomModal')) $('roomModal').classList.add('hidden');
   });
+
+  // 看即時排行榜
+  $('btnShowLeaderboard').onclick = async () => {
+    const code = $('roomCodeDisplay').textContent.trim();
+    if (!code || code === '------') { alert('請先開房間'); return; }
+    $('lbRoomCode').textContent = code;
+    $('lbModal').classList.remove('hidden');
+    await refreshLeaderboard(code);
+  };
+  $('btnRefreshLb').onclick = async () => {
+    const code = $('lbRoomCode').textContent.trim();
+    if (code) await refreshLeaderboard(code);
+  };
+  $('btnCloseLb').onclick = () => $('lbModal').classList.add('hidden');
+  $('lbModal').addEventListener('click', (e) => {
+    if (e.target === $('lbModal')) $('lbModal').classList.add('hidden');
+  });
+}
+
+// 從雲端讀取分數並渲染排行榜
+async function refreshLeaderboard(code) {
+  const body = $('lbBody');
+  body.textContent = '載入中…';
+  try {
+    const list = await window.cloudRoom.getScores(code);
+    if (!list.length) {
+      body.innerHTML = '<div class="lb-empty">還沒有人完成 / 上傳成績</div>';
+      return;
+    }
+    // 排序：找完的 > 沒找完的；找完的按用時短先；沒找完的按找到字數多先、再用時短
+    list.sort((a, b) => {
+      if (a.finished !== b.finished) return a.finished ? -1 : 1;
+      if (a.finished) return (a.elapsedSec || 0) - (b.elapsedSec || 0);
+      if ((b.foundCount || 0) !== (a.foundCount || 0)) return (b.foundCount || 0) - (a.foundCount || 0);
+      return (a.elapsedSec || 0) - (b.elapsedSec || 0);
+    });
+    body.innerHTML = list.map((r, i) => {
+      const rank = i + 1;
+      const cls = ['lb-row'];
+      if (r.finished) cls.push('finished'); else cls.push('unfinished');
+      if (rank <= 3) cls.push('r' + rank);
+      const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+      const m = Math.floor((r.elapsedSec || 0) / 60).toString().padStart(2, '0');
+      const s = ((r.elapsedSec || 0) % 60).toString().padStart(2, '0');
+      const timeStr = `${m}:${s}`;
+      const status = r.finished
+        ? `✅ 完成 <b>${r.foundCount}/${r.totalWords}</b>`
+        : `⏰ 時限到 找到 <b>${r.foundCount}/${r.totalWords}</b>`;
+      return `<div class="${cls.join(' ')}">
+        <div class="rank">${medal}</div>
+        <div class="seat">${r.seat}</div>
+        <div class="info">${status}</div>
+        <div class="time">${timeStr}</div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    body.innerHTML = '<div class="lb-empty">讀取失敗：' + (err && err.message || err) + '</div>';
+  }
 }
 
 function readInputs() {
@@ -1543,6 +1661,7 @@ function gameWin() {
     date: new Date().toISOString(),
   });
   renderLeaderboard();
+  uploadScoreIfInRoom(state.foundSolutions.length, state.placedWords.length, state.elapsed, true);
 }
 
 function gameTimeout() {
@@ -1561,6 +1680,21 @@ function gameTimeout() {
     date: new Date().toISOString(),
   });
   renderLeaderboard();
+  uploadScoreIfInRoom(n, total, state.timeLimit * 60, n === total);
+}
+
+// 學生在雲端房間裡才上傳分數
+function uploadScoreIfInRoom(found, total, elapsed, finished) {
+  if (state.role === 'teacher') return;
+  if (!state.roomCode) return;
+  if (!window.cloudRoom || !window.cloudRoom.submitScore) return;
+  if (!state.seat || state.seat === '--') return;
+  window.cloudRoom.submitScore(state.roomCode, state.seat, {
+    foundCount: found,
+    totalWords: total,
+    elapsedSec: Math.round(elapsed),
+    finished: !!finished
+  }).catch(err => console.warn('上傳分數失敗', err));
 }
 
 function playWinSound() {
@@ -1816,7 +1950,7 @@ boot();
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, getDocs, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   // jsps-tools-sync（apiKey 可公開，靠 Firestore 安全規則保護）
   const firebaseConfig = {
@@ -1883,7 +2017,28 @@ boot();
     return snap.data();
   }
 
-  window.cloudRoom = { openRoom, joinRoom };
+  async function submitScore(code, seat, payload) {
+    await authReady;
+    const ref = doc(fdb, 'word-search-rooms', code, 'scores', seat);
+    await setDoc(ref, {
+      seat: String(seat),
+      foundCount: payload.foundCount | 0,
+      totalWords: payload.totalWords | 0,
+      elapsedSec: payload.elapsedSec | 0,
+      finished: !!payload.finished,
+      updatedAt: serverTimestamp()
+    });
+  }
+
+  async function getScores(code) {
+    await authReady;
+    const snap = await getDocs(collection(fdb, 'word-search-rooms', code, 'scores'));
+    const list = [];
+    snap.forEach(d => list.push(d.data()));
+    return list;
+  }
+
+  window.cloudRoom = { openRoom, joinRoom, submitScore, getScores };
   window.dispatchEvent(new Event('cloud-room-ready'));
 </script>
 </body>
