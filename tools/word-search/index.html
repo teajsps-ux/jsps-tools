@@ -530,6 +530,81 @@
   .top-switch a:hover { text-decoration: underline; }
 
   .hidden { display: none !important; }
+
+  /* 房間彈窗 */
+  .room-modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+  }
+  .room-modal-inner {
+    background: white;
+    border-radius: 20px;
+    padding: clamp(20px, 3vw, 32px);
+    max-width: 420px; width: 100%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  }
+  .room-modal-inner h2 {
+    color: var(--green);
+    margin-bottom: 12px;
+    font-size: clamp(20px, 3vw, 24px);
+  }
+  .room-modal-close {
+    position: absolute; top: 10px; right: 14px;
+    background: transparent; border: none;
+    font-size: 18px; cursor: pointer;
+    color: var(--gray-500);
+  }
+  .room-modal-close:hover { color: var(--gray-800); }
+  .room-code-big {
+    font-size: clamp(36px, 6vw, 52px);
+    font-weight: bold;
+    color: var(--orange-dark);
+    letter-spacing: 4px;
+    margin: 12px 0;
+    font-family: ui-monospace, "Cascadia Code", monospace;
+    background: var(--yellow-bg);
+    padding: 12px 16px;
+    border-radius: 12px;
+  }
+  .room-hint {
+    color: var(--gray-500);
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .room-qr-wrap {
+    margin: 12px auto 16px;
+    width: 220px; height: 220px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .room-qr-wrap img { max-width: 100%; height: auto; }
+  .room-url-wrap {
+    display: flex; gap: 6px; margin-bottom: 12px;
+  }
+  .room-url-wrap input {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--gray-700);
+    background: var(--gray-50);
+  }
+  .room-tip {
+    font-size: 12px;
+    color: var(--gray-500);
+    background: var(--gray-50);
+    padding: 8px;
+    border-radius: 8px;
+  }
 </style>
 </head>
 <body>
@@ -557,7 +632,11 @@
         <div class="form-field">
           <label>📝 答案清單（用空白或換行分隔）</label>
           <textarea id="wordsInput" placeholder="例如：倫敦 改變 決心 守護員 挖空">倫敦 改變 決心 守護員 挖空 不可思議 建設 紛紛 城市 律動 付出 費用</textarea>
-          <div class="hint">同一個字可以出現多次</div>
+          <div class="hint">
+            同一個字可以出現多次　·
+            📚 找語詞來源：<a href="https://pedia.cloud.edu.tw/Bookmark/TextWord" target="_blank" rel="noopener" style="color:var(--orange-dark); font-weight:600; text-decoration:underline;">教育百科 生字詞彙表</a>
+            <span style="opacity:.7;">（可用 Google 智慧鏡頭複製過來）</span>
+          </div>
         </div>
 
         <div class="form-field" style="margin-top:12px;">
@@ -608,13 +687,39 @@
 
     <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
       <button class="btn btn-orange" id="btnRegenerate">🔄 重新生成題目</button>
-      <button class="btn btn-blue" id="btnCopyLink">📋 複製學生版連結</button>
+      <button class="btn btn-green" id="btnOpenRoom">📡 開雲端房間</button>
+      <button class="btn btn-blue" id="btnCopyLink">📋 複製連結（離線版）</button>
+    </div>
+    <div class="hint" style="margin-top:8px;">
+      💡 <b>開雲端房間</b>：學生掃 QR 碼即可加入，分數會即時上傳。<br>
+      💡 <b>複製連結（離線版）</b>：題目藏在網址裡，學生開連結就能玩，分數只存自己手機。
+    </div>
+  </div>
+
+  <!-- 房間彈窗（老師按開房間後出現） -->
+  <div class="room-modal hidden" id="roomModal">
+    <div class="room-modal-inner">
+      <button class="room-modal-close" id="btnCloseRoom" aria-label="關閉">✖</button>
+      <h2>📡 雲端房間已開</h2>
+      <div class="room-code-big" id="roomCodeDisplay">------</div>
+      <p class="room-hint">學生掃 QR 碼，或在「老師登入」之外的版本輸入房號加入</p>
+      <div class="room-qr-wrap">
+        <img id="roomQrImg" alt="QR Code" />
+      </div>
+      <div class="room-url-wrap">
+        <input type="text" id="roomUrlInput" readonly>
+        <button class="btn btn-blue btn-sm" id="btnCopyRoomUrl">📋 複製連結</button>
+      </div>
+      <div class="room-tip">⚠ 關掉這個視窗後，題目仍然有效；房號保持到老師按「重新生成題目」前。</div>
     </div>
   </div>
 
   <!-- 學生端：座號輸入 -->
   <div class="student-gate" id="studentGate">
     <h2>👋 歡迎同學</h2>
+    <div id="studentRoomInfo" class="hidden" style="margin:8px 0; padding:8px 12px; background:var(--green-bg); border-radius:8px; font-size:14px;">
+      已加入房間 <b id="studentRoomCode">------</b>
+    </div>
     <p>請輸入你的座號開始遊戲</p>
     <input type="text" id="seatInput" class="seat-input" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}" placeholder="01">
     <div style="margin-top:20px;">
@@ -887,11 +992,54 @@ function initSettings() {
     try {
       await navigator.clipboard.writeText(url);
       $('btnCopyLink').textContent = '✅ 已複製完整連結（含設定）！';
-      setTimeout(() => $('btnCopyLink').innerHTML = '📋 複製學生版連結', 2000);
+      setTimeout(() => $('btnCopyLink').innerHTML = '📋 複製連結（離線版）', 2000);
     } catch (e) {
       prompt('請手動複製這個網址：', url);
     }
   };
+
+  // 開雲端房間（接 cloudRoom.openRoom，下方 ES module 提供）
+  $('btnOpenRoom').onclick = async () => {
+    if (!window.cloudRoom) {
+      alert('雲端房間還在連線中，請稍候 1~2 秒再試');
+      return;
+    }
+    readInputs();
+    saveSettings();
+    const btn = $('btnOpenRoom');
+    btn.disabled = true;
+    btn.textContent = '⏳ 開房間中…';
+    try {
+      const { roomCode, joinUrl } = await window.cloudRoom.openRoom(state);
+      $('roomCodeDisplay').textContent = roomCode;
+      $('roomUrlInput').value = joinUrl;
+      $('roomQrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' + encodeURIComponent(joinUrl);
+      $('roomModal').classList.remove('hidden');
+    } catch (err) {
+      alert('開房間失敗：' + (err && err.message ? err.message : '請檢查網路'));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '📡 開雲端房間';
+    }
+  };
+
+  // 房間彈窗：複製連結
+  $('btnCopyRoomUrl').onclick = async () => {
+    const url = $('roomUrlInput').value;
+    try {
+      await navigator.clipboard.writeText(url);
+      $('btnCopyRoomUrl').textContent = '✅ 已複製';
+      setTimeout(() => $('btnCopyRoomUrl').innerHTML = '📋 複製連結', 2000);
+    } catch (e) {
+      $('roomUrlInput').select();
+    }
+  };
+
+  // 關閉房間彈窗
+  $('btnCloseRoom').onclick = () => $('roomModal').classList.add('hidden');
+  $('roomModal').addEventListener('click', (e) => {
+    if (e.target === $('roomModal')) $('roomModal').classList.add('hidden');
+  });
 }
 
 function readInputs() {
@@ -1600,6 +1748,25 @@ function boot() {
   generateGrid();
   renderLeaderboard();
 
+  // 學生端：URL 有 room=XXX → 從雲端拉題目
+  const roomFromUrl = urlParams.get('room');
+  if (state.role !== 'teacher' && roomFromUrl) {
+    state.roomCode = roomFromUrl.toUpperCase();
+    $('studentRoomCode').textContent = state.roomCode;
+    $('studentRoomInfo').classList.remove('hidden');
+    // 等 cloudRoom 載入後拉題目
+    waitForCloudRoom().then(async () => {
+      try {
+        const data = await window.cloudRoom.joinRoom(state.roomCode);
+        applyRoomDataToState(data);
+        readInputs(); // 把 wordsRaw 推回 UI（雖然學生看不到設定區，但 generateGrid 會用 state.words）
+        generateGrid();
+      } catch (err) {
+        alert('加入房間失敗：' + (err && err.message ? err.message : '請檢查房號或網路'));
+      }
+    });
+  }
+
   if (state.role === 'teacher') {
     teacherSkipGate();
   } else {
@@ -1607,7 +1774,113 @@ function boot() {
   }
 }
 
+// 把雲端房間取回的設定套到 state（學生端用）
+function applyRoomDataToState(data) {
+  if (!data) return;
+  if (data.wordsRaw) {
+    state._wordsRaw = data.wordsRaw;
+    $('wordsInput').value = data.wordsRaw;
+  }
+  if (data.interference !== undefined) {
+    state.interference = data.interference;
+    $('interferenceInput').value = data.interference;
+  }
+  if (data.gridSize) state.gridSize = data.gridSize;
+  if (data.font) state.font = data.font;
+  if (data.mode) state.mode = data.mode;
+  if (data.timeLimit) state.timeLimit = data.timeLimit;
+  if (data.allowDiagonals !== undefined) state.allowDiagonals = data.allowDiagonals;
+  applyFont();
+}
+
+function waitForCloudRoom() {
+  if (window.cloudRoom) return Promise.resolve();
+  return new Promise(res => {
+    const t = setInterval(() => {
+      if (window.cloudRoom) { clearInterval(t); res(); }
+    }, 100);
+    setTimeout(() => { clearInterval(t); res(); }, 8000);
+  });
+}
+
 boot();
+</script>
+
+<!-- ============================================================ -->
+<!-- 雲端房間（jsps-tools-sync Firebase）                            -->
+<!-- ============================================================ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // jsps-tools-sync（apiKey 可公開，靠 Firestore 安全規則保護）
+  const firebaseConfig = {
+    apiKey: "AIzaSyA0lSykngwrK5exy1rxD4TZ96RqeVD4x9U",
+    authDomain: "jsps-tools-sync.firebaseapp.com",
+    projectId: "jsps-tools-sync",
+    storageBucket: "jsps-tools-sync.firebasestorage.app",
+    messagingSenderId: "435781850232",
+    appId: "1:435781850232:web:bedbf1e1cd942e972b898d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const fdb = getFirestore(app);
+
+  // 匿名登入（學生用），老師之後若要綁 UID 可改 GoogleAuthProvider
+  let authReady = new Promise((resolve) => {
+    onAuthStateChanged(auth, (u) => { if (u) resolve(u); });
+  });
+  signInAnonymously(auth).catch(err => console.error('匿名登入失敗', err));
+
+  // 房號產生（6 位英數，O/0 I/1 排除避免混淆）
+  function makeRoomCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s = '';
+    for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    return s;
+  }
+
+  function roomRef(code) {
+    return doc(fdb, 'word-search-rooms', code);
+  }
+
+  async function openRoom(state) {
+    await authReady;
+    // 嘗試 5 次以避免極小機率撞號
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const code = makeRoomCode();
+      const ref = roomRef(code);
+      const existing = await getDoc(ref);
+      if (existing.exists()) continue;
+      const wordsRaw = document.getElementById('wordsInput').value;
+      await setDoc(ref, {
+        wordsRaw: wordsRaw || '',
+        interference: state.interference || '',
+        gridSize: state.gridSize,
+        font: state.font,
+        mode: state.mode,
+        timeLimit: state.timeLimit,
+        allowDiagonals: !!state.allowDiagonals,
+        ownerUid: auth.currentUser ? auth.currentUser.uid : null,
+        createdAt: serverTimestamp()
+      });
+      const joinUrl = location.origin + location.pathname + '?room=' + code;
+      return { roomCode: code, joinUrl };
+    }
+    throw new Error('房號產生失敗，請重試');
+  }
+
+  async function joinRoom(code) {
+    await authReady;
+    const snap = await getDoc(roomRef(code));
+    if (!snap.exists()) throw new Error('找不到房號 ' + code);
+    return snap.data();
+  }
+
+  window.cloudRoom = { openRoom, joinRoom };
+  window.dispatchEvent(new Event('cloud-room-ready'));
 </script>
 </body>
 </html>
