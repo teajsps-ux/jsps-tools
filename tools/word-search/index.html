@@ -899,7 +899,11 @@ function initRole() {
     };
   } else {
     $('settingsPanel').classList.add('hidden');
-    topSwitch.innerHTML = `👨‍🎓 學生版 · <a href="?role=teacher">老師登入 →</a>`;
+    // 學生若是掃 QR 進來（URL 有 ?room=XXX）就藏「老師登入」連結，避免作弊或誤點
+    const inRoom = !!urlParams.get('room');
+    topSwitch.innerHTML = inRoom
+      ? `👨‍🎓 學生版`
+      : `👨‍🎓 學生版 · <a href="?role=teacher">老師登入 →</a>`;
   }
 }
 
