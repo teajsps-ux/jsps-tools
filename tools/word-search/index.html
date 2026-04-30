@@ -2137,8 +2137,19 @@ async function openTeamGate() {
       ? `每組 ${state.teamSize} 人，電腦隨機指派…`
       : `每組 ${state.teamSize} 人，請點選一個未滿的隊伍`;
 
+  // 等雲端連線（最多 8 秒），失敗後給重試按鈕
   if (!window.cloudRoom) {
-    grid.innerHTML = '<div class="lb-empty">雲端尚未連線，請稍候…</div>';
+    grid.innerHTML = '<div class="lb-empty">⏳ 雲端連線中…</div>';
+    await waitForCloudRoom();
+  }
+  if (!window.cloudRoom) {
+    grid.innerHTML = `
+      <div class="lb-empty" style="margin-bottom:16px;">雲端連不上，請檢查網路連線</div>
+      <div style="text-align:center;">
+        <button class="btn btn-orange" id="btnRetryTeamGate" style="padding:12px 32px;font-size:18px;">🔄 重試</button>
+      </div>`;
+    const retryBtn = $('btnRetryTeamGate');
+    if (retryBtn) retryBtn.onclick = () => openTeamGate();
     return;
   }
 
@@ -2146,24 +2157,39 @@ async function openTeamGate() {
   try {
     counts = await window.cloudRoom.getTeamCounts(state.roomCode);
   } catch (e) {
-    grid.innerHTML = '<div class="lb-empty">讀取隊伍失敗：' + (e.message || e) + '</div>';
+    grid.innerHTML = `
+      <div class="lb-empty" style="margin-bottom:16px;">讀取隊伍失敗：${e.message || e}</div>
+      <div style="text-align:center;">
+        <button class="btn btn-orange" id="btnRetryTeamGate" style="padding:12px 32px;font-size:18px;">🔄 重試</button>
+      </div>`;
+    const retryBtn = $('btnRetryTeamGate');
+    if (retryBtn) retryBtn.onclick = () => openTeamGate();
     return;
   }
 
   if (state.teamMode === 'random') {
-    // 找目前最少人的隊伍。若全部都滿，找仍可加入者；若全滿就放第一個
+    // 找目前最少人且未滿的隊伍
     let pick = null, pickCount = Infinity;
     for (const k of TEAM_KEYS) {
       const n = counts[k] || 0;
       if (n < state.teamSize && n < pickCount) { pick = k; pickCount = n; }
     }
     if (!pick) {
-      // 全部滿了，找人數最少那組
-      pick = TEAM_KEYS[0];
-      let mn = counts[pick] || 0;
-      for (const k of TEAM_KEYS) {
-        if ((counts[k] || 0) < mn) { pick = k; mn = counts[k] || 0; }
-      }
+      // 全部都滿了：不再硬塞，提示老師
+      const totalCap = TEAM_KEYS.length * state.teamSize;
+      grid.innerHTML = `
+        <div class="lb-empty" style="margin-bottom:16px;">
+          😱 所有隊伍都滿了！<br>
+          目前容量：${TEAM_KEYS.length} 組 × ${state.teamSize} 人 = ${totalCap} 人<br>
+          <span style="color:var(--gray-500);font-size:14px;">請通知老師調整每組人數</span>
+        </div>
+        <div style="text-align:center;">
+          <button class="btn btn-orange" id="btnRetryTeamGate" style="padding:12px 32px;font-size:18px;">🔄 重試</button>
+        </div>`;
+      const retryBtn = $('btnRetryTeamGate');
+      if (retryBtn) retryBtn.onclick = () => openTeamGate();
+      $('teamRandomResult').classList.add('hidden');
+      return;
     }
     try {
       await window.cloudRoom.assignTeam(state.roomCode, state.seat, pick);
@@ -2319,7 +2345,7 @@ boot();
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, getDocs, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   // jsps-tools-sync（apiKey 可公開，靠 Firestore 安全規則保護）
   const firebaseConfig = {
@@ -2390,6 +2416,7 @@ boot();
 
   async function submitScore(code, seat, payload) {
     await authReady;
+    const uid = auth.currentUser ? auth.currentUser.uid : null;
     const ref = doc(fdb, 'word-search-rooms', code, 'scores', seat);
     const data = {
       seat: String(seat),
@@ -2397,6 +2424,7 @@ boot();
       totalWords: payload.totalWords | 0,
       elapsedSec: payload.elapsedSec | 0,
       finished: !!payload.finished,
+      uid: uid,
       updatedAt: serverTimestamp()
     };
     if (payload.team) data.team = payload.team;
@@ -2412,12 +2440,33 @@ boot();
   }
 
   // 分組：學生加入隊伍（寫入 scores/{seat} 的 team 欄位）
+  // 防呆：若同一 UID 已佔了別的座號（學生重整換座號），先把舊紀錄刪掉
   async function assignTeam(code, seat, team) {
     await authReady;
-    const ref = doc(fdb, 'word-search-rooms', code, 'scores', String(seat));
+    const uid = auth.currentUser ? auth.currentUser.uid : null;
+    const seatStr = String(seat);
+
+    if (uid) {
+      try {
+        const snap = await getDocs(collection(fdb, 'word-search-rooms', code, 'scores'));
+        const cleanups = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.uid === uid && d.id !== seatStr) {
+            cleanups.push(deleteDoc(d.ref));
+          }
+        });
+        if (cleanups.length) await Promise.all(cleanups);
+      } catch (e) {
+        console.warn('清除舊座號失敗（不影響加入）', e);
+      }
+    }
+
+    const ref = doc(fdb, 'word-search-rooms', code, 'scores', seatStr);
     await setDoc(ref, {
-      seat: String(seat),
+      seat: seatStr,
       team: team,
+      uid: uid,
       joinedAt: serverTimestamp()
     }, { merge: true });
   }
