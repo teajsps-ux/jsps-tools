@@ -1358,8 +1358,8 @@ function renderPersonalLeaderboard(body, listIn) {
     const s = ((r.elapsedSec || 0) % 60).toString().padStart(2, '0');
     const timeStr = `${m}:${s}`;
     const status = r.finished
-      ? `✅ 完成 <b>${r.foundCount}/${r.totalWords}</b>`
-      : `⏰ 時限到 找到 <b>${r.foundCount}/${r.totalWords}</b>`;
+      ? `✅ 完成 <b>${r.foundCount}/${r.totalWords}</b> 個語詞`
+      : `⏰ 時限到 找到 <b>${r.foundCount}/${r.totalWords}</b> 個語詞`;
     const teamTag = r.team && TEAM_COLORS[r.team]
       ? ` <span class="team-pill" style="background:${TEAM_COLORS[r.team].hex}; padding:2px 8px; font-size:12px;">${TEAM_COLORS[r.team].name}</span>`
       : '';
@@ -1927,7 +1927,7 @@ function gameTimeout() {
   state.won = false;
   const n = state.foundSolutions.length;
   const total = state.placedWords.length;
-  winBanner.textContent = `⏰ 時間到！你找到 ${n} / ${total} 個`;
+  winBanner.textContent = `⏰ 時間到！你找到 ${n} / ${total} 個語詞`;
   winBanner.classList.remove('hidden');
   saveRecord({
     seat: state.seat,
