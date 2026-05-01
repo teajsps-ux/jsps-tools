@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>作業清點矩陣</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/bpmf-huninn/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/bpmf-iansui/index.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+        /* ===== 主題色彩變數（素色） ===== */
+        :root {
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-header: #e2e8f0;
+            --bg-row-alt: #f8fafc;
+            --border-soft: #cbd5e1;
+            --border-strong: #94a3b8;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --status-submitted-bg: #dcfce7;
+            --status-submitted-text: #15803d;
+            --status-unrevised-bg: #fef3c7;
+            --status-unrevised-text: #b45309;
+            --status-missing-bg: #fecaca;
+            --status-missing-text: #b91c1c;
+            --status-absent-bg: #e2e8f0;
+            --status-absent-text: #64748b;
+            --font-main: 'Noto Sans TC', sans-serif;
+            --radius-card: 0.5rem;
+        }
+
+        /* ===== Ganvas 動漫印象派主題 ===== */
+        body.theme-ganvas {
+            --bg-page: #FFE2D1;
+            --bg-card: #F9F9F9;
+            --bg-header: #F6CC41;
+            --bg-row-alt: #FFF5E8;
+            --border-soft: #D1D1D1;
+            --border-strong: #8B4513;
+            --text-main: #3A3432;
+            --text-muted: #8B4513;
+            --accent: #D15C3D;
+            --accent-hover: #B0492C;
+            --status-submitted-bg: #C8E6A0;
+            --status-submitted-text: #4A6B1F;
+            --status-unrevised-bg: #FFE082;
+            --status-unrevised-text: #8B4513;
+            --status-missing-bg: #F4A09A;
+            --status-missing-text: #8B2A1F;
+            --status-absent-bg: #D1D1D1;
+            --status-absent-text: #5A4A42;
+            --radius-card: 1rem;
+        }
+        body.theme-ganvas {
+            background-image:
+                radial-gradient(ellipse at 20% 10%, rgba(135, 206, 235, 0.35), transparent 55%),
+                radial-gradient(ellipse at 85% 90%, rgba(125, 190, 63, 0.25), transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(246, 204, 65, 0.18), transparent 60%);
+        }
+
+        /* ===== 背景圖層（每週由 GPT-image 自動覆蓋 bg.png） ===== */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+        body.theme-ganvas .bg-layer {
+            background-image: url('bg.png');
+            opacity: var(--bg-opacity, 0.45);
+        }
+        /* 透明度滑桿 */
+        .bg-control { display: none; align-items: center; gap: 4px; }
+        body.theme-ganvas .bg-control { display: inline-flex; }
+        .bg-control input[type="range"] {
+            width: 90px;
+            accent-color: var(--accent);
+        }
+        body.theme-ganvas .table-container,
+        body.theme-ganvas header,
+        body.theme-ganvas #setupOverlay > div {
+            box-shadow: 0 6px 24px -4px rgba(58, 52, 50, 0.25), inset 0 0 0 1px rgba(209, 92, 61, 0.1);
+        }
+        /* ===== Ganvas 風格：盡量透明，讓背景圖透出來 ===== */
+        /* 表格容器與滾動區：完全透明 + 邊框柔化 */
+        body.theme-ganvas .table-container {
+            background: transparent;
+            border-color: rgba(209, 92, 61, 0.35);
+            box-shadow: none;
+        }
+        body.theme-ganvas { --header-bg-color: rgba(255, 255, 255, 0.55); }
+        body.theme-ganvas header { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+        /* 表頭只用淡淡黃色，依然能讀文字 */
+        body.theme-ganvas thead th {
+            background: rgba(246, 204, 65, 0.65) !important;
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+        }
+        body.theme-ganvas thead th:first-child {
+            background: rgba(209, 209, 209, 0.55) !important;
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+        }
+        /* 學生姓名欄與空格子：完全透明，背景圖直透 */
+        body.theme-ganvas td:first-child {
+            background: rgba(255, 245, 232, 0.4);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+        body.theme-ganvas tbody td { background-color: transparent; }
+        /* 狀態色塊：較強烈一點以便辨識，但仍透 */
+        body.theme-ganvas .status-submitted { background-color: rgba(125, 190, 63, 0.55) !important; }
+        body.theme-ganvas .status-unrevised { background-color: rgba(255, 224, 130, 0.65) !important; }
+        body.theme-ganvas .status-missing   { background-color: rgba(244, 160, 154, 0.7) !important; }
+        body.theme-ganvas .status-absent    { background-color: rgba(180, 180, 180, 0.45) !important; }
+        /* 表格邊框柔化，避免一格格切得太死 */
+        body.theme-ganvas th,
+        body.theme-ganvas td {
+            border-bottom-color: rgba(139, 69, 19, 0.18);
+            border-right-color: rgba(139, 69, 19, 0.18);
+        }
+        /* footer 區徽章在 Ganvas 也要半透明 */
+        body.theme-ganvas #summaryList > span {
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        /* ===== 字型切換 ===== */
+        body.font-default { font-family: 'Noto Sans TC', sans-serif; }
+        body.font-huninn,
+        body.font-huninn input,
+        body.font-huninn select,
+        body.font-huninn button,
+        body.font-huninn textarea { font-family: 'Bpmf Huninn', 'Noto Sans TC', sans-serif; }
+        body.font-iansui,
+        body.font-iansui input,
+        body.font-iansui select,
+        body.font-iansui button,
+        body.font-iansui textarea { font-family: 'Bpmf Iansui', 'Noto Sans TC', sans-serif; }
+        body.font-zihikai,
+        body.font-zihikai input,
+        body.font-zihikai select,
+        body.font-zihikai button,
+        body.font-zihikai textarea { font-family: 'Bpmf Zihi Kai Std', 'Noto Sans TC', sans-serif; }
+
+        /* ===== 基礎版面（鎖定 viewport：上方 header 不動、下方表格自捲） ===== */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0.5rem;
+            max-width: 100%;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            background: var(--bg-card);
+            border-radius: var(--radius-card);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--border-soft);
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            table-layout: auto;
+        }
+        th, td {
+            min-width: 78px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-soft);
+            border-right: 1px solid var(--border-soft);
+            padding: 6px 4px;
+            font-size: 14px;
+        }
+        thead th {
+            position: sticky;
+            top: 0;
+            background: var(--bg-header);
+            z-index: 20;
+            font-weight: 700;
+            box-shadow: 0 2px 0 var(--border-strong);
+            white-space: nowrap;
+        }
+        th:first-child, td:first-child {
+            position: sticky;
+            left: 0;
+            background: var(--bg-row-alt);
+            z-index: 30;
+            min-width: 200px;
+            border-right: 3px solid var(--border-strong);
+        }
+        thead th:first-child { z-index: 40; background: var(--border-soft); }
+
+        /* ===== 狀態格 ===== */
+        .check-cell {
+            cursor: pointer;
+            transition: all 0.1s;
+            height: 44px; /* 觸控友善 */
+            user-select: none;
+            position: relative;
+        }
+        .check-cell:hover { filter: brightness(0.97); }
+        .status-submitted { background-color: var(--status-submitted-bg) !important; }
+        .status-submitted .status-text { color: var(--status-submitted-text); font-weight: 800; font-size: 14px; }
+        .status-unrevised { background-color: var(--status-unrevised-bg) !important; }
+        .status-unrevised .status-text { color: var(--status-unrevised-text); font-weight: 800; font-size: 13px; }
+        .status-missing { background-color: var(--status-missing-bg) !important; }
+        .status-missing .status-text { color: var(--status-missing-text); font-weight: 800; font-size: 13px; }
+        .status-absent { background-color: var(--status-absent-bg) !important; }
+        .status-absent .status-text { color: var(--status-absent-text); font-weight: 600; font-size: 13px; font-style: italic; }
+        .status-empty .status-text { color: var(--border-soft); font-size: 18px; }
+
+        /* 整列請假灰化 */
+        tr.row-absent td { opacity: 0.55; }
+        tr.row-absent td:first-child { opacity: 1; background: var(--status-absent-bg); }
+
+        /* ===== 名字格 ===== */
+        .name-cell-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            padding: 0 4px;
+        }
+        .name-input {
+            background: transparent;
+            border: none;
+            text-align: left;
+            font-weight: bold;
+            color: var(--text-main);
+            flex: 1;
+            min-width: 0;
+            font-size: 14px;
+        }
+        .name-input:focus { outline: 1px solid var(--accent); background: white; border-radius: 2px; }
+
+        .badge-excellent {
+            font-size: 11px;
+            color: #dc2626;
+            font-weight: 900;
+            background: #fef2f2;
+            padding: 2px 5px;
+            border: 1px solid #fecaca;
+            border-radius: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        body.theme-ganvas .badge-excellent {
+            background: #FFE082;
+            color: #8B2A1F;
+            border-color: #D15C3D;
+        }
+
+        .absent-toggle {
+            border: 1px solid var(--border-soft);
+            background: white;
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
+            flex-shrink: 0;
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 16px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 4l3 3 3-3' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 4px center;
+        }
+        .absent-toggle.is-absent { background-color: var(--status-absent-bg); color: var(--status-absent-text); border-color: var(--border-strong); font-weight: 700; }
+        .absent-toggle.is-transferred { background-color: #fee2e2; color: #991b1b; border-color: #fca5a5; font-weight: 700; }
+        .absent-toggle.is-empty { background-color: #f1f5f9; color: #475569; border-color: #94a3b8; font-style: italic; }
+
+        /* ===== 作業欄表頭 ===== */
+        .task-input {
+            background: transparent;
+            border: none;
+            text-align: center;
+            font-weight: bold;
+            width: 96px;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+        .task-input:focus { outline: 1px solid var(--accent); background: white; border-radius: 2px; }
+
+        .task-btn {
+            font-size: 11px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: filter 0.15s;
+        }
+        .task-btn:hover { filter: brightness(0.92); }
+        .task-btn-allcheck { background: #dcfce7; color: #15803d; border-color: #86efac; }
+        .task-btn-missing { background: #fecaca; color: #b91c1c; border-color: #fca5a5; }
+
+        /* ===== 狀態選單 popover ===== */
+        #statusPopover {
+            position: fixed;
+            display: none;
+            z-index: 150;
+            background: white;
+            border: 2px solid var(--border-strong);
+            border-radius: 8px;
+            padding: 6px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            display: none;
+        }
+        #statusPopover.show { display: flex; gap: 4px; flex-wrap: wrap; max-width: 280px; }
+        .status-opt {
+            border: 1px solid var(--border-soft);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            min-width: 64px;
+            transition: filter 0.1s;
+        }
+        .status-opt:hover { filter: brightness(0.9); }
+        .opt-clear { background: white; color: var(--text-muted); }
+        .opt-submitted { background: var(--status-submitted-bg); color: var(--status-submitted-text); }
+        .opt-unrevised { background: var(--status-unrevised-bg); color: var(--status-unrevised-text); }
+        .opt-missing { background: var(--status-missing-bg); color: var(--status-missing-text); }
+
+        /* ===== 初始化引導畫面 ===== */
+        #setupOverlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-page);
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #setupOverlay > div {
+            background: var(--bg-card);
+            border: 2px solid var(--border-soft);
+            border-radius: var(--radius-card);
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        #missingOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #missingOverlay.show { display: flex; }
+
+        .delete-student-btn {
+            opacity: 0.25;
+            transition: opacity 0.2s;
+            cursor: pointer;
+            padding: 2px;
+            flex-shrink: 0;
+        }
+        tr:hover .delete-student-btn { opacity: 1; }
+        @media (hover: none) { .delete-student-btn { opacity: 0.6; } }
+
+        .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+        /* ===== 響應式：手機 ===== */
+        @media (max-width: 640px) {
+            header { flex-direction: column; align-items: stretch !important; gap: 6px; }
+            header .header-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+            th, td { font-size: 13px; padding: 5px 3px; }
+            th:first-child, td:first-child { min-width: 150px; }
+            .task-input { width: 76px; font-size: 13px; }
+            .name-input { font-size: 13px; }
+            .check-cell { height: 48px; min-width: 64px; }
+            .status-submitted .status-text,
+            .status-unrevised .status-text,
+            .status-missing .status-text { font-size: 12px; }
+            .badge-excellent { font-size: 10px; padding: 1px 3px; }
+            .absent-toggle { padding: 2px 5px; }
+        }
+
+        /* ===== 響應式：大螢幕觸控（電視/觸控大螢幕） ===== */
+        @media (min-width: 1600px) {
+            th, td { font-size: 17px; min-width: 96px; padding: 8px 6px; }
+            th:first-child, td:first-child { min-width: 240px; }
+            .check-cell { height: 56px; }
+            .task-input { width: 120px; font-size: 17px; }
+            .name-input { font-size: 17px; }
+            .task-btn { font-size: 13px; padding: 5px 10px; }
+            .status-opt { font-size: 16px; padding: 10px 16px; min-width: 88px; }
+            .badge-excellent { font-size: 13px; }
+        }
+
+        /* 隱藏 utility */
+        .hidden-x { display: none !important; }
+    </style>
+</head>
+<body class="font-default">
+    <!-- 背景圖層（Ganvas 風格才顯示，每週自動更新 bg.png） -->
+    <div class="bg-layer"></div>
+
+    <!-- 初始化引導 -->
+    <div id="setupOverlay">
+        <div class="max-w-md w-full text-center space-y-5">
+            <div>
+                <h2 class="text-2xl font-bold mb-1" style="color: var(--text-main);">建立班級名單</h2>
+                <p class="text-sm" style="color: var(--text-muted);">請選擇一種方式開始</p>
+            </div>
+
+            <div class="p-4 rounded-xl text-left" style="background: var(--bg-row-alt); border: 1px solid var(--border-soft);">
+                <label class="block text-sm font-bold mb-2" style="color: var(--text-main);">方式 A：貼上名單 (每行一人)</label>
+                <textarea id="customNameList" placeholder="01&#10;02&#10;03&#10;..."
+                          class="w-full h-32 p-3 text-sm border rounded-lg outline-none resize-none mb-3"
+                          style="border-color: var(--border-soft); background: white;"></textarea>
+                <button onclick="initializeByNames()" class="w-full text-white py-2 rounded-lg font-bold transition" style="background: var(--accent);">以此名單生成</button>
+            </div>
+
+            <div class="relative py-1">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t" style="border-color: var(--border-soft);"></div></div>
+                <div class="relative flex justify-center text-xs uppercase"><span class="px-2 font-bold" style="background: var(--bg-card); color: var(--text-muted);">或</span></div>
+            </div>
+
+            <div class="p-4 rounded-xl flex items-center justify-between" style="background: var(--bg-row-alt); border: 1px solid var(--border-soft);">
+                <div class="text-left">
+                    <label class="block text-sm font-bold" style="color: var(--text-main);">方式 B：按人數生成座號</label>
+                    <input type="number" id="initialCount" min="1" max="100" placeholder="輸入人數"
+                           class="mt-1 border rounded px-3 py-1 text-sm outline-none w-24"
+                           style="border-color: var(--border-soft);">
+                </div>
+                <button onclick="initializeByCount()" class="text-white px-4 py-2 rounded-lg font-bold text-sm transition" style="background: var(--text-main);">生成座號</button>
+            </div>
+
+            <p class="text-[11px]" style="color: var(--text-muted);">建議只輸入座號（如 01、02），避免在公開頁面留下真名。</p>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Header -->
+        <header class="mb-2 flex justify-between items-center px-3 py-2 rounded-lg shadow-sm" style="background: var(--header-bg-color, var(--bg-card)); border: 1px solid var(--border-soft);">
+            <div class="header-row">
+                <h1 class="text-base font-bold" style="color: var(--text-main);">📋 作業清點矩陣</h1>
+                <span id="todayDate" class="text-xs font-bold px-2 py-0.5 rounded" style="background: var(--bg-row-alt); color: var(--text-main); border: 1px solid var(--border-soft);"></span>
+                <button onclick="clearAllData()" class="text-[10px] border px-1.5 py-0.5 rounded hover:opacity-80" style="color: #dc2626; border-color: #fecaca;">重設名單</button>
+            </div>
+
+            <div class="header-row">
+                <input type="text" id="newAssignmentName" placeholder="作業名稱"
+                       class="pl-2 py-1 text-xs border rounded outline-none w-28"
+                       style="background: var(--bg-row-alt); border-color: var(--border-soft);">
+                <button onclick="addAssignmentColumn()" class="text-white px-3 py-1 rounded text-xs font-bold shadow-sm transition" style="background: var(--accent);">新增</button>
+                <button onclick="resetOnlySubmissions()" class="text-[10px] hover:underline" style="color: var(--text-muted);">重置勾選</button>
+
+                <span class="mx-1" style="color: var(--border-strong);">|</span>
+
+                <label class="text-[11px]" style="color: var(--text-muted);">字型</label>
+                <select id="fontSelect" onchange="changeFont(this.value)" class="text-xs border rounded px-1 py-0.5 outline-none" style="border-color: var(--border-soft); background: white;">
+                    <option value="default">預設（無注音）</option>
+                    <option value="huninn">Bpmf Huninn（注音）</option>
+                    <option value="iansui">Bpmf Iansui（注音）</option>
+                </select>
+
+                <label class="text-[11px]" style="color: var(--text-muted);">風格</label>
+                <select id="themeSelect" onchange="changeTheme(this.value)" class="text-xs border rounded px-1 py-0.5 outline-none" style="border-color: var(--border-soft); background: white;">
+                    <option value="plain">素色</option>
+                    <option value="ganvas">Ganvas 動漫印象派</option>
+                </select>
+
+                <span class="bg-control">
+                    <label class="text-[11px]" style="color: var(--text-muted);">底圖透明度</label>
+                    <input type="range" id="bgOpacity" min="0" max="100" oninput="changeBgOpacity(this.value)" title="拖曳調整背景圖片透明度">
+                    <span id="bgOpacityVal" class="text-[10px]" style="color: var(--text-muted); min-width: 28px;">45%</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- 圖例 -->
+        <div class="flex flex-wrap gap-1.5 mb-1.5 text-[11px] items-center px-1">
+            <span style="color: var(--text-muted);">點格子設定狀態：</span>
+            <span class="px-2 py-0.5 rounded font-bold" style="background: var(--status-submitted-bg); color: var(--status-submitted-text);">已交</span>
+            <span class="px-2 py-0.5 rounded font-bold" style="background: var(--status-unrevised-bg); color: var(--status-unrevised-text);">未訂正</span>
+            <span class="px-2 py-0.5 rounded font-bold" style="background: var(--status-missing-bg); color: var(--status-missing-text);">缺交</span>
+            <span class="px-2 py-0.5 rounded font-bold" style="background: var(--status-absent-bg); color: var(--status-absent-text);">請假（自動套整列）</span>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container relative">
+            <table>
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- 缺交清單 popover -->
+        <div id="missingOverlay">
+            <div class="p-6 rounded-xl shadow-xl border-2 w-full max-w-md" style="background: var(--bg-card); border-color: var(--border-soft);">
+                <h2 id="missingTitle" class="text-xl font-bold mb-4 border-b pb-2" style="color: #dc2626;">未交名單</h2>
+                <div id="missingList" class="text-base space-y-1 max-h-[50vh] overflow-y-auto mb-6" style="color: var(--text-main);"></div>
+                <button onclick="hideMissing()" class="w-full text-white font-bold py-2 rounded-lg transition" style="background: var(--text-main);">返回主頁面</button>
+            </div>
+        </div>
+
+        <!-- 狀態選單 popover -->
+        <div id="statusPopover">
+            <button class="status-opt opt-submitted" data-status="submitted">已交 ✓</button>
+            <button class="status-opt opt-unrevised" data-status="unrevised">未訂正</button>
+            <button class="status-opt opt-missing" data-status="missing">缺交</button>
+            <button class="status-opt opt-clear" data-status="">清除</button>
+        </div>
+
+        <!-- Footer Info -->
+        <footer id="summaryList" class="mt-2 flex flex-wrap gap-1 overflow-x-auto pb-0.5"></footer>
+    </div>
+
+    <script>
+        // ===== 儲存 key =====
+        const DATA_KEY = 'classMatrix_Data_V10';
+        const STUDENT_LIST_KEY = 'classMatrix_Students_V10';
+        const SETTINGS_KEY = 'classMatrix_Settings_V10';
+
+        // ===== 全域狀態 =====
+        let students = JSON.parse(localStorage.getItem(STUDENT_LIST_KEY)) || [];
+        let matrixData = JSON.parse(localStorage.getItem(DATA_KEY)) || {
+            tasks: [],
+            submissions: {} // { "id-task": "submitted"|"unrevised"|"missing" }
+        };
+        let settings = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {
+            font: 'default',
+            theme: 'plain',
+            bgOpacity: 45  // 預設背景圖透明度 45%
+        };
+        if (settings.bgOpacity === undefined) settings.bgOpacity = 45;
+
+        // ===== 姓名遮罩（去識別化） =====
+        // 王小明 → 王○明、林美美 → 林○美、王明 → 王○、司馬相如 → 司○○如
+        // 前綴座號保留：「01 王小明」→「01 王○明」、「15林美美」→「15 林○美」、「5號王小明」→「5號 王○明」
+        // 純數字（01、5號）不遮罩
+        function maskName(raw) {
+            const name = String(raw || '').trim();
+            if (!name) return name;
+            // 純數字或座號格式不遮罩
+            if (/^[0-9]+$/.test(name)) return name;
+            if (/^[0-9]+\s*號$/.test(name)) return name;
+
+            // 偵測前綴座號（數字 + 可選的「號」+ 可選分隔符），分離出名字本體
+            // 支援：「01 王小明」「15林美美」「5號王小明」「01.王小明」「01、王小明」
+            const m = name.match(/^(\d+(?:\s*號)?)[\s.、,\-_/]*(.+)$/);
+            if (m) {
+                const prefix = m[1].replace(/\s+/g, '');
+                const rest = m[2].trim();
+                if (rest) return prefix + ' ' + maskCore(rest);
+            }
+            return maskCore(name);
+        }
+
+        function maskCore(name) {
+            const chars = Array.from(name);
+            if (chars.length <= 1) return name;
+            if (chars.length === 2) return chars[0] + '○';
+            // 3 字以上：保留首末字，中間全部遮成 ○
+            return chars[0] + '○'.repeat(chars.length - 2) + chars[chars.length - 1];
+        }
+
+        // ===== 初始化名單 =====
+        function initializeByNames() {
+            const rawText = document.getElementById('customNameList').value;
+            const names = rawText.split('\n').map(n => n.trim()).filter(n => n !== '');
+            if (names.length === 0) return alert("請輸入名單內容");
+            students = names.map((name, index) => ({
+                id: Date.now() + index,
+                name: maskName(name),
+                absent: false
+            }));
+            finishInit();
+        }
+
+        function initializeByCount() {
+            const count = parseInt(document.getElementById('initialCount').value);
+            if (!count || count <= 0) return alert("請輸入正確人數");
+            students = [];
+            for (let i = 1; i <= count; i++) {
+                const seat = String(i).padStart(2, '0');
+                students.push({ id: Date.now() + i, name: seat, absent: false });
+            }
+            finishInit();
+        }
+
+        function finishInit() {
+            document.getElementById('setupOverlay').style.display = 'none';
+            saveAndRender();
+        }
+
+        function clearAllData() {
+            if (confirm("確定要重設名單嗎？這將會清空目前所有學生與作業記錄（已套用的字型/風格保留）。")) {
+                localStorage.removeItem(DATA_KEY);
+                localStorage.removeItem(STUDENT_LIST_KEY);
+                location.reload();
+            }
+        }
+
+        // ===== 學生操作 =====
+        function removeStudent(index) {
+            if (confirm(`確定要移除「${students[index].name}」嗎？`)) {
+                students.splice(index, 1);
+                saveAndRender();
+            }
+        }
+
+        function updateStudentName(index, val) {
+            students[index].name = val.trim() || `學生 ${index + 1}`;
+            localStorage.setItem(STUDENT_LIST_KEY, JSON.stringify(students));
+            renderSummary();
+        }
+
+        // 學生狀態：'' = 在班、'absent' = 請假、'transferred' = 轉學、'empty' = 空號
+        // 後三者皆「不列入清點」（不計分母也不算分子），只差在顯示文字與顏色
+        function setStudentStatus(index, val) {
+            students[index].status = val || '';
+            // 為了相容舊資料，同步維護 absent 欄位（但 isInactive 是新的判斷依據）
+            students[index].absent = (val === 'absent');
+            saveAndRender();
+        }
+        function isInactive(s) {
+            return s.status === 'absent' || s.status === 'transferred' || s.status === 'empty' || s.absent === true;
+        }
+        function inactiveLabel(s) {
+            if (s.status === 'transferred') return '轉學';
+            if (s.status === 'empty') return '空號';
+            return '請假';
+        }
+
+        // ===== 作業操作 =====
+        function addAssignmentColumn() {
+            const input = document.getElementById('newAssignmentName');
+            const name = input.value.trim();
+            if (!name || matrixData.tasks.includes(name)) return;
+            matrixData.tasks.push(name);
+            input.value = '';
+            saveAndRender();
+        }
+
+        function removeAssignment(index) {
+            if (confirm(`刪除作業「${matrixData.tasks[index]}」？`)) {
+                const taskName = matrixData.tasks[index];
+                matrixData.tasks.splice(index, 1);
+                // 順便清掉該作業的所有勾選
+                Object.keys(matrixData.submissions).forEach(k => {
+                    if (k.endsWith('-' + taskName)) delete matrixData.submissions[k];
+                });
+                saveAndRender();
+            }
+        }
+
+        function updateTaskName(index, val) {
+            const newVal = val.trim();
+            const oldVal = matrixData.tasks[index];
+            if (!newVal || newVal === oldVal) return renderMatrix();
+            // 把舊 key 搬到新 key
+            students.forEach(s => {
+                const oldKey = `${s.id}-${oldVal}`;
+                if (matrixData.submissions[oldKey]) {
+                    matrixData.submissions[`${s.id}-${newVal}`] = matrixData.submissions[oldKey];
+                    delete matrixData.submissions[oldKey];
+                }
+            });
+            matrixData.tasks[index] = newVal;
+            saveAndRender();
+        }
+
+        // 一鍵全交：對該作業，所有「未交且非請假」的學生 → 已交
+        function markAllSubmitted(task) {
+            if (!confirm(`將所有未交的學生（請假/轉學/空號除外）標為「已交」？\n（已交、未訂正、缺交的不會動到）`)) return;
+            students.forEach(s => {
+                if (isInactive(s)) return;
+                const key = `${s.id}-${task}`;
+                if (!matrixData.submissions[key]) {
+                    matrixData.submissions[key] = 'submitted';
+                }
+            });
+            // 全班全交時放彩帶
+            const allDone = students.every(s => isInactive(s) || matrixData.submissions[`${s.id}-${task}`] === 'submitted');
+            if (allDone) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+            saveAndRender();
+        }
+
+        // ===== 狀態 popover =====
+        let popoverTarget = null;
+
+        function openStatusPopover(e, studentId, task) {
+            e.stopPropagation();
+            const pop = document.getElementById('statusPopover');
+            popoverTarget = { studentId, task };
+            const rect = e.currentTarget.getBoundingClientRect();
+            // 智慧定位：避免超出右側/下側
+            let left = rect.left;
+            let top = rect.bottom + 4;
+            const popWidth = 290;
+            const popHeight = 56;
+            if (left + popWidth > window.innerWidth - 8) left = window.innerWidth - popWidth - 8;
+            if (top + popHeight > window.innerHeight - 8) top = rect.top - popHeight - 4;
+            if (left < 8) left = 8;
+            if (top < 8) top = 8;
+            pop.style.left = left + 'px';
+            pop.style.top = top + 'px';
+            pop.classList.add('show');
+        }
+
+        function closeStatusPopover() {
+            document.getElementById('statusPopover').classList.remove('show');
+            popoverTarget = null;
+        }
+
+        document.addEventListener('click', (e) => {
+            const pop = document.getElementById('statusPopover');
+            if (!popoverTarget) return;
+            if (e.target.classList.contains('status-opt')) {
+                const newStatus = e.target.getAttribute('data-status');
+                const key = `${popoverTarget.studentId}-${popoverTarget.task}`;
+                if (newStatus) matrixData.submissions[key] = newStatus;
+                else delete matrixData.submissions[key];
+
+                // 滿堂彩
+                const task = popoverTarget.task;
+                const allDone = students.length > 0 && students.every(s =>
+                    isInactive(s) || matrixData.submissions[`${s.id}-${task}`] === 'submitted'
+                );
+                const someoneActuallySubmitted = students.some(s =>
+                    !isInactive(s) && matrixData.submissions[`${s.id}-${task}`] === 'submitted'
+                );
+                if (allDone && someoneActuallySubmitted) {
+                    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                }
+
+                closeStatusPopover();
+                saveAndRender();
+            } else if (!pop.contains(e.target)) {
+                closeStatusPopover();
+            }
+        });
+
+        // ===== 缺交清單 =====
+        function showMissing(task) {
+            const overlay = document.getElementById('missingOverlay');
+            const title = document.getElementById('missingTitle');
+            const list = document.getElementById('missingList');
+
+            title.innerText = `「${task}」狀況一覽`;
+
+            // 分類
+            const submitted = [];
+            const unrevised = [];
+            const missing = [];
+            const notYet = [];
+            const absent = [];
+            const transferred = [];
+            const empty = [];
+            students.forEach(s => {
+                if (s.status === 'transferred') { transferred.push(s); return; }
+                if (s.status === 'empty') { empty.push(s); return; }
+                if (s.status === 'absent' || s.absent) { absent.push(s); return; }
+                const status = matrixData.submissions[`${s.id}-${task}`];
+                if (status === 'submitted') submitted.push(s);
+                else if (status === 'unrevised') unrevised.push(s);
+                else if (status === 'missing') missing.push(s);
+                else notYet.push(s);
+            });
+
+            const section = (label, color, arr) => arr.length === 0 ? '' :
+                `<div class="mb-3">
+                    <div class="text-sm font-bold mb-1" style="color: ${color};">${label}（${arr.length}）</div>
+                    <div class="flex flex-wrap gap-1">${arr.map(s => `<span class="text-sm px-2 py-0.5 rounded border" style="border-color: ${color}40;">${escapeHtml(s.name)}</span>`).join('')}</div>
+                 </div>`;
+
+            list.innerHTML =
+                section('🔴 缺交', '#b91c1c', missing) +
+                section('🟡 未訂正', '#b45309', unrevised) +
+                section('⚪ 未交（尚未標記）', '#64748b', notYet) +
+                section('🟢 已交', '#15803d', submitted) +
+                section('⚪ 請假', '#64748b', absent) +
+                section('🔁 轉學（不列入）', '#991b1b', transferred) +
+                section('· 空號（不列入）', '#475569', empty);
+
+            if (submitted.length + unrevised.length + missing.length + notYet.length === 0) {
+                list.innerHTML += `<div class="text-green-600 font-bold text-center py-4">今日無待清點學生 ✨</div>`;
+            }
+            overlay.classList.add('show');
+        }
+
+        function hideMissing() {
+            document.getElementById('missingOverlay').classList.remove('show');
+        }
+
+        // ===== 模範生：所有作業都「已交」（請假/轉學/空號不算分母也不算分子）=====
+        function isExcellent(student) {
+            if (isInactive(student)) return false;
+            if (matrixData.tasks.length === 0) return false;
+            return matrixData.tasks.every(t => matrixData.submissions[`${student.id}-${t}`] === 'submitted');
+        }
+
+        function resetOnlySubmissions() {
+            if (confirm("將清空所有作業的勾選狀態與「請假」標記（轉學/空號保留）。確定嗎？")) {
+                matrixData.submissions = {};
+                students.forEach(s => {
+                    // 只清「請假」這個臨時狀態，轉學/空號是永久狀態保留
+                    if (s.status === 'absent' || (!s.status && s.absent)) {
+                        s.status = '';
+                        s.absent = false;
+                    }
+                });
+                saveAndRender();
+            }
+        }
+
+        // ===== 字型 / 風格 =====
+        function changeFont(val) {
+            settings.font = val;
+            applySettings();
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        }
+
+        function changeTheme(val) {
+            settings.theme = val;
+            applySettings();
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        }
+
+        function changeBgOpacity(val) {
+            settings.bgOpacity = Number(val);
+            applySettings();
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        }
+
+        function applySettings() {
+            // 字型
+            document.body.classList.remove('font-default', 'font-huninn', 'font-iansui', 'font-zihikai');
+            document.body.classList.add('font-' + settings.font);
+            // 主題
+            document.body.classList.remove('theme-plain', 'theme-ganvas');
+            document.body.classList.add('theme-' + settings.theme);
+            // 背景透明度（套到 CSS 變數）
+            document.body.style.setProperty('--bg-opacity', (settings.bgOpacity / 100).toFixed(2));
+            // 同步下拉選單與滑桿
+            document.getElementById('fontSelect').value = settings.font;
+            document.getElementById('themeSelect').value = settings.theme;
+            const slider = document.getElementById('bgOpacity');
+            const valDisplay = document.getElementById('bgOpacityVal');
+            if (slider) slider.value = settings.bgOpacity;
+            if (valDisplay) valDisplay.textContent = settings.bgOpacity + '%';
+        }
+
+        // ===== 儲存 + 渲染 =====
+        function saveAndRender() {
+            localStorage.setItem(STUDENT_LIST_KEY, JSON.stringify(students));
+            localStorage.setItem(DATA_KEY, JSON.stringify(matrixData));
+            renderMatrix();
+            renderSummary();
+        }
+
+        function renderMatrix() {
+            if (students.length === 0) {
+                document.getElementById('setupOverlay').style.display = 'flex';
+                return;
+            }
+
+            const thead = document.getElementById('tableHead');
+            const tbody = document.getElementById('tableBody');
+
+            // ===== 表頭 =====
+            let h = `<tr><th>姓名 / 座號</th>`;
+            matrixData.tasks.forEach((t, i) => {
+                const safeT = escapeAttr(t);
+                h += `<th class="group px-2 py-2">
+                    <div class="flex flex-col items-center gap-1">
+                        <input type="text" class="task-input" value="${escapeHtml(t)}" onchange="updateTaskName(${i}, this.value)">
+                        <div class="flex gap-1">
+                            <button onclick="markAllSubmitted('${safeT}')" class="task-btn task-btn-allcheck">✓ 一鍵全交</button>
+                            <button onclick="showMissing('${safeT}')" class="task-btn task-btn-missing">未交名單</button>
+                        </div>
+                    </div>
+                    <button onclick="removeAssignment(${i})" class="hidden group-hover:block absolute top-0 right-0 rounded-full w-5 h-5 text-[11px] leading-none" style="background: var(--border-strong); color: white;" title="刪除作業">×</button>
+                </th>`;
+            });
+            thead.innerHTML = h + `</tr>`;
+
+            // ===== 表身 =====
+            let b = '';
+            students.forEach((s, index) => {
+                const excellent = isExcellent(s);
+                const inactive = isInactive(s);
+                const rowClass = inactive ? 'row-absent' : '';
+                // 狀態下拉選單：空 / absent / transferred / empty
+                const cur = s.status || (s.absent ? 'absent' : '');
+                const toggleClass = cur === 'absent' ? 'is-absent'
+                                  : cur === 'transferred' ? 'is-transferred'
+                                  : cur === 'empty' ? 'is-empty' : '';
+                b += `<tr class="${rowClass}">
+                    <td>
+                        <div class="name-cell-wrapper">
+                            <button onclick="removeStudent(${index})" class="delete-student-btn" title="移除此人">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                            </button>
+                            <input type="text" class="name-input" value="${escapeAttr(s.name)}" onchange="updateStudentName(${index}, this.value)">
+                            <select class="absent-toggle ${toggleClass}" onchange="setStudentStatus(${index}, this.value)" title="標記學生狀態">
+                                <option value="" ${cur === '' ? 'selected' : ''}>在班</option>
+                                <option value="absent" ${cur === 'absent' ? 'selected' : ''}>請假</option>
+                                <option value="transferred" ${cur === 'transferred' ? 'selected' : ''}>轉學</option>
+                                <option value="empty" ${cur === 'empty' ? 'selected' : ''}>空號</option>
+                            </select>
+                            ${excellent ? '<span class="badge-excellent">👍 全交</span>' : ''}
+                        </div>
+                    </td>`;
+                matrixData.tasks.forEach(t => {
+                    const safeT = escapeAttr(t);
+                    let label, statusClass;
+                    if (inactive) {
+                        label = inactiveLabel(s);
+                        statusClass = 'status-absent';
+                    } else {
+                        const status = matrixData.submissions[`${s.id}-${t}`];
+                        if (status === 'submitted') { label = '已交'; statusClass = 'status-submitted'; }
+                        else if (status === 'unrevised') { label = '未訂正'; statusClass = 'status-unrevised'; }
+                        else if (status === 'missing') { label = '缺交'; statusClass = 'status-missing'; }
+                        else { label = '·'; statusClass = 'status-empty'; }
+                    }
+                    const onClick = inactive
+                        ? `event.stopPropagation()`
+                        : `openStatusPopover(event, ${s.id}, '${safeT}')`;
+                    b += `<td class="check-cell ${statusClass}" onclick="${onClick}">
+                            <div class="status-text">${label}</div>
+                         </td>`;
+                });
+                b += `</tr>`;
+            });
+            tbody.innerHTML = b;
+        }
+
+        function renderSummary() {
+            const container = document.getElementById('summaryList');
+            container.innerHTML = '';
+            if (students.length === 0) return;
+
+            const activeCount = students.filter(s => !isInactive(s)).length;
+
+            matrixData.tasks.forEach(t => {
+                let submitted = 0, unrevised = 0, missing = 0;
+                students.forEach(s => {
+                    if (isInactive(s)) return;
+                    const st = matrixData.submissions[`${s.id}-${t}`];
+                    if (st === 'submitted') submitted++;
+                    else if (st === 'unrevised') unrevised++;
+                    else if (st === 'missing') missing++;
+                });
+                const isAll = submitted > 0 && submitted === activeCount;
+                const span = document.createElement('span');
+                span.className = 'px-2 py-1 rounded text-[11px] font-bold border shadow-sm';
+                if (isAll) {
+                    span.style.background = 'var(--status-submitted-bg)';
+                    span.style.color = 'var(--status-submitted-text)';
+                    span.style.borderColor = 'var(--status-submitted-text)';
+                } else {
+                    span.style.background = 'var(--bg-card)';
+                    span.style.color = 'var(--text-muted)';
+                    span.style.borderColor = 'var(--border-soft)';
+                }
+                let extra = '';
+                if (unrevised > 0) extra += ` <span style="color: var(--status-unrevised-text);">📝${unrevised}</span>`;
+                if (missing > 0) extra += ` <span style="color: var(--status-missing-text);">❌${missing}</span>`;
+                span.innerHTML = `${escapeHtml(t)}: ${submitted}/${activeCount}${extra}`;
+                container.appendChild(span);
+            });
+
+            // 各種「不列入清點」狀態的標示
+            const absentList = students.filter(s => s.status === 'absent' || (!s.status && s.absent)).map(s => s.name);
+            const transferredList = students.filter(s => s.status === 'transferred').map(s => s.name);
+            const emptyList = students.filter(s => s.status === 'empty').map(s => s.name);
+
+            const addBadge = (text, bg, color, border) => {
+                const span = document.createElement('span');
+                span.className = 'px-2 py-1 rounded text-[11px] font-bold border';
+                span.style.background = bg;
+                span.style.color = color;
+                span.style.borderColor = border;
+                span.innerText = text;
+                container.appendChild(span);
+            };
+
+            if (absentList.length > 0) {
+                addBadge(`📌 今日請假：${absentList.join('、')}`, 'var(--status-absent-bg)', 'var(--status-absent-text)', 'var(--border-strong)');
+            }
+            if (transferredList.length > 0) {
+                addBadge(`🔁 轉學：${transferredList.join('、')}`, '#fee2e2', '#991b1b', '#fca5a5');
+            }
+            if (emptyList.length > 0) {
+                addBadge(`· 空號：${emptyList.join('、')}`, '#f1f5f9', '#475569', '#94a3b8');
+            }
+        }
+
+        // ===== 安全跳脫 =====
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+            }[c]));
+        }
+        function escapeAttr(s) {
+            // 給 onclick 字串內的單引號參數用
+            return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        // ===== 顯示今日日期 =====
+        function renderTodayDate() {
+            const el = document.getElementById('todayDate');
+            if (!el) return;
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            el.textContent = `${y}/${m}/${d} (${weekdays[now.getDay()]})`;
+        }
+
+        // ===== 啟動 =====
+        window.addEventListener('load', () => {
+            applySettings();
+            renderTodayDate();
+            renderMatrix();
+            renderSummary();
+        });
+    </script>
+</body>
+</html>
