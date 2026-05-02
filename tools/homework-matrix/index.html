@@ -868,7 +868,7 @@
         <header class="mb-2 flex justify-between items-center px-3 py-2 rounded-lg shadow-sm" style="background: var(--header-bg-color, var(--bg-card)); border: 1px solid var(--border-soft);">
             <div class="header-row">
                 <h1 class="text-base font-bold" style="color: var(--text-main);">📋 作業清點矩陣</h1>
-                <select id="dateSelect" onchange="switchDate(this.value)" title="切換日期"></select>
+                <select id="dateSelect" onchange="onDateSelectChange(this.value)" title="切換日期"></select>
                 <button onclick="goToToday()" class="text-[10px] border px-1.5 py-0.5 rounded hover:opacity-80" style="color: var(--text-muted); border-color: var(--border-soft);" title="跳到今天">今天</button>
                 <span id="syncStatusPill" class="sync-status-pill" onclick="showSyncDialog()" title="點擊管理同步">
                     <span class="dot"></span><span id="syncStatusText">離線</span>
@@ -980,8 +980,10 @@
                 <div id="copyDayDesc" style="color: var(--text-muted); font-size: 0.95rem;"></div>
                 <div class="task-preview" id="copyDayPreview"></div>
                 <div class="btn-row">
-                    <button class="btn-copy" onclick="confirmCopyFromPrior(true)">📋 複製作業項目</button>
-                    <button class="btn-blank" onclick="confirmCopyFromPrior(false)">⚪ 從空白開始</button>
+                    <button class="btn-copy" onclick="confirmCopyFromPrior('copy')">📋 複製作業項目</button>
+                    <button class="btn-blank" onclick="confirmCopyFromPrior('blank')">⚪ 從空白開始</button>
+                    <button class="btn-blank" id="copyDayBtnView" onclick="confirmCopyFromPrior('view')" style="display:none;">👁 只切過去檢視</button>
+                    <button class="btn-blank" onclick="confirmCopyFromPrior('cancel')">✕ 取消</button>
                 </div>
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
                     📌 只複製「作業項目名稱」，繳交狀態會清空。複製完可手動修改名稱。
@@ -1648,49 +1650,126 @@
             }
         }
 
-        // ===== 複製前一日對話框 =====
+        // ===== 複製某一日對話框 =====
+        // mode: 'auto' = 自動跳（今天空白）只給「複製/空白/取消」
+        //       'pick' = 手動選舊日期，給「複製到今天/只切過去檢視/取消」
+        let pendingDialogMode = 'auto';
+
         function offerCopyFromPriorDay(targetDate) {
             const priorDates = Object.keys(dayRecords)
                 .filter(d => d < targetDate && (dayRecords[d].tasks || []).length > 0)
                 .sort();
             if (priorDates.length === 0) {
-                // 沒有歷史可複製 → 直接建空白並切過去
                 ensureDayRecord(targetDate);
                 switchDate(targetDate);
                 return;
             }
             const lastDate = priorDates[priorDates.length - 1];
-            const lastTasks = dayRecords[lastDate].tasks || [];
+            openCopyDialog({
+                mode: 'auto',
+                targetDate: targetDate,
+                sourceDate: lastDate
+            });
+        }
 
-            // 填對話框內容
-            document.getElementById('copyDayTitle').innerText = `📅 開啟 ${fmtDateLabel(targetDate, {full:true})}`;
-            document.getElementById('copyDayDesc').innerText = `要從 ${fmtDateLabel(lastDate, {full:true})} 複製作業項目嗎？`;
-            const preview = document.getElementById('copyDayPreview');
-            preview.innerHTML = lastTasks.map(t => `<span style="display:inline-block; background:white; border:1px solid var(--border-soft); padding:0.2rem 0.55rem; border-radius:0.4rem; margin:0.15rem;">${escapeHtml(t)}</span>`).join('');
+        // 老師從下拉選了一個過去且有作業的日期 → 詢問要不要複製到今天
+        function offerCopyFromPickedDay(sourceDate) {
+            const today = todayStr();
+            openCopyDialog({
+                mode: 'pick',
+                targetDate: today,
+                sourceDate: sourceDate
+            });
+        }
 
-            // 紀錄當下要建立的日期與要複製的來源
+        function openCopyDialog({ mode, targetDate, sourceDate }) {
+            const sourceTasks = (dayRecords[sourceDate] && dayRecords[sourceDate].tasks) || [];
+            pendingDialogMode = mode;
             pendingNewDate = targetDate;
-            pendingSourceDate = lastDate;
+            pendingSourceDate = sourceDate;
+
+            const title = document.getElementById('copyDayTitle');
+            const desc = document.getElementById('copyDayDesc');
+            const viewBtn = document.getElementById('copyDayBtnView');
+
+            if (mode === 'pick') {
+                title.innerText = `📋 把 ${fmtDateLabel(sourceDate, {full:true})} 的作業複製到今天？`;
+                desc.innerText = `今天（${fmtDateLabel(targetDate, {full:true})}）將會「附加」以下作業項目。`;
+                viewBtn.style.display = '';
+            } else {
+                title.innerText = `📅 開啟 ${fmtDateLabel(targetDate, {full:true})}`;
+                desc.innerText = `要從 ${fmtDateLabel(sourceDate, {full:true})} 複製作業項目嗎？`;
+                viewBtn.style.display = 'none';
+            }
+            const preview = document.getElementById('copyDayPreview');
+            preview.innerHTML = sourceTasks.map(t => `<span style="display:inline-block; background:white; border:1px solid var(--border-soft); padding:0.2rem 0.55rem; border-radius:0.4rem; margin:0.15rem;">${escapeHtml(t)}</span>`).join('') || '<span style="color:var(--text-muted);">（該日無作業項目）</span>';
+
             document.getElementById('copyDayOverlay').classList.add('show');
         }
 
         let pendingNewDate = null;
         let pendingSourceDate = null;
 
-        function confirmCopyFromPrior(doCopy) {
+        function confirmCopyFromPrior(action) {
             const target = pendingNewDate;
             const source = pendingSourceDate;
+            const mode = pendingDialogMode;
             document.getElementById('copyDayOverlay').classList.remove('show');
-            if (!target) return;
+            pendingNewDate = null;
+            pendingSourceDate = null;
+
+            if (action === 'cancel') {
+                // 對話框是手動觸發 → 把下拉拉回原先 currentDate
+                if (mode === 'pick') {
+                    const sel = document.getElementById('dateSelect');
+                    if (sel) sel.value = currentDate;
+                }
+                return;
+            }
+            if (action === 'view') {
+                // 只切過去看，不動今天
+                switchDate(source);
+                return;
+            }
+            if (mode === 'pick') {
+                // 把舊日的 tasks 「附加」到今天現有作業後面（去重）
+                const today = target;
+                ensureDayRecord(today);
+                const srcTasks = ((dayRecords[source] && dayRecords[source].tasks) || []);
+                if (action === 'copy') {
+                    const existing = dayRecords[today].tasks || [];
+                    const merged = [...existing];
+                    srcTasks.forEach(t => { if (!merged.includes(t)) merged.push(t); });
+                    dayRecords[today].tasks = merged;
+                    // submissions 不動：保留今天已有的勾選
+                }
+                // 'blank' 在 pick 模式下不會出現（按鈕沒顯示），保險起見也走切換到今天
+                // 把下拉拉回今天並切過去
+                const sel = document.getElementById('dateSelect');
+                if (sel) sel.value = today;
+                switchDate(today);
+                return;
+            }
+            // mode === 'auto'：原邏輯（建立新的 target 日）
             ensureDayRecord(target);
-            if (doCopy && source && dayRecords[source]) {
-                // 只複製 tasks，不複製 submissions
+            if (action === 'copy' && source && dayRecords[source]) {
                 dayRecords[target].tasks = [...(dayRecords[source].tasks || [])];
                 dayRecords[target].submissions = {};
             }
-            pendingNewDate = null;
-            pendingSourceDate = null;
             switchDate(target);
+        }
+
+        // 日期下拉變更：判斷是否要跳「複製到今天」對話框
+        function onDateSelectChange(newDate) {
+            const today = todayStr();
+            // 切到「過去且有作業」的日期，且現在停在今天 → 詢問複製
+            if (newDate < today
+                && dayRecords[newDate]
+                && (dayRecords[newDate].tasks || []).length > 0) {
+                offerCopyFromPickedDay(newDate);
+                return;
+            }
+            switchDate(newDate);
         }
 
         // ===== 日期下拉列 =====
