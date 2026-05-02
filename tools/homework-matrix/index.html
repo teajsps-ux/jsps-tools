@@ -540,6 +540,146 @@
             font-weight: 900;
         }
 
+        /* ===== 雲端同步 ===== */
+        .sync-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            border: 1px solid var(--border-soft);
+            background: var(--bg-row-alt);
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+        .sync-status-pill .dot {
+            width: 8px; height: 8px; border-radius: 9999px; background: #94a3b8;
+        }
+        .sync-status-pill.online { color: #15803d; border-color: #86efac; background: #dcfce7; }
+        .sync-status-pill.online .dot { background: #15803d; animation: syncPulse 2s infinite; }
+        .sync-status-pill.connecting { color: #b45309; border-color: #fde68a; background: #fef3c7; }
+        .sync-status-pill.connecting .dot { background: #d97706; animation: syncPulse 0.9s infinite; }
+        .sync-status-pill.error { color: #b91c1c; border-color: #fca5a5; background: #fee2e2; }
+        .sync-status-pill.error .dot { background: #b91c1c; }
+        @keyframes syncPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+        #syncOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 105;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #syncOverlay.show { display: flex; }
+        #syncOverlay .panel {
+            background: var(--bg-card);
+            border: 2px solid var(--border-soft);
+            border-radius: 1rem;
+            padding: 1.5rem 1.75rem;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+        #syncOverlay h2 {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+        #syncOverlay .desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+        .sync-room-code {
+            font-family: ui-monospace, "Courier New", monospace;
+            font-size: 1.85rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            background: var(--bg-row-alt);
+            padding: 0.55rem 1rem;
+            border-radius: 0.5rem;
+            border: 2px solid var(--border-strong);
+            text-align: center;
+            color: var(--text-main);
+            margin: 0.5rem 0;
+        }
+        .sync-qr {
+            display: block;
+            margin: 0.5rem auto;
+            width: 170px;
+            height: 170px;
+            background: white;
+            padding: 6px;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-soft);
+        }
+        .sync-btn-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .sync-btn-row button {
+            flex: 1 1 140px;
+            padding: 0.65rem 0.8rem;
+            border-radius: 0.55rem;
+            font-weight: 700;
+            border: 2px solid;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .sync-btn-create { background: var(--accent); color: white; border-color: var(--accent); }
+        .sync-btn-create:hover { filter: brightness(1.1); }
+        .sync-btn-join { background: white; color: var(--text-main); border-color: var(--border-strong); }
+        .sync-btn-join:hover { background: var(--bg-row-alt); }
+        .sync-btn-leave { background: #fee2e2; color: #991b1b; border-color: #b91c1c; }
+        .sync-btn-leave:hover { background: #fecaca; }
+        .sync-btn-close { background: var(--text-muted); color: white; border-color: var(--text-muted); }
+        .sync-btn-close:hover { filter: brightness(1.1); }
+        .sync-input {
+            width: 100%;
+            padding: 0.55rem;
+            font-size: 1.1rem;
+            font-family: ui-monospace, monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            text-align: center;
+            border: 2px solid var(--border-soft);
+            border-radius: 0.5rem;
+            margin-bottom: 0.4rem;
+            box-sizing: border-box;
+        }
+        .sync-error {
+            color: #b91c1c;
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            border-radius: 0.4rem;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
+        }
+        .sync-section { margin-bottom: 0.85rem; }
+        .sync-divider {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 0.85rem 0;
+            position: relative;
+        }
+        .sync-divider::before,
+        .sync-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: var(--border-soft);
+        }
+        .sync-divider::before { left: 0; }
+        .sync-divider::after { right: 0; }
+
         /* ===== 日期切換 ===== */
         #dateSelect {
             font-size: 12px;
@@ -730,6 +870,9 @@
                 <h1 class="text-base font-bold" style="color: var(--text-main);">📋 作業清點矩陣</h1>
                 <select id="dateSelect" onchange="switchDate(this.value)" title="切換日期"></select>
                 <button onclick="goToToday()" class="text-[10px] border px-1.5 py-0.5 rounded hover:opacity-80" style="color: var(--text-muted); border-color: var(--border-soft);" title="跳到今天">今天</button>
+                <span id="syncStatusPill" class="sync-status-pill" onclick="showSyncDialog()" title="點擊管理同步">
+                    <span class="dot"></span><span id="syncStatusText">離線</span>
+                </span>
                 <button onclick="clearAllData()" class="text-[10px] border px-1.5 py-0.5 rounded hover:opacity-80" style="color: #dc2626; border-color: #fecaca;">重設名單</button>
             </div>
 
@@ -767,6 +910,67 @@
         <div id="pastDayBanner" class="past-day-banner" style="display:none;">
             <span id="pastDayBannerText">⚠️ 你正在看／編輯過去的紀錄</span>
             <button onclick="goToToday()">回到今天 →</button>
+        </div>
+
+        <!-- 雲端同步對話框 -->
+        <div id="syncOverlay" onclick="if(event.target===this)hideSyncDialog()">
+            <div class="panel">
+                <div id="syncOfflineView">
+                    <h2>☁️ 雲端同步</h2>
+                    <p class="desc">讓電腦、平板、觸控電視之間的繳交狀態即時連動。</p>
+
+                    <div class="sync-section">
+                        <button class="sync-btn-create" style="width:100%; padding:0.75rem; border-radius:0.55rem; font-weight:700; border:2px solid var(--accent); cursor:pointer; font-size:1rem;" onclick="syncCreateRoom()">
+                            🏠 建立新同步房間
+                        </button>
+                        <p class="text-[11px]" style="color: var(--text-muted); margin-top: 0.4rem;">
+                            把「目前的所有資料（學生、所有日期、設定）」上傳成新房間。
+                        </p>
+                    </div>
+
+                    <div class="sync-divider">或</div>
+
+                    <div class="sync-section">
+                        <label class="text-xs font-bold block mb-1" style="color: var(--text-main);">輸入既有房號加入</label>
+                        <input id="syncJoinCode" class="sync-input" placeholder="ABC123" maxlength="6">
+                        <button class="sync-btn-join" style="width:100%;" onclick="syncJoinRoom()">
+                            🔗 加入這個房間
+                        </button>
+                        <p class="text-[11px]" style="color: var(--text-muted); margin-top: 0.4rem;">
+                            ⚠️ 加入後本機現有的紀錄會被房間資料覆蓋。
+                        </p>
+                    </div>
+
+                    <div id="syncErrorMsg" style="display:none;" class="sync-error"></div>
+
+                    <div class="sync-btn-row" style="margin-top: 0.85rem;">
+                        <button class="sync-btn-close" onclick="hideSyncDialog()">關閉</button>
+                    </div>
+                </div>
+
+                <div id="syncOnlineView" style="display:none;">
+                    <h2>🟢 同步中</h2>
+                    <p class="desc">其他裝置可以掃 QR 或輸入房號加入。</p>
+
+                    <div class="sync-section" style="text-align:center;">
+                        <div class="sync-room-code" id="syncRoomCode">——————</div>
+                        <img id="syncQrImg" class="sync-qr" alt="QR Code">
+                        <p class="text-[11px]" style="color: var(--text-muted);">
+                            或直接打開：<br>
+                            <span id="syncJoinUrl" style="word-break:break-all; font-family:monospace;"></span>
+                        </p>
+                    </div>
+
+                    <div id="syncStats" class="text-xs" style="color: var(--text-muted); padding-top: 0.5rem; border-top: 1px dashed var(--border-soft);">
+                        最後同步：<span id="syncLastWriteAt">—</span>
+                    </div>
+
+                    <div class="sync-btn-row">
+                        <button class="sync-btn-leave" onclick="syncLeaveRoom()">離開房間</button>
+                        <button class="sync-btn-close" onclick="hideSyncDialog()">關閉</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- 複製前一日對話框 -->
@@ -1269,6 +1473,9 @@
         }
 
         // ===== 儲存 + 渲染 =====
+        // 旗標：true 表示這次 save 來自雲端推送，不要再回推到雲端避免循環
+        let _suppressCloudWrite = false;
+
         function saveAndRender() {
             localStorage.setItem(STUDENT_LIST_KEY, JSON.stringify(students));
             // 確保 matrixData 已掛回 dayRecords[currentDate]（防止外部把 matrixData 重新指派）
@@ -1279,6 +1486,137 @@
             renderPastDayBanner();
             renderMatrix();
             renderSummary();
+
+            // 通知雲端模組（如果在同步中且不是雲端推下來的更新）
+            if (!_suppressCloudWrite && window.__hwCloudSync && window.__hwCloudSync.onLocalChange) {
+                window.__hwCloudSync.onLocalChange({
+                    students,
+                    settings,
+                    dayRecords,
+                    currentDate
+                });
+            }
+        }
+
+        // 雲端模組要把遠端資料套回本機時呼叫這個
+        window.__hwApplyRemoteState = function(remote) {
+            _suppressCloudWrite = true;
+            try {
+                if (remote.students) students = remote.students;
+                if (remote.settings) {
+                    settings = remote.settings;
+                    if (settings.bgOpacity === undefined) settings.bgOpacity = 45;
+                    applySettings();
+                }
+                if (remote.dayRecords) {
+                    dayRecords = remote.dayRecords;
+                    // 確認 currentDate 還存在；若被刪除，就跳到最新一天
+                    if (!dayRecords[currentDate]) {
+                        const sorted = Object.keys(dayRecords).sort();
+                        currentDate = sorted[sorted.length - 1] || todayStr();
+                        ensureDayRecord(currentDate);
+                        localStorage.setItem(CURRENT_DATE_KEY, currentDate);
+                    }
+                    matrixData = dayRecords[currentDate];
+                }
+                saveAndRender();
+            } finally {
+                _suppressCloudWrite = false;
+            }
+        };
+
+        // 雲端模組同步狀態變化時更新表頭 pill
+        window.__hwUpdateSyncBadge = function(state) {
+            const pill = document.getElementById('syncStatusPill');
+            const text = document.getElementById('syncStatusText');
+            if (!pill || !text) return;
+            pill.classList.remove('online', 'connecting', 'error');
+            if (state.mode === 'syncing') {
+                pill.classList.add('online');
+                text.innerText = state.code ? `同步中 ${state.code}` : '同步中';
+            } else if (state.mode === 'connecting') {
+                pill.classList.add('connecting');
+                text.innerText = '連線中…';
+            } else if (state.mode === 'error') {
+                pill.classList.add('error');
+                text.innerText = '連線錯誤';
+            } else {
+                text.innerText = '離線';
+            }
+        };
+
+        // ===== 同步對話框（UI 部分，邏輯交給雲端模組） =====
+        function showSyncDialog() {
+            const overlay = document.getElementById('syncOverlay');
+            const offlineView = document.getElementById('syncOfflineView');
+            const onlineView = document.getElementById('syncOnlineView');
+            const errMsg = document.getElementById('syncErrorMsg');
+            errMsg.style.display = 'none';
+
+            const state = window.__hwCloudSync ? window.__hwCloudSync.getState() : { mode: 'offline' };
+            if (state.mode === 'syncing') {
+                offlineView.style.display = 'none';
+                onlineView.style.display = 'block';
+                document.getElementById('syncRoomCode').innerText = state.code;
+                const url = location.origin + location.pathname + '?class=' + state.code;
+                document.getElementById('syncJoinUrl').innerText = url;
+                document.getElementById('syncQrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' + encodeURIComponent(url);
+                document.getElementById('syncLastWriteAt').innerText = state.lastWriteAt || '—';
+            } else {
+                offlineView.style.display = 'block';
+                onlineView.style.display = 'none';
+            }
+            overlay.classList.add('show');
+        }
+
+        function hideSyncDialog() {
+            document.getElementById('syncOverlay').classList.remove('show');
+        }
+
+        function syncCreateRoom() {
+            const errMsg = document.getElementById('syncErrorMsg');
+            errMsg.style.display = 'none';
+            if (!window.__hwCloudSync) {
+                errMsg.innerText = '雲端模組尚未載入，稍候再試。';
+                errMsg.style.display = 'block';
+                return;
+            }
+            window.__hwCloudSync.createRoom().then(() => {
+                showSyncDialog(); // 重新整理對話框
+            }).catch(err => {
+                errMsg.innerText = '建立失敗：' + (err.message || err);
+                errMsg.style.display = 'block';
+            });
+        }
+
+        function syncJoinRoom() {
+            const errMsg = document.getElementById('syncErrorMsg');
+            errMsg.style.display = 'none';
+            const code = (document.getElementById('syncJoinCode').value || '').trim().toUpperCase();
+            if (code.length !== 6) {
+                errMsg.innerText = '房號必須是 6 個字。';
+                errMsg.style.display = 'block';
+                return;
+            }
+            if (!window.__hwCloudSync) {
+                errMsg.innerText = '雲端模組尚未載入，稍候再試。';
+                errMsg.style.display = 'block';
+                return;
+            }
+            if (!confirm(`加入房間 ${code} 後，本機現有的紀錄會被覆蓋。確定要加入嗎？`)) return;
+            window.__hwCloudSync.joinRoom(code).then(() => {
+                showSyncDialog();
+            }).catch(err => {
+                errMsg.innerText = '加入失敗：' + (err.message || err);
+                errMsg.style.display = 'block';
+            });
+        }
+
+        function syncLeaveRoom() {
+            if (!window.__hwCloudSync) return;
+            if (!confirm('離開後不再即時同步，本機資料保留。確定要離開房間嗎？')) return;
+            window.__hwCloudSync.leaveRoom();
+            hideSyncDialog();
         }
 
         // ===== 日期切換 =====
@@ -1567,6 +1905,298 @@
             renderMatrix();
             renderSummary();
         });
+    </script>
+
+    <!-- ============================================================ -->
+    <!-- 雲端同步模組（jsps-tools-sync Firebase）                          -->
+    <!-- ============================================================ -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import {
+            getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc,
+            collection, serverTimestamp, onSnapshot
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0lSykngwrK5exy1rxD4TZ96RqeVD4x9U",
+            authDomain: "jsps-tools-sync.firebaseapp.com",
+            projectId: "jsps-tools-sync",
+            storageBucket: "jsps-tools-sync.firebasestorage.app",
+            messagingSenderId: "435781850232",
+            appId: "1:435781850232:web:bedbf1e1cd942e972b898d"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const fdb = getFirestore(app);
+
+        const ROOM_COL = 'homework-matrix-rooms';
+        const ROOM_CODE_KEY = 'classMatrix_RoomCode_V11';
+
+        // 等匿名登入完成
+        let authReady = new Promise(resolve => {
+            onAuthStateChanged(auth, u => { if (u) resolve(u); });
+        });
+        signInAnonymously(auth).catch(err => {
+            console.error('[hw sync] 匿名登入失敗', err.code, err.message);
+        });
+        // 暴露給診斷用
+        window.__hwAuth = auth;
+
+        // 房號工具（與 word-search 同邏輯）
+        function makeRoomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let s = '';
+            for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+            return s;
+        }
+        function metaRef(code) { return doc(fdb, ROOM_COL, code); }
+        function dayRef(code, date) { return doc(fdb, ROOM_COL, code, 'days', date); }
+        function daysCol(code) { return collection(fdb, ROOM_COL, code, 'days'); }
+
+        // 內部狀態
+        const state = {
+            mode: 'offline',         // 'offline' | 'connecting' | 'syncing' | 'error'
+            code: null,
+            unsubMeta: null,
+            unsubDays: null,
+            lastWriteAt: null,
+            writeTimer: null,
+            pendingPush: null
+        };
+
+        function pushBadge() {
+            if (window.__hwUpdateSyncBadge) {
+                window.__hwUpdateSyncBadge({
+                    mode: state.mode,
+                    code: state.code,
+                    lastWriteAt: state.lastWriteAt
+                });
+            }
+        }
+
+        // 寫入 debounce：500ms 內合併
+        function scheduleWrite(localState) {
+            state.pendingPush = localState;
+            if (state.writeTimer) return;
+            state.writeTimer = setTimeout(async () => {
+                const snapshot = state.pendingPush;
+                state.pendingPush = null;
+                state.writeTimer = null;
+                if (!snapshot || state.mode !== 'syncing' || !state.code) return;
+                try {
+                    await pushAll(state.code, snapshot);
+                    state.lastWriteAt = new Date().toLocaleTimeString();
+                    pushBadge();
+                } catch (e) {
+                    console.error('雲端寫入失敗', e);
+                }
+            }, 500);
+        }
+
+        async function pushAll(code, s) {
+            // meta：學生 + 設定
+            await setDoc(metaRef(code), {
+                students: s.students || [],
+                settings: s.settings || {},
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+            // 每天的紀錄
+            const days = s.dayRecords || {};
+            const tasks = Object.keys(days).map(date =>
+                setDoc(dayRef(code, date), {
+                    tasks: days[date].tasks || [],
+                    submissions: days[date].submissions || {},
+                    updatedAt: serverTimestamp()
+                })
+            );
+            await Promise.all(tasks);
+        }
+
+        // 把房間整體拉下來
+        async function fetchRoom(code) {
+            const metaSnap = await getDoc(metaRef(code));
+            if (!metaSnap.exists()) throw new Error('找不到房號 ' + code);
+            const meta = metaSnap.data();
+            const daysSnap = await getDocs(daysCol(code));
+            const dayRecords = {};
+            daysSnap.forEach(d => {
+                dayRecords[d.id] = {
+                    tasks: d.data().tasks || [],
+                    submissions: d.data().submissions || {}
+                };
+            });
+            return {
+                students: meta.students || [],
+                settings: meta.settings || {},
+                dayRecords
+            };
+        }
+
+        // 訂閱遠端變化
+        function subscribe(code) {
+            // meta 變化（students、settings）
+            state.unsubMeta = onSnapshot(metaRef(code), snap => {
+                if (!snap.exists()) return;
+                const data = snap.data();
+                window.__hwApplyRemoteState && window.__hwApplyRemoteState({
+                    students: data.students || [],
+                    settings: data.settings || undefined
+                });
+            }, err => {
+                console.error('meta 監聽錯誤', err);
+                state.mode = 'error';
+                pushBadge();
+            });
+            // 所有日子變化
+            state.unsubDays = onSnapshot(daysCol(code), snap => {
+                const dayRecords = {};
+                snap.forEach(d => {
+                    dayRecords[d.id] = {
+                        tasks: d.data().tasks || [],
+                        submissions: d.data().submissions || {}
+                    };
+                });
+                window.__hwApplyRemoteState && window.__hwApplyRemoteState({ dayRecords });
+            }, err => {
+                console.error('days 監聽錯誤', err);
+                state.mode = 'error';
+                pushBadge();
+            });
+        }
+
+        function unsubscribeAll() {
+            if (state.unsubMeta) { state.unsubMeta(); state.unsubMeta = null; }
+            if (state.unsubDays) { state.unsubDays(); state.unsubDays = null; }
+        }
+
+        // ===== 對外 API =====
+        async function createRoom() {
+            await authReady;
+            state.mode = 'connecting';
+            pushBadge();
+            // 嘗試 5 次避免撞號
+            for (let attempt = 0; attempt < 5; attempt++) {
+                const code = makeRoomCode();
+                const ref = metaRef(code);
+                const existing = await getDoc(ref);
+                if (existing.exists()) continue;
+
+                // 把目前本機資料當作初始上傳
+                const s = readLocalSnapshot();
+                await setDoc(ref, {
+                    students: s.students || [],
+                    settings: s.settings || {},
+                    ownerUid: auth.currentUser ? auth.currentUser.uid : null,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+                // 上傳每日紀錄
+                const days = s.dayRecords || {};
+                await Promise.all(Object.keys(days).map(d =>
+                    setDoc(dayRef(code, d), {
+                        tasks: days[d].tasks || [],
+                        submissions: days[d].submissions || {},
+                        updatedAt: serverTimestamp()
+                    })
+                ));
+
+                state.code = code;
+                state.mode = 'syncing';
+                state.lastWriteAt = new Date().toLocaleTimeString();
+                localStorage.setItem(ROOM_CODE_KEY, code);
+                subscribe(code);
+                pushBadge();
+                return code;
+            }
+            state.mode = 'offline';
+            pushBadge();
+            throw new Error('房號產生失敗，請重試');
+        }
+
+        async function joinRoom(code) {
+            await authReady;
+            code = String(code || '').toUpperCase().trim();
+            state.mode = 'connecting';
+            pushBadge();
+            try {
+                const remote = await fetchRoom(code);
+                // 用遠端覆蓋本機
+                window.__hwApplyRemoteState && window.__hwApplyRemoteState(remote);
+                state.code = code;
+                state.mode = 'syncing';
+                state.lastWriteAt = new Date().toLocaleTimeString();
+                localStorage.setItem(ROOM_CODE_KEY, code);
+                subscribe(code);
+                pushBadge();
+            } catch (e) {
+                state.mode = 'offline';
+                pushBadge();
+                throw e;
+            }
+        }
+
+        function leaveRoom() {
+            unsubscribeAll();
+            state.code = null;
+            state.mode = 'offline';
+            state.lastWriteAt = null;
+            localStorage.removeItem(ROOM_CODE_KEY);
+            pushBadge();
+        }
+
+        function readLocalSnapshot() {
+            // 從 main script 讀目前狀態
+            return {
+                students: JSON.parse(localStorage.getItem('classMatrix_Students_V10')) || [],
+                settings: JSON.parse(localStorage.getItem('classMatrix_Settings_V10')) || {},
+                dayRecords: JSON.parse(localStorage.getItem('classMatrix_Days_V11')) || {}
+            };
+        }
+
+        // 暴露給主腳本
+        window.__hwCloudSync = {
+            getState() {
+                return { mode: state.mode, code: state.code, lastWriteAt: state.lastWriteAt };
+            },
+            createRoom,
+            joinRoom,
+            leaveRoom,
+            onLocalChange(s) {
+                if (state.mode === 'syncing') scheduleWrite(s);
+            }
+        };
+
+        // 自動連線：URL ?class=XXXXXX 優先，否則用上次儲存的房號
+        async function autoConnect() {
+            await authReady;
+            const params = new URLSearchParams(location.search);
+            const fromUrl = (params.get('class') || '').toUpperCase().trim();
+            const fromStorage = localStorage.getItem(ROOM_CODE_KEY);
+            const code = fromUrl || fromStorage;
+            if (!code || code.length !== 6) return;
+            try {
+                if (fromUrl) {
+                    // URL 加入：覆蓋本機
+                    await joinRoom(code);
+                } else {
+                    // 上次同步過的房間：訂閱繼續同步（不覆蓋本機）
+                    state.code = code;
+                    state.mode = 'syncing';
+                    state.lastWriteAt = new Date().toLocaleTimeString();
+                    subscribe(code);
+                    pushBadge();
+                    // 啟動時用本機資料 push 一次（防 last-write 被別人覆蓋的情況；
+                    // 若雲端較新，下一輪 onSnapshot 會立即推回本機）
+                    scheduleWrite(readLocalSnapshot());
+                }
+            } catch (e) {
+                console.error('自動連線失敗', e);
+                state.mode = 'offline';
+                pushBadge();
+            }
+        }
+        autoConnect();
     </script>
 </body>
 </html>
