@@ -540,6 +540,105 @@
             font-weight: 900;
         }
 
+        /* ===== 日期切換 ===== */
+        #dateSelect {
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid var(--border-soft);
+            background: white;
+            border-radius: 0.4rem;
+            padding: 2px 4px;
+            color: var(--text-main);
+            cursor: pointer;
+            max-width: 180px;
+        }
+        .past-day-banner {
+            background: #fef3c7;
+            border: 2px solid #d97706;
+            color: #92400e;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .past-day-banner button {
+            background: #d97706;
+            color: white;
+            border: none;
+            padding: 0.35rem 0.85rem;
+            border-radius: 0.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .past-day-banner button:hover { filter: brightness(1.1); }
+
+        /* 複製前一日對話框 */
+        #copyDayOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 110;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #copyDayOverlay.show { display: flex; }
+        #copyDayOverlay .panel {
+            background: var(--bg-card);
+            border: 2px solid var(--border-soft);
+            border-radius: 1rem;
+            padding: 1.75rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        #copyDayOverlay h2 {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+        #copyDayOverlay .task-preview {
+            background: var(--bg-row-alt);
+            border: 1px solid var(--border-soft);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin: 0.75rem 0 1.25rem;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            max-height: 140px;
+            overflow-y: auto;
+        }
+        #copyDayOverlay .btn-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+        #copyDayOverlay .btn-row button {
+            flex: 1 1 180px;
+            padding: 0.7rem 1rem;
+            border-radius: 0.6rem;
+            font-weight: 700;
+            border: 2px solid;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        #copyDayOverlay .btn-copy {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        #copyDayOverlay .btn-copy:hover { filter: brightness(1.1); }
+        #copyDayOverlay .btn-blank {
+            background: white;
+            color: var(--text-main);
+            border-color: var(--border-strong);
+        }
+        #copyDayOverlay .btn-blank:hover { background: var(--bg-row-alt); }
+
         .delete-student-btn {
             opacity: 0.25;
             transition: opacity 0.2s;
@@ -629,7 +728,8 @@
         <header class="mb-2 flex justify-between items-center px-3 py-2 rounded-lg shadow-sm" style="background: var(--header-bg-color, var(--bg-card)); border: 1px solid var(--border-soft);">
             <div class="header-row">
                 <h1 class="text-base font-bold" style="color: var(--text-main);">📋 作業清點矩陣</h1>
-                <span id="todayDate" class="text-xs font-bold px-2 py-0.5 rounded" style="background: var(--bg-row-alt); color: var(--text-main); border: 1px solid var(--border-soft);"></span>
+                <select id="dateSelect" onchange="switchDate(this.value)" title="切換日期"></select>
+                <button onclick="goToToday()" class="text-[10px] border px-1.5 py-0.5 rounded hover:opacity-80" style="color: var(--text-muted); border-color: var(--border-soft);" title="跳到今天">今天</button>
                 <button onclick="clearAllData()" class="text-[10px] border px-1.5 py-0.5 rounded hover:opacity-80" style="color: #dc2626; border-color: #fecaca;">重設名單</button>
             </div>
 
@@ -662,6 +762,28 @@
                 </span>
             </div>
         </header>
+
+        <!-- 過去日子提醒 -->
+        <div id="pastDayBanner" class="past-day-banner" style="display:none;">
+            <span id="pastDayBannerText">⚠️ 你正在看／編輯過去的紀錄</span>
+            <button onclick="goToToday()">回到今天 →</button>
+        </div>
+
+        <!-- 複製前一日對話框 -->
+        <div id="copyDayOverlay">
+            <div class="panel">
+                <h2 id="copyDayTitle">📅 今天的新紀錄</h2>
+                <div id="copyDayDesc" style="color: var(--text-muted); font-size: 0.95rem;"></div>
+                <div class="task-preview" id="copyDayPreview"></div>
+                <div class="btn-row">
+                    <button class="btn-copy" onclick="confirmCopyFromPrior(true)">📋 複製作業項目</button>
+                    <button class="btn-blank" onclick="confirmCopyFromPrior(false)">⚪ 從空白開始</button>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
+                    📌 只複製「作業項目名稱」，繳交狀態會清空。複製完可手動修改名稱。
+                </p>
+            </div>
+        </div>
 
         <!-- 圖例 -->
         <div class="flex flex-wrap gap-1.5 mb-1.5 text-[11px] items-center px-1">
@@ -709,16 +831,60 @@
 
     <script>
         // ===== 儲存 key =====
-        const DATA_KEY = 'classMatrix_Data_V10';
+        const DATA_KEY = 'classMatrix_Data_V10';                    // 舊版（單一紀錄，僅作遷移用）
         const STUDENT_LIST_KEY = 'classMatrix_Students_V10';
         const SETTINGS_KEY = 'classMatrix_Settings_V10';
+        const DAYS_KEY = 'classMatrix_Days_V11';                    // 新版：每日獨立紀錄
+        const CURRENT_DATE_KEY = 'classMatrix_CurrentDate_V11';     // 目前查看／編輯的日期
+
+        // ===== 日期工具 =====
+        function todayStr() {
+            const d = new Date();
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${dd}`;
+        }
+        function fmtDateLabel(s, opts = {}) {
+            // s = "YYYY-MM-DD" → "2026/05/02 (一)" 或 "5/2 (一)"
+            if (!s) return '';
+            const parts = s.split('-');
+            const y = parts[0], m = parts[1], dd = parts[2];
+            const date = new Date(+y, +m - 1, +dd);
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            if (opts.full) return `${y}/${m}/${dd} (${weekdays[date.getDay()]})`;
+            return `${+m}/${+dd} (${weekdays[date.getDay()]})`;
+        }
 
         // ===== 全域狀態 =====
         let students = JSON.parse(localStorage.getItem(STUDENT_LIST_KEY)) || [];
-        let matrixData = JSON.parse(localStorage.getItem(DATA_KEY)) || {
-            tasks: [],
-            submissions: {} // { "id-task": "submitted"|"unrevised"|"missing" }
-        };
+        let dayRecords = JSON.parse(localStorage.getItem(DAYS_KEY)) || null;
+        let currentDate = localStorage.getItem(CURRENT_DATE_KEY) || todayStr();
+
+        // ── 遷移：第一次跑新版時把 V10 單筆紀錄放到目前日期下 ──
+        if (!dayRecords) {
+            dayRecords = {};
+            const old = JSON.parse(localStorage.getItem(DATA_KEY));
+            if (old && (old.tasks || old.submissions)) {
+                dayRecords[currentDate] = {
+                    tasks: Array.isArray(old.tasks) ? old.tasks : [],
+                    submissions: old.submissions && typeof old.submissions === 'object' ? old.submissions : {}
+                };
+            }
+            localStorage.setItem(DAYS_KEY, JSON.stringify(dayRecords));
+            localStorage.setItem(CURRENT_DATE_KEY, currentDate);
+        }
+
+        // 確保目前日期有對應紀錄物件（即使是空的也要建好以利後續寫入）
+        function ensureDayRecord(date) {
+            if (!dayRecords[date]) {
+                dayRecords[date] = { tasks: [], submissions: {} };
+            }
+            return dayRecords[date];
+        }
+
+        let matrixData = ensureDayRecord(currentDate);
+
         let settings = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {
             font: 'default',
             theme: 'plain',
@@ -786,9 +952,11 @@
         }
 
         function clearAllData() {
-            if (confirm("確定要重設名單嗎？這將會清空目前所有學生與作業記錄（已套用的字型/風格保留）。")) {
+            if (confirm("確定要重設名單嗎？這將會清空所有學生、所有日期的作業紀錄（已套用的字型/風格保留）。")) {
                 localStorage.removeItem(DATA_KEY);
                 localStorage.removeItem(STUDENT_LIST_KEY);
+                localStorage.removeItem(DAYS_KEY);
+                localStorage.removeItem(CURRENT_DATE_KEY);
                 location.reload();
             }
         }
@@ -1103,9 +1271,128 @@
         // ===== 儲存 + 渲染 =====
         function saveAndRender() {
             localStorage.setItem(STUDENT_LIST_KEY, JSON.stringify(students));
-            localStorage.setItem(DATA_KEY, JSON.stringify(matrixData));
+            // 確保 matrixData 已掛回 dayRecords[currentDate]（防止外部把 matrixData 重新指派）
+            dayRecords[currentDate] = matrixData;
+            localStorage.setItem(DAYS_KEY, JSON.stringify(dayRecords));
+            localStorage.setItem(CURRENT_DATE_KEY, currentDate);
+            renderDateBar();
+            renderPastDayBanner();
             renderMatrix();
             renderSummary();
+        }
+
+        // ===== 日期切換 =====
+        function switchDate(date) {
+            if (!date || date === currentDate) return;
+            ensureDayRecord(date);
+            currentDate = date;
+            matrixData = dayRecords[date];
+            localStorage.setItem(CURRENT_DATE_KEY, currentDate);
+            renderDateBar();
+            renderPastDayBanner();
+            renderMatrix();
+            renderSummary();
+        }
+
+        function goToToday() {
+            const t = todayStr();
+            if (currentDate === t && dayRecords[t]) {
+                // 已在今天且今天有紀錄 → 不必處理
+                renderDateBar();
+                renderPastDayBanner();
+                return;
+            }
+            // 今天還沒紀錄 → 走複製流程
+            if (!dayRecords[t] || (dayRecords[t].tasks.length === 0 && Object.keys(dayRecords[t].submissions).length === 0)) {
+                offerCopyFromPriorDay(t);
+            } else {
+                switchDate(t);
+            }
+        }
+
+        // ===== 複製前一日對話框 =====
+        function offerCopyFromPriorDay(targetDate) {
+            const priorDates = Object.keys(dayRecords)
+                .filter(d => d < targetDate && (dayRecords[d].tasks || []).length > 0)
+                .sort();
+            if (priorDates.length === 0) {
+                // 沒有歷史可複製 → 直接建空白並切過去
+                ensureDayRecord(targetDate);
+                switchDate(targetDate);
+                return;
+            }
+            const lastDate = priorDates[priorDates.length - 1];
+            const lastTasks = dayRecords[lastDate].tasks || [];
+
+            // 填對話框內容
+            document.getElementById('copyDayTitle').innerText = `📅 開啟 ${fmtDateLabel(targetDate, {full:true})}`;
+            document.getElementById('copyDayDesc').innerText = `要從 ${fmtDateLabel(lastDate, {full:true})} 複製作業項目嗎？`;
+            const preview = document.getElementById('copyDayPreview');
+            preview.innerHTML = lastTasks.map(t => `<span style="display:inline-block; background:white; border:1px solid var(--border-soft); padding:0.2rem 0.55rem; border-radius:0.4rem; margin:0.15rem;">${escapeHtml(t)}</span>`).join('');
+
+            // 紀錄當下要建立的日期與要複製的來源
+            pendingNewDate = targetDate;
+            pendingSourceDate = lastDate;
+            document.getElementById('copyDayOverlay').classList.add('show');
+        }
+
+        let pendingNewDate = null;
+        let pendingSourceDate = null;
+
+        function confirmCopyFromPrior(doCopy) {
+            const target = pendingNewDate;
+            const source = pendingSourceDate;
+            document.getElementById('copyDayOverlay').classList.remove('show');
+            if (!target) return;
+            ensureDayRecord(target);
+            if (doCopy && source && dayRecords[source]) {
+                // 只複製 tasks，不複製 submissions
+                dayRecords[target].tasks = [...(dayRecords[source].tasks || [])];
+                dayRecords[target].submissions = {};
+            }
+            pendingNewDate = null;
+            pendingSourceDate = null;
+            switchDate(target);
+        }
+
+        // ===== 日期下拉列 =====
+        function renderDateBar() {
+            const sel = document.getElementById('dateSelect');
+            if (!sel) return;
+            const t = todayStr();
+            // 把所有有紀錄的日期 + 今天合併、去重、排序（新到舊）
+            const allDates = new Set(Object.keys(dayRecords));
+            allDates.add(t);
+            allDates.add(currentDate);
+            const sorted = Array.from(allDates).sort().reverse();
+
+            sel.innerHTML = sorted.map(d => {
+                const isToday = d === t;
+                const label = isToday ? `📅 ${fmtDateLabel(d, {full:true})}（今天）` : fmtDateLabel(d, {full:true});
+                return `<option value="${d}" ${d === currentDate ? 'selected' : ''}>${label}</option>`;
+            }).join('');
+        }
+
+        function renderPastDayBanner() {
+            const banner = document.getElementById('pastDayBanner');
+            const text = document.getElementById('pastDayBannerText');
+            if (!banner) return;
+            const t = todayStr();
+            if (currentDate < t) {
+                text.innerText = `⚠️ 你正在看／編輯 ${fmtDateLabel(currentDate, {full:true})} 的紀錄（過去）`;
+                banner.style.display = 'flex';
+                banner.style.background = '#fef3c7';
+                banner.style.borderColor = '#d97706';
+                banner.style.color = '#92400e';
+            } else if (currentDate > t) {
+                text.innerText = `⚠️ 你正在看／編輯 ${fmtDateLabel(currentDate, {full:true})} 的紀錄（未來）`;
+                banner.style.display = 'flex';
+                banner.style.background = '#dbeafe';
+                banner.style.borderColor = '#2563eb';
+                banner.style.color = '#1e40af';
+            } else {
+                banner.style.display = 'none';
+            }
         }
 
         function renderMatrix() {
@@ -1258,22 +1545,25 @@
             return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
 
-        // ===== 顯示今日日期 =====
-        function renderTodayDate() {
-            const el = document.getElementById('todayDate');
-            if (!el) return;
-            const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth() + 1).padStart(2, '0');
-            const d = String(now.getDate()).padStart(2, '0');
-            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-            el.textContent = `${y}/${m}/${d} (${weekdays[now.getDay()]})`;
-        }
-
         // ===== 啟動 =====
         window.addEventListener('load', () => {
             applySettings();
-            renderTodayDate();
+            renderDateBar();
+
+            // 開啟頁面時：如果今天還沒有紀錄，且過去有紀錄 → 跳出複製對話框
+            const t = todayStr();
+            const todayEmpty = !dayRecords[t] || (
+                (dayRecords[t].tasks || []).length === 0 &&
+                Object.keys(dayRecords[t].submissions || {}).length === 0
+            );
+            const hasPrior = Object.keys(dayRecords).some(d =>
+                d < t && (dayRecords[d].tasks || []).length > 0
+            );
+            // 只在「使用者目前停在今天」且「今天空空」且「有過去紀錄」時自動跳
+            if (currentDate === t && todayEmpty && hasPrior && students.length > 0) {
+                offerCopyFromPriorDay(t);
+            }
+            renderPastDayBanner();
             renderMatrix();
             renderSummary();
         });
