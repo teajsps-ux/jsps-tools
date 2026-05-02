@@ -378,13 +378,167 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.55);
             z-index: 100;
+            overflow-y: auto;
+        }
+        #missingOverlay.show { display: block; }
+
+        .missing-fullscreen {
+            background: var(--bg-card);
+            min-height: 100vh;
+            padding: 2rem clamp(1rem, 4vw, 3rem);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        .missing-fullscreen-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            border-bottom: 3px solid var(--border-strong);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .missing-fullscreen-eyebrow {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        .missing-fullscreen-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            color: var(--text-main);
+            line-height: 1.15;
+        }
+        #missingSummary {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .missing-summary-pill {
+            background: var(--bg-row-alt);
+            border-radius: 9999px;
+            padding: 0.4rem 1rem;
+            font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+            font-weight: 700;
+            color: var(--text-main);
+            border: 2px solid var(--border-soft);
+        }
+        .missing-close-btn {
+            font-size: 1.75rem;
+            background: var(--text-main);
+            color: white;
+            border-radius: 9999px;
+            width: 3.25rem;
+            height: 3.25rem;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            cursor: pointer;
+            border: none;
+            flex-shrink: 0;
+            line-height: 1;
         }
-        #missingOverlay.show { display: flex; }
+        .missing-close-btn:hover { filter: brightness(1.15); }
+
+        .missing-block {
+            border: 3px solid;
+            border-radius: 1rem;
+            padding: 1.25rem 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .missing-block-title {
+            font-size: clamp(1.4rem, 2.8vw, 2.25rem);
+            font-weight: 900;
+            margin-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .missing-name-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 0.6rem;
+        }
+        .missing-name-chip {
+            font-size: clamp(1.15rem, 2.2vw, 1.85rem);
+            font-weight: 700;
+            padding: 0.6rem 0.85rem;
+            border-radius: 0.6rem;
+            border: 2px solid;
+            text-align: center;
+            background: white;
+            line-height: 1.3;
+        }
+        .missing-block-missing { border-color: #b91c1c; background: #fef2f2; }
+        .missing-block-missing .missing-block-title { color: #991b1b; }
+        .missing-block-missing .missing-name-chip { border-color: #b91c1c; color: #991b1b; background: #fee2e2; }
+        .missing-block-unrevised { border-color: #b45309; background: #fffbeb; }
+        .missing-block-unrevised .missing-block-title { color: #92400e; }
+        .missing-block-unrevised .missing-name-chip { border-color: #d97706; color: #92400e; background: #fef3c7; }
+        .missing-block-notyet { border-color: #94a3b8; background: #f8fafc; }
+        .missing-block-notyet .missing-block-title { color: #475569; }
+        .missing-block-notyet .missing-name-chip { border-color: #94a3b8; color: #334155; background: white; }
+
+        .missing-quick-action {
+            font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+            font-weight: 700;
+            padding: 0.45rem 0.95rem;
+            border-radius: 0.6rem;
+            border: 2px solid #15803d;
+            background: #dcfce7;
+            color: #15803d;
+            cursor: pointer;
+        }
+        .missing-quick-action:hover { background: #bbf7d0; }
+
+        .missing-secondary {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 0.85rem;
+            border-top: 2px dashed var(--border-soft);
+            padding-top: 1.25rem;
+            margin-top: 0.5rem;
+        }
+        .missing-secondary-block {
+            background: var(--bg-row-alt);
+            border: 2px solid var(--border-soft);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+        }
+        .missing-secondary-block .label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+        .missing-secondary-block .names {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        .missing-secondary-block .names span {
+            font-size: 0.95rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 0.4rem;
+            background: white;
+            border: 1px solid var(--border-soft);
+            color: var(--text-main);
+        }
+
+        .missing-all-clear {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            text-align: center;
+            padding: clamp(2rem, 8vw, 5rem) 1rem;
+            color: #15803d;
+            font-weight: 900;
+        }
 
         .delete-student-btn {
             opacity: 0.25;
@@ -526,12 +680,18 @@
             </table>
         </div>
 
-        <!-- 缺交清單 popover -->
-        <div id="missingOverlay">
-            <div class="p-6 rounded-xl shadow-xl border-2 w-full max-w-md" style="background: var(--bg-card); border-color: var(--border-soft);">
-                <h2 id="missingTitle" class="text-xl font-bold mb-4 border-b pb-2" style="color: #dc2626;">未交名單</h2>
-                <div id="missingList" class="text-base space-y-1 max-h-[50vh] overflow-y-auto mb-6" style="color: var(--text-main);"></div>
-                <button onclick="hideMissing()" class="w-full text-white font-bold py-2 rounded-lg transition" style="background: var(--text-main);">返回主頁面</button>
+        <!-- 單一作業全螢幕看板 -->
+        <div id="missingOverlay" onclick="if(event.target===this)hideMissing()">
+            <div class="missing-fullscreen">
+                <div class="missing-fullscreen-header">
+                    <div style="min-width:0; flex:1;">
+                        <div class="missing-fullscreen-eyebrow">📋 作業狀況</div>
+                        <div id="missingTitle" class="missing-fullscreen-title">—</div>
+                        <div id="missingSummary"></div>
+                    </div>
+                    <button onclick="hideMissing()" class="missing-close-btn" title="關閉 (ESC)">✕</button>
+                </div>
+                <div id="missingList"></div>
             </div>
         </div>
 
@@ -773,22 +933,20 @@
             }
         });
 
-        // ===== 缺交清單 =====
+        // ===== 單一作業全螢幕看板 =====
+        let currentMissingTask = null;
         function showMissing(task) {
+            currentMissingTask = task;
             const overlay = document.getElementById('missingOverlay');
             const title = document.getElementById('missingTitle');
+            const summary = document.getElementById('missingSummary');
             const list = document.getElementById('missingList');
 
-            title.innerText = `「${task}」狀況一覽`;
+            title.innerText = `📕 ${task}`;
 
             // 分類
-            const submitted = [];
-            const unrevised = [];
-            const missing = [];
-            const notYet = [];
-            const absent = [];
-            const transferred = [];
-            const empty = [];
+            const submitted = [], unrevised = [], missing = [], notYet = [];
+            const absent = [], transferred = [], empty = [];
             students.forEach(s => {
                 if (s.status === 'transferred') { transferred.push(s); return; }
                 if (s.status === 'empty') { empty.push(s); return; }
@@ -800,30 +958,89 @@
                 else notYet.push(s);
             });
 
-            const section = (label, color, arr) => arr.length === 0 ? '' :
-                `<div class="mb-3">
-                    <div class="text-sm font-bold mb-1" style="color: ${color};">${label}（${arr.length}）</div>
-                    <div class="flex flex-wrap gap-1">${arr.map(s => `<span class="text-sm px-2 py-0.5 rounded border" style="border-color: ${color}40;">${escapeHtml(s.name)}</span>`).join('')}</div>
-                 </div>`;
+            const activeTotal = submitted.length + unrevised.length + missing.length + notYet.length;
+            const submittedRate = activeTotal === 0 ? 0 : Math.round(submitted.length / activeTotal * 100);
 
-            list.innerHTML =
-                section('🔴 缺交', '#b91c1c', missing) +
-                section('🟡 未訂正', '#b45309', unrevised) +
-                section('⚪ 未交（尚未標記）', '#64748b', notYet) +
-                section('🟢 已交', '#15803d', submitted) +
-                section('⚪ 請假', '#64748b', absent) +
-                section('🔁 轉學（不列入）', '#991b1b', transferred) +
-                section('· 空號（不列入）', '#475569', empty);
+            // 頂部摘要 pills
+            let pills = `<div class="missing-summary-pill">🟢 已交 <b>${submitted.length}</b> / ${activeTotal}（${submittedRate}%）</div>`;
+            if (missing.length) pills += `<div class="missing-summary-pill" style="background:#fee2e2; border-color:#b91c1c; color:#991b1b;">🔴 缺交 ${missing.length}</div>`;
+            if (unrevised.length) pills += `<div class="missing-summary-pill" style="background:#fef3c7; border-color:#d97706; color:#92400e;">🟡 未訂正 ${unrevised.length}</div>`;
+            if (notYet.length) pills += `<div class="missing-summary-pill">⚪ 尚未標記 ${notYet.length}</div>`;
+            if (absent.length) pills += `<div class="missing-summary-pill">⚪ 請假 ${absent.length}</div>`;
+            if (transferred.length) pills += `<div class="missing-summary-pill">🔁 轉學 ${transferred.length}</div>`;
+            if (empty.length) pills += `<div class="missing-summary-pill">· 空號 ${empty.length}</div>`;
+            summary.innerHTML = pills;
 
-            if (submitted.length + unrevised.length + missing.length + notYet.length === 0) {
-                list.innerHTML += `<div class="text-green-600 font-bold text-center py-4">今日無待清點學生 ✨</div>`;
+            // 主重點區：超大名牌
+            const safeT = task.replace(/'/g, "\\'");
+            const bigBlock = (cls, icon, label, arr, quickBtn = '') => arr.length === 0 ? '' :
+                `<div class="missing-block missing-block-${cls}">
+                    <div class="missing-block-title">
+                        <span>${icon} ${label}</span>
+                        <span style="font-size:0.75em;">（${arr.length}）</span>
+                        ${quickBtn}
+                    </div>
+                    <div class="missing-name-grid">
+                        ${arr.map(s => `<div class="missing-name-chip">${escapeHtml(s.name)}</div>`).join('')}
+                    </div>
+                </div>`;
+
+            const allClearBtn = `<button class="missing-quick-action" onclick="markAllSubmittedFromOverlay()">✓ 一鍵全部催繳完畢</button>`;
+
+            let html = bigBlock('missing', '🔴', '缺交', missing,
+                missing.length ? allClearBtn : '');
+            html += bigBlock('unrevised', '🟡', '未訂正', unrevised, '');
+            html += bigBlock('notyet', '⚪', '尚未標記', notYet, '');
+
+            // 全班無待處理時的慶祝畫面
+            if (missing.length === 0 && unrevised.length === 0 && notYet.length === 0) {
+                html = `<div class="missing-all-clear">✨ 全班都繳交完畢！</div>`;
             }
+
+            // 次要區：已交 / 請假 / 轉學 / 空號
+            const sideBlock = (label, arr) => arr.length === 0 ? '' :
+                `<div class="missing-secondary-block">
+                    <div class="label">${label}（${arr.length}）</div>
+                    <div class="names">${arr.map(s => `<span>${escapeHtml(s.name)}</span>`).join('')}</div>
+                </div>`;
+            const secondary = sideBlock('🟢 已交', submitted)
+                + sideBlock('⚪ 請假', absent)
+                + sideBlock('🔁 轉學（不列入）', transferred)
+                + sideBlock('· 空號（不列入）', empty);
+            if (secondary) html += `<div class="missing-secondary">${secondary}</div>`;
+
+            list.innerHTML = html;
             overlay.classList.add('show');
+            // 鎖捲動避免背景跟著捲
+            document.body.style.overflow = 'hidden';
         }
 
         function hideMissing() {
             document.getElementById('missingOverlay').classList.remove('show');
+            document.body.style.overflow = '';
+            currentMissingTask = null;
         }
+
+        function markAllSubmittedFromOverlay() {
+            if (!currentMissingTask) return;
+            const task = currentMissingTask;
+            if (!confirm(`將「${task}」剩下未交、未訂正的學生全部標記為「已交」？`)) return;
+            students.forEach(s => {
+                if (isInactive(s)) return;
+                const key = `${s.id}-${task}`;
+                const cur = matrixData.submissions[key];
+                if (cur !== 'submitted') matrixData.submissions[key] = 'submitted';
+            });
+            saveAndRender();
+            showMissing(task); // 重新整理當前看板
+        }
+
+        // ESC 關閉全螢幕看板
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('missingOverlay').classList.contains('show')) {
+                hideMissing();
+            }
+        });
 
         // ===== 模範生：所有作業都「已交」（請假/轉學/空號不算分母也不算分子）=====
         function isExcellent(student) {
