@@ -596,6 +596,13 @@
             const applyingRemoteRef = useRef(false);
             const cloudSaveTimerRef = useRef(null);
             const parentMode = isParentShareMode();
+            const parentCloudStatus = !cloudLibraryId
+                ? '請使用老師提供的連結'
+                : cloudReady
+                    ? '題庫已同步'
+                    : cloudStatus.includes('失敗')
+                        ? '題庫同步暫時失敗'
+                        : '正在同步題庫';
 
             // Course Browser State
             const [filterPublisher, setFilterPublisher] = useState('全部');
@@ -1659,7 +1666,7 @@
                     <div className="glass-box p-3 mb-6 flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
                             <LucideIcon name={parentMode ? "Users" : (cloudLibraryId ? "Cloud" : "HardDrive")} size={18}/>
-                            <span>{parentMode ? `家長練習模式：${cloudLibraryId ? cloudStatus : '請使用老師提供的連結'}` : cloudStatus}</span>
+                            <span>{parentMode ? `家長練習模式：${parentCloudStatus}` : cloudStatus}</span>
                         </div>
                         {cloudLibraryId && !parentMode && (
                             <button onClick={disconnectCloudLibrary} className="text-xs font-bold text-gray-500 underline hover:text-gray-900">改回本機題庫</button>
