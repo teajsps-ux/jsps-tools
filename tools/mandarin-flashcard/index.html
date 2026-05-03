@@ -577,6 +577,7 @@
         const BG_MODE_KEY = 'mandarin_bg_mode';
         const BG_SELECTED_KEY = 'mandarin_bg_selected';
         const BG_SLIDESHOW_SECONDS_KEY = 'mandarin_bg_slideshow_seconds';
+        const BG_HIDDEN_KEY = 'mandarin_bg_hidden_ids';
         const BG_INDEXED_DB = 'mandarin-backgrounds-db';
         const BG_INDEXED_STORE = 'images';
         const BACKGROUND_MANIFEST_URL = 'backgrounds/manifest.json';
@@ -603,6 +604,13 @@
             if (theme === 'ocean') return 'summer';
             if (theme === 'maple') return 'autumn';
             return 'spring';
+        };
+        const getFriendlyBackgroundName = (name, index = 1) => {
+            const value = String(name || '').trim();
+            if (!value || /^bg\d*$/i.test(value) || /^img[-_ ]?\d*$/i.test(value)) {
+                return `自選背景 ${index}`;
+            }
+            return value;
         };
 
         const openBackgroundDb = () => new Promise((resolve, reject) => {
@@ -752,6 +760,13 @@
             const [selectedBgId, setSelectedBgId] = useState(() => localStorage.getItem(BG_SELECTED_KEY) || BUILTIN_BACKGROUNDS[0].id);
             const [manifestBackgrounds, setManifestBackgrounds] = useState([]);
             const [customBackgrounds, setCustomBackgrounds] = useState([]);
+            const [hiddenBackgroundIds, setHiddenBackgroundIds] = useState(() => {
+                try {
+                    return JSON.parse(localStorage.getItem(BG_HIDDEN_KEY) || '[]');
+                } catch {
+                    return [];
+                }
+            });
             const [bgPanelOpen, setBgPanelOpen] = useState(false);
             const [slideshowSeconds, setSlideshowSeconds] = useState(() => Number(localStorage.getItem(BG_SLIDESHOW_SECONDS_KEY)) || 12);
             const [slideIndex, setSlideIndex] = useState(0);
@@ -766,9 +781,15 @@
             const manifestOnlyBackgrounds = manifestBackgrounds.filter(bg =>
                 bg && bg.id && bg.url && !BUILTIN_BACKGROUNDS.some(item => item.id === bg.id || item.url === bg.url)
             );
-            const allBackgrounds = [...BUILTIN_BACKGROUNDS, ...manifestOnlyBackgrounds, ...customBackgrounds];
+            const allBackgrounds = [...BUILTIN_BACKGROUNDS, ...manifestOnlyBackgrounds, ...customBackgrounds]
+                .filter(bg => !hiddenBackgroundIds.includes(bg.id))
+                .map((bg, index) => ({ ...bg, name: getFriendlyBackgroundName(bg.name, index + 1) }));
             const selectedBackground = allBackgrounds.find(bg => bg.id === selectedBgId) || allBackgrounds[0];
             const slideshowBackground = allBackgrounds.length ? allBackgrounds[slideIndex % allBackgrounds.length] : selectedBackground;
+
+            useEffect(() => {
+                localStorage.setItem(BG_HIDDEN_KEY, JSON.stringify(hiddenBackgroundIds));
+            }, [hiddenBackgroundIds]);
 
             useEffect(() => {
                 let cancelled = false;
@@ -958,11 +979,12 @@
                 const files = Array.from(event.target.files || []).filter(file => file.type.startsWith('image/'));
                 if (files.length === 0) return;
                 const nextItems = [];
-                for (const file of files) {
+                for (const [index, file] of files.entries()) {
                     const dataUrl = await fileToDataUrl(file);
+                    const nextNumber = customBackgrounds.length + nextItems.length + 1;
                     const item = {
                         id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-                        name: file.name.replace(/\.[^.]+$/, '').slice(0, 24) || '自訂背景',
+                        name: `自選背景 ${nextNumber}`,
                         url: dataUrl,
                         custom: true
                     };
@@ -975,10 +997,19 @@
                 event.target.value = '';
             };
 
-            const removeCustomBackgroundById = async (id) => {
-                await deleteCustomBackground(id);
-                setCustomBackgrounds(prev => prev.filter(bg => bg.id !== id));
-                if (selectedBgId === id) setSelectedBgId(BUILTIN_BACKGROUNDS[0].id);
+            const removeBackgroundById = async (background) => {
+                if (!background) return;
+                if (background.custom) {
+                    await deleteCustomBackground(background.id);
+                    setCustomBackgrounds(prev => prev.filter(bg => bg.id !== background.id));
+                } else {
+                    setHiddenBackgroundIds(prev => [...new Set([...prev, background.id])]);
+                }
+                if (selectedBgId === background.id) {
+                    const fallback = allBackgrounds.find(bg => bg.id !== background.id) || BUILTIN_BACKGROUNDS[0];
+                    setSelectedBgId(fallback.id);
+                    setBgMode('manual');
+                }
             };
 
             // --- Logic Functions (V9.2.1) ---
@@ -1888,11 +1919,9 @@
                                                 <div className="bg-thumb rounded-lg border border-gray-200" style={{ backgroundImage: `url("${bg.url}")` }}></div>
                                                 <div className="mt-1 text-xs font-bold text-gray-700 truncate">{bg.name}</div>
                                             </button>
-                                            {bg.custom && (
-                                                <button onClick={() => removeCustomBackgroundById(bg.id)} className="mt-2 w-full rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-xs font-bold text-red-600 flex items-center justify-center gap-1">
-                                                    <LucideIcon name="Trash2" size={14}/> 刪除
-                                                </button>
-                                            )}
+                                            <button onClick={() => removeBackgroundById(bg)} className="mt-2 w-full rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-xs font-bold text-red-600 flex items-center justify-center gap-1">
+                                                <LucideIcon name="Trash2" size={14}/> 刪除
+                                            </button>
                                         </div>
                                     ))}
                                 </div>

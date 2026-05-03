@@ -1,181 +1,181 @@
 [
     {
         "id":  "manifest-backgrounds-bgg-snow-jpg",
-        "name":  "bgg-snow",
+        "name":  "雪山衝刺",
         "url":  "backgrounds/bgg-snow.jpg",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-bg-math-0-jpg",
-        "name":  "bg-math-0",
+        "name":  "溫柔房間",
         "url":  "backgrounds/bg-math-0.jpg",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-bg-math-1-jpg",
-        "name":  "bg-math-1",
+        "name":  "貓咪格紋",
         "url":  "backgrounds/bg-math-1.jpg",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-bg-math-2-jpg",
-        "name":  "bg-math-2",
+        "name":  "花束祝福",
         "url":  "backgrounds/bg-math-2.jpg",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-bg-math-3-jpg",
-        "name":  "bg-math-3",
+        "name":  "夏日校園",
         "url":  "backgrounds/bg-math-3.jpg",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-bg-math-5-jpg",
-        "name":  "bg-math-5",
+        "name":  "山屋雪地",
         "url":  "backgrounds/bg-math-5.jpg",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-01-xiaohan-png",
-        "name":  "solar-01-xiaohan",
+        "name":  "節氣背景 1",
         "url":  "backgrounds/solar-terms/solar-01-xiaohan.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-02-dahan-png",
-        "name":  "solar-02-dahan",
+        "name":  "節氣背景 2",
         "url":  "backgrounds/solar-terms/solar-02-dahan.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-03-lichun-png",
-        "name":  "solar-03-lichun",
+        "name":  "節氣背景 3",
         "url":  "backgrounds/solar-terms/solar-03-lichun.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-04-yushui-png",
-        "name":  "solar-04-yushui",
+        "name":  "節氣背景 4",
         "url":  "backgrounds/solar-terms/solar-04-yushui.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-05-jingzhe-png",
-        "name":  "solar-05-jingzhe",
+        "name":  "節氣背景 5",
         "url":  "backgrounds/solar-terms/solar-05-jingzhe.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-06-chunfen-png",
-        "name":  "solar-06-chunfen",
+        "name":  "節氣背景 6",
         "url":  "backgrounds/solar-terms/solar-06-chunfen.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-07-qingming-png",
-        "name":  "solar-07-qingming",
+        "name":  "節氣背景 7",
         "url":  "backgrounds/solar-terms/solar-07-qingming.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-08-guyu-png",
-        "name":  "solar-08-guyu",
+        "name":  "節氣背景 8",
         "url":  "backgrounds/solar-terms/solar-08-guyu.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-09-lixia-png",
-        "name":  "solar-09-lixia",
+        "name":  "節氣背景 9",
         "url":  "backgrounds/solar-terms/solar-09-lixia.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-10-xiaoman-png",
-        "name":  "solar-10-xiaoman",
+        "name":  "節氣背景 10",
         "url":  "backgrounds/solar-terms/solar-10-xiaoman.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-11-mangzhong-png",
-        "name":  "solar-11-mangzhong",
+        "name":  "節氣背景 11",
         "url":  "backgrounds/solar-terms/solar-11-mangzhong.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-12-xiazhi-png",
-        "name":  "solar-12-xiazhi",
+        "name":  "節氣背景 12",
         "url":  "backgrounds/solar-terms/solar-12-xiazhi.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-13-xiaoshu-png",
-        "name":  "solar-13-xiaoshu",
+        "name":  "節氣背景 13",
         "url":  "backgrounds/solar-terms/solar-13-xiaoshu.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-14-dashu-png",
-        "name":  "solar-14-dashu",
+        "name":  "節氣背景 14",
         "url":  "backgrounds/solar-terms/solar-14-dashu.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-15-liqiu-png",
-        "name":  "solar-15-liqiu",
+        "name":  "節氣背景 15",
         "url":  "backgrounds/solar-terms/solar-15-liqiu.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-16-chushu-png",
-        "name":  "solar-16-chushu",
+        "name":  "節氣背景 16",
         "url":  "backgrounds/solar-terms/solar-16-chushu.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-17-bailu-png",
-        "name":  "solar-17-bailu",
+        "name":  "節氣背景 17",
         "url":  "backgrounds/solar-terms/solar-17-bailu.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-18-qiufen-png",
-        "name":  "solar-18-qiufen",
+        "name":  "節氣背景 18",
         "url":  "backgrounds/solar-terms/solar-18-qiufen.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-19-hanlu-png",
-        "name":  "solar-19-hanlu",
+        "name":  "節氣背景 19",
         "url":  "backgrounds/solar-terms/solar-19-hanlu.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-20-shuangjiang-png",
-        "name":  "solar-20-shuangjiang",
+        "name":  "節氣背景 20",
         "url":  "backgrounds/solar-terms/solar-20-shuangjiang.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-21-lidong-png",
-        "name":  "solar-21-lidong",
+        "name":  "節氣背景 21",
         "url":  "backgrounds/solar-terms/solar-21-lidong.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-22-xiaoxue-png",
-        "name":  "solar-22-xiaoxue",
+        "name":  "節氣背景 22",
         "url":  "backgrounds/solar-terms/solar-22-xiaoxue.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-23-daxue-png",
-        "name":  "solar-23-daxue",
+        "name":  "節氣背景 23",
         "url":  "backgrounds/solar-terms/solar-23-daxue.png",
         "season":  "spring"
     },
     {
         "id":  "manifest-backgrounds-solar-terms-solar-24-dongzhi-png",
-        "name":  "solar-24-dongzhi",
+        "name":  "節氣背景 24",
         "url":  "backgrounds/solar-terms/solar-24-dongzhi.png",
         "season":  "spring"
     }
