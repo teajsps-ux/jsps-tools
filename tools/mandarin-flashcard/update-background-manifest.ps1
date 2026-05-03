@@ -15,6 +15,10 @@ $knownNames = @{
     "backgrounds/bg-math-2.jpg" = "花束祝福"
     "backgrounds/bg-math-3.jpg" = "夏日校園"
     "backgrounds/bg-math-5.jpg" = "山屋雪地"
+    "backgrounds/bg6.jpg" = "海風咖啡"
+    "backgrounds/bg7.jpg" = "黑衫守衛"
+    "backgrounds/bg8.jpg" = "城市咖啡"
+    "backgrounds/bg9.jpg" = "訓練場守護"
 }
 
 $sharedIndex = 1

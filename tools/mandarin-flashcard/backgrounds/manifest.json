@@ -1,5 +1,29 @@
 [
     {
+        "id":  "manifest-backgrounds-bg6-jpg",
+        "name":  "海風咖啡",
+        "url":  "backgrounds/bg6.jpg",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-bg7-jpg",
+        "name":  "黑衫守衛",
+        "url":  "backgrounds/bg7.jpg",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-bg8-jpg",
+        "name":  "城市咖啡",
+        "url":  "backgrounds/bg8.jpg",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-bg9-jpg",
+        "name":  "訓練場守護",
+        "url":  "backgrounds/bg9.jpg",
+        "season":  "spring"
+    },
+    {
         "id":  "manifest-backgrounds-bgg-snow-jpg",
         "name":  "雪山衝刺",
         "url":  "backgrounds/bgg-snow.jpg",
