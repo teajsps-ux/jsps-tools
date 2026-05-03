@@ -579,6 +579,7 @@
         const BG_SLIDESHOW_SECONDS_KEY = 'mandarin_bg_slideshow_seconds';
         const BG_INDEXED_DB = 'mandarin-backgrounds-db';
         const BG_INDEXED_STORE = 'images';
+        const BACKGROUND_MANIFEST_URL = 'backgrounds/manifest.json';
         const BUILTIN_BACKGROUNDS = [
             ...SOLAR_TERM_BACKGROUNDS,
             { id: 'builtin-bg', name: '鍛造師原圖', url: 'bg.jpg', season: 'spring' },
@@ -749,6 +750,7 @@
                 return savedMode === 'image' ? 'manual' : savedMode;
             });
             const [selectedBgId, setSelectedBgId] = useState(() => localStorage.getItem(BG_SELECTED_KEY) || BUILTIN_BACKGROUNDS[0].id);
+            const [manifestBackgrounds, setManifestBackgrounds] = useState([]);
             const [customBackgrounds, setCustomBackgrounds] = useState([]);
             const [bgPanelOpen, setBgPanelOpen] = useState(false);
             const [slideshowSeconds, setSlideshowSeconds] = useState(() => Number(localStorage.getItem(BG_SLIDESHOW_SECONDS_KEY)) || 12);
@@ -761,9 +763,32 @@
                     .catch(() => setCustomBackgrounds([]));
             }, []);
 
-            const allBackgrounds = [...BUILTIN_BACKGROUNDS, ...customBackgrounds];
+            const manifestOnlyBackgrounds = manifestBackgrounds.filter(bg =>
+                bg && bg.id && bg.url && !BUILTIN_BACKGROUNDS.some(item => item.id === bg.id || item.url === bg.url)
+            );
+            const allBackgrounds = [...BUILTIN_BACKGROUNDS, ...manifestOnlyBackgrounds, ...customBackgrounds];
             const selectedBackground = allBackgrounds.find(bg => bg.id === selectedBgId) || allBackgrounds[0];
             const slideshowBackground = allBackgrounds.length ? allBackgrounds[slideIndex % allBackgrounds.length] : selectedBackground;
+
+            useEffect(() => {
+                let cancelled = false;
+                fetch(BACKGROUND_MANIFEST_URL, { cache: 'no-store' })
+                    .then(response => response.ok ? response.json() : [])
+                    .then(items => {
+                        if (cancelled || !Array.isArray(items)) return;
+                        const cleanItems = items
+                            .filter(item => item && item.id && item.name && item.url)
+                            .map(item => ({
+                                id: String(item.id),
+                                name: String(item.name),
+                                url: String(item.url),
+                                season: item.season || 'spring'
+                            }));
+                        setManifestBackgrounds(cleanItems);
+                    })
+                    .catch(() => setManifestBackgrounds([]));
+                return () => { cancelled = true; };
+            }, []);
 
             useEffect(() => {
                 if (bgMode !== 'slideshow' || allBackgrounds.length <= 1) return;
@@ -1816,6 +1841,7 @@
                 return (
                 <div className="max-w-5xl mx-auto p-4">
                     {/* 右上角：背景圖庫 */}
+                    {!parentMode && (
                     <div className="relative flex justify-end pt-3">
                         <button onClick={() => setBgPanelOpen(open => !open)} className="anime-btn bg-white px-3 py-2 text-sm font-bold text-gray-800 cursor-pointer flex items-center gap-2">
                             <LucideIcon name="Image" size={18}/> 背景 {bgMode === 'auto' ? `(${autoTermName})` : ''}
@@ -1873,6 +1899,7 @@
                             </div>
                         )}
                     </div>
+                    )}
                     <header className="text-center mb-8 pt-4">
                         <h1 className="home-title text-5xl font-bold mb-2 text-white tracking-widest drop-shadow-lg" style={{textShadow: "2px 2px 4px rgba(0,0,0,0.5)"}}>我是國語背書高手</h1>
                         <p className="home-subtitle text-xl text-gray-200">詩意學習，快樂成長</p>

@@ -1,0 +1,182 @@
+[
+    {
+        "id":  "manifest-backgrounds-bgg-snow-jpg",
+        "name":  "bgg-snow",
+        "url":  "backgrounds/bgg-snow.jpg",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-bg-math-0-jpg",
+        "name":  "bg-math-0",
+        "url":  "backgrounds/bg-math-0.jpg",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-bg-math-1-jpg",
+        "name":  "bg-math-1",
+        "url":  "backgrounds/bg-math-1.jpg",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-bg-math-2-jpg",
+        "name":  "bg-math-2",
+        "url":  "backgrounds/bg-math-2.jpg",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-bg-math-3-jpg",
+        "name":  "bg-math-3",
+        "url":  "backgrounds/bg-math-3.jpg",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-bg-math-5-jpg",
+        "name":  "bg-math-5",
+        "url":  "backgrounds/bg-math-5.jpg",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-01-xiaohan-png",
+        "name":  "solar-01-xiaohan",
+        "url":  "backgrounds/solar-terms/solar-01-xiaohan.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-02-dahan-png",
+        "name":  "solar-02-dahan",
+        "url":  "backgrounds/solar-terms/solar-02-dahan.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-03-lichun-png",
+        "name":  "solar-03-lichun",
+        "url":  "backgrounds/solar-terms/solar-03-lichun.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-04-yushui-png",
+        "name":  "solar-04-yushui",
+        "url":  "backgrounds/solar-terms/solar-04-yushui.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-05-jingzhe-png",
+        "name":  "solar-05-jingzhe",
+        "url":  "backgrounds/solar-terms/solar-05-jingzhe.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-06-chunfen-png",
+        "name":  "solar-06-chunfen",
+        "url":  "backgrounds/solar-terms/solar-06-chunfen.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-07-qingming-png",
+        "name":  "solar-07-qingming",
+        "url":  "backgrounds/solar-terms/solar-07-qingming.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-08-guyu-png",
+        "name":  "solar-08-guyu",
+        "url":  "backgrounds/solar-terms/solar-08-guyu.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-09-lixia-png",
+        "name":  "solar-09-lixia",
+        "url":  "backgrounds/solar-terms/solar-09-lixia.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-10-xiaoman-png",
+        "name":  "solar-10-xiaoman",
+        "url":  "backgrounds/solar-terms/solar-10-xiaoman.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-11-mangzhong-png",
+        "name":  "solar-11-mangzhong",
+        "url":  "backgrounds/solar-terms/solar-11-mangzhong.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-12-xiazhi-png",
+        "name":  "solar-12-xiazhi",
+        "url":  "backgrounds/solar-terms/solar-12-xiazhi.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-13-xiaoshu-png",
+        "name":  "solar-13-xiaoshu",
+        "url":  "backgrounds/solar-terms/solar-13-xiaoshu.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-14-dashu-png",
+        "name":  "solar-14-dashu",
+        "url":  "backgrounds/solar-terms/solar-14-dashu.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-15-liqiu-png",
+        "name":  "solar-15-liqiu",
+        "url":  "backgrounds/solar-terms/solar-15-liqiu.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-16-chushu-png",
+        "name":  "solar-16-chushu",
+        "url":  "backgrounds/solar-terms/solar-16-chushu.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-17-bailu-png",
+        "name":  "solar-17-bailu",
+        "url":  "backgrounds/solar-terms/solar-17-bailu.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-18-qiufen-png",
+        "name":  "solar-18-qiufen",
+        "url":  "backgrounds/solar-terms/solar-18-qiufen.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-19-hanlu-png",
+        "name":  "solar-19-hanlu",
+        "url":  "backgrounds/solar-terms/solar-19-hanlu.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-20-shuangjiang-png",
+        "name":  "solar-20-shuangjiang",
+        "url":  "backgrounds/solar-terms/solar-20-shuangjiang.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-21-lidong-png",
+        "name":  "solar-21-lidong",
+        "url":  "backgrounds/solar-terms/solar-21-lidong.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-22-xiaoxue-png",
+        "name":  "solar-22-xiaoxue",
+        "url":  "backgrounds/solar-terms/solar-22-xiaoxue.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-23-daxue-png",
+        "name":  "solar-23-daxue",
+        "url":  "backgrounds/solar-terms/solar-23-daxue.png",
+        "season":  "spring"
+    },
+    {
+        "id":  "manifest-backgrounds-solar-terms-solar-24-dongzhi-png",
+        "name":  "solar-24-dongzhi",
+        "url":  "backgrounds/solar-terms/solar-24-dongzhi.png",
+        "season":  "spring"
+    }
+]
