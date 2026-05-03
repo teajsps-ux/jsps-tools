@@ -19,6 +19,7 @@ $knownNames = @{
     "backgrounds/bg7.jpg" = "黑衫守衛"
     "backgrounds/bg8.jpg" = "城市咖啡"
     "backgrounds/bg9.jpg" = "訓練場守護"
+    "backgrounds/bg10.jpg" = "白衫辦公"
 }
 
 $sharedIndex = 1

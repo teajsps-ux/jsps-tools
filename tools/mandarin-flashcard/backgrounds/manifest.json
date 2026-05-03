@@ -1,5 +1,11 @@
 [
     {
+        "id":  "manifest-backgrounds-bg10-jpg",
+        "name":  "白衫辦公",
+        "url":  "backgrounds/bg10.jpg",
+        "season":  "spring"
+    },
+    {
         "id":  "manifest-backgrounds-bg6-jpg",
         "name":  "海風咖啡",
         "url":  "backgrounds/bg6.jpg",
