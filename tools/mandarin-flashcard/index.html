@@ -129,6 +129,16 @@
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
 
+        .vertical-card-word {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.08em;
+            line-height: 1.1;
+            max-height: 72%;
+            max-width: 82%;
+            overflow: hidden;
+        }
+
         /* --- 玻璃磨砂容器 --- */
         .glass-box {
             background: rgba(255, 255, 255, 0.90);
@@ -1252,7 +1262,12 @@
                 }
                 setActivePlayers(currentPlayers);
                 let allCards = [];
-                decks.forEach(d => { if (setupSelectedDecks.includes(d.id)) { allCards.push(...d.cards); } });
+                decks.forEach(d => {
+                    if (setupSelectedDecks.includes(d.id)) {
+                        const meta = parseDeckMeta(d);
+                        allCards.push(...d.cards.map(card => ({ ...card, category: meta.category })));
+                    }
+                });
                 if (allCards.length === 0) { showModal({ title: "無法開始", content: "選定的單元裡沒有題目！", showCancel: false, onConfirm: closeModal }); return; }
                 const totalCells = side * side;
                 let gridCardsPool = [];
@@ -1626,6 +1641,9 @@
             const renderQuiz = () => {
                 const currentCard = quizCards[currentCardIndex];
                 if (!currentCard) return <div>載入中...</div>;
+                const activeDeck = decks.find(d => d.id === currentDeckId);
+                const quizMeta = parseDeckMeta(activeDeck || {});
+                const quizWordLabel = quizMeta.category === 'idiom' ? '成語' : '詞語';
                 const progress = ((currentCardIndex) / quizCards.length) * 100;
                 return (
                     <div className="h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative">
@@ -1635,8 +1653,8 @@
                             <div className={`relative w-full h-full duration-500 transform-style-3d transition-transform ${isFlipped ? 'rotate-y-180' : ''}`}>
                                 <div className="absolute w-full h-full backface-hidden">
                                     <div className="glass-box w-full h-full flex flex-col items-center justify-center p-8 border-4 border-white bg-white/90">
-                                        <div className="text-2xl text-gray-500 absolute top-8 left-8">詞語</div>
-                                        <div className="font-bpmf quiz-word text-6xl md:text-7xl font-bold text-slate-800 text-center leading-relaxed tracking-widest">{currentCard.word}</div>
+                                        <div className="text-2xl text-gray-500 absolute top-8 left-8">{quizWordLabel}</div>
+                                        <div className="font-bpmf quiz-word vertical-card-word text-6xl md:text-7xl font-bold text-slate-800 text-center">{currentCard.word}</div>
                                         <div className="absolute bottom-8 text-slate-500 animate-bounce">點擊翻牌</div>
                                     </div>
                                 </div>
@@ -1780,6 +1798,8 @@
             const renderBattleGame = () => {
                 const currentPlayer = activePlayers[currentPlayerIndex];
                 const gridStyle = { display: 'grid', gridTemplateColumns: `repeat(${gridSide}, minmax(0, 1fr))`, gap: gridSide > 6 ? '0.25rem' : '0.5rem' };
+                const selectedBattleCard = selectedGridIndex !== null ? battleGrid[selectedGridIndex] : null;
+                const battleWordLabel = selectedBattleCard?.category === 'idiom' ? '成語' : '詞語';
                 return (
                     <div className="min-h-screen flex flex-col p-2 md:p-4">
                         <div className="flex flex-col md:flex-row justify-between items-center mb-4 glass-box p-4 gap-4">
@@ -1818,8 +1838,8 @@
                                     <div className={`relative w-full h-full duration-500 transform-style-3d transition-transform ${isFlipped ? 'rotate-y-180' : ''}`}>
                                         <div className="absolute w-full h-full backface-hidden">
                                             <div className={`glass-box w-full h-full flex flex-col items-center justify-center p-8 border-4 border-white ${currentPlayer.color.light}`}>
-                                                <div className="text-2xl text-gray-500 absolute top-8 left-8">請回答</div>
-                                                <div className="font-bpmf quiz-word text-5xl md:text-6xl font-bold text-center mb-8 text-gray-800">{battleGrid[selectedGridIndex].word}</div>
+                                                <div className="text-2xl text-gray-500 absolute top-8 left-8">{battleWordLabel}</div>
+                                                <div className="font-bpmf quiz-word vertical-card-word text-5xl md:text-6xl font-bold text-center mb-8 text-gray-800">{selectedBattleCard.word}</div>
                                                 <div className="text-gray-500 animate-bounce font-bold">點擊翻牌看答案</div>
                                             </div>
                                         </div>
