@@ -1059,12 +1059,48 @@
                     '{"cards":[{"word":"詞語","definition":"解釋","example":"例句"}]}'
                 ].join('\n');
 
+                const showPromptModal = (copied) => {
+                    showModal({
+                        title: copied ? "提示詞已複製" : "手動複製提示詞",
+                        content: (
+                            <div className="space-y-3">
+                                <p className="text-sm text-gray-600">
+                                    {copied ? '請到 Google AI 模式貼上截圖與提示詞，再把 JSON 貼回文字框。' : '瀏覽器擋住自動複製時，請手動複製下面文字。'}
+                                </p>
+                                <textarea
+                                    readOnly
+                                    value={prompt}
+                                    onFocus={(e) => e.target.select()}
+                                    className="w-full h-64 border-2 border-gray-300 rounded-lg p-3 text-sm font-mono bg-white"
+                                />
+                            </div>
+                        ),
+                        showCancel: false,
+                        confirmText: "知道了",
+                        onConfirm: closeModal
+                    });
+                };
+
                 try {
-                    await navigator.clipboard.writeText(prompt);
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(prompt);
+                    } else {
+                        const temp = document.createElement('textarea');
+                        temp.value = prompt;
+                        temp.setAttribute('readonly', '');
+                        temp.style.position = 'fixed';
+                        temp.style.left = '-9999px';
+                        document.body.appendChild(temp);
+                        temp.select();
+                        const copied = document.execCommand('copy');
+                        temp.remove();
+                        if (!copied) throw new Error('copy command failed');
+                    }
                     setOcrStatus('已複製 Google AI 模式提示詞。請到 Google AI 模式貼上截圖與提示詞，再把 JSON 貼回文字框。');
+                    showPromptModal(true);
                 } catch (error) {
-                    setBatchInput(prompt);
-                    setOcrStatus('瀏覽器無法自動複製，已把提示詞放進文字框。');
+                    setOcrStatus('瀏覽器無法自動複製，請從提示視窗手動複製。');
+                    showPromptModal(false);
                 }
             };
 
