@@ -493,18 +493,18 @@
 
         // === 24 節氣表 ===（[月-日, 節氣名, 對應主題]，按時間排序）
         const SOLAR_TERMS = [
-            ['01-05', '小寒', 'snow'],   ['01-20', '大寒', 'snow'],
-            ['02-04', '立春', 'sakura'], ['02-19', '雨水', 'sakura'],
-            ['03-05', '驚蟄', 'sakura'], ['03-20', '春分', 'sakura'],
-            ['04-05', '清明', 'sakura'], ['04-20', '穀雨', 'ocean'],
-            ['05-05', '立夏', 'ocean'],  ['05-21', '小滿', 'ocean'],
-            ['06-05', '芒種', 'ocean'],  ['06-21', '夏至', 'rainbow'],
-            ['07-07', '小暑', 'rainbow'],['07-23', '大暑', 'rainbow'],
-            ['08-07', '立秋', 'maple'],  ['08-23', '處暑', 'maple'],
-            ['09-07', '白露', 'maple'],  ['09-23', '秋分', 'maple'],
-            ['10-08', '寒露', 'maple'],  ['10-23', '霜降', 'stars'],
-            ['11-07', '立冬', 'snow'],   ['11-22', '小雪', 'snow'],
-            ['12-07', '大雪', 'snow'],   ['12-21', '冬至', 'stars'],
+            ['01-05', '小寒', 'snow', 'solar-01-xiaohan.png'],   ['01-20', '大寒', 'snow', 'solar-02-dahan.png'],
+            ['02-04', '立春', 'sakura', 'solar-03-lichun.png'],   ['02-19', '雨水', 'sakura', 'solar-04-yushui.png'],
+            ['03-05', '驚蟄', 'sakura', 'solar-05-jingzhe.png'],  ['03-20', '春分', 'sakura', 'solar-06-chunfen.png'],
+            ['04-05', '清明', 'sakura', 'solar-07-qingming.png'], ['04-20', '穀雨', 'ocean', 'solar-08-guyu.png'],
+            ['05-05', '立夏', 'ocean', 'solar-09-lixia.png'],     ['05-21', '小滿', 'ocean', 'solar-10-xiaoman.png'],
+            ['06-05', '芒種', 'ocean', 'solar-11-mangzhong.png'], ['06-21', '夏至', 'rainbow', 'solar-12-xiazhi.png'],
+            ['07-07', '小暑', 'rainbow', 'solar-13-xiaoshu.png'], ['07-23', '大暑', 'rainbow', 'solar-14-dashu.png'],
+            ['08-07', '立秋', 'maple', 'solar-15-liqiu.png'],     ['08-23', '處暑', 'maple', 'solar-16-chushu.png'],
+            ['09-07', '白露', 'maple', 'solar-17-bailu.png'],     ['09-23', '秋分', 'maple', 'solar-18-qiufen.png'],
+            ['10-08', '寒露', 'maple', 'solar-19-hanlu.png'],     ['10-23', '霜降', 'stars', 'solar-20-shuangjiang.png'],
+            ['11-07', '立冬', 'snow', 'solar-21-lidong.png'],     ['11-22', '小雪', 'snow', 'solar-22-xiaoxue.png'],
+            ['12-07', '大雪', 'snow', 'solar-23-daxue.png'],      ['12-21', '冬至', 'stars', 'solar-24-dongzhi.png'],
         ];
 
         const getCurrentSolarTerm = () => {
@@ -515,8 +515,16 @@
             for (const t of SOLAR_TERMS) {
                 if (t[0] <= md) cur = t;
             }
-            return { date: cur[0], name: cur[1], theme: cur[2] };
+            return { date: cur[0], name: cur[1], theme: cur[2], image: cur[3] };
         };
+
+        const SOLAR_TERM_BACKGROUNDS = SOLAR_TERMS.map(([date, name, theme, file], index) => ({
+            id: `solar-${String(index + 1).padStart(2, '0')}`,
+            name: `節氣：${name}`,
+            url: `backgrounds/solar-terms/${file}`,
+            theme,
+            season: theme === 'snow' || theme === 'stars' ? 'winter' : theme === 'ocean' || theme === 'rainbow' ? 'summer' : theme === 'maple' ? 'autumn' : 'spring'
+        }));
 
         // === 粒子產生器（櫻花/雪花/楓葉/星星/泡泡） ===
         const generateParticles = (theme) => {
@@ -563,6 +571,7 @@
         const BG_INDEXED_DB = 'mandarin-backgrounds-db';
         const BG_INDEXED_STORE = 'images';
         const BUILTIN_BACKGROUNDS = [
+            ...SOLAR_TERM_BACKGROUNDS,
             { id: 'builtin-bg', name: '鍛造師原圖', url: 'bg.jpg', season: 'spring' },
             { id: 'builtin-snow', name: '雪山衝刺', url: 'backgrounds/bgg-snow.jpg', season: 'winter' },
             { id: 'builtin-math-0', name: '溫柔房間', url: 'backgrounds/bg-math-0.jpg', season: 'spring' },
@@ -764,6 +773,7 @@
                     const term = getCurrentSolarTerm();
                     actualTheme = term.theme;
                     setAutoTermName(term.name);
+                    imageUrl = term.image ? `backgrounds/solar-terms/${term.image}` : '';
                 } else if (bgMode === 'manual') {
                     actualTheme = 'image';
                     imageUrl = selectedBackground?.url || '';
