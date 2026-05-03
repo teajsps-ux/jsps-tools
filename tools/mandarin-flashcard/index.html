@@ -578,6 +578,7 @@
         const BG_SELECTED_KEY = 'mandarin_bg_selected';
         const BG_SLIDESHOW_SECONDS_KEY = 'mandarin_bg_slideshow_seconds';
         const BG_HIDDEN_KEY = 'mandarin_bg_hidden_ids';
+        const BG_NAME_OVERRIDES_KEY = 'mandarin_bg_name_overrides';
         const BG_INDEXED_DB = 'mandarin-backgrounds-db';
         const BG_INDEXED_STORE = 'images';
         const BACKGROUND_MANIFEST_URL = 'backgrounds/manifest.json';
@@ -608,7 +609,7 @@
         const getFriendlyBackgroundName = (name, index = 1) => {
             const value = String(name || '').trim();
             if (!value || /^bg\d*$/i.test(value) || /^img[-_ ]?\d*$/i.test(value)) {
-                return `自選背景 ${index}`;
+                return `請命名背景 ${index}`;
             }
             return value;
         };
@@ -767,6 +768,13 @@
                     return [];
                 }
             });
+            const [backgroundNameOverrides, setBackgroundNameOverrides] = useState(() => {
+                try {
+                    return JSON.parse(localStorage.getItem(BG_NAME_OVERRIDES_KEY) || '{}');
+                } catch {
+                    return {};
+                }
+            });
             const [bgPanelOpen, setBgPanelOpen] = useState(false);
             const [slideshowSeconds, setSlideshowSeconds] = useState(() => Number(localStorage.getItem(BG_SLIDESHOW_SECONDS_KEY)) || 12);
             const [slideIndex, setSlideIndex] = useState(0);
@@ -783,13 +791,17 @@
             );
             const allBackgrounds = [...BUILTIN_BACKGROUNDS, ...manifestOnlyBackgrounds, ...customBackgrounds]
                 .filter(bg => !hiddenBackgroundIds.includes(bg.id))
-                .map((bg, index) => ({ ...bg, name: getFriendlyBackgroundName(bg.name, index + 1) }));
+                .map((bg, index) => ({ ...bg, name: backgroundNameOverrides[bg.id] || getFriendlyBackgroundName(bg.name, index + 1) }));
             const selectedBackground = allBackgrounds.find(bg => bg.id === selectedBgId) || allBackgrounds[0];
             const slideshowBackground = allBackgrounds.length ? allBackgrounds[slideIndex % allBackgrounds.length] : selectedBackground;
 
             useEffect(() => {
                 localStorage.setItem(BG_HIDDEN_KEY, JSON.stringify(hiddenBackgroundIds));
             }, [hiddenBackgroundIds]);
+
+            useEffect(() => {
+                localStorage.setItem(BG_NAME_OVERRIDES_KEY, JSON.stringify(backgroundNameOverrides));
+            }, [backgroundNameOverrides]);
 
             useEffect(() => {
                 let cancelled = false;
@@ -982,9 +994,10 @@
                 for (const [index, file] of files.entries()) {
                     const dataUrl = await fileToDataUrl(file);
                     const nextNumber = customBackgrounds.length + nextItems.length + 1;
+                    const fileBaseName = file.name.replace(/\.[^.]+$/, '').slice(0, 24);
                     const item = {
                         id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-                        name: `自選背景 ${nextNumber}`,
+                        name: getFriendlyBackgroundName(fileBaseName, nextNumber),
                         url: dataUrl,
                         custom: true
                     };
@@ -995,6 +1008,19 @@
                 setSelectedBgId(nextItems[0].id);
                 setBgMode('manual');
                 event.target.value = '';
+            };
+
+            const renameBackground = async (background, name) => {
+                if (!background) return;
+                const nextName = name.slice(0, 24);
+                setBackgroundNameOverrides(prev => ({ ...prev, [background.id]: nextName }));
+                if (background.custom) {
+                    const original = customBackgrounds.find(bg => bg.id === background.id);
+                    if (!original) return;
+                    const updated = { ...original, name: nextName || original.name };
+                    setCustomBackgrounds(prev => prev.map(bg => bg.id === background.id ? updated : bg));
+                    await saveCustomBackground(updated);
+                }
             };
 
             const removeBackgroundById = async (background) => {
@@ -1010,6 +1036,11 @@
                     setSelectedBgId(fallback.id);
                     setBgMode('manual');
                 }
+                setBackgroundNameOverrides(prev => {
+                    const next = { ...prev };
+                    delete next[background.id];
+                    return next;
+                });
             };
 
             // --- Logic Functions (V9.2.1) ---
@@ -1917,8 +1948,8 @@
                                         <div key={bg.id} className={`rounded-xl border-2 bg-white p-2 ${selectedBgId === bg.id ? 'border-sky-500' : 'border-gray-200'}`}>
                                             <button onClick={() => { setSelectedBgId(bg.id); setBgMode('manual'); }} className="block w-full text-left">
                                                 <div className="bg-thumb rounded-lg border border-gray-200" style={{ backgroundImage: `url("${bg.url}")` }}></div>
-                                                <div className="mt-1 text-xs font-bold text-gray-700 truncate">{bg.name}</div>
                                             </button>
+                                            <input value={bg.name} onChange={(e) => renameBackground(bg, e.target.value)} placeholder="替背景取名" className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-bold text-gray-700 outline-none focus:border-sky-400" />
                                             <button onClick={() => removeBackgroundById(bg)} className="mt-2 w-full rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-xs font-bold text-red-600 flex items-center justify-center gap-1">
                                                 <LucideIcon name="Trash2" size={14}/> 刪除
                                             </button>
