@@ -13,6 +13,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons (Vanilla JS version) -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase Web SDK (compat for single-file HTML app) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <!-- OCR for screenshot import -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <!-- Bpmf Iansui (含注音的標楷風字型，給低年級閃卡用) -->
@@ -270,9 +274,18 @@
 
         const SEED_DATA_URL = 'seed_翰林114一上.json';
         const STORAGE_KEY = 'mandarin_tutor_data_v2';
+        const CLOUD_LIBRARY_ID_KEY = 'mandarin_cloud_library_id';
         const VISION_ENDPOINT_STORAGE_KEY = 'mandarin_vision_endpoint';
         const DEFAULT_VISION_ENDPOINT = '';
         const LEGACY_UNDEPLOYED_VISION_ENDPOINT = 'https://asia-east1-jsps-tools-sync.cloudfunctions.net/parseMandarinFlashcards';
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyA0lSykngwrK5exy1rxD4TZ96RqeVD4x9U",
+            authDomain: "jsps-tools-sync.firebaseapp.com",
+            projectId: "jsps-tools-sync",
+            storageBucket: "jsps-tools-sync.firebasestorage.app",
+            messagingSenderId: "435781850232",
+            appId: "1:435781850232:web:bedbf1e1cd942e972b898d"
+        };
         const DEFAULT_PUBLISHER = '翰林';
         const DEFAULT_BOOK = '114一上';
         const PUBLISHER_OPTIONS = ['翰林', '康軒', '南一'];
@@ -552,6 +565,12 @@
                 const savedEndpoint = localStorage.getItem(VISION_ENDPOINT_STORAGE_KEY) || DEFAULT_VISION_ENDPOINT;
                 return savedEndpoint === LEGACY_UNDEPLOYED_VISION_ENDPOINT ? '' : savedEndpoint;
             });
+            const [cloudLibraryId, setCloudLibraryId] = useState(() => localStorage.getItem(CLOUD_LIBRARY_ID_KEY) || '');
+            const [cloudStatus, setCloudStatus] = useState('本機題庫');
+            const [cloudReady, setCloudReady] = useState(false);
+            const [dataLoaded, setDataLoaded] = useState(false);
+            const applyingRemoteRef = useRef(false);
+            const cloudSaveTimerRef = useRef(null);
 
             // Course Browser State
             const [filterPublisher, setFilterPublisher] = useState('全部');
@@ -602,6 +621,7 @@
                     if (!isMounted) return;
                     setDecks(nextDecks);
                     setSetupSelectedDecks(nextDecks.map(d => d.id));
+                    setDataLoaded(true);
                 };
 
                 const savedData = localStorage.getItem(STORAGE_KEY);
@@ -627,6 +647,93 @@
             useEffect(() => {
                 if (decks.length > 0) { localStorage.setItem(STORAGE_KEY, JSON.stringify(decks)); }
             }, [decks]);
+
+            useEffect(() => {
+                if (!cloudLibraryId.trim()) {
+                    setCloudReady(false);
+                    setCloudStatus('本機題庫');
+                    return;
+                }
+                if (!dataLoaded) {
+                    setCloudReady(false);
+                    setCloudStatus('等待本機題庫載入');
+                    return;
+                }
+                if (!window.firebase || !window.firebase.apps) {
+                    setCloudStatus('Firebase SDK 尚未載入');
+                    return;
+                }
+
+                let unsubscribe = null;
+                let cancelled = false;
+                const libraryId = cloudLibraryId.trim();
+                localStorage.setItem(CLOUD_LIBRARY_ID_KEY, libraryId);
+                setCloudReady(false);
+                setCloudStatus(`連線雲端題庫：${libraryId}`);
+
+                const initCloud = async () => {
+                    try {
+                        if (!window.firebase.apps.length) window.firebase.initializeApp(FIREBASE_CONFIG);
+                        await window.firebase.auth().signInAnonymously();
+                        if (cancelled) return;
+                        const db = window.firebase.firestore();
+                        const docRef = db.collection('mandarin-flashcard-libraries').doc(libraryId);
+                        unsubscribe = docRef.onSnapshot(async (snapshot) => {
+                            if (!snapshot.exists) {
+                                await docRef.set({
+                                    decks: normalizeDecks(decks),
+                                    updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
+                                setCloudReady(true);
+                                setCloudStatus(`已建立雲端題庫：${libraryId}`);
+                                return;
+                            }
+                            const remoteDecks = normalizeDecks(snapshot.data().decks || []);
+                            if (remoteDecks.length > 0) {
+                                applyingRemoteRef.current = true;
+                                setDecks(remoteDecks);
+                                setSetupSelectedDecks(remoteDecks.map(d => d.id));
+                            }
+                            setCloudReady(true);
+                            setCloudStatus(`雲端同步中：${libraryId}`);
+                        }, (error) => {
+                            setCloudReady(false);
+                            setCloudStatus(`雲端同步失敗：${error.message}`);
+                        });
+                    } catch (error) {
+                        setCloudReady(false);
+                        setCloudStatus(`雲端登入失敗：${error.message}`);
+                    }
+                };
+
+                initCloud();
+                return () => {
+                    cancelled = true;
+                    if (unsubscribe) unsubscribe();
+                };
+            }, [cloudLibraryId, dataLoaded]);
+
+            useEffect(() => {
+                if (!dataLoaded || !cloudReady || !cloudLibraryId.trim() || decks.length === 0) return;
+                if (applyingRemoteRef.current) {
+                    applyingRemoteRef.current = false;
+                    return;
+                }
+                if (!window.firebase || !window.firebase.apps.length) return;
+                if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
+                cloudSaveTimerRef.current = setTimeout(() => {
+                    const db = window.firebase.firestore();
+                    db.collection('mandarin-flashcard-libraries').doc(cloudLibraryId.trim()).set({
+                        decks: normalizeDecks(decks),
+                        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true })
+                        .then(() => setCloudStatus(`已同步到雲端：${cloudLibraryId.trim()}`))
+                        .catch(error => setCloudStatus(`雲端儲存失敗：${error.message}`));
+                }, 800);
+                return () => {
+                    if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
+                };
+            }, [decks, cloudReady, cloudLibraryId, dataLoaded]);
 
             // --- Helpers ---
             const showModal = (config) => setModalConfig({ ...config, isOpen: true });
@@ -1059,6 +1166,46 @@
                 });
             };
 
+            const configureCloudLibrary = () => {
+                showModal({
+                    title: "雲端題庫同步",
+                    content: (
+                        <div className="space-y-3">
+                            <p className="text-sm text-gray-600">輸入同一個題庫代碼，電腦和手機就會同步同一份閃卡。請用不容易被猜到的代碼。</p>
+                            <input
+                                id="cloudLibraryInput"
+                                defaultValue={cloudLibraryId}
+                                className="w-full border-2 border-gray-300 rounded-lg p-2 text-lg font-bold outline-none focus:border-emerald-300"
+                                placeholder="例如 kx-115-a-7391"
+                            />
+                            <p className="text-xs text-gray-500">免費版使用 Firestore 同步，不使用 Firebase Functions。不要輸入學生姓名。</p>
+                        </div>
+                    ),
+                    confirmText: "連線同步",
+                    onConfirm: () => {
+                        const value = (document.getElementById('cloudLibraryInput')?.value || '').trim();
+                        if (!value) {
+                            localStorage.removeItem(CLOUD_LIBRARY_ID_KEY);
+                            setCloudLibraryId('');
+                            setCloudStatus('本機題庫');
+                        } else {
+                            const safeValue = value.replace(/[^\w-]/g, '-').slice(0, 48);
+                            localStorage.setItem(CLOUD_LIBRARY_ID_KEY, safeValue);
+                            setCloudLibraryId(safeValue);
+                        }
+                        closeModal();
+                    },
+                    onCancel: closeModal
+                });
+            };
+
+            const disconnectCloudLibrary = () => {
+                localStorage.removeItem(CLOUD_LIBRARY_ID_KEY);
+                setCloudLibraryId('');
+                setCloudReady(false);
+                setCloudStatus('本機題庫');
+            };
+
             const copyDPrompt = async () => {
                 const categoryLabel = getCategoryInfo(editCategory).label;
                 const prompt = [
@@ -1417,6 +1564,9 @@
                     <div className="flex flex-wrap gap-3 justify-between items-center mb-6 px-2">
                         <h2 className="home-section-title text-3xl font-bold border-l-8 border-yellow-400 pl-4 text-white drop-shadow-md">我的題庫</h2>
                         <div className="home-actions flex gap-3">
+                            <button onClick={configureCloudLibrary} className={`anime-btn ${cloudLibraryId ? 'bg-emerald-100 hover:bg-emerald-200 border-emerald-300 text-emerald-800' : 'bg-white hover:bg-gray-50'} flex items-center gap-2 px-4 py-2`}>
+                                <LucideIcon name="Cloud" size={20}/> 雲端題庫
+                            </button>
                             <button onClick={importDecks} className={`anime-btn bg-white hover:bg-gray-50 flex items-center gap-2 px-4 py-2`}>
                                 <LucideIcon name="Upload" size={20}/> 匯入
                             </button>
@@ -1430,6 +1580,15 @@
                                 <LucideIcon name="Plus" size={24}/> 新增單元
                             </button>
                         </div>
+                    </div>
+                    <div className="glass-box p-3 mb-6 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                            <LucideIcon name={cloudLibraryId ? "Cloud" : "HardDrive"} size={18}/>
+                            <span>{cloudStatus}</span>
+                        </div>
+                        {cloudLibraryId && (
+                            <button onClick={disconnectCloudLibrary} className="text-xs font-bold text-gray-500 underline hover:text-gray-900">改回本機題庫</button>
+                        )}
                     </div>
                     <div className="mb-8">
                          <button onClick={openGameCenter} className="w-full anime-btn bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 py-4 text-2xl flex justify-center items-center gap-4 text-gray-800 shadow-md">

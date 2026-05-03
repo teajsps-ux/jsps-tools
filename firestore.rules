@@ -20,6 +20,17 @@ service cloud.firestore {
                          && request.auth.uid == userId;
     }
 
+    // Mandarin Flashcard cloud libraries
+    // Spark/free plan friendly: shared by a hard-to-guess library code.
+    match /mandarin-flashcard-libraries/{libraryId} {
+      allow read: if request.auth != null
+                  && libraryId.matches('^[A-Za-z0-9_-]{4,48}$');
+      allow create, update: if request.auth != null
+                            && libraryId.matches('^[A-Za-z0-9_-]{4,48}$')
+                            && request.resource.data.keys().hasOnly(['decks', 'updatedAt']);
+      allow delete: if false;
+    }
+
     // Word Search 雲端房間
     match /word-search-rooms/{roomCode} {
       allow read: if request.auth != null;
