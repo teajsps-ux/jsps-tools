@@ -275,6 +275,7 @@
         const SEED_DATA_URL = 'seed_翰林114一上.json';
         const STORAGE_KEY = 'mandarin_tutor_data_v2';
         const CLOUD_LIBRARY_ID_KEY = 'mandarin_cloud_library_id';
+        const PUBLISHED_APP_URL = 'https://teajsps-ux.github.io/jsps-tools/tools/mandarin-flashcard/index.html';
         const VISION_ENDPOINT_STORAGE_KEY = 'mandarin_vision_endpoint';
         const DEFAULT_VISION_ENDPOINT = '';
         const LEGACY_UNDEPLOYED_VISION_ENDPOINT = 'https://asia-east1-jsps-tools-sync.cloudfunctions.net/parseMandarinFlashcards';
@@ -299,6 +300,22 @@
             other: { label: '其他閃卡', shortLabel: '其他', color: 'bg-gray-100 text-gray-700 border-gray-200' }
         };
         const CATEGORY_ORDER = { vocabulary: 1, idiom: 2, other: 9 };
+        const sanitizeCloudLibraryId = (value) => (value || '').trim().replace(/[^\w-]/g, '-').slice(0, 48);
+        const getUrlCloudLibraryId = () => {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                return sanitizeCloudLibraryId(params.get('library') || params.get('lib') || '');
+            } catch {
+                return '';
+            }
+        };
+        const isParentShareMode = () => {
+            try {
+                return new URLSearchParams(window.location.search).get('parent') === '1';
+            } catch {
+                return false;
+            }
+        };
 
         const getCategoryInfo = (category) => DECK_CATEGORIES[category] || DECK_CATEGORIES.other;
 
@@ -565,12 +582,20 @@
                 const savedEndpoint = localStorage.getItem(VISION_ENDPOINT_STORAGE_KEY) || DEFAULT_VISION_ENDPOINT;
                 return savedEndpoint === LEGACY_UNDEPLOYED_VISION_ENDPOINT ? '' : savedEndpoint;
             });
-            const [cloudLibraryId, setCloudLibraryId] = useState(() => localStorage.getItem(CLOUD_LIBRARY_ID_KEY) || '');
+            const [cloudLibraryId, setCloudLibraryId] = useState(() => {
+                const urlLibraryId = getUrlCloudLibraryId();
+                if (urlLibraryId) {
+                    localStorage.setItem(CLOUD_LIBRARY_ID_KEY, urlLibraryId);
+                    return urlLibraryId;
+                }
+                return localStorage.getItem(CLOUD_LIBRARY_ID_KEY) || '';
+            });
             const [cloudStatus, setCloudStatus] = useState('本機題庫');
             const [cloudReady, setCloudReady] = useState(false);
             const [dataLoaded, setDataLoaded] = useState(false);
             const applyingRemoteRef = useRef(false);
             const cloudSaveTimerRef = useRef(null);
+            const parentMode = isParentShareMode();
 
             // Course Browser State
             const [filterPublisher, setFilterPublisher] = useState('全部');
@@ -1189,7 +1214,7 @@
                             setCloudLibraryId('');
                             setCloudStatus('本機題庫');
                         } else {
-                            const safeValue = value.replace(/[^\w-]/g, '-').slice(0, 48);
+                            const safeValue = sanitizeCloudLibraryId(value);
                             localStorage.setItem(CLOUD_LIBRARY_ID_KEY, safeValue);
                             setCloudLibraryId(safeValue);
                         }
@@ -1204,6 +1229,49 @@
                 setCloudLibraryId('');
                 setCloudReady(false);
                 setCloudStatus('本機題庫');
+            };
+
+            const getParentShareUrl = () => {
+                const libraryId = sanitizeCloudLibraryId(cloudLibraryId);
+                if (!libraryId) return '';
+                const url = new URL(PUBLISHED_APP_URL);
+                url.searchParams.set('library', libraryId);
+                url.searchParams.set('parent', '1');
+                return url.toString();
+            };
+
+            const copyParentShareLink = async () => {
+                const shareUrl = getParentShareUrl();
+                if (!shareUrl) {
+                    showModal({
+                        title: "還沒連線雲端題庫",
+                        content: "請先按「雲端題庫」設定題庫代碼，再複製家長連結。",
+                        showCancel: false,
+                        onConfirm: closeModal
+                    });
+                    return;
+                }
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    showModal({
+                        title: "已複製家長連結",
+                        content: (
+                            <div className="space-y-3">
+                                <p>把這個連結傳給家長。家長手機打開後會自動連到這份題庫，只要選閃卡開始測驗。</p>
+                                <textarea readOnly value={shareUrl} className="w-full h-24 border-2 border-gray-300 rounded-lg p-2 text-xs" />
+                            </div>
+                        ),
+                        showCancel: false,
+                        onConfirm: closeModal
+                    });
+                } catch {
+                    showModal({
+                        title: "請手動複製家長連結",
+                        content: <textarea readOnly value={shareUrl} className="w-full h-28 border-2 border-gray-300 rounded-lg p-2 text-xs" />,
+                        showCancel: false,
+                        onConfirm: closeModal
+                    });
+                }
             };
 
             const copyDPrompt = async () => {
@@ -1564,29 +1632,36 @@
                     <div className="flex flex-wrap gap-3 justify-between items-center mb-6 px-2">
                         <h2 className="home-section-title text-3xl font-bold border-l-8 border-yellow-400 pl-4 text-white drop-shadow-md">我的題庫</h2>
                         <div className="home-actions flex gap-3">
-                            <button onClick={configureCloudLibrary} className={`anime-btn ${cloudLibraryId ? 'bg-emerald-100 hover:bg-emerald-200 border-emerald-300 text-emerald-800' : 'bg-white hover:bg-gray-50'} flex items-center gap-2 px-4 py-2`}>
-                                <LucideIcon name="Cloud" size={20}/> 雲端題庫
-                            </button>
-                            <button onClick={importDecks} className={`anime-btn bg-white hover:bg-gray-50 flex items-center gap-2 px-4 py-2`}>
-                                <LucideIcon name="Upload" size={20}/> 匯入
-                            </button>
-                            <button onClick={loadSeedDecks} className={`anime-btn bg-amber-100 hover:bg-amber-200 border-amber-300 flex items-center gap-2 px-4 py-2 text-gray-800`}>
-                                <LucideIcon name="BookOpen" size={20}/> 載入翰林題庫
-                            </button>
-                            <button onClick={exportDecks} className={`anime-btn bg-white hover:bg-gray-50 flex items-center gap-2 px-4 py-2`}>
-                                <LucideIcon name="FileJson" size={20}/> 匯出
-                            </button>
-                            <button onClick={createDeck} className={`anime-btn bg-sky-200 hover:bg-sky-300 border-sky-400 flex items-center gap-2 px-4 py-2 text-gray-800`}>
-                                <LucideIcon name="Plus" size={24}/> 新增單元
-                            </button>
+                            {!parentMode && (
+                                <React.Fragment>
+                                    <button onClick={configureCloudLibrary} className={`anime-btn ${cloudLibraryId ? 'bg-emerald-100 hover:bg-emerald-200 border-emerald-300 text-emerald-800' : 'bg-white hover:bg-gray-50'} flex items-center gap-2 px-4 py-2`}>
+                                        <LucideIcon name="Cloud" size={20}/> 雲端題庫
+                                    </button>
+                                    <button onClick={copyParentShareLink} className={`anime-btn bg-emerald-200 hover:bg-emerald-300 border-emerald-400 flex items-center gap-2 px-4 py-2 text-gray-800`}>
+                                        <LucideIcon name="Share2" size={20}/> 複製家長連結
+                                    </button>
+                                    <button onClick={importDecks} className={`anime-btn bg-white hover:bg-gray-50 flex items-center gap-2 px-4 py-2`}>
+                                        <LucideIcon name="Upload" size={20}/> 匯入
+                                    </button>
+                                    <button onClick={loadSeedDecks} className={`anime-btn bg-amber-100 hover:bg-amber-200 border-amber-300 flex items-center gap-2 px-4 py-2 text-gray-800`}>
+                                        <LucideIcon name="BookOpen" size={20}/> 載入翰林題庫
+                                    </button>
+                                    <button onClick={exportDecks} className={`anime-btn bg-white hover:bg-gray-50 flex items-center gap-2 px-4 py-2`}>
+                                        <LucideIcon name="FileJson" size={20}/> 匯出
+                                    </button>
+                                    <button onClick={createDeck} className={`anime-btn bg-sky-200 hover:bg-sky-300 border-sky-400 flex items-center gap-2 px-4 py-2 text-gray-800`}>
+                                        <LucideIcon name="Plus" size={24}/> 新增單元
+                                    </button>
+                                </React.Fragment>
+                            )}
                         </div>
                     </div>
                     <div className="glass-box p-3 mb-6 flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                            <LucideIcon name={cloudLibraryId ? "Cloud" : "HardDrive"} size={18}/>
-                            <span>{cloudStatus}</span>
+                            <LucideIcon name={parentMode ? "Users" : (cloudLibraryId ? "Cloud" : "HardDrive")} size={18}/>
+                            <span>{parentMode ? `家長練習模式：${cloudLibraryId ? cloudStatus : '請使用老師提供的連結'}` : cloudStatus}</span>
                         </div>
-                        {cloudLibraryId && (
+                        {cloudLibraryId && !parentMode && (
                             <button onClick={disconnectCloudLibrary} className="text-xs font-bold text-gray-500 underline hover:text-gray-900">改回本機題庫</button>
                         )}
                     </div>
@@ -1632,15 +1707,19 @@
                             const categoryInfo = getCategoryInfo(meta.category);
                             return (
                             <div key={deck.id} className="deck-card glass-box p-6 relative group">
-                                <div className="absolute top-4 left-4 flex gap-2">
-                                    <button onClick={() => moveDeck(originalIndex, -1)} disabled={originalIndex === 0} className={btnBase}><LucideIcon name="ArrowUp" size={16} /> 上移</button>
-                                    <button onClick={() => moveDeck(originalIndex, 1)} disabled={originalIndex === decks.length - 1} className={btnBase}><LucideIcon name="ArrowDown" size={16} /> 下移</button>
-                                </div>
-                                <div className="absolute top-4 right-4 flex gap-2">
-                                    <button onClick={() => startEdit(deck.id)} className={btnBase}><LucideIcon name="Edit3" size={16} /> 編輯</button>
-                                    <button onClick={() => deleteDeck(deck.id)} className={`${btnBase} text-red-600 bg-red-50 border-red-200`}><LucideIcon name="Trash2" size={16} /> 刪除</button>
-                                </div>
-                                <div className="flex flex-wrap gap-2 mt-10 mb-3">
+                                {!parentMode && (
+                                    <React.Fragment>
+                                        <div className="absolute top-4 left-4 flex gap-2">
+                                            <button onClick={() => moveDeck(originalIndex, -1)} disabled={originalIndex === 0} className={btnBase}><LucideIcon name="ArrowUp" size={16} /> 上移</button>
+                                            <button onClick={() => moveDeck(originalIndex, 1)} disabled={originalIndex === decks.length - 1} className={btnBase}><LucideIcon name="ArrowDown" size={16} /> 下移</button>
+                                        </div>
+                                        <div className="absolute top-4 right-4 flex gap-2">
+                                            <button onClick={() => startEdit(deck.id)} className={btnBase}><LucideIcon name="Edit3" size={16} /> 編輯</button>
+                                            <button onClick={() => deleteDeck(deck.id)} className={`${btnBase} text-red-600 bg-red-50 border-red-200`}><LucideIcon name="Trash2" size={16} /> 刪除</button>
+                                        </div>
+                                    </React.Fragment>
+                                )}
+                                <div className={`flex flex-wrap gap-2 ${parentMode ? 'mt-0' : 'mt-10'} mb-3`}>
                                     <span className="px-2 py-1 rounded border bg-white/70 text-xs font-bold text-gray-700">{meta.publisher}</span>
                                     <span className="px-2 py-1 rounded border bg-white/70 text-xs font-bold text-gray-700">{meta.book}</span>
                                     <span className="px-2 py-1 rounded border bg-white/70 text-xs font-bold text-gray-700">{meta.lessonNo ? `第 ${meta.lessonNo} 課` : '未分課'}</span>
