@@ -101,6 +101,10 @@
             top: auto;
             animation: particle-twinkle ease-in-out infinite;
         }
+        .particle-rise {
+            top: auto;
+            animation: particle-rise linear infinite;
+        }
         @keyframes particle-fall {
             0% { transform: translateY(-10vh) translateX(0); opacity: 0; }
             8% { opacity: 0.85; }
@@ -117,6 +121,13 @@
         @keyframes particle-twinkle {
             0%, 100% { opacity: 0.25; transform: scale(0.7); }
             50% { opacity: 1; transform: scale(1.3); }
+        }
+        @keyframes particle-rise {
+            0% { transform: translateY(12vh) translateX(0) scale(0.65); opacity: 0; }
+            10% { opacity: 0.75; }
+            50% { transform: translateY(-45vh) translateX(36px) scale(1); }
+            90% { opacity: 0.75; }
+            100% { transform: translateY(-110vh) translateX(-28px) scale(1.25); opacity: 0; }
         }
 
         /* root 確保在粒子層之上 */
@@ -507,7 +518,7 @@
             return { date: cur[0], name: cur[1], theme: cur[2] };
         };
 
-        // === 粒子產生器（櫻花/雪花/楓葉/星星） ===
+        // === 粒子產生器（櫻花/雪花/楓葉/星星/泡泡） ===
         const generateParticles = (theme) => {
             const layer = document.getElementById('particles-layer');
             if (!layer) return;
@@ -517,7 +528,9 @@
             else if (theme === 'snow')   { emoji = '❄';  count = 40; animClass = 'particle-fall'; }
             else if (theme === 'maple')  { emoji = '🍁'; count = 22; animClass = 'particle-sway'; }
             else if (theme === 'stars')  { emoji = '✨'; count = 50; animClass = 'particle-twinkle'; }
-            else return; // ocean / rainbow / image：不需要粒子
+            else if (theme === 'ocean')  { emoji = '🫧'; count = 36; animClass = 'particle-rise'; }
+            else if (theme === 'rainbow'){ emoji = '💫'; count = 42; animClass = 'particle-twinkle'; }
+            else return; // image：不需要粒子
             for (let i = 0; i < count; i++) {
                 const el = document.createElement('div');
                 el.className = 'particle ' + animClass;
@@ -528,6 +541,12 @@
                     el.style.animationDuration = (1.5 + Math.random() * 2.5) + 's';
                     el.style.animationDelay = (Math.random() * 3) + 's';
                     el.style.fontSize = (8 + Math.random() * 14) + 'px';
+                } else if (animClass === 'particle-rise') {
+                    el.style.bottom = '-12vh';
+                    el.style.left = (Math.random() * 100) + '%';
+                    el.style.animationDuration = (7 + Math.random() * 8) + 's';
+                    el.style.animationDelay = (Math.random() * 10) + 's';
+                    el.style.fontSize = (12 + Math.random() * 20) + 'px';
                 } else {
                     el.style.left = (Math.random() * 100) + '%';
                     el.style.animationDuration = (8 + Math.random() * 8) + 's';
