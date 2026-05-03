@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我是國語背書高手</title>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons (Vanilla JS version) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- OCR for screenshot import -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- Bpmf Iansui (含注音的標楷風字型，給低年級閃卡用) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/bpmf-iansui/index.css">
+    
+    <style>
+        /* --- 全域設定：字體與背景 --- */
+        body {
+            font-family: "BiaoKai", "DFKai-SB", "KaiTi", "Noto Serif TC", serif;
+            background-color: #2c3e50;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            color: #2d3748;
+            min-height: 100vh;
+            transition: background 1.2s ease;
+        }
+
+        /* === 背景主題：圖片（保留原本 bg.jpg 用法） === */
+        body.theme-image {
+            background-image: url('bg.jpg'), linear-gradient(135deg, #232526 0%, #414345 100%);
+        }
+
+        /* === 背景主題：櫻花飄落（春） === */
+        body.theme-sakura {
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 50%, #f48fb1 100%);
+        }
+
+        /* === 背景主題：雪花紛飛（冬） === */
+        body.theme-snow {
+            background: linear-gradient(180deg, #1a2e4a 0%, #34546c 100%);
+        }
+
+        /* === 背景主題：星空閃爍（夜晚） === */
+        body.theme-stars {
+            background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f0f23 100%);
+        }
+
+        /* === 背景主題：楓葉飄動（秋） === */
+        body.theme-maple {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffcc80 50%, #ff8a65 100%);
+        }
+
+        /* === 背景主題：海浪流動（夏） === */
+        body.theme-ocean {
+            background: linear-gradient(135deg, #00c6fb 0%, #005bea 50%, #0077be 100%);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+        }
+
+        /* === 背景主題：彩虹漸層 === */
+        body.theme-rainbow {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #ffd1ff, #c2e9fb, #a1c4fd, #d4fc79);
+            background-size: 600% 600%;
+            animation: gradientFlow 20s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* === 粒子層（櫻花/雪花/楓葉/星星） === */
+        #particles-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .particle {
+            position: absolute;
+            top: -10vh;
+            user-select: none;
+            will-change: transform, opacity;
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+        }
+        .particle-fall { animation: particle-fall linear infinite; }
+        .particle-sway { animation: particle-sway linear infinite; }
+        .particle-twinkle {
+            top: auto;
+            animation: particle-twinkle ease-in-out infinite;
+        }
+        @keyframes particle-fall {
+            0% { transform: translateY(-10vh) translateX(0); opacity: 0; }
+            8% { opacity: 0.85; }
+            92% { opacity: 0.85; }
+            100% { transform: translateY(110vh) translateX(30px); opacity: 0; }
+        }
+        @keyframes particle-sway {
+            0% { transform: translateY(-10vh) translateX(0) rotate(0); opacity: 0; }
+            8% { opacity: 0.9; }
+            50% { transform: translateY(50vh) translateX(80px) rotate(180deg); }
+            92% { opacity: 0.9; }
+            100% { transform: translateY(110vh) translateX(-50px) rotate(360deg); opacity: 0; }
+        }
+        @keyframes particle-twinkle {
+            0%, 100% { opacity: 0.25; transform: scale(0.7); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        /* root 確保在粒子層之上 */
+        #root { position: relative; z-index: 1; }
+
+        /* === 字型：閃卡專用 Bpmf Iansui（內建注音） === */
+        .font-bpmf {
+            font-family: 'Bpmf Iansui', "BiaoKai", "DFKai-SB", "KaiTi", "Noto Serif TC", serif !important;
+        }
+
+        /* --- 翻牌動畫核心 --- */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+
+        /* --- 玻璃磨砂容器 --- */
+        .glass-box {
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .glass-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        /* --- 按鈕風格 --- */
+        .anime-btn {
+            border: 2px solid #4a5568;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.15s ease;
+            box-shadow: 3px 3px 0px 0px #2d3748;
+        }
+        .anime-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px 0px #2d3748;
+        }
+
+        /* 隱藏 Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* === 響應式：手機 / 平板 === */
+        @media (max-width: 640px) {
+            .home-title { font-size: 2.25rem !important; letter-spacing: 0.1em !important; }
+            .home-subtitle { font-size: 1rem !important; }
+            .home-section-title { font-size: 1.5rem !important; padding-left: 0.75rem !important; }
+            .home-actions { flex-wrap: wrap !important; gap: 0.5rem !important; justify-content: flex-end; }
+            .home-actions button { padding: 0.4rem 0.7rem !important; font-size: 0.8rem !important; }
+            .deck-card { padding: 1rem !important; }
+            .deck-card-title { font-size: 1.25rem !important; margin-top: 4.5rem !important; }
+            .quiz-word { font-size: 3.5rem !important; }
+            .quiz-definition { font-size: 1.5rem !important; }
+            .quiz-example { font-size: 1.05rem !important; }
+            .battle-grid-cell { font-size: 0.7rem !important; }
+        }
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .home-title { font-size: 3.5rem !important; }
+        }
+
+        /* 觸控按鈕最小 44px（iOS 規範） */
+        @media (max-width: 640px) {
+            button, select, input[type="button"], input[type="submit"] {
+                min-height: 40px;
+            }
+        }
+    </style>
+</head>
+<body class="theme-image">
+    <div id="particles-layer"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Shared Button Style Class ---
+        const btnBase = "px-3 py-1.5 rounded-lg border-2 border-gray-600 flex items-center gap-1 shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] text-sm font-bold transition-all active:translate-y-[2px] active:shadow-none bg-white hover:bg-gray-100 text-gray-800";
+
+        // --- Lucide Icon Helper ---
+        const LucideIcon = ({ name, size = 24, className = "" }) => {
+            const lucideGlobal = window.lucide;
+            if (!lucideGlobal || !lucideGlobal.icons) return null;
+            const iconData = lucideGlobal.icons[name];
+            if (!iconData) return null;
+            const toCamelCase = (str) => str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+            const convertAttrs = (rawAttrs) => {
+                const newAttrs = {};
+                for (const key in rawAttrs) {
+                    const camelKey = key === 'class' ? 'className' : toCamelCase(key);
+                    newAttrs[camelKey] = rawAttrs[key];
+                }
+                return newAttrs;
+            };
+            const renderIconNode = ([tag, attrs = {}, children = []], index) => React.createElement(
+                tag,
+                { ...convertAttrs(attrs), key: index },
+                children.map(renderIconNode)
+            );
+            return (
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={size}
+                    height={size}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className={`lucide lucide-${name} ${className}`.trim()}
+                >
+                    {iconData.map(renderIconNode)}
+                </svg>
+            );
+        };
+
+        // --- Default Data ---
+        const DEFAULT_DECK = {
+            id: 'default_001',
+            name: '範例單元：成語練習',
+            publisher: '範例',
+            book: '範例冊',
+            lessonNo: 1,
+            category: 'idiom',
+            cards: [
+                { id: 'c1', word: '一心一意', definition: '指心意專一，沒有其他的想法。', example: '姐姐做事一心一意，所以很快就做完了。' },
+                { id: 'c2', word: '五花八門', definition: '比喻花樣繁多，變化多端。', example: '夜市裡的小吃五花八門，讓人看了眼花撩亂。' },
+                { id: 'c3', word: '七上八下', definition: '形容心情忐忑不安。', example: '就要公佈成績了，我的心裡七上八下的。' },
+                { id: 'c4', word: '井底之蛙', definition: '比喻見識淺薄的人。', example: '我們應該多讀書，才不會成為井底之蛙。' },
+                { id: 'c5', word: '守株待兔', definition: '比喻拘泥守成，不知變通。', example: '做事要主動積極，不能守株待兔。' }
+            ]
+        };
+
+        const SEED_DATA_URL = 'seed_翰林114一上.json';
+        const STORAGE_KEY = 'mandarin_tutor_data_v2';
+        const VISION_ENDPOINT_STORAGE_KEY = 'mandarin_vision_endpoint';
+        const DEFAULT_VISION_ENDPOINT = '';
+        const LEGACY_UNDEPLOYED_VISION_ENDPOINT = 'https://asia-east1-jsps-tools-sync.cloudfunctions.net/parseMandarinFlashcards';
+        const DEFAULT_PUBLISHER = '翰林';
+        const DEFAULT_BOOK = '114一上';
+        const PUBLISHER_OPTIONS = ['翰林', '康軒', '南一'];
+        const BOOK_YEARS = ['114', '115'];
+        const BOOK_GRADES = ['一', '二', '三', '四', '五', '六'];
+        const BOOK_TERMS = ['上', '下'];
+        const BOOK_OPTIONS = BOOK_YEARS.flatMap(year => BOOK_GRADES.flatMap(grade => BOOK_TERMS.map(term => `${year}${grade}${term}`)));
+        const DECK_CATEGORIES = {
+            vocabulary: { label: '語詞解釋', shortLabel: '語詞', color: 'bg-sky-100 text-sky-800 border-sky-200' },
+            idiom: { label: '成語解釋', shortLabel: '成語', color: 'bg-amber-100 text-amber-800 border-amber-200' },
+            other: { label: '其他閃卡', shortLabel: '其他', color: 'bg-gray-100 text-gray-700 border-gray-200' }
+        };
+        const CATEGORY_ORDER = { vocabulary: 1, idiom: 2, other: 9 };
+
+        const getCategoryInfo = (category) => DECK_CATEGORIES[category] || DECK_CATEGORIES.other;
+
+        const parseDeckMeta = (deck = {}) => {
+            const name = deck.name || '';
+            const compact = name.replace(/\s+/g, '');
+            const lessonMatch = compact.match(/L\.?(\d+)|第(\d+)課/);
+            const lessonNo = deck.lessonNo || (lessonMatch ? parseInt(lessonMatch[1] || lessonMatch[2], 10) : '');
+            let category = deck.category || 'other';
+            if (/背?解釋|語詞|詞語/.test(compact) && !/成語/.test(compact)) category = 'vocabulary';
+            if (/成語/.test(compact)) category = 'idiom';
+            let publisher = deck.publisher || DEFAULT_PUBLISHER;
+            if (compact.includes('康軒')) publisher = '康軒';
+            if (compact.includes('南一')) publisher = '南一';
+            if (compact.includes('範例')) publisher = '範例';
+            let book = deck.book || DEFAULT_BOOK;
+            const bookMatch = compact.match(/(\d{3}[一二三四五六]上|\d{3}[一二三四五六]下|[一二三四五六]上|[一二三四五六]下)/);
+            if (bookMatch) book = bookMatch[1].length <= 2 ? `114${bookMatch[1]}` : bookMatch[1];
+            return { publisher, book, lessonNo, category };
+        };
+
+        const buildDeckName = ({ publisher, book, lessonNo, category }) => {
+            const categoryText = getCategoryInfo(category).label;
+            const lessonText = lessonNo ? `L.${lessonNo}` : '未分課';
+            return `${publisher || DEFAULT_PUBLISHER}${book || DEFAULT_BOOK}${lessonText}${categoryText}`;
+        };
+
+        const sortDecksByCourse = (a, b) => {
+            const ma = parseDeckMeta(a);
+            const mb = parseDeckMeta(b);
+            return `${ma.publisher}|${ma.book}|${String(ma.lessonNo).padStart(3, '0')}|${CATEGORY_ORDER[ma.category] || 9}`.localeCompare(
+                `${mb.publisher}|${mb.book}|${String(mb.lessonNo).padStart(3, '0')}|${CATEGORY_ORDER[mb.category] || 9}`,
+                'zh-Hant'
+            );
+        };
+
+        const normalizeDecks = (rawDecks, shouldRegenerateIds = false) => {
+            if (!Array.isArray(rawDecks)) throw new Error('Deck data must be an array');
+            return rawDecks.map((deck) => {
+                const deckId = shouldRegenerateIds ? generateId() : (deck.id || generateId());
+                const meta = parseDeckMeta(deck);
+                return {
+                    id: deckId,
+                    name: deck.name || buildDeckName(meta),
+                    publisher: meta.publisher,
+                    book: meta.book,
+                    lessonNo: meta.lessonNo,
+                    category: meta.category,
+                    cards: Array.isArray(deck.cards) ? deck.cards.map((card) => ({
+                        id: shouldRegenerateIds ? generateId() : (card.id || generateId()),
+                        word: card.word || '未知',
+                        definition: card.definition || '',
+                        example: card.example || ''
+                    })) : []
+                };
+            });
+        };
+
+        const generateId = () => Math.random().toString(36).substr(2, 9);
+
+        // --- TTS ---
+        const speakText = (text, onEnd = null) => {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-TW';
+            utterance.rate = 0.9;
+            if (onEnd) utterance.onend = onEnd;
+            window.speechSynthesis.speak(utterance);
+        };
+
+        // --- Parser ---
+        const parseContent = (text) => {
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            const cards = [];
+            lines.forEach(line => {
+                let cleanLine = line.replace(/^\d+[\.\、\s]\s*/, '').trim();
+                const splitIndex = cleanLine.search(/[:：]/);
+                if (splitIndex > 0) {
+                    const word = cleanLine.substring(0, splitIndex).trim();
+                    const remaining = cleanLine.substring(splitIndex + 1).trim();
+                    if (word && remaining) {
+                        let definition = remaining;
+                        let example = "（無例句）"; 
+                        const exampleMatch = remaining.match(/([例造]句[:：])/);
+                        if (exampleMatch) {
+                            const exIndex = exampleMatch.index;
+                            definition = remaining.substring(0, exIndex).trim();
+                            const rawExample = remaining.substring(exIndex + exampleMatch[0].length).trim();
+                            if (rawExample) { example = rawExample; }
+                        }
+                        cards.push({ id: generateId(), word: word, definition: definition, example: example });
+                    }
+                }
+            });
+            return cards;
+        };
+
+        const parseStructuredCards = (text) => {
+            const raw = String(text || '').trim();
+            if (!raw) return [];
+
+            const tryParseJson = (value) => {
+                try {
+                    const parsed = JSON.parse(value);
+                    const list = Array.isArray(parsed) ? parsed : parsed.cards;
+                    if (!Array.isArray(list)) return [];
+                    return list.map(card => ({
+                        id: generateId(),
+                        word: String(card.word || '').trim(),
+                        definition: String(card.definition || '').trim(),
+                        example: String(card.example || card.sentence || '').trim() || '（無例句）'
+                    })).filter(card => card.word && card.definition);
+                } catch (error) {
+                    return [];
+                }
+            };
+
+            const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+            const jsonCards = tryParseJson(fenced ? fenced[1].trim() : raw);
+            if (jsonCards.length > 0) return jsonCards;
+
+            const tableCards = raw.split('\n')
+                .map(line => line.trim())
+                .filter(Boolean)
+                .map(line => line.replace(/^\d+[\.\、\s]\s*/, ''))
+                .map(line => line.split(/[|｜\t]/).map(part => part.trim()))
+                .filter(parts => parts.length >= 2)
+                .map(parts => ({
+                    id: generateId(),
+                    word: parts[0],
+                    definition: parts[1],
+                    example: parts.slice(2).join('｜') || '（無例句）'
+                }))
+                .filter(card => card.word && card.definition);
+            if (tableCards.length > 0) return tableCards;
+
+            return parseContent(raw);
+        };
+
+        // --- Modal (Glass Style) ---
+        const Modal = ({ isOpen, title, content, onConfirm, onCancel, showConfirm = true, showCancel = true, confirmText="確定", cancelText="取消" }) => {
+            if (!isOpen) return null;
+            const handleConfirmClick = onConfirm || onCancel || (() => {});
+            const handleCancelClick = onCancel || (() => {});
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="glass-box p-6 max-w-md w-full animate-bounce-in">
+                        <h3 className="text-2xl font-bold mb-4 text-center border-b-2 border-gray-300 pb-2 text-gray-800">{title}</h3>
+                        <div className="mb-6 text-lg whitespace-pre-wrap text-gray-700">{content}</div>
+                        <div className="flex justify-center space-x-4">
+                            {showCancel && <button onClick={handleCancelClick} className="px-6 py-2 bg-gray-100 border-2 border-gray-400 rounded-lg hover:bg-gray-200 font-bold text-gray-700">{cancelText}</button>}
+                            {showConfirm && <button onClick={handleConfirmClick} className="px-6 py-2 bg-slate-700 border-2 border-slate-900 rounded-lg hover:bg-slate-800 font-bold text-white shadow-md">{confirmText}</button>}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // === 24 節氣表 ===（[月-日, 節氣名, 對應主題]，按時間排序）
+        const SOLAR_TERMS = [
+            ['01-05', '小寒', 'snow'],   ['01-20', '大寒', 'snow'],
+            ['02-04', '立春', 'sakura'], ['02-19', '雨水', 'sakura'],
+            ['03-05', '驚蟄', 'sakura'], ['03-20', '春分', 'sakura'],
+            ['04-05', '清明', 'sakura'], ['04-20', '穀雨', 'ocean'],
+            ['05-05', '立夏', 'ocean'],  ['05-21', '小滿', 'ocean'],
+            ['06-05', '芒種', 'ocean'],  ['06-21', '夏至', 'rainbow'],
+            ['07-07', '小暑', 'rainbow'],['07-23', '大暑', 'rainbow'],
+            ['08-07', '立秋', 'maple'],  ['08-23', '處暑', 'maple'],
+            ['09-07', '白露', 'maple'],  ['09-23', '秋分', 'maple'],
+            ['10-08', '寒露', 'maple'],  ['10-23', '霜降', 'stars'],
+            ['11-07', '立冬', 'snow'],   ['11-22', '小雪', 'snow'],
+            ['12-07', '大雪', 'snow'],   ['12-21', '冬至', 'stars'],
+        ];
+
+        const getCurrentSolarTerm = () => {
+            const d = new Date();
+            const md = String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            // 1/1 ~ 1/4 屬於去年的「冬至」區間
+            let cur = SOLAR_TERMS[SOLAR_TERMS.length - 1];
+            for (const t of SOLAR_TERMS) {
+                if (t[0] <= md) cur = t;
+            }
+            return { date: cur[0], name: cur[1], theme: cur[2] };
+        };
+
+        // === 粒子產生器（櫻花/雪花/楓葉/星星） ===
+        const generateParticles = (theme) => {
+            const layer = document.getElementById('particles-layer');
+            if (!layer) return;
+            layer.innerHTML = '';
+            let emoji, count, animClass;
+            if (theme === 'sakura')      { emoji = '🌸'; count = 25; animClass = 'particle-sway'; }
+            else if (theme === 'snow')   { emoji = '❄';  count = 40; animClass = 'particle-fall'; }
+            else if (theme === 'maple')  { emoji = '🍁'; count = 22; animClass = 'particle-sway'; }
+            else if (theme === 'stars')  { emoji = '✨'; count = 50; animClass = 'particle-twinkle'; }
+            else return; // ocean / rainbow / image：不需要粒子
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.className = 'particle ' + animClass;
+                el.textContent = emoji;
+                if (animClass === 'particle-twinkle') {
+                    el.style.top = (Math.random() * 100) + '%';
+                    el.style.left = (Math.random() * 100) + '%';
+                    el.style.animationDuration = (1.5 + Math.random() * 2.5) + 's';
+                    el.style.animationDelay = (Math.random() * 3) + 's';
+                    el.style.fontSize = (8 + Math.random() * 14) + 'px';
+                } else {
+                    el.style.left = (Math.random() * 100) + '%';
+                    el.style.animationDuration = (8 + Math.random() * 8) + 's';
+                    el.style.animationDelay = (Math.random() * 12) + 's';
+                    el.style.fontSize = (12 + Math.random() * 18) + 'px';
+                }
+                layer.appendChild(el);
+            }
+        };
+
+        const BG_THEME_OPTIONS = [
+            { value: 'auto',    label: '📅 24節氣自動' },
+            { value: 'image',   label: '🖼️ 自選圖片(bg.jpg)' },
+            { value: 'sakura',  label: '🌸 櫻花飄落' },
+            { value: 'snow',    label: '❄️ 雪花紛飛' },
+            { value: 'stars',   label: '✨ 星空閃爍' },
+            { value: 'maple',   label: '🍁 楓葉飄動' },
+            { value: 'ocean',   label: '🌊 海浪流動' },
+            { value: 'rainbow', label: '🌈 彩虹漸層' },
+        ];
+
+        // --- Player Colors (Vibrant/Cinematic Palette) ---
+        const COLOR_PALETTE = [
+            { id: 0, name: '寶石藍', bg: 'bg-blue-500', text: 'text-white', border: 'border-blue-800', light: 'bg-blue-100' },
+            { id: 1, name: '赤紅', bg: 'bg-red-500', text: 'text-white', border: 'border-red-800', light: 'bg-red-100' },
+            { id: 2, name: '翡翠綠', bg: 'bg-emerald-500', text: 'text-white', border: 'border-emerald-800', light: 'bg-emerald-100' },
+            { id: 3, name: '琥珀黃', bg: 'bg-amber-400', text: 'text-black', border: 'border-amber-700', light: 'bg-amber-100' },
+            { id: 4, name: '皇家紫', bg: 'bg-violet-500', text: 'text-white', border: 'border-violet-800', light: 'bg-violet-100' },
+            { id: 5, name: '烈焰橘', bg: 'bg-orange-500', text: 'text-white', border: 'border-orange-800', light: 'bg-orange-100' },
+            { id: 6, name: '霓虹粉', bg: 'bg-pink-500', text: 'text-white', border: 'border-pink-800', light: 'bg-pink-100' },
+            { id: 7, name: '酷黑', bg: 'bg-gray-900', text: 'text-white', border: 'border-black', light: 'bg-gray-300' },
+        ];
+
+        // --- App Component ---
+        const App = () => {
+            const [decks, setDecks] = useState([]);
+            const [currentDeckId, setCurrentDeckId] = useState(null);
+            const [view, setView] = useState('HOME');
+            const [modalConfig, setModalConfig] = useState({ isOpen: false });
+            
+            // Quiz State
+            const [quizCards, setQuizCards] = useState([]);
+            const [currentCardIndex, setCurrentCardIndex] = useState(0);
+            const [isFlipped, setIsFlipped] = useState(false);
+            const [score, setScore] = useState({ correct: 0, wrong: 0, wrongCards: [] });
+            const [isSpeaking, setIsSpeaking] = useState(false);
+
+            // Edit State
+            const [editName, setEditName] = useState('');
+            const [editPublisher, setEditPublisher] = useState(DEFAULT_PUBLISHER);
+            const [editBook, setEditBook] = useState(DEFAULT_BOOK);
+            const [editLessonNo, setEditLessonNo] = useState('');
+            const [editCategory, setEditCategory] = useState('vocabulary');
+            const [batchInput, setBatchInput] = useState('');
+            const [ocrStatus, setOcrStatus] = useState('');
+            const [ocrReviewCards, setOcrReviewCards] = useState([]);
+            const [visionEndpoint, setVisionEndpoint] = useState(() => {
+                const savedEndpoint = localStorage.getItem(VISION_ENDPOINT_STORAGE_KEY) || DEFAULT_VISION_ENDPOINT;
+                return savedEndpoint === LEGACY_UNDEPLOYED_VISION_ENDPOINT ? '' : savedEndpoint;
+            });
+
+            // Course Browser State
+            const [filterPublisher, setFilterPublisher] = useState('全部');
+            const [filterBook, setFilterBook] = useState('全部');
+            const [filterLesson, setFilterLesson] = useState('全部');
+            const [filterCategory, setFilterCategory] = useState('全部');
+
+            // Battle Setup State
+            const [setupMode, setSetupMode] = useState('STREAK_STATIC');
+            const [setupSide, setSetupSide] = useState(3);
+            const [setupPlayerCount, setSetupPlayerCount] = useState(3);
+            const [setupSelectedDecks, setSetupSelectedDecks] = useState([]); 
+            const [playerConfig, setPlayerConfig] = useState([
+                { name: '藍隊', colorId: 0 }, { name: '紅隊', colorId: 1 }, { name: '綠隊', colorId: 2 },
+                { name: '黃隊', colorId: 3 }, { name: '紫隊', colorId: 4 }, { name: '橘隊', colorId: 5 },
+            ]);
+
+            // Battle Game State
+            const [gameMode, setGameMode] = useState(null);
+            const [gridSide, setGridSide] = useState(3);
+            const [battleGrid, setBattleGrid] = useState([]);
+            const [activePlayers, setActivePlayers] = useState([]);
+            const [playerCount, setPlayerCount] = useState(2);
+            const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+            const [battleWinner, setBattleWinner] = useState(null);
+            const [selectedGridIndex, setSelectedGridIndex] = useState(null);
+            const [winnerDetails, setWinnerDetails] = useState(null);
+
+            // === 背景主題狀態 ===
+            const [bgTheme, setBgTheme] = useState(() => localStorage.getItem('mandarin_bg_theme') || 'auto');
+            const [autoTermName, setAutoTermName] = useState(() => getCurrentSolarTerm().name);
+
+            useEffect(() => {
+                let actualTheme = bgTheme;
+                if (bgTheme === 'auto') {
+                    const term = getCurrentSolarTerm();
+                    actualTheme = term.theme;
+                    setAutoTermName(term.name);
+                }
+                document.body.className = 'theme-' + actualTheme;
+                generateParticles(actualTheme);
+                localStorage.setItem('mandarin_bg_theme', bgTheme);
+            }, [bgTheme]);
+
+            useEffect(() => {
+                let isMounted = true;
+                const applyDecks = (nextDecks) => {
+                    if (!isMounted) return;
+                    setDecks(nextDecks);
+                    setSetupSelectedDecks(nextDecks.map(d => d.id));
+                };
+
+                const savedData = localStorage.getItem(STORAGE_KEY);
+                if (savedData) {
+                    try { 
+                        applyDecks(normalizeDecks(JSON.parse(savedData)));
+                    } catch(e) {
+                        localStorage.removeItem(STORAGE_KEY);
+                        applyDecks([DEFAULT_DECK]);
+                    }
+                } else { 
+                    fetch(SEED_DATA_URL)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Seed data not found');
+                            return response.json();
+                        })
+                        .then(seedDecks => applyDecks(normalizeDecks(seedDecks)))
+                        .catch(() => applyDecks([DEFAULT_DECK]));
+                }
+                return () => { isMounted = false; };
+            }, []);
+
+            useEffect(() => {
+                if (decks.length > 0) { localStorage.setItem(STORAGE_KEY, JSON.stringify(decks)); }
+            }, [decks]);
+
+            // --- Helpers ---
+            const showModal = (config) => setModalConfig({ ...config, isOpen: true });
+            const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false });
+
+            // --- Logic Functions (V9.2.1) ---
+            const createDeck = () => {
+                showModal({
+                    title: "建立新單元",
+                    content: (
+                        <div className="grid grid-cols-1 gap-3">
+                            <p className="text-sm text-gray-600">同一課的「語詞解釋」和「成語解釋」會建立成不同閃卡單元。</p>
+                            <label className="text-sm font-bold text-gray-700">版本</label>
+                            <select id="newPublisher" defaultValue={DEFAULT_PUBLISHER} className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none bg-white">
+                                {PUBLISHER_OPTIONS.map(value => <option key={value} value={value}>{value}</option>)}
+                            </select>
+                            <label className="text-sm font-bold text-gray-700">冊別</label>
+                            <select id="newBook" defaultValue={DEFAULT_BOOK} className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none bg-white">
+                                {BOOK_OPTIONS.map(value => <option key={value} value={value}>{value}</option>)}
+                            </select>
+                            <label className="text-sm font-bold text-gray-700">課次</label>
+                            <input type="number" id="newLessonNo" min="1" defaultValue="1" className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none" />
+                            <label className="text-sm font-bold text-gray-700">閃卡類型</label>
+                            <select id="newCategory" defaultValue="vocabulary" className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none bg-white">
+                                {Object.entries(DECK_CATEGORIES).map(([value, info]) => <option key={value} value={value}>{info.label}</option>)}
+                            </select>
+                            <label className="text-sm font-bold text-gray-700">自訂名稱（可留白）</label>
+                            <input type="text" id="newDeckName" className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none" placeholder="留白會自動命名" />
+                        </div>
+                    ),
+                    onConfirm: () => {
+                        const meta = {
+                            publisher: document.getElementById('newPublisher')?.value || DEFAULT_PUBLISHER,
+                            book: document.getElementById('newBook')?.value || DEFAULT_BOOK,
+                            lessonNo: parseInt(document.getElementById('newLessonNo')?.value, 10) || '',
+                            category: document.getElementById('newCategory')?.value || 'vocabulary'
+                        };
+                        const nameInput = document.getElementById('newDeckName')?.value.trim();
+                        const newId = generateId();
+                        setDecks([...decks, { id: newId, name: nameInput || buildDeckName(meta), ...meta, cards: [] }]);
+                        setSetupSelectedDecks(prev => [...prev, newId]); 
+                        closeModal();
+                    },
+                    onCancel: closeModal
+                });
+            };
+            const deleteDeck = (id) => showModal({ title: "刪除警告", content: "確定要刪除這個單元嗎？\n刪除後無法復原喔！", onConfirm: () => { setDecks(decks.filter(d => d.id !== id)); setSetupSelectedDecks(prev => prev.filter(did => did !== id)); closeModal(); }, onCancel: closeModal });
+            
+            const moveDeck = (index, direction) => {
+                const newDecks = [...decks];
+                if (direction === -1 && index > 0) [newDecks[index], newDecks[index - 1]] = [newDecks[index - 1], newDecks[index]];
+                else if (direction === 1 && index < newDecks.length - 1) [newDecks[index], newDecks[index + 1]] = [newDecks[index + 1], newDecks[index]];
+                setDecks(newDecks);
+            };
+            
+            const startEdit = (deckId) => { 
+                const deck = decks.find(d => d.id === deckId);
+                if (deck) {
+                    const meta = parseDeckMeta(deck);
+                    setCurrentDeckId(deckId);
+                    setEditName(deck.name || '');
+                    setEditPublisher(meta.publisher);
+                    setEditBook(meta.book);
+                    setEditLessonNo(meta.lessonNo);
+                    setEditCategory(meta.category);
+                    setBatchInput('');
+                    setOcrStatus('');
+                    setOcrReviewCards([]);
+                    setView('EDIT');
+                }
+            };
+            
+            const saveDeck = () => {
+                const meta = {
+                    publisher: editPublisher.trim() || DEFAULT_PUBLISHER,
+                    book: editBook.trim() || DEFAULT_BOOK,
+                    lessonNo: parseInt(editLessonNo, 10) || '',
+                    category: editCategory
+                };
+                setDecks(decks.map(d => d.id === currentDeckId ? { ...d, ...meta, name: editName.trim() || buildDeckName(meta) } : d));
+                setView('HOME');
+            };
+            
+            const parseAndAddCards = () => {
+                if (!batchInput.trim()) return;
+                const newCards = parseStructuredCards(batchInput);
+                if (newCards.length === 0) { showModal({ title: "無法辨識", content: "請貼 JSON，或每行使用「詞語｜解釋｜例句」，也可使用「詞語：解釋」。", showCancel: false, onConfirm: closeModal }); return; }
+                setDecks(decks.map(d => d.id === currentDeckId ? { ...d, cards: [...(d.cards || []), ...newCards] } : d));
+                setBatchInput('');
+                showModal({ title: "成功加入", content: `成功加入了 ${newCards.length} 張卡片！`, showCancel: false, onConfirm: closeModal });
+            };
+
+            const getOcrBox = (item) => item.bbox || item.boundingBox || item.box || null;
+
+            const cleanOcrToken = (text) => String(text || '').replace(/\s+/g, '').trim();
+            const BOPOMOFO_REGEX = /[\u3100-\u312f\u31a0-\u31bf]/g;
+            const BOPOMOFO_BLACKLIST = 'ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩㄪㄫㄬㄭㄮㄯ㄰ㄱㄲㄳㄴㄵㄶㄷㄸㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅃㅄㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+
+            const getOcrItems = (data) => {
+                const source = [data?.symbols, data?.words, data?.lines].find(list => Array.isArray(list) && list.length > 0) || [];
+                return source
+                    .map(item => {
+                        const box = getOcrBox(item);
+                        const text = cleanOcrToken(item.text);
+                        if (!box || !text) return null;
+                        const x0 = Number(box.x0 ?? box.left ?? 0);
+                        const y0 = Number(box.y0 ?? box.top ?? 0);
+                        const x1 = Number(box.x1 ?? box.right ?? x0);
+                        const y1 = Number(box.y1 ?? box.bottom ?? y0);
+                        return {
+                            text,
+                            x0,
+                            y0,
+                            x1,
+                            y1,
+                            xCenter: (x0 + x1) / 2,
+                            width: Math.max(1, x1 - x0)
+                        };
+                    })
+                    .filter(Boolean);
+            };
+
+            const buildVerticalOcrText = (data) => {
+                const items = getOcrItems(data);
+                if (items.length === 0) return '';
+                const widths = items.map(item => item.width).sort((a, b) => a - b);
+                const medianWidth = widths[Math.floor(widths.length / 2)] || 16;
+                const columnThreshold = Math.max(18, medianWidth * 1.8);
+                const columns = [];
+
+                [...items].sort((a, b) => b.xCenter - a.xCenter).forEach(item => {
+                    const column = columns.find(col => Math.abs(col.xCenter - item.xCenter) <= columnThreshold);
+                    if (column) {
+                        column.items.push(item);
+                        column.xCenter = column.items.reduce((sum, current) => sum + current.xCenter, 0) / column.items.length;
+                    } else {
+                        columns.push({ xCenter: item.xCenter, items: [item] });
+                    }
+                });
+
+                return columns
+                    .sort((a, b) => b.xCenter - a.xCenter)
+                    .map(column => column.items.sort((a, b) => a.y0 - b.y0).map(item => item.text).join(''))
+                    .filter(Boolean)
+                    .join('\n');
+            };
+
+            const loadImageFile = (file) => new Promise((resolve, reject) => {
+                const image = new Image();
+                image.onload = () => resolve(image);
+                image.onerror = reject;
+                image.src = URL.createObjectURL(file);
+            });
+
+            const cropImageToBlob = (image, crop, options = {}) => new Promise((resolve) => {
+                const scale = options.scale || 3;
+                const padX = crop.width * (options.padX ?? 0.08);
+                const padY = crop.height * (options.padY ?? 0.08);
+                const sourceX = Math.max(0, crop.x + padX);
+                const sourceY = Math.max(0, crop.y + padY);
+                const sourceWidth = Math.max(1, Math.min(image.width - sourceX, crop.width - padX * 2));
+                const sourceHeight = Math.max(1, Math.min(image.height - sourceY, crop.height - padY * 2));
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+                canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(
+                    image,
+                    sourceX,
+                    sourceY,
+                    sourceWidth,
+                    sourceHeight,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+                if (options.preprocess !== false) {
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i];
+                        const g = data[i + 1];
+                        const b = data[i + 2];
+                        const lightness = (Math.max(r, g, b) + Math.min(r, g, b)) / 2;
+                        const gray = r * 0.299 + g * 0.587 + b * 0.114;
+                        const isPaleGrid = lightness > 165 && r > g && g > b;
+                        const isVeryLight = gray > 205;
+                        const isText = gray < 172 && !isPaleGrid;
+                        const value = isText ? 0 : 255;
+                        data[i] = value;
+                        data[i + 1] = value;
+                        data[i + 2] = value;
+                        data[i + 3] = 255;
+                        if (isVeryLight || isPaleGrid) {
+                            data[i] = 255;
+                            data[i + 1] = 255;
+                            data[i + 2] = 255;
+                        }
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                }
+                canvas.toBlob(resolve, 'image/png');
+            });
+
+            const cropImageToDataUrl = (image, crop) => {
+                const padX = crop.width * 0.04;
+                const padY = crop.height * 0.03;
+                const sourceX = Math.max(0, crop.x + padX);
+                const sourceY = Math.max(0, crop.y + padY);
+                const sourceWidth = Math.max(1, Math.min(image.width - sourceX, crop.width - padX * 2));
+                const sourceHeight = Math.max(1, Math.min(image.height - sourceY, crop.height - padY * 2));
+                const canvas = document.createElement('canvas');
+                const maxHeight = 360;
+                const scale = Math.min(1, maxHeight / sourceHeight);
+                canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+                canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+                return canvas.toDataURL('image/jpeg', 0.88);
+            };
+
+            const fileToDataUrl = (file) => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result || ''));
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+
+            const parseImageWithVisionApi = async (file) => {
+                if (!visionEndpoint.trim()) return null;
+                const dataUrl = await fileToDataUrl(file);
+                const imageBase64 = dataUrl.split(',')[1] || '';
+                const response = await fetch(visionEndpoint.trim(), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageBase64,
+                        mimeType: file.type || 'image/jpeg',
+                        publisher: editPublisher,
+                        book: editBook,
+                        lessonNo: editLessonNo,
+                        category: editCategory
+                    })
+                });
+                if (!response.ok) throw new Error(`Vision API failed: ${response.status}`);
+                const payload = await response.json();
+                const cards = Array.isArray(payload.cards) ? payload.cards : [];
+                return cards
+                    .map(card => ({
+                        id: generateId(),
+                        word: cleanTableCellText(card.word || '', 'word'),
+                        definition: cleanTableCellText(card.definition || '', 'definition'),
+                        example: cleanTableCellText(card.example || '', 'example') || '（無例句）'
+                    }))
+                    .filter(card => card.word || card.definition || card.example !== '（無例句）');
+            };
+
+            const cleanTableCellText = (text, type) => {
+                let value = String(text || '')
+                    .replace(/\s+/g, '')
+                    .replace(BOPOMOFO_REGEX, '')
+                    .replace(/[|｜]/g, '')
+                    .replace(/[「」]/g, '')
+                    .replace(/[#＃$＄%％&＆*＊@＠^＾_＿=＝+＋~～`｀\\]/g, '')
+                    .replace(/[·•‧]/g, '')
+                    .trim();
+                if (type === 'word') value = value.replace(/^[\d一二三四五六七八九十]+[.\、]*/, '').replace(/詞語|語詞|成語/g, '').replace(/[^\u3400-\u9fff]/g, '');
+                if (type === 'definition') value = value.replace(/^解釋[:：]?/, '').replace(/^[\d一二三四五六七八九十]+[.\、]*/, '');
+                if (type === 'example') value = value.replace(/^造句[:：]?/, '').replace(/^[\d一二三四五六七八九十]+[.\、]*/, '');
+                return value.trim();
+            };
+
+            const recognizeVerticalBlob = async (blob, label) => {
+                let result;
+                try {
+                    result = await window.Tesseract.recognize(blob, 'chi_tra_vert+chi_tra+eng', {
+                        tessedit_pageseg_mode: '5',
+                        preserve_interword_spaces: '1',
+                        tessedit_char_blacklist: BOPOMOFO_BLACKLIST
+                    });
+                } catch (error) {
+                    result = await window.Tesseract.recognize(blob, 'chi_tra+eng', {
+                        tessedit_pageseg_mode: '5',
+                        preserve_interword_spaces: '1',
+                        tessedit_char_blacklist: BOPOMOFO_BLACKLIST
+                    });
+                }
+                const verticalText = buildVerticalOcrText(result.data);
+                return cleanTableCellText(verticalText || result.data?.text || '', label);
+            };
+
+            const recognizeVerticalTableCards = async (file) => {
+                const image = await loadImageFile(file);
+                const dataLeft = image.width * 0.032;
+                const dataRight = image.width * 0.925;
+                const tableTop = image.height * 0.072;
+                const tableBottom = image.height * 0.962;
+                const columnWidth = (dataRight - dataLeft) / 8;
+                const rowCrops = {
+                    word: { y: image.height * 0.145, height: image.height * 0.160 },
+                    definition: { y: image.height * 0.305, height: image.height * 0.310 },
+                    example: { y: image.height * 0.615, height: tableBottom - image.height * 0.615 }
+                };
+                const cards = [];
+
+                for (let index = 0; index < 8; index++) {
+                    const x = dataRight - columnWidth * (index + 1);
+                    const preview = cropImageToDataUrl(image, { x, y: tableTop, width: columnWidth, height: tableBottom - tableTop });
+                    setOcrStatus(`正在切表格辨識第 ${index + 1} 欄 / 8：詞語`);
+                    const wordBlob = await cropImageToBlob(image, { x, y: rowCrops.word.y, width: columnWidth, height: rowCrops.word.height }, { padX: 0.20, padY: 0.12, scale: 4 });
+                    const word = cleanTableCellText(await recognizeVerticalBlob(wordBlob, 'word'), 'word');
+
+                    setOcrStatus(`正在切表格辨識第 ${index + 1} 欄 / 8：解釋`);
+                    const definitionBlob = await cropImageToBlob(image, { x, y: rowCrops.definition.y, width: columnWidth, height: rowCrops.definition.height }, { padX: 0.10, padY: 0.08, scale: 3 });
+                    const definition = cleanTableCellText(await recognizeVerticalBlob(definitionBlob, 'definition'), 'definition');
+
+                    setOcrStatus(`正在切表格辨識第 ${index + 1} 欄 / 8：例句`);
+                    const exampleBlob = await cropImageToBlob(image, { x, y: rowCrops.example.y, width: columnWidth, height: rowCrops.example.height }, { padX: 0.10, padY: 0.08, scale: 3 });
+                    const example = cleanTableCellText(await recognizeVerticalBlob(exampleBlob, 'example'), 'example') || '（無例句）';
+
+                    if (word || definition || example !== '（無例句）') {
+                        cards.push({
+                            id: generateId(),
+                            word: word || `第 ${index + 1} 欄`,
+                            definition,
+                            example,
+                            preview
+                        });
+                    }
+                }
+
+                return cards;
+            };
+
+            const importImageText = () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = async (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    setOcrStatus(visionEndpoint.trim() ? '正在交給 AI Vision 解析成「詞語 / 解釋 / 例句」...' : '未設定 AI 後端，使用 D 方案或本機 OCR 校對表。');
+                    try {
+                        if (visionEndpoint.trim()) {
+                            try {
+                                const aiCards = await parseImageWithVisionApi(file);
+                                if (aiCards && aiCards.length > 0) {
+                                    setOcrReviewCards(aiCards);
+                                    setBatchInput(aiCards.map(card => `${card.word}：${card.definition} 例句：${card.example}`).join('\n'));
+                                    setOcrStatus(`AI 已解析 ${aiCards.length} 張卡片。請在下方校對表確認後，再按「確認加入卡片」。`);
+                                    return;
+                                }
+                            } catch (error) {
+                                setOcrStatus('AI 後端目前無法使用，已改用本機 OCR 校對表。');
+                            }
+                        }
+
+                        if (!window.Tesseract) {
+                            showModal({ title: "圖片辨識失敗", content: "AI 後端尚未設定或無法使用，本機 OCR 套件也尚未載入。建議改用「複製 Google AI 模式提示詞」後，把 Google AI 模式整理出的 JSON 貼回來。", showCancel: false, onConfirm: closeModal });
+                            setOcrStatus('');
+                            return;
+                        }
+
+                        const tableCards = await recognizeVerticalTableCards(file);
+                        if (tableCards.length === 0) {
+                            setOcrStatus('');
+                            showModal({ title: "沒有辨識到卡片", content: "這張圖無法切出詞語、解釋、例句。請確認是康軒這種直排表格截圖，或先手動貼上文字。", showCancel: false, onConfirm: closeModal });
+                            return;
+                        }
+                        setOcrReviewCards(tableCards);
+                        setBatchInput(tableCards.map(card => `${card.word}：${card.definition} 例句：${card.example}`).join('\n'));
+                        setOcrStatus(`已切出 ${tableCards.length} 欄。OCR 只當草稿，請先在下方校對表修正，再按「確認加入卡片」。`);
+                    } catch (error) {
+                        setOcrStatus('');
+                        showModal({ title: "圖片辨識失敗", content: "AI 或 OCR 暫時無法辨識這張圖片。請確認後端網址、金鑰與網路連線，或先手動貼上文字。", showCancel: false, onConfirm: closeModal });
+                    }
+                };
+                input.click();
+            };
+            
+            const moveCard = (index, direction) => {
+                const deck = decks.find(d => d.id === currentDeckId);
+                const cards = [...deck.cards];
+                if (direction === -1 && index > 0) [cards[index], cards[index - 1]] = [cards[index - 1], cards[index]];
+                else if (direction === 1 && index < cards.length - 1) [cards[index], cards[index + 1]] = [cards[index + 1], cards[index]];
+                setDecks(decks.map(d => d.id === currentDeckId ? { ...d, cards } : d));
+            };
+
+            const updateCard = (cardId, field, value) => {
+                setDecks(decks.map(d => d.id === currentDeckId ? {
+                    ...d,
+                    cards: d.cards.map(card => card.id === cardId ? { ...card, [field]: value } : card)
+                } : d));
+            };
+
+            const addBlankCard = () => {
+                const newCard = { id: generateId(), word: '', definition: '', example: '' };
+                setDecks(decks.map(d => d.id === currentDeckId ? { ...d, cards: [...(d.cards || []), newCard] } : d));
+            };
+
+            const configureVisionEndpoint = () => {
+                showModal({
+                    title: "設定 AI 後端",
+                    content: (
+                        <div className="space-y-3">
+                            <p className="text-sm text-gray-600">填入 Firebase Function 網址。API key 只放在 Firebase Secret，不要放在 HTML。</p>
+                            <input
+                                id="visionEndpointInput"
+                                defaultValue={visionEndpoint}
+                                className="w-full border-2 border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-purple-300"
+                                placeholder="https://parsemandarinflashcards-xxxxx.a.run.app"
+                            />
+                        </div>
+                    ),
+                    confirmText: "儲存",
+                    onConfirm: () => {
+                        const value = document.getElementById('visionEndpointInput')?.value.trim() || '';
+                        localStorage.setItem(VISION_ENDPOINT_STORAGE_KEY, value);
+                        setVisionEndpoint(value);
+                        closeModal();
+                    },
+                    onCancel: closeModal
+                });
+            };
+
+            const copyDPrompt = async () => {
+                const categoryLabel = getCategoryInfo(editCategory).label;
+                const prompt = [
+                    `請幫我整理這張國小國語課本「${categoryLabel}」截圖，請務必依照課本原文整理。`,
+                    `版本：${editPublisher}；冊別：${editBook}；課次：第 ${editLessonNo || '?'} 課。`,
+                    '圖片是直排中文表格，閱讀順序是由右而左，每欄由上而下。',
+                    '每一欄整理成一張閃卡：上方是詞語或成語，中間是解釋，下方是造句或例句。',
+                    '請完全忽略注音、欄號、表格標題，以及「語詞」「解釋」「造句」這些列標籤。',
+                    '不得改寫課本文字，不得補字，不得刪字，不得簡化，不得把前後句順序調換。',
+                    '不要把解釋和造句混在一起；definition 只放解釋，example 只放造句或例句。',
+                    '如果圖片中有標點符號，請盡量保留原標點。',
+                    '請只輸出 JSON，不要 Markdown，不要解釋。',
+                    '格式如下：',
+                    '{"cards":[{"word":"詞語","definition":"解釋","example":"例句"}]}'
+                ].join('\n');
+
+                try {
+                    await navigator.clipboard.writeText(prompt);
+                    setOcrStatus('已複製 Google AI 模式提示詞。請到 Google AI 模式貼上截圖與提示詞，再把 JSON 貼回文字框。');
+                } catch (error) {
+                    setBatchInput(prompt);
+                    setOcrStatus('瀏覽器無法自動複製，已把提示詞放進文字框。');
+                }
+            };
+
+            const updateOcrReviewCard = (cardId, field, value) => {
+                setOcrReviewCards(ocrReviewCards.map(card => card.id === cardId ? { ...card, [field]: value } : card));
+            };
+
+            const deleteOcrReviewCard = (cardId) => {
+                setOcrReviewCards(ocrReviewCards.filter(card => card.id !== cardId));
+            };
+
+            const confirmOcrReviewCards = () => {
+                const confirmedCards = ocrReviewCards
+                    .map(({ preview, ...card }) => ({
+                        ...card,
+                        word: card.word.trim(),
+                        definition: card.definition.trim(),
+                        example: card.example.trim() || '（無例句）'
+                    }))
+                    .filter(card => card.word || card.definition || card.example !== '（無例句）');
+                if (confirmedCards.length === 0) {
+                    showModal({ title: "沒有可加入的卡片", content: "請至少保留一張有內容的卡片。", showCancel: false, onConfirm: closeModal });
+                    return;
+                }
+                setDecks(decks.map(d => d.id === currentDeckId ? { ...d, cards: [...(d.cards || []), ...confirmedCards] } : d));
+                setOcrReviewCards([]);
+                setBatchInput('');
+                setOcrStatus(`已加入 ${confirmedCards.length} 張校對後的卡片。`);
+            };
+            
+            const deleteCard = (cardId) => setDecks(decks.map(d => d.id === currentDeckId ? { ...d, cards: d.cards.filter(c => c.id !== cardId) } : d));
+            
+            const exportDecks = () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(decks));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "國語文鍛造師_備份.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            };
+            
+            const importDecks = () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'application/json';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if(!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const sanitizedDecks = normalizeDecks(JSON.parse(event.target.result), true);
+                            setDecks(prev => [...prev, ...sanitizedDecks]);
+                            setSetupSelectedDecks(prev => [...prev, ...sanitizedDecks.map(d => d.id)]);
+                            showModal({ title: "匯入成功", content: `成功匯入 ${sanitizedDecks.length} 個單元！`, showCancel: false, onConfirm: closeModal });
+                        } catch (err) { showModal({ title: "匯入失敗", content: "檔案格式不正確。", showCancel: false, onConfirm: closeModal }); }
+                    };
+                    reader.readAsText(file);
+                };
+                input.click();
+            };
+
+            const loadSeedDecks = () => {
+                fetch(SEED_DATA_URL)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Seed data not found');
+                        return response.json();
+                    })
+                    .then(seedDecks => {
+                        const normalizedSeedDecks = normalizeDecks(seedDecks);
+                        const existingNames = new Set(decks.map(deck => deck.name));
+                        const missingDecks = normalizedSeedDecks.filter(deck => !existingNames.has(deck.name));
+                        if (missingDecks.length === 0) {
+                            showModal({ title: "已經載入", content: "翰林 114 一上題庫已經在你的題庫裡了。", showCancel: false, onConfirm: closeModal });
+                            return;
+                        }
+                        setDecks(prev => [...prev, ...missingDecks]);
+                        setSetupSelectedDecks(prev => [...prev, ...missingDecks.map(deck => deck.id)]);
+                        showModal({ title: "載入完成", content: `已加入 ${missingDecks.length} 個翰林 114 一上單元。`, showCancel: false, onConfirm: closeModal });
+                    })
+                    .catch(() => showModal({ title: "載入失敗", content: "找不到預設題庫檔，請確認 seed_翰林114一上.json 是否存在。", showCancel: false, onConfirm: closeModal }));
+            };
+
+            const startQuiz = (deckId) => {
+                const deck = decks.find(d => d.id === deckId);
+                if (!deck || deck.cards.length === 0) { showModal({ title: "無法開始", content: "這個單元還沒有卡片喔！", showCancel: false, onConfirm: closeModal }); return; }
+                let cardsToPlay = [...deck.cards];
+                cardsToPlay.sort(() => Math.random() - 0.5);
+                setCurrentDeckId(deckId);
+                setQuizCards(cardsToPlay);
+                setCurrentCardIndex(0);
+                setIsFlipped(false);
+                setScore({ correct: 0, wrong: 0, wrongCards: [] });
+                setView('QUIZ');
+            };
+            
+            const startQuizRetry = (cards) => {
+                let cardsToPlay = [...cards];
+                cardsToPlay.sort(() => Math.random() - 0.5);
+                setQuizCards(cardsToPlay);
+                setCurrentCardIndex(0);
+                setIsFlipped(false);
+                setScore({ correct: 0, wrong: 0, wrongCards: [] });
+                setView('QUIZ');
+            };
+
+            useEffect(() => {
+                if (view === 'QUIZ' && quizCards.length > 0 && !isFlipped) {
+                    const timer = setTimeout(() => speakText(quizCards[currentCardIndex].word), 600);
+                    return () => clearTimeout(timer);
+                }
+            }, [view, currentCardIndex, isFlipped, quizCards]);
+            
+            const handleCardClick = () => !isFlipped && setIsFlipped(true);
+            const handleAnswer = (isCorrect) => {
+                if (isCorrect) { setScore(prev => ({ ...prev, correct: prev.correct + 1 })); nextCard(); }
+                else {
+                    setScore(prev => ({ ...prev, wrong: prev.wrong + 1, wrongCards: [...prev.wrongCards, quizCards[currentCardIndex]] }));
+                    setIsSpeaking(true);
+                    speakText(quizCards[currentCardIndex].definition, () => { setIsSpeaking(false); nextCard(); });
+                }
+            };
+            const nextCard = () => {
+                if (currentCardIndex < quizCards.length - 1) { setIsFlipped(false); setCurrentCardIndex(prev => prev + 1); }
+                else setView('RESULT');
+            };
+            const playDefinition = (e) => { e.stopPropagation(); speakText(quizCards[currentCardIndex].definition); };
+
+            // --- Battle Logic V9 ---
+            const openGameCenter = () => {
+                if (decks.length === 0) { showModal({ title: "無法開始", content: "請先新增一些單元吧！", showCancel: false, onConfirm: closeModal }); return; }
+                setView('BATTLE_SETUP');
+            };
+            const updatePlayerConfig = (index, field, value) => {
+                const newConfig = [...playerConfig];
+                newConfig[index] = { ...newConfig[index], [field]: value };
+                setPlayerConfig(newConfig);
+            };
+            const toggleDeckSelection = (deckId) => { setSetupSelectedDecks(prev => prev.includes(deckId) ? prev.filter(id => id !== deckId) : [...prev, deckId]); };
+            const initBattle = (mode, side, pCount) => {
+                if (setupSelectedDecks.length === 0) { showModal({ title: "無法開始", content: "請至少勾選一個單元！", showCancel: false, onConfirm: closeModal }); return; }
+                const count = mode === 'TERRITORY_CHAOS' ? pCount : 2; 
+                const currentPlayers = [];
+                for(let i=0; i<count; i++) {
+                    const cfg = playerConfig[i];
+                    const colorData = COLOR_PALETTE[cfg.colorId];
+                    currentPlayers.push({ id: i, name: cfg.name.trim() || colorData.name + '隊', color: colorData });
+                }
+                setActivePlayers(currentPlayers);
+                let allCards = [];
+                decks.forEach(d => { if (setupSelectedDecks.includes(d.id)) { allCards.push(...d.cards); } });
+                if (allCards.length === 0) { showModal({ title: "無法開始", content: "選定的單元裡沒有題目！", showCancel: false, onConfirm: closeModal }); return; }
+                const totalCells = side * side;
+                let gridCardsPool = [];
+                while(gridCardsPool.length < totalCells) { gridCardsPool.push(...allCards); }
+                gridCardsPool.sort(() => Math.random() - 0.5);
+                const gridCards = [];
+                for(let i=0; i<totalCells; i++) { gridCards.push({ ...gridCardsPool[i], gridId: `g-${i}`, owner: null }); }
+                gridCards.sort(() => Math.random() - 0.5);
+                setGameMode(mode); setGridSide(side); setBattleGrid(gridCards); setPlayerCount(count);
+                setCurrentPlayerIndex(0); setBattleWinner(null); setWinnerDetails(null); setSelectedGridIndex(null); setIsFlipped(false);
+                setView('BATTLE_GAME');
+            };
+            const shuffleGrid = (currentGrid) => {
+                const newGrid = [...currentGrid];
+                for (let i = newGrid.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newGrid[i], newGrid[j]] = [newGrid[j], newGrid[i]];
+                }
+                return newGrid;
+            };
+            const checkLineWinner = (grid, side) => {
+                const check = (indices) => {
+                    const firstOwner = grid[indices[0]].owner;
+                    if (firstOwner === null) return null; 
+                    for (let i = 1; i < indices.length; i++) { if (grid[indices[i]].owner !== firstOwner) return null; }
+                    return firstOwner;
+                };
+                for (let r = 0; r < side; r++) { const w = check(Array.from({length:side}, (_,i) => r*side+i)); if (w !== null) return w; }
+                for (let c = 0; c < side; c++) { const w = check(Array.from({length:side}, (_,i) => i*side+c)); if (w !== null) return w; }
+                const w1 = check(Array.from({length:side}, (_,i) => i*side+i)); if (w1 !== null) return w1;
+                const w2 = check(Array.from({length:side}, (_,i) => i*side+(side-1-i))); if (w2 !== null) return w2;
+                return null;
+            };
+            const checkTerritoryWinner = (grid) => {
+                const counts = {}; let full = true;
+                grid.forEach(c => { if (c.owner === null) full = false; else counts[c.owner] = (counts[c.owner] || 0) + 1; });
+                if (!full) return null; 
+                let max = -1; let winner = null;
+                Object.keys(counts).forEach(p => { if (counts[p] > max) { max = counts[p]; winner = parseInt(p); } else if (counts[p] === max) { winner = 'DRAW'; } });
+                return { winner, counts };
+            };
+            const handleBattleCardClick = (index) => {
+                if (battleWinner !== null || battleGrid[index].owner !== null) return; 
+                setSelectedGridIndex(index); setIsFlipped(false); speakText(battleGrid[index].word);
+            };
+            const handleBattleAnswer = (isCorrect) => {
+                let newGrid = [...battleGrid];
+                const cardIndex = selectedGridIndex;
+                const pIndex = currentPlayerIndex;
+                const nextP = (pIndex + 1) % playerCount;
+                if (gameMode === 'STREAK_STATIC' || gameMode === 'STREAK_CHAOS') {
+                    if (isCorrect) {
+                        newGrid[cardIndex].owner = pIndex;
+                        const w = checkLineWinner(newGrid, gridSide);
+                        if (w !== null) { setBattleGrid(newGrid); setBattleWinner(w); setSelectedGridIndex(null); return; }
+                    } else {
+                        newGrid[cardIndex].owner = nextP; 
+                        const w = checkLineWinner(newGrid, gridSide);
+                        if (w !== null) { setBattleGrid(newGrid); setBattleWinner(w); setSelectedGridIndex(null); return; }
+                        setCurrentPlayerIndex(nextP);
+                    }
+                    if (gameMode === 'STREAK_CHAOS') newGrid = shuffleGrid(newGrid);
+                } else if (gameMode === 'CONNECT_STATIC') {
+                    if (isCorrect) newGrid[cardIndex].owner = pIndex;
+                    const w = checkLineWinner(newGrid, gridSide);
+                    if (w !== null) { setBattleGrid(newGrid); setBattleWinner(w); setSelectedGridIndex(null); return; }
+                    setCurrentPlayerIndex(nextP);
+                } else if (gameMode === 'TERRITORY_CHAOS') {
+                    if (isCorrect) newGrid[cardIndex].owner = pIndex;
+                    setCurrentPlayerIndex(nextP);
+                    newGrid = shuffleGrid(newGrid);
+                    const res = checkTerritoryWinner(newGrid);
+                    if (res) { setBattleGrid(newGrid); setBattleWinner(res.winner); setWinnerDetails(res.counts); setSelectedGridIndex(null); return; }
+                }
+                setBattleGrid(newGrid); setSelectedGridIndex(null);
+            };
+            const onBattleWrong = (e) => {
+                e.stopPropagation(); if (isSpeaking) return; setIsSpeaking(true);
+                speakText(battleGrid[selectedGridIndex].definition, () => { setIsSpeaking(false); handleBattleAnswer(false); });
+            };
+            const onBattleCorrect = (e) => { e.stopPropagation(); if (isSpeaking) return; handleBattleAnswer(true); };
+            const playBattleDefinition = (e) => { e.stopPropagation(); if (selectedGridIndex !== null) speakText(battleGrid[selectedGridIndex].definition); };
+
+            // --- Views ---
+            const renderHome = () => {
+                const sortedDecks = [...decks].sort(sortDecksByCourse);
+                const publishers = ['全部', ...new Set([...PUBLISHER_OPTIONS, ...sortedDecks.map(d => parseDeckMeta(d).publisher)])];
+                const books = ['全部', ...new Set([...BOOK_OPTIONS, ...sortedDecks
+                    .filter(d => filterPublisher === '全部' || parseDeckMeta(d).publisher === filterPublisher)
+                    .map(d => parseDeckMeta(d).book)])];
+                const lessons = ['全部', ...new Set(sortedDecks
+                    .filter(d => {
+                        const meta = parseDeckMeta(d);
+                        return (filterPublisher === '全部' || meta.publisher === filterPublisher) &&
+                            (filterBook === '全部' || meta.book === filterBook) &&
+                            (filterCategory === '全部' || meta.category === filterCategory);
+                    })
+                    .map(d => parseDeckMeta(d).lessonNo)
+                    .filter(Boolean)
+                    .sort((a, b) => a - b)
+                    .map(String))];
+                const visibleDecks = sortedDecks.filter(deck => {
+                    const meta = parseDeckMeta(deck);
+                    return (filterPublisher === '全部' || meta.publisher === filterPublisher) &&
+                        (filterBook === '全部' || meta.book === filterBook) &&
+                        (filterLesson === '全部' || String(meta.lessonNo) === filterLesson) &&
+                        (filterCategory === '全部' || meta.category === filterCategory);
+                });
+
+                return (
+                <div className="max-w-5xl mx-auto p-4">
+                    {/* 右上角：背景主題切換 */}
+                    <div className="flex justify-end pt-3">
+                        <select
+                            value={bgTheme}
+                            onChange={(e) => setBgTheme(e.target.value)}
+                            className="anime-btn bg-white px-3 py-2 text-sm font-bold text-gray-800 cursor-pointer"
+                            title="切換背景主題"
+                        >
+                            {BG_THEME_OPTIONS.map(opt => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.value === 'auto' ? `${opt.label}（${autoTermName}）` : opt.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <header className="text-center mb-8 pt-4">
+                        <h1 className="home-title text-5xl font-bold mb-2 text-white tracking-widest drop-shadow-lg" style={{textShadow: "2px 2px 4px rgba(0,0,0,0.5)"}}>我是國語背書高手</h1>
+                        <p className="home-subtitle text-xl text-gray-200">詩意學習，快樂成長</p>
+                    </header>
+                    <div className="flex flex-wrap gap-3 justify-between items-center mb-6 px-2">
+                        <h2 className="home-section-title text-3xl font-bold border-l-8 border-yellow-400 pl-4 text-white drop-shadow-md">我的題庫</h2>
+                        <div className="home-actions flex gap-3">
+                            <button onClick={importDecks} className={`anime-btn bg-white hover:bg-gray-50 flex items-center gap-2 px-4 py-2`}>
+                                <LucideIcon name="Upload" size={20}/> 匯入
+                            </button>
+                            <button onClick={loadSeedDecks} className={`anime-btn bg-amber-100 hover:bg-amber-200 border-amber-300 flex items-center gap-2 px-4 py-2 text-gray-800`}>
+                                <LucideIcon name="BookOpen" size={20}/> 載入翰林題庫
+                            </button>
+                            <button onClick={exportDecks} className={`anime-btn bg-white hover:bg-gray-50 flex items-center gap-2 px-4 py-2`}>
+                                <LucideIcon name="FileJson" size={20}/> 匯出
+                            </button>
+                            <button onClick={createDeck} className={`anime-btn bg-sky-200 hover:bg-sky-300 border-sky-400 flex items-center gap-2 px-4 py-2 text-gray-800`}>
+                                <LucideIcon name="Plus" size={24}/> 新增單元
+                            </button>
+                        </div>
+                    </div>
+                    <div className="mb-8">
+                         <button onClick={openGameCenter} className="w-full anime-btn bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 py-4 text-2xl flex justify-center items-center gap-4 text-gray-800 shadow-md">
+                            <LucideIcon name="Swords" size={32} /> 進入遊戲大廳 (對戰模式)
+                        </button>
+                    </div>
+                    <div className="glass-box p-4 mb-6">
+                        <div className="flex flex-wrap items-end gap-3">
+                            <div className="flex-1 min-w-[150px]">
+                                <label className="block text-xs font-bold text-gray-500 mb-1">版本</label>
+                                <select value={filterPublisher} onChange={(e) => { setFilterPublisher(e.target.value); setFilterBook('全部'); setFilterLesson('全部'); }} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold bg-white">
+                                    {publishers.map(value => <option key={value} value={value}>{value}</option>)}
+                                </select>
+                            </div>
+                            <div className="flex-1 min-w-[150px]">
+                                <label className="block text-xs font-bold text-gray-500 mb-1">冊別</label>
+                                <select value={filterBook} onChange={(e) => { setFilterBook(e.target.value); setFilterLesson('全部'); }} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold bg-white">
+                                    {books.map(value => <option key={value} value={value}>{value}</option>)}
+                                </select>
+                            </div>
+                            <div className="flex-1 min-w-[120px]">
+                                <label className="block text-xs font-bold text-gray-500 mb-1">課次</label>
+                                <select value={filterLesson} onChange={(e) => setFilterLesson(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold bg-white">
+                                    {lessons.map(value => <option key={value} value={value}>{value === '全部' ? value : `第 ${value} 課`}</option>)}
+                                </select>
+                            </div>
+                            <div className="flex-1 min-w-[150px]">
+                                <label className="block text-xs font-bold text-gray-500 mb-1">閃卡類型</label>
+                                <select value={filterCategory} onChange={(e) => { setFilterCategory(e.target.value); setFilterLesson('全部'); }} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold bg-white">
+                                    <option value="全部">全部</option>
+                                    {Object.entries(DECK_CATEGORIES).map(([value, info]) => <option key={value} value={value}>{info.label}</option>)}
+                                </select>
+                            </div>
+                            <button onClick={() => { setFilterPublisher('全部'); setFilterBook('全部'); setFilterLesson('全部'); setFilterCategory('全部'); }} className="anime-btn bg-gray-100 hover:bg-gray-200 border-gray-300 px-4 py-2 text-gray-700">顯示全部</button>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {visibleDecks.map((deck) => {
+                            const meta = parseDeckMeta(deck);
+                            const originalIndex = decks.findIndex(d => d.id === deck.id);
+                            const categoryInfo = getCategoryInfo(meta.category);
+                            return (
+                            <div key={deck.id} className="deck-card glass-box p-6 relative group">
+                                <div className="absolute top-4 left-4 flex gap-2">
+                                    <button onClick={() => moveDeck(originalIndex, -1)} disabled={originalIndex === 0} className={btnBase}><LucideIcon name="ArrowUp" size={16} /> 上移</button>
+                                    <button onClick={() => moveDeck(originalIndex, 1)} disabled={originalIndex === decks.length - 1} className={btnBase}><LucideIcon name="ArrowDown" size={16} /> 下移</button>
+                                </div>
+                                <div className="absolute top-4 right-4 flex gap-2">
+                                    <button onClick={() => startEdit(deck.id)} className={btnBase}><LucideIcon name="Edit3" size={16} /> 編輯</button>
+                                    <button onClick={() => deleteDeck(deck.id)} className={`${btnBase} text-red-600 bg-red-50 border-red-200`}><LucideIcon name="Trash2" size={16} /> 刪除</button>
+                                </div>
+                                <div className="flex flex-wrap gap-2 mt-10 mb-3">
+                                    <span className="px-2 py-1 rounded border bg-white/70 text-xs font-bold text-gray-700">{meta.publisher}</span>
+                                    <span className="px-2 py-1 rounded border bg-white/70 text-xs font-bold text-gray-700">{meta.book}</span>
+                                    <span className="px-2 py-1 rounded border bg-white/70 text-xs font-bold text-gray-700">{meta.lessonNo ? `第 ${meta.lessonNo} 課` : '未分課'}</span>
+                                    <span className={`px-2 py-1 rounded border text-xs font-bold ${categoryInfo.color}`}>{categoryInfo.label}</span>
+                                </div>
+                                <h3 className="deck-card-title text-2xl font-bold mb-2 pr-2 text-center md:text-left text-gray-800">{deck.name}</h3>
+                                <p className="text-gray-600 mb-4 font-bold text-center md:text-left">卡片數量：{deck.cards.length} 張</p>
+                                <button onClick={() => startQuiz(deck.id)} className="w-full anime-btn bg-emerald-200 hover:bg-emerald-300 border-emerald-400 py-3 text-xl flex justify-center items-center gap-2 text-gray-800"><LucideIcon name="Play" size={24} fill="currentColor" /> 開始測驗</button>
+                            </div>
+                            );
+                        })}
+                    </div>
+                    {visibleDecks.length === 0 && <div className="glass-box p-8 text-center text-gray-600 font-bold">這個篩選條件下還沒有閃卡。</div>}
+                </div>
+                );
+            };
+
+            const renderEdit = () => {
+                const deck = decks.find(d => d.id === currentDeckId);
+                if (!deck) return null;
+                const editPublisherOptions = [...new Set([editPublisher, ...PUBLISHER_OPTIONS].filter(Boolean))];
+                const editBookOptions = [...new Set([editBook, ...BOOK_OPTIONS].filter(Boolean))];
+                return (
+                    <div className="max-w-4xl mx-auto p-4 pb-20">
+                        <div className="flex items-center gap-4 mb-6 pt-4">
+                            <button onClick={saveDeck} className="anime-btn bg-gray-100 hover:bg-gray-200 p-2"><LucideIcon name="ArrowLeft" size={24} /></button>
+                            <input value={editName} onChange={(e) => setEditName(e.target.value)} className="text-3xl font-bold bg-white/30 border-b-2 border-white focus:border-yellow-400 outline-none flex-1 text-white p-2 rounded"/>
+                            <button onClick={saveDeck} className="anime-btn bg-blue-200 hover:bg-blue-300 border-blue-400 px-6 py-2 flex items-center gap-2 text-gray-800"><LucideIcon name="Save" size={20} /> 完成</button>
+                        </div>
+                        <div className="glass-box p-6 mb-8">
+                            <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800"><LucideIcon name="Library" size={20} /> 課程分類</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">版本</label>
+                                    <select value={editPublisher} onChange={(e) => setEditPublisher(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold outline-none focus:border-sky-300 bg-white">
+                                        {editPublisherOptions.map(value => <option key={value} value={value}>{value}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">冊別</label>
+                                    <select value={editBook} onChange={(e) => setEditBook(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold outline-none focus:border-sky-300 bg-white">
+                                        {editBookOptions.map(value => <option key={value} value={value}>{value}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">課次</label>
+                                    <input type="number" min="1" value={editLessonNo} onChange={(e) => setEditLessonNo(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold outline-none focus:border-sky-300" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">閃卡類型</label>
+                                    <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold outline-none focus:border-sky-300 bg-white">
+                                        {Object.entries(DECK_CATEGORIES).map(([value, info]) => <option key={value} value={value}>{info.label}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setEditName(buildDeckName({ publisher: editPublisher, book: editBook, lessonNo: editLessonNo, category: editCategory }))}
+                                className="mt-4 anime-btn bg-gray-100 hover:bg-gray-200 border-gray-300 px-4 py-2 text-gray-700"
+                            >
+                                依分類自動命名
+                            </button>
+                        </div>
+                        <div className="glass-box p-6 mb-8">
+                            <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-gray-800"><LucideIcon name="Plus" size={20} /> 匯入與新增</h3>
+                            <p className="text-sm text-gray-600 mb-2">建議優先用 Google AI 模式整理截圖；ChatGPT 可備用，但請特別檢查前後句、漏字與欄位對應。可貼 JSON、每行「詞語｜解釋｜例句」，或原本「詞語：解釋」格式。</p>
+                            <textarea value={batchInput} onChange={(e) => setBatchInput(e.target.value)} className="w-full h-32 p-3 border-2 border-gray-300 rounded-xl text-lg font-mono mb-4 resize-none focus:border-slate-500 outline-none bg-white/70" placeholder='{"cards":[{"word":"拍手","definition":"鼓掌，雙手相擊。","example":"大家都大聲的拍手。"}]}'/>
+                            {ocrStatus && <div className="mb-3 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-bold text-sky-700">{ocrStatus}</div>}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <button onClick={copyDPrompt} className="anime-btn bg-white hover:bg-gray-50 border-gray-300 px-6 py-2 flex items-center justify-center gap-2 text-gray-800">
+                                    <LucideIcon name="ClipboardCopy" size={18} /> 複製 Google AI 模式提示詞
+                                </button>
+                                <button onClick={importImageText} className="anime-btn bg-purple-100 hover:bg-purple-200 border-purple-300 px-6 py-2 flex items-center justify-center gap-2 text-gray-800">
+                                    <LucideIcon name="ImagePlus" size={18} /> {visionEndpoint ? 'AI 截圖辨識成卡片' : '截圖辨識成卡片'}
+                                </button>
+                                <button onClick={parseAndAddCards} className="anime-btn bg-yellow-200 hover:bg-yellow-300 border-yellow-400 px-6 py-2 text-gray-800">貼回內容加入</button>
+                            </div>
+                            <button onClick={configureVisionEndpoint} className="mt-3 w-full text-sm font-bold text-purple-700 hover:text-purple-900 underline">
+                                {visionEndpoint ? '已設定 AI 後端，點此修改' : '設定 Gemini / Claude Vision 後端'}
+                            </button>
+                        </div>
+                        {ocrReviewCards.length > 0 && (
+                            <div className="glass-box p-6 mb-8">
+                                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                                    <div>
+                                        <h3 className="text-xl font-bold flex items-center gap-2 text-gray-800"><LucideIcon name="ScanText" size={20} /> 截圖校對表</h3>
+                                        <p className="text-sm text-gray-600 mt-1">OCR 只當草稿。請看左邊原圖欄位，修正右邊文字後再加入卡片。</p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => setOcrReviewCards([])} className="anime-btn bg-gray-100 hover:bg-gray-200 border-gray-300 px-4 py-2 text-gray-700">取消校對</button>
+                                        <button onClick={confirmOcrReviewCards} className="anime-btn bg-emerald-200 hover:bg-emerald-300 border-emerald-400 px-4 py-2 text-gray-800">確認加入卡片</button>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    {ocrReviewCards.map((card, index) => (
+                                        <div key={card.id} className="grid grid-cols-1 md:grid-cols-[170px_minmax(0,1fr)_auto] gap-4 rounded-xl border-2 border-gray-200 bg-white/70 p-4">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <div className="bg-purple-100 text-purple-700 border-2 border-purple-200 rounded-full w-8 h-8 flex items-center justify-center font-bold">{index + 1}</div>
+                                                {card.preview && <img src={card.preview} alt={`第 ${index + 1} 欄截圖`} className="max-h-[300px] rounded-lg border border-gray-200 bg-white object-contain" />}
+                                            </div>
+                                            <div className="space-y-3 min-w-0">
+                                                <div>
+                                                    <label className="block text-xs font-bold text-gray-500 mb-1">詞語 / 成語</label>
+                                                    <input value={card.word} onChange={(e) => updateOcrReviewCard(card.id, 'word', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg p-2 text-xl font-bold outline-none focus:border-purple-300 bg-white" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-gray-500 mb-1">解釋</label>
+                                                    <textarea value={card.definition} onChange={(e) => updateOcrReviewCard(card.id, 'definition', e.target.value)} className="w-full min-h-[76px] border-2 border-red-100 rounded-lg p-2 text-red-700 outline-none focus:border-red-300 bg-white resize-y" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-gray-500 mb-1">例句</label>
+                                                    <textarea value={card.example} onChange={(e) => updateOcrReviewCard(card.id, 'example', e.target.value)} className="w-full min-h-[68px] border-2 border-gray-200 rounded-lg p-2 text-gray-700 outline-none focus:border-purple-300 bg-white resize-y" />
+                                                </div>
+                                            </div>
+                                            <button onClick={() => deleteOcrReviewCard(card.id)} className={`${btnBase} text-red-600 bg-red-50 border-red-200 self-start`}><LucideIcon name="Trash2" size={14}/> 略過</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <h3 className="text-2xl font-bold text-white drop-shadow-md">卡片內容</h3>
+                            <button onClick={addBlankCard} className="anime-btn bg-sky-200 hover:bg-sky-300 border-sky-400 px-4 py-2 flex items-center gap-2 text-gray-800">
+                                <LucideIcon name="Plus" size={18} /> 新增空白卡
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            {deck.cards && deck.cards.map((card, index) => (
+                                <div key={card.id} className="glass-box p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] gap-4 items-start">
+                                    <div className="bg-sky-100 text-sky-700 border-2 border-sky-200 rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">{index + 1}</div>
+                                    <div className="space-y-3 min-w-0">
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-500 mb-1">詞語 / 成語</label>
+                                            <input
+                                                value={card.word}
+                                                onChange={(e) => updateCard(card.id, 'word', e.target.value)}
+                                                className="w-full border-2 border-gray-200 rounded-lg p-2 text-2xl text-gray-800 font-bold outline-none focus:border-sky-300 bg-white/80"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-500 mb-1">解釋</label>
+                                            <textarea
+                                                value={card.definition}
+                                                onChange={(e) => updateCard(card.id, 'definition', e.target.value)}
+                                                className="w-full min-h-[76px] border-2 border-red-100 rounded-lg p-2 text-red-700 text-lg outline-none focus:border-red-300 bg-white/80 resize-y"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-500 mb-1">例句</label>
+                                            <textarea
+                                                value={card.example}
+                                                onChange={(e) => updateCard(card.id, 'example', e.target.value)}
+                                                className="w-full min-h-[68px] border-2 border-gray-200 rounded-lg p-2 text-gray-700 outline-none focus:border-sky-300 bg-white/80 resize-y"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-2 w-20 flex-shrink-0">
+                                        <button onClick={() => moveCard(index, -1)} disabled={index===0} className={btnBase}><LucideIcon name="ArrowUp" size={14}/> 上移</button>
+                                        <button onClick={() => moveCard(index, 1)} disabled={index===deck.cards.length-1} className={btnBase}><LucideIcon name="ArrowDown" size={14}/> 下移</button>
+                                        <button onClick={() => deleteCard(card.id)} className={`${btnBase} text-red-600 bg-red-50 border-red-200`}><LucideIcon name="Trash2" size={14}/> 刪除</button>
+                                    </div>
+                                </div>
+                            ))}
+                            {(!deck.cards || deck.cards.length === 0) && (
+                                <div className="glass-box p-8 text-center text-gray-600 font-bold">
+                                    這個單元還沒有卡片，可以按「新增空白卡」手動建立，或用上方快速貼上新增。
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderQuiz = () => {
+                const currentCard = quizCards[currentCardIndex];
+                if (!currentCard) return <div>載入中...</div>;
+                const progress = ((currentCardIndex) / quizCards.length) * 100;
+                return (
+                    <div className="h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative">
+                        <div className="absolute top-0 left-0 w-full h-4 bg-gray-600/50"><div className="h-full bg-yellow-400 transition-all duration-300" style={{width: `${progress}%`}}></div></div>
+                        <div className="absolute top-6 right-6 text-xl font-bold text-white shadow-sm">{currentCardIndex + 1} / {quizCards.length}</div>
+                        <div className="relative w-full max-w-lg aspect-[3/4] perspective-1000 cursor-pointer" onClick={handleCardClick}>
+                            <div className={`relative w-full h-full duration-500 transform-style-3d transition-transform ${isFlipped ? 'rotate-y-180' : ''}`}>
+                                <div className="absolute w-full h-full backface-hidden">
+                                    <div className="glass-box w-full h-full flex flex-col items-center justify-center p-8 border-4 border-white bg-white/90">
+                                        <div className="text-2xl text-gray-500 absolute top-8 left-8">詞語</div>
+                                        <div className="font-bpmf quiz-word text-6xl md:text-7xl font-bold text-slate-800 text-center leading-relaxed tracking-widest">{currentCard.word}</div>
+                                        <div className="absolute bottom-8 text-slate-500 animate-bounce">點擊翻牌</div>
+                                    </div>
+                                </div>
+                                <div className="absolute w-full h-full backface-hidden rotate-y-180">
+                                    <div className="glass-box w-full h-full flex flex-col p-8 border-4 border-white bg-white/95 relative">
+                                        <div className="flex-1 flex flex-col justify-center gap-6 overflow-y-auto no-scrollbar">
+                                            <div><span className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-sm font-bold mb-2 inline-block">解釋</span><div className="font-bpmf quiz-definition text-3xl font-bold text-gray-800 leading-snug">{currentCard.definition}</div></div>
+                                            <div className="bg-gray-50/80 p-4 border-2 border-dashed border-gray-300 rounded-xl transform -rotate-1 mt-4">
+                                                <span className="text-gray-500 text-xs font-bold mb-1 block">例句</span><div className="font-bpmf quiz-example text-xl text-gray-700 leading-relaxed font-medium">{currentCard.example}</div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 grid grid-cols-2 gap-4">
+                                            <button onClick={(e) => { e.stopPropagation(); handleAnswer(false); }} disabled={isSpeaking} className="anime-btn bg-red-100 border-red-400 py-3 flex flex-col items-center justify-center hover:bg-red-200 text-red-800 disabled:opacity-50"><LucideIcon name="XCircle" size={32} className="mb-1"/><span className="font-bold">還不熟 (X)</span></button>
+                                            <button onClick={(e) => { e.stopPropagation(); handleAnswer(true); }} disabled={isSpeaking} className="anime-btn bg-emerald-100 border-emerald-400 py-3 flex flex-col items-center justify-center hover:bg-emerald-200 text-emerald-800 disabled:opacity-50"><LucideIcon name="CheckCircle" size={32} className="mb-1"/><span className="font-bold">記住了 (O)</span></button>
+                                        </div>
+                                        <button onClick={playDefinition} className="absolute top-4 right-4 p-2 rounded-full bg-yellow-100 border-2 border-yellow-400 hover:bg-yellow-200 text-yellow-800"><LucideIcon name="Volume2" size={24}/></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-8"><button onClick={() => setView('HOME')} className="text-gray-300 font-bold underline hover:text-white">放棄測驗，回到首頁</button></div>
+                    </div>
+                );
+            };
+
+            const renderResult = () => {
+                const percentage = Math.round((score.correct / (score.correct + score.wrong)) * 100) || 0;
+                let comment = "繼續加油！"; if (percentage === 100) comment = "太神啦！完全制霸！"; else if (percentage >= 80) comment = "很棒喔！只差一點點！";
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4">
+                        <div className="glass-box p-8 max-w-2xl w-full text-center">
+                            <h2 className="text-4xl font-bold mb-2 text-gray-800">測驗結果</h2>
+                            <p className="text-xl text-slate-600 mb-6 font-bold">{comment}</p>
+                            <div className="flex justify-center items-center gap-8 mb-8">
+                                <div className="text-center"><div className="text-6xl font-bold text-emerald-500">{score.correct}</div><div className="text-gray-500 font-bold">答對</div></div>
+                                <div className="text-6xl text-gray-300">/</div>
+                                <div className="text-center"><div className="text-6xl font-bold text-red-500">{score.wrong}</div><div className="text-gray-500 font-bold">需要複習</div></div>
+                            </div>
+                            {score.wrongCards.length > 0 && <div className="mb-8 text-left"><h3 className="font-bold text-xl mb-3 border-b-2 border-red-200 pb-1 text-red-700">錯誤單字複習：</h3><div className="flex flex-wrap gap-2">{score.wrongCards.map(c => (<span key={c.id} className="bg-red-50 border border-red-200 px-3 py-1 rounded text-lg text-gray-700 font-bold">{c.word}</span>))}</div></div>}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <button onClick={() => setView('HOME')} className="anime-btn bg-gray-100 hover:bg-gray-200 py-3 flex justify-center items-center gap-2"><LucideIcon name="Home" size={20}/> 回首頁</button>
+                                {score.wrongCards.length > 0 && <button onClick={() => startQuizRetry(score.wrongCards)} className="anime-btn bg-orange-100 border-orange-300 hover:bg-orange-200 py-3 flex justify-center items-center gap-2 text-orange-700"><LucideIcon name="RotateCcw" size={20}/> 複習錯誤</button>}
+                                <button onClick={() => startQuiz(currentDeckId)} className="anime-btn bg-emerald-100 border-emerald-300 hover:bg-emerald-200 py-3 flex justify-center items-center gap-2 text-emerald-700"><LucideIcon name="RotateCcw" size={20}/> 全部重考</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderBattleSetup = () => {
+                const activePlayerCount = setupMode === 'TERRITORY_CHAOS' ? setupPlayerCount : 2;
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+                        <div className="glass-box p-6 max-w-5xl w-full">
+                            <h2 className="text-4xl font-bold mb-6 text-center border-b-4 border-gray-200 pb-4 text-gray-800">遊戲大廳</h2>
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-700"><span className="bg-slate-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">1</span> 選擇模式：</h3>
+                                        <div className="flex flex-col gap-3">
+                                            <button onClick={() => setSetupMode('STREAK_STATIC')} className={`p-3 border-2 rounded-xl font-bold text-left flex items-center gap-3 transition-all ${setupMode==='STREAK_STATIC'?'bg-sky-100 border-sky-400 shadow-md':'bg-white/50 border-gray-200 hover:bg-white'}`}>
+                                                <div className="text-2xl">⚡</div><div><div className="text-lg">先答先贏 (靜態)</div><div className="text-xs text-gray-500">答對繼續｜連線獲勝｜位置固定</div></div>
+                                            </button>
+                                            <button onClick={() => setSetupMode('CONNECT_STATIC')} className={`p-3 border-2 rounded-xl font-bold text-left flex items-center gap-3 transition-all ${setupMode==='CONNECT_STATIC'?'bg-violet-100 border-violet-400 shadow-md':'bg-white/50 border-gray-200 hover:bg-white'}`}>
+                                                <div className="text-2xl">🔗</div><div><div className="text-lg">先連線贏 (靜態)</div><div className="text-xs text-gray-500">輪流答題｜連線獲勝｜位置固定</div></div>
+                                            </button>
+                                            <button onClick={() => setSetupMode('STREAK_CHAOS')} className={`p-3 border-2 rounded-xl font-bold text-left flex items-center gap-3 transition-all ${setupMode==='STREAK_CHAOS'?'bg-red-100 border-red-400 shadow-md':'bg-white/50 border-gray-200 hover:bg-white'}`}>
+                                                <div className="text-2xl">🌀</div><div><div className="text-lg">先答先贏 (亂數)</div><div className="text-xs text-gray-500">連勝規則｜每回亂數大風吹</div></div>
+                                            </button>
+                                            <button onClick={() => setSetupMode('TERRITORY_CHAOS')} className={`p-3 border-2 rounded-xl font-bold text-left flex items-center gap-3 transition-all ${setupMode==='TERRITORY_CHAOS'?'bg-emerald-100 border-emerald-400 shadow-md':'bg-white/50 border-gray-200 hover:bg-white'}`}>
+                                                <div className="text-2xl">🏰</div><div><div className="text-lg">多人佔地 (亂數)</div><div className="text-xs text-gray-500">佔領最多者勝｜每回亂數大風吹</div></div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-700"><span className="bg-slate-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">2</span> 設定宮格 (N x N)：</h3>
+                                        <div className="flex items-center gap-4 bg-white/60 p-3 rounded-xl border border-gray-200">
+                                            <input type="number" min="3" max="10" value={setupSide} onChange={(e)=>setSetupSide(Math.max(3, Math.min(10, parseInt(e.target.value)||3)))} className="w-full h-8 border-2 border-gray-300 rounded-lg text-center font-bold text-xl outline-none focus:border-sky-300" />
+                                            <div className="text-center w-24"><span className="block text-2xl font-bold text-gray-700">{setupSide}x{setupSide}</span><span className="text-xs text-gray-500 font-bold">{setupSide*setupSide}格</span></div>
+                                        </div>
+                                    </div>
+                                    {setupMode === 'TERRITORY_CHAOS' && (
+                                        <div>
+                                            <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-700"><span className="bg-slate-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">3</span> 遊玩人數：</h3>
+                                            <div className="flex items-center gap-4 bg-white/60 p-3 rounded-xl border border-gray-200">
+                                                <input type="range" min="2" max="6" value={setupPlayerCount} onChange={(e)=>setSetupPlayerCount(parseInt(e.target.value))} className="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-400" />
+                                                <span className="text-2xl font-bold w-20 text-center text-gray-700">{setupPlayerCount}人</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-700"><span className="bg-slate-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">{setupMode==='TERRITORY_CHAOS'?'4':'3'}</span> 隊伍設定：</h3>
+                                    <div className="bg-white/50 p-4 rounded-xl border border-gray-200 h-full max-h-[400px] overflow-y-auto custom-scroll">
+                                        {Array.from({ length: activePlayerCount }).map((_, i) => (
+                                            <div key={i} className="mb-4 last:mb-0">
+                                                <label className="text-sm font-bold text-gray-600 mb-1 block">玩家 {i + 1}</label>
+                                                <div className="flex gap-2">
+                                                    <div className="relative group"><button className={`w-12 h-12 rounded-lg border-2 border-white shadow-sm ${COLOR_PALETTE[playerConfig[i].colorId].bg}`} onClick={() => updatePlayerConfig(i, 'colorId', (playerConfig[i].colorId + 1) % COLOR_PALETTE.length)} title="點擊更換顏色"></button></div>
+                                                    <input type="text" value={playerConfig[i].name} onChange={(e) => updatePlayerConfig(i, 'name', e.target.value)} placeholder={`${COLOR_PALETTE[playerConfig[i].colorId].name}隊`} className="flex-1 border-2 border-gray-200 rounded-lg px-3 py-2 font-bold focus:border-sky-300 outline-none bg-white/80"/>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div className="text-xs text-gray-500 mt-4 text-center">* 點擊色塊可更換代表色</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-700"><span className="bg-slate-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">{setupMode==='TERRITORY_CHAOS'?'5':'4'}</span> 選擇單元：</h3>
+                                    <div className="bg-white/50 p-4 rounded-xl border border-gray-200 h-full max-h-[400px] overflow-y-auto custom-scroll">
+                                        <div className="flex gap-2 mb-2">
+                                            <button onClick={() => setSetupSelectedDecks(decks.map(d => d.id))} className="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 text-gray-600">全選</button>
+                                            <button onClick={() => setSetupSelectedDecks([])} className="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 text-gray-600">全不選</button>
+                                        </div>
+                                        {[...decks].sort(sortDecksByCourse).map(deck => {
+                                            const meta = parseDeckMeta(deck);
+                                            const categoryInfo = getCategoryInfo(meta.category);
+                                            return (
+                                            <div key={deck.id} onClick={() => toggleDeckSelection(deck.id)} className={`flex items-center gap-3 p-2 rounded cursor-pointer mb-2 border-2 transition-all ${setupSelectedDecks.includes(deck.id) ? 'bg-yellow-50 border-yellow-300 shadow-sm' : 'bg-white/40 border-transparent hover:bg-white/80'}`}>
+                                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${setupSelectedDecks.includes(deck.id) ? 'bg-yellow-400 border-yellow-500 text-white' : 'border-gray-300 bg-white'}`}>
+                                                    {setupSelectedDecks.includes(deck.id) && <LucideIcon name="Check" size={14} />}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="font-bold text-sm truncate text-gray-700">{deck.name}</div>
+                                                    <div className="text-xs text-gray-500">{meta.publisher} / {meta.book} / {meta.lessonNo ? `第 ${meta.lessonNo} 課` : '未分課'} / {categoryInfo.shortLabel} / {deck.cards.length} 張</div>
+                                                </div>
+                                            </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex gap-4 mt-8">
+                                <button onClick={() => setView('HOME')} className="flex-1 anime-btn bg-gray-100 hover:bg-gray-200 py-3 font-bold text-xl text-gray-600">回首頁</button>
+                                <button onClick={() => initBattle(setupMode, setupSide, activePlayerCount)} className="flex-[2] anime-btn bg-gradient-to-r from-yellow-200 to-orange-200 hover:from-yellow-300 hover:to-orange-300 border-orange-300 py-3 font-bold text-xl text-gray-700 shadow-lg">開始對戰！</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderBattleGame = () => {
+                const currentPlayer = activePlayers[currentPlayerIndex];
+                const gridStyle = { display: 'grid', gridTemplateColumns: `repeat(${gridSide}, minmax(0, 1fr))`, gap: gridSide > 6 ? '0.25rem' : '0.5rem' };
+                return (
+                    <div className="min-h-screen flex flex-col p-2 md:p-4">
+                        <div className="flex flex-col md:flex-row justify-between items-center mb-4 glass-box p-4 gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className={`flex items-center gap-2 px-6 py-2 rounded-xl border-2 border-white shadow-md transition-all ${currentPlayer.color.bg} ${currentPlayer.color.text}`}>
+                                    <span className="font-bold text-2xl drop-shadow-sm">輪到：{currentPlayer.name}</span>
+                                </div>
+                                {gameMode === 'STREAK_STATIC' && <span className="text-sm font-bold text-sky-600 bg-sky-100 px-2 py-1 rounded-lg">先答先贏(靜態)</span>}
+                                {gameMode === 'CONNECT_STATIC' && <span className="text-sm font-bold text-violet-600 bg-violet-100 px-2 py-1 rounded-lg">先連線贏(靜態)</span>}
+                                {gameMode === 'STREAK_CHAOS' && <span className="text-sm font-bold text-pink-600 bg-pink-100 px-2 py-1 rounded-lg">先答先贏(亂數)</span>}
+                                {gameMode === 'TERRITORY_CHAOS' && <span className="text-sm font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-lg">多人佔地(亂數)</span>}
+                            </div>
+                            <button onClick={() => setView('BATTLE_SETUP')} className="text-gray-600 font-bold underline hover:text-gray-900">結束對戰</button>
+                        </div>
+                        <div className="flex-1 flex items-center justify-center overflow-auto p-2">
+                            <div style={gridStyle} className="w-full max-w-[800px] aspect-square">
+                                {battleGrid.map((cell, index) => {
+                                    const owner = cell.owner !== null ? activePlayers[cell.owner] : null;
+                                    const ownerColor = owner ? owner.color : null;
+                                    return (
+                                        <button key={`${cell.gridId}-${index}`} onClick={() => handleBattleCardClick(index)} disabled={cell.owner !== null || battleWinner !== null}
+                                            className={`relative glass-box flex flex-col items-center justify-center p-1 text-center transition-all overflow-hidden ${ownerColor ? ownerColor.bg + ' ' + ownerColor.text + ' border-transparent' : 'hover:bg-white/90 border-white/50'}`}>
+                                            {ownerColor ? (
+                                                <div className="w-full h-full flex items-center justify-center p-1"><span className={`font-bold leading-tight break-words drop-shadow-md ${gridSide > 5 ? 'text-xs' : 'text-lg md:text-2xl'}`}>{owner.name}</span></div>
+                                            ) : (
+                                                <span className={`font-bold leading-tight text-gray-700 ${gridSide > 5 ? 'text-xs md:text-base' : 'text-sm md:text-xl'}`}>{cell.word}</span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                        {selectedGridIndex !== null && (
+                            <div className="fixed inset-0 bg-gray-800 bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                                <div className="relative w-full max-w-lg aspect-[3/4] perspective-1000" onClick={() => !isFlipped && setIsFlipped(true)}>
+                                    <div className={`relative w-full h-full duration-500 transform-style-3d transition-transform ${isFlipped ? 'rotate-y-180' : ''}`}>
+                                        <div className="absolute w-full h-full backface-hidden">
+                                            <div className={`glass-box w-full h-full flex flex-col items-center justify-center p-8 border-4 border-white ${currentPlayer.color.light}`}>
+                                                <div className="text-2xl text-gray-500 absolute top-8 left-8">請回答</div>
+                                                <div className="font-bpmf quiz-word text-5xl md:text-6xl font-bold text-center mb-8 text-gray-800">{battleGrid[selectedGridIndex].word}</div>
+                                                <div className="text-gray-500 animate-bounce font-bold">點擊翻牌看答案</div>
+                                            </div>
+                                        </div>
+                                        <div className="absolute w-full h-full backface-hidden rotate-y-180">
+                                            <div className="glass-box w-full h-full flex flex-col p-8 border-4 border-white bg-white/95 relative">
+                                                <div className="flex-1 flex flex-col justify-center gap-6 overflow-y-auto no-scrollbar">
+                                                    <div><span className="bg-slate-200 px-2 py-1 rounded text-sm font-bold mb-2 inline-block text-slate-700">解釋</span><div className="font-bpmf quiz-definition text-3xl font-bold text-gray-800 leading-snug">{battleGrid[selectedGridIndex].definition}</div></div>
+
+                                                    {/* V9.1 FIX: Example Section */}
+                                                    <div className="bg-gray-50/80 p-4 border-2 border-dashed border-gray-300 rounded-xl transform -rotate-1 mt-4">
+                                                        <span className="text-gray-500 text-xs font-bold mb-1 block">例句</span>
+                                                        <div className="font-bpmf quiz-example text-xl text-gray-700 leading-relaxed font-medium">{battleGrid[selectedGridIndex].example}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="mt-4 grid grid-cols-2 gap-4">
+                                                    <button onClick={onBattleWrong} disabled={isSpeaking} className="anime-btn bg-gray-100 border-gray-400 py-3 flex flex-col items-center justify-center hover:bg-gray-200 disabled:opacity-50 text-gray-600"><span className="font-bold text-xl">答錯了</span></button>
+                                                    <button onClick={onBattleCorrect} disabled={isSpeaking} className={`anime-btn py-3 flex flex-col items-center justify-center disabled:opacity-50 ${currentPlayer.color.light} border-gray-400 text-gray-800`}><span className="font-bold text-xl">答對了</span></button>
+                                                </div>
+                                                <button onClick={playBattleDefinition} className="absolute top-4 right-4 p-2 rounded-full bg-yellow-100 border-2 border-yellow-400 hover:bg-yellow-200 text-yellow-700"><LucideIcon name="Volume2" size={24}/></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {battleWinner !== null && (
+                            <div className="fixed inset-0 bg-gray-800 bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-md">
+                                <div className="glass-box p-8 max-w-md w-full text-center animate-bounce-in">
+                                    <div className="text-6xl mb-4">🏆</div>
+                                    {battleWinner === 'DRAW' ? <h2 className="text-4xl font-bold mb-4 text-gray-700">平手！</h2> : <h2 className={`text-4xl font-bold mb-4 ${activePlayers[battleWinner].color.text.replace('white', 'gray-800')}`}>{activePlayers[battleWinner].name} 獲勝！</h2>}
+                                    {winnerDetails && (
+                                        <div className="my-6 text-left bg-white/60 p-4 rounded-xl border border-gray-200"><h4 className="font-bold mb-2 border-b border-gray-300 pb-1 text-gray-600">佔領統計：</h4>{Object.entries(winnerDetails).map(([pid, count]) => (<div key={pid} className="flex justify-between items-center mb-1"><span className="font-bold text-gray-700">{activePlayers[pid].name}</span><span className="font-bold text-gray-700">{count} 格</span></div>))}</div>
+                                    )}
+                                    <div className="flex flex-col gap-3 mt-6"><button onClick={() => initBattle(gameMode, gridSide, activePlayers.length)} className="anime-btn bg-emerald-200 hover:bg-emerald-300 border-emerald-400 py-3 font-bold text-gray-700">再玩一局</button><button onClick={() => setView('BATTLE_SETUP')} className="anime-btn bg-gray-100 hover:bg-gray-200 py-3 font-bold text-gray-600">回遊戲大廳</button></div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen selection:bg-slate-300 selection:text-slate-900">
+                    {view === 'HOME' && renderHome()}
+                    {view === 'EDIT' && renderEdit()}
+                    {view === 'QUIZ' && renderQuiz()}
+                    {view === 'RESULT' && renderResult()}
+                    {view === 'BATTLE_SETUP' && renderBattleSetup()}
+                    {view === 'BATTLE_GAME' && renderBattleGame()}
+                    <Modal isOpen={modalConfig.isOpen} title={modalConfig.title} content={modalConfig.content} onConfirm={modalConfig.onConfirm} onCancel={modalConfig.onCancel} showConfirm={modalConfig.showConfirm} showCancel={modalConfig.showCancel} confirmText={modalConfig.confirmText} cancelText={modalConfig.cancelText} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
