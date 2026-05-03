@@ -139,6 +139,15 @@
             background-position: center;
         }
 
+        .battle-cell-word {
+            max-width: 100%;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+        }
+
         /* === 字型：閃卡專用 Bpmf Iansui（內建注音） === */
         .font-bpmf {
             font-family: 'Bpmf Iansui', "BiaoKai", "DFKai-SB", "KaiTi", "Noto Serif TC", serif !important;
@@ -1654,6 +1663,19 @@
                 return displayWord.split('').map((char, index) => <span key={`${char}-${index}`}>{char}</span>);
             };
 
+            const getBattleCellWord = (word) => {
+                const displayWord = getCleanDisplayWord(word);
+                const limit = gridSide >= 9 ? 2 : gridSide >= 7 ? 3 : gridSide >= 5 ? 4 : 8;
+                return displayWord.length > limit ? `${displayWord.slice(0, limit)}…` : displayWord;
+            };
+
+            const getBattleCellTextStyle = () => {
+                if (gridSide >= 9) return { fontSize: 'clamp(0.55rem, 2.1vw, 0.78rem)', WebkitLineClamp: 2 };
+                if (gridSide >= 7) return { fontSize: 'clamp(0.65rem, 2.5vw, 0.9rem)', WebkitLineClamp: 2 };
+                if (gridSide >= 5) return { fontSize: 'clamp(0.78rem, 3vw, 1.05rem)', WebkitLineClamp: 2 };
+                return { fontSize: 'clamp(1rem, 4vw, 1.45rem)', WebkitLineClamp: 3 };
+            };
+
             // --- Battle Logic V9 ---
             const openGameCenter = () => {
                 if (decks.length === 0) { showModal({ title: "無法開始", content: "請先新增一些單元吧！", showCancel: false, onConfirm: closeModal }); return; }
@@ -2211,9 +2233,18 @@
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-700"><span className="bg-slate-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">2</span> 設定宮格 (N x N)：</h3>
-                                        <div className="flex items-center gap-4 bg-white/60 p-3 rounded-xl border border-gray-200">
-                                            <input type="number" min="3" max="10" value={setupSide} onChange={(e)=>setSetupSide(Math.max(3, Math.min(10, parseInt(e.target.value)||3)))} className="w-full h-8 border-2 border-gray-300 rounded-lg text-center font-bold text-xl outline-none focus:border-sky-300" />
-                                            <div className="text-center w-24"><span className="block text-2xl font-bold text-gray-700">{setupSide}x{setupSide}</span><span className="text-xs text-gray-500 font-bold">{setupSide*setupSide}格</span></div>
+                                        <div className="bg-white/60 p-3 rounded-xl border border-gray-200">
+                                            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 mb-3">
+                                                {[3,4,5,6,7,8,9,10].map(size => (
+                                                    <button key={size} onClick={() => setSetupSide(size)} className={`rounded-lg border-2 px-2 py-2 text-base font-bold ${setupSide === size ? 'bg-sky-100 border-sky-400 text-sky-900' : 'bg-white border-gray-200 text-gray-700'}`}>
+                                                        {size}x{size}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <input type="range" min="3" max="10" step="1" value={setupSide} onChange={(e)=>setSetupSide(parseInt(e.target.value, 10))} className="w-full accent-sky-400" />
+                                                <div className="text-center w-24 shrink-0"><span className="block text-2xl font-bold text-gray-700">{setupSide}x{setupSide}</span><span className="text-xs text-gray-500 font-bold">{setupSide*setupSide}格</span></div>
+                                            </div>
                                         </div>
                                     </div>
                                     {setupMode === 'TERRITORY_CHAOS' && (
@@ -2277,7 +2308,9 @@
 
             const renderBattleGame = () => {
                 const currentPlayer = activePlayers[currentPlayerIndex];
-                const gridStyle = { display: 'grid', gridTemplateColumns: `repeat(${gridSide}, minmax(0, 1fr))`, gap: gridSide > 6 ? '0.25rem' : '0.5rem' };
+                const gridStyle = { display: 'grid', gridTemplateColumns: `repeat(${gridSide}, minmax(0, 1fr))`, gap: gridSide >= 8 ? '0.18rem' : gridSide > 6 ? '0.25rem' : '0.5rem' };
+                const cellPadding = gridSide >= 8 ? 'p-0.5' : 'p-1';
+                const cellTextStyle = getBattleCellTextStyle();
                 const selectedBattleCard = selectedGridIndex !== null ? battleGrid[selectedGridIndex] : null;
                 const battleWordLabel = selectedBattleCard?.category === 'idiom' ? '成語' : '詞語';
                 return (
@@ -2301,11 +2334,11 @@
                                     const ownerColor = owner ? owner.color : null;
                                     return (
                                         <button key={`${cell.gridId}-${index}`} onClick={() => handleBattleCardClick(index)} disabled={cell.owner !== null || battleWinner !== null}
-                                            className={`relative glass-box flex flex-col items-center justify-center p-1 text-center transition-all overflow-hidden ${ownerColor ? ownerColor.bg + ' ' + ownerColor.text + ' border-transparent' : 'hover:bg-white/90 border-white/50'}`}>
+                                            className={`relative glass-box flex flex-col items-center justify-center ${cellPadding} text-center transition-all overflow-hidden min-w-0 ${ownerColor ? ownerColor.bg + ' ' + ownerColor.text + ' border-transparent' : 'hover:bg-white/90 border-white/50'}`}>
                                             {ownerColor ? (
-                                                <div className="w-full h-full flex items-center justify-center p-1"><span className={`font-bold leading-tight break-words drop-shadow-md ${gridSide > 5 ? 'text-xs' : 'text-lg md:text-2xl'}`}>{owner.name}</span></div>
+                                                <div className="w-full h-full flex items-center justify-center p-1"><span className="battle-cell-word font-bold leading-tight drop-shadow-md" style={cellTextStyle}>{owner.name}</span></div>
                                             ) : (
-                                                <span className={`font-bold leading-tight text-gray-700 ${gridSide > 5 ? 'text-xs md:text-base' : 'text-sm md:text-xl'}`}>{cell.word}</span>
+                                                <span className="battle-cell-word font-bold leading-tight text-gray-700" style={cellTextStyle} title={getCleanDisplayWord(cell.word)}>{getBattleCellWord(cell.word)}</span>
                                             )}
                                         </button>
                                     );
