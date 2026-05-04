@@ -433,15 +433,17 @@
             utterance.lang = 'zh-TW';
             utterance.rate = 0.9;
             let finished = false;
+            let fallbackTimer = null;
             const finishOnce = () => {
                 if (finished) return;
                 finished = true;
+                if (fallbackTimer) clearTimeout(fallbackTimer);
                 done();
             };
             utterance.onend = finishOnce;
             utterance.onerror = finishOnce;
-            const fallbackMs = Math.min(6500, Math.max(1400, String(text || '').length * 120));
-            if (onEnd) setTimeout(finishOnce, fallbackMs);
+            const fallbackMs = Math.min(30000, Math.max(6000, String(text || '').length * 380));
+            if (onEnd) fallbackTimer = setTimeout(finishOnce, fallbackMs);
             window.speechSynthesis.speak(utterance);
         };
 
