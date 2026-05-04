@@ -175,6 +175,14 @@
             display: block;
         }
 
+        .quiz-card-shell {
+            max-height: min(74vh, 680px);
+        }
+
+        .quiz-card-face {
+            border-radius: 16px;
+        }
+
         /* --- 玻璃磨砂容器 --- */
         .glass-box {
             background: rgba(255, 255, 255, 0.90);
@@ -215,9 +223,17 @@
             .home-actions button { padding: 0.4rem 0.7rem !important; font-size: 0.8rem !important; }
             .deck-card { padding: 1rem !important; }
             .deck-card-title { font-size: 1.25rem !important; margin-top: 4.5rem !important; }
-            .quiz-word { font-size: 3.5rem !important; }
-            .quiz-definition { font-size: 1.5rem !important; }
-            .quiz-example { font-size: 1.05rem !important; }
+            .quiz-card-shell { max-height: 66vh; }
+            .quiz-card-face { padding: 1.25rem !important; }
+            .vertical-card-word {
+                gap: 0.08em;
+                max-height: 68%;
+                max-width: 90%;
+                line-height: 1.12;
+            }
+            .quiz-word { font-size: clamp(2.4rem, 14vw, 4.1rem) !important; }
+            .quiz-definition { font-size: clamp(1.3rem, 6vw, 2rem) !important; line-height: 1.42 !important; }
+            .quiz-example { font-size: clamp(1rem, 4.5vw, 1.35rem) !important; line-height: 1.45 !important; }
             .battle-grid-cell { font-size: 0.7rem !important; }
         }
         @media (min-width: 641px) and (max-width: 1024px) {
@@ -301,6 +317,7 @@
         const SEED_DATA_URL = 'seed_翰林114一上.json';
         const STORAGE_KEY = 'mandarin_tutor_data_v2';
         const CLOUD_LIBRARY_ID_KEY = 'mandarin_cloud_library_id';
+        const DEFAULT_CLOUD_LIBRARY_ID = '890712';
         const PUBLISHED_APP_URL = 'https://teajsps-ux.github.io/jsps-tools/tools/mandarin-flashcard/index.html';
         const VISION_ENDPOINT_STORAGE_KEY = 'mandarin_vision_endpoint';
         const DEFAULT_VISION_ENDPOINT = '';
@@ -404,11 +421,27 @@
 
         // --- TTS ---
         const speakText = (text, onEnd = null) => {
+            const done = () => {
+                if (onEnd) onEnd();
+            };
+            if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
+                setTimeout(done, 250);
+                return;
+            }
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'zh-TW';
             utterance.rate = 0.9;
-            if (onEnd) utterance.onend = onEnd;
+            let finished = false;
+            const finishOnce = () => {
+                if (finished) return;
+                finished = true;
+                done();
+            };
+            utterance.onend = finishOnce;
+            utterance.onerror = finishOnce;
+            const fallbackMs = Math.min(6500, Math.max(1400, String(text || '').length * 120));
+            if (onEnd) setTimeout(finishOnce, fallbackMs);
             window.speechSynthesis.speak(utterance);
         };
 
@@ -710,7 +743,7 @@
                     localStorage.setItem(CLOUD_LIBRARY_ID_KEY, urlLibraryId);
                     return urlLibraryId;
                 }
-                return localStorage.getItem(CLOUD_LIBRARY_ID_KEY) || '';
+                return localStorage.getItem(CLOUD_LIBRARY_ID_KEY) || DEFAULT_CLOUD_LIBRARY_ID;
             });
             const [cloudStatus, setCloudStatus] = useState('本機題庫');
             const [cloudReady, setCloudReady] = useState(false);
@@ -2238,18 +2271,18 @@
                     <div className="h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative">
                         <div className="absolute top-0 left-0 w-full h-4 bg-gray-600/50"><div className="h-full bg-yellow-400 transition-all duration-300" style={{width: `${progress}%`}}></div></div>
                         <div className="absolute top-6 right-6 text-xl font-bold text-white shadow-sm">{currentCardIndex + 1} / {quizCards.length}</div>
-                        <div className="relative w-full max-w-lg aspect-[3/4] perspective-1000 cursor-pointer" onClick={handleCardClick}>
+                        <div className="quiz-card-shell relative w-full max-w-lg aspect-[3/4] perspective-1000 cursor-pointer" onClick={handleCardClick}>
                             <div className={`relative w-full h-full duration-500 transform-style-3d transition-transform ${isFlipped ? 'rotate-y-180' : ''}`}>
                                 <div className={`absolute w-full h-full backface-hidden ${isFlipped ? 'pointer-events-none' : 'pointer-events-auto'}`}>
-                                    <div className="glass-box w-full h-full flex flex-col items-center justify-center p-8 border-4 border-white bg-white/90">
+                                    <div className="quiz-card-face glass-box w-full h-full flex flex-col items-center justify-center p-8 border-4 border-white bg-white/90">
                                         <div className="text-2xl text-gray-500 absolute top-8 left-8">{quizWordLabel}</div>
                                         <div className="font-bpmf quiz-word vertical-card-word text-6xl md:text-7xl font-bold text-slate-800 text-center">{renderVerticalWord(currentCard.word)}</div>
                                         <div className="absolute bottom-8 text-slate-500 animate-bounce">點擊翻牌</div>
                                     </div>
                                 </div>
                                 <div className={`absolute w-full h-full backface-hidden rotate-y-180 ${isFlipped ? 'pointer-events-auto' : 'pointer-events-none'}`}>
-                                    <div className="glass-box w-full h-full flex flex-col p-8 border-4 border-white bg-white/95 relative">
-                                        <div className="flex-1 flex flex-col justify-center gap-6 overflow-y-auto no-scrollbar">
+                                    <div className="quiz-card-face glass-box w-full h-full flex flex-col p-8 border-4 border-white bg-white/95 relative">
+                                        <div className="flex-1 min-h-0 flex flex-col justify-start gap-4 overflow-y-auto no-scrollbar pr-1">
                                             <div><span className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-sm font-bold mb-2 inline-block">解釋</span><div className="font-bpmf quiz-definition text-3xl font-bold text-gray-800 leading-snug">{currentCard.definition}</div></div>
                                             <div className="bg-gray-50/80 p-4 border-2 border-dashed border-gray-300 rounded-xl transform -rotate-1 mt-4">
                                                 <span className="text-gray-500 text-xs font-bold mb-1 block">例句</span><div className="font-bpmf quiz-example text-xl text-gray-700 leading-relaxed font-medium">{currentCard.example}</div>
