@@ -330,13 +330,12 @@
             messagingSenderId: "435781850232",
             appId: "1:435781850232:web:bedbf1e1cd942e972b898d"
         };
-        const DEFAULT_PUBLISHER = '翰林';
-        const DEFAULT_BOOK = '114一上';
-        const PUBLISHER_OPTIONS = ['翰林', '康軒', '南一'];
-        const BOOK_YEARS = ['114', '115'];
-        const BOOK_GRADES = ['一', '二', '三', '四', '五', '六'];
-        const BOOK_TERMS = ['上', '下'];
-        const BOOK_OPTIONS = BOOK_YEARS.flatMap(year => BOOK_GRADES.flatMap(grade => BOOK_TERMS.map(term => `${year}${grade}${term}`)));
+        const DEFAULT_PUBLISHER = '康軒';
+        const DEFAULT_BOOK = '115一上';
+        const PUBLISHER_OPTIONS = ['康軒', '翰林', '南一'];
+        const BOOK_OPTIONS = ['115一上', '115一下', '116二上', '116二下'];
+        const getLessonCount = (book) => book === '115一上' ? 6 : 12;
+        const getLessonOptions = (book) => Array.from({ length: getLessonCount(book) }, (_, index) => index + 1);
         const DECK_CATEGORIES = {
             vocabulary: { label: '語詞解釋', shortLabel: '語詞', color: 'bg-sky-100 text-sky-800 border-sky-200' },
             idiom: { label: '成語解釋', shortLabel: '成語', color: 'bg-amber-100 text-amber-800 border-amber-200' },
@@ -376,7 +375,7 @@
             if (compact.includes('範例')) publisher = '範例';
             let book = deck.book || DEFAULT_BOOK;
             const bookMatch = compact.match(/(\d{3}[一二三四五六]上|\d{3}[一二三四五六]下|[一二三四五六]上|[一二三四五六]下)/);
-            if (bookMatch) book = bookMatch[1].length <= 2 ? `114${bookMatch[1]}` : bookMatch[1];
+            if (bookMatch) book = bookMatch[1].length <= 2 ? `115${bookMatch[1]}` : bookMatch[1];
             return { publisher, book, lessonNo, category };
         };
 
@@ -1090,11 +1089,19 @@
                                 {PUBLISHER_OPTIONS.map(value => <option key={value} value={value}>{value}</option>)}
                             </select>
                             <label className="text-sm font-bold text-gray-700">冊別</label>
-                            <select id="newBook" defaultValue={DEFAULT_BOOK} className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none bg-white">
+                            <select id="newBook" defaultValue={DEFAULT_BOOK} onChange={(e) => {
+                                const lessonSelect = document.getElementById('newLessonNo');
+                                if (!lessonSelect) return;
+                                const maxLesson = getLessonCount(e.target.value);
+                                lessonSelect.innerHTML = getLessonOptions(e.target.value).map(value => `<option value="${value}">第 ${value} 課</option>`).join('');
+                                lessonSelect.value = Math.min(parseInt(lessonSelect.value, 10) || 1, maxLesson);
+                            }} className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none bg-white">
                                 {BOOK_OPTIONS.map(value => <option key={value} value={value}>{value}</option>)}
                             </select>
                             <label className="text-sm font-bold text-gray-700">課次</label>
-                            <input type="number" id="newLessonNo" min="1" defaultValue="1" className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none" />
+                            <select id="newLessonNo" defaultValue="1" className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none bg-white">
+                                {getLessonOptions(DEFAULT_BOOK).map(value => <option key={value} value={value}>第 {value} 課</option>)}
+                            </select>
                             <label className="text-sm font-bold text-gray-700">閃卡類型</label>
                             <select id="newCategory" defaultValue="vocabulary" className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none bg-white">
                                 {Object.entries(DECK_CATEGORIES).map(([value, info]) => <option key={value} value={value}>{info.label}</option>)}
@@ -1916,17 +1923,19 @@
                 const books = ['全部', ...new Set([...BOOK_OPTIONS, ...sortedDecks
                     .filter(d => filterPublisher === '全部' || parseDeckMeta(d).publisher === filterPublisher)
                     .map(d => parseDeckMeta(d).book)])];
-                const lessons = ['全部', ...new Set(sortedDecks
-                    .filter(d => {
-                        const meta = parseDeckMeta(d);
-                        return (filterPublisher === '全部' || meta.publisher === filterPublisher) &&
-                            (filterBook === '全部' || meta.book === filterBook) &&
-                            (filterCategory === '全部' || meta.category === filterCategory);
-                    })
-                    .map(d => parseDeckMeta(d).lessonNo)
-                    .filter(Boolean)
-                    .sort((a, b) => a - b)
-                    .map(String))];
+                const lessonSource = filterBook !== '全部'
+                    ? getLessonOptions(filterBook).map(String)
+                    : [...new Set(sortedDecks
+                        .filter(d => {
+                            const meta = parseDeckMeta(d);
+                            return (filterPublisher === '全部' || meta.publisher === filterPublisher) &&
+                                (filterCategory === '全部' || meta.category === filterCategory);
+                        })
+                        .map(d => parseDeckMeta(d).lessonNo)
+                        .filter(Boolean)
+                        .sort((a, b) => a - b)
+                        .map(String))];
+                const lessons = ['全部', ...lessonSource];
                 const visibleDecks = sortedDecks.filter(deck => {
                     const meta = parseDeckMeta(deck);
                     return (filterPublisher === '全部' || meta.publisher === filterPublisher) &&
@@ -2130,13 +2139,20 @@
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 mb-1">冊別</label>
-                                    <select value={editBook} onChange={(e) => setEditBook(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold outline-none focus:border-sky-300 bg-white">
+                                    <select value={editBook} onChange={(e) => {
+                                        const nextBook = e.target.value;
+                                        setEditBook(nextBook);
+                                        const maxLesson = getLessonCount(nextBook);
+                                        if ((parseInt(editLessonNo, 10) || 1) > maxLesson) setEditLessonNo(String(maxLesson));
+                                    }} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold outline-none focus:border-sky-300 bg-white">
                                         {editBookOptions.map(value => <option key={value} value={value}>{value}</option>)}
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 mb-1">課次</label>
-                                    <input type="number" min="1" value={editLessonNo} onChange={(e) => setEditLessonNo(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold outline-none focus:border-sky-300" />
+                                    <select value={String(editLessonNo || 1)} onChange={(e) => setEditLessonNo(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold outline-none focus:border-sky-300 bg-white">
+                                        {getLessonOptions(editBook).map(value => <option key={value} value={value}>第 {value} 課</option>)}
+                                    </select>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 mb-1">閃卡類型</label>
