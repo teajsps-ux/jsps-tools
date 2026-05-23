@@ -336,6 +336,7 @@
         const BOOK_OPTIONS = ['115一上', '115一下', '116二上', '116二下'];
         const getLessonCount = (book) => book === '115一上' ? 6 : 12;
         const getLessonOptions = (book) => Array.from({ length: getLessonCount(book) }, (_, index) => index + 1);
+        const formatPublisherLabel = (publisher) => publisher === '全部' ? publisher : `${publisher}版`;
         const DECK_CATEGORIES = {
             vocabulary: { label: '語詞解釋', shortLabel: '語詞', color: 'bg-sky-100 text-sky-800 border-sky-200' },
             idiom: { label: '成語解釋', shortLabel: '成語', color: 'bg-amber-100 text-amber-800 border-amber-200' },
@@ -761,7 +762,7 @@
                         : '正在同步題庫';
 
             // Course Browser State
-            const [filterPublisher, setFilterPublisher] = useState('全部');
+            const [filterPublisher, setFilterPublisher] = useState(DEFAULT_PUBLISHER);
             const [filterBook, setFilterBook] = useState('全部');
             const [filterLesson, setFilterLesson] = useState('全部');
             const [filterCategory, setFilterCategory] = useState('全部');
@@ -1086,7 +1087,7 @@
                             <p className="text-sm text-gray-600">同一課的「語詞解釋」和「成語解釋」會建立成不同閃卡單元。</p>
                             <label className="text-sm font-bold text-gray-700">版本</label>
                             <select id="newPublisher" defaultValue={DEFAULT_PUBLISHER} className="border-2 border-gray-300 p-2 rounded-lg text-lg focus:border-slate-500 outline-none bg-white">
-                                {PUBLISHER_OPTIONS.map(value => <option key={value} value={value}>{value}</option>)}
+                                {PUBLISHER_OPTIONS.map(value => <option key={value} value={value}>{formatPublisherLabel(value)}</option>)}
                             </select>
                             <label className="text-sm font-bold text-gray-700">冊別</label>
                             <select id="newBook" defaultValue={DEFAULT_BOOK} onChange={(e) => {
@@ -2054,7 +2055,7 @@
                             <div className="flex-1 min-w-[150px]">
                                 <label className="block text-xs font-bold text-gray-500 mb-1">版本</label>
                                 <select value={filterPublisher} onChange={(e) => { setFilterPublisher(e.target.value); setFilterBook('全部'); setFilterLesson('全部'); }} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold bg-white">
-                                    {publishers.map(value => <option key={value} value={value}>{value}</option>)}
+                                    {publishers.map(value => <option key={value} value={value}>{formatPublisherLabel(value)}</option>)}
                                 </select>
                             </div>
                             <div className="flex-1 min-w-[150px]">
@@ -2134,7 +2135,7 @@
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 mb-1">版本</label>
                                     <select value={editPublisher} onChange={(e) => setEditPublisher(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg p-2 font-bold outline-none focus:border-sky-300 bg-white">
-                                        {editPublisherOptions.map(value => <option key={value} value={value}>{value}</option>)}
+                                        {editPublisherOptions.map(value => <option key={value} value={value}>{formatPublisherLabel(value)}</option>)}
                                     </select>
                                 </div>
                                 <div>
