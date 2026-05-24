@@ -130,6 +130,7 @@
     position: relative;
     overflow: hidden;
     background: #7dd3fc;
+    cursor: default;
   }
   .lesson-card::before {
     content: "";
@@ -142,7 +143,7 @@
     pointer-events: none;
   }
   .lesson-card::after {
-    content: "↗";
+    content: "";
     position: absolute;
     z-index: 3;
     top: 14px;
@@ -158,15 +159,6 @@
     height: 100%;
     object-fit: cover;
     display: block;
-  }
-  .lesson-card:hover, .lesson-card:focus-visible {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 0 rgba(0,0,0,0.15), 0 14px 30px rgba(0,0,0,0.12);
-    outline: none;
-  }
-  .lesson-card:active {
-    transform: translateY(0);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.12);
   }
   .lesson-label {
     position: relative;
@@ -224,77 +216,77 @@
 
       <h2 class="section-title">📚 選擇課次</h2>
       <div class="lesson-grid">
-        <a class="lesson-card c1" href="./play.html?lesson=l01" target="_blank" rel="noopener">
+        <div class="lesson-card c1">
           <img class="card-bg" src="./images/l01-cat.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L01</div>
             <h2>貓咪</h2>
           </div>
-        </a>
+        </div>
 
-        <a class="lesson-card c2" href="./play.html?lesson=l02" target="_blank" rel="noopener">
+        <div class="lesson-card c2">
           <img class="card-bg" src="./images/l02-gosling.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L02</div>
             <h2>鵝寶寶</h2>
           </div>
-        </a>
+        </div>
 
-        <a class="lesson-card c3" href="./play.html?lesson=l03" target="_blank" rel="noopener">
+        <div class="lesson-card c3">
           <img class="card-bg" src="./images/l03-hippo-beaver.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L03</div>
             <h2>河馬和河狸</h2>
           </div>
-        </a>
+        </div>
 
-        <a class="lesson-card c4" href="./play.html?lesson=l04" target="_blank" rel="noopener">
+        <div class="lesson-card c4">
           <img class="card-bg" src="./images/l04-smile.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L04</div>
             <h2>笑嘻嘻</h2>
           </div>
-        </a>
+        </div>
 
-        <a class="lesson-card c5" href="./play.html?lesson=l05" target="_blank" rel="noopener">
+        <div class="lesson-card c5">
           <img class="card-bg" src="./images/l05-seesaw.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L05</div>
             <h2>翹翹板</h2>
           </div>
-        </a>
+        </div>
 
-        <a class="lesson-card c6" href="./play.html?lesson=l06" target="_blank" rel="noopener">
+        <div class="lesson-card c6">
           <img class="card-bg" src="./images/l06-teacher.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L06</div>
             <h2>謝謝老師</h2>
           </div>
-        </a>
+        </div>
 
-        <a class="lesson-card c7" href="./play.html?lesson=l07" target="_blank" rel="noopener">
+        <div class="lesson-card c7">
           <img class="card-bg" src="./images/l07-race.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L07</div>
             <h2>龜兔賽跑</h2>
           </div>
-        </a>
+        </div>
 
-        <a class="lesson-card c8" href="./play.html?lesson=l08" target="_blank" rel="noopener">
+        <div class="lesson-card c8">
           <img class="card-bg" src="./images/l08-radish.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L08</div>
             <h2>拔蘿蔔</h2>
           </div>
-        </a>
+        </div>
 
-        <a class="lesson-card c9" href="./play.html?lesson=l09" target="_blank" rel="noopener">
+        <div class="lesson-card c9">
           <img class="card-bg" src="./images/l09-animal-party.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L09</div>
             <h2>動物狂歡會</h2>
           </div>
-        </a>
+        </div>
       </div>
     </div>
   </div>
