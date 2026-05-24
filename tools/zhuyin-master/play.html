@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>注音高手</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+    background: #f6f4ee;
+    color: #1e3a8a;
+  }
+  .loading {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 24px;
+  }
+  .loading h1 {
+    margin: 0 0 12px;
+    font-size: clamp(28px, 5vw, 48px);
+  }
+  .loading p {
+    margin: 0;
+    color: #64748b;
+    font-size: 18px;
+  }
+</style>
+</head>
+<body>
+  <main class="loading" id="loading">
+    <div>
+      <h1>注音高手</h1>
+      <p>正在準備題目...</p>
+    </div>
+  </main>
+
+  <script>
+    const lessonData = {
+      l01: {
+        title: "L1 貓咪-注音高手",
+        questions: [
+          ["刀", "https://drive.google.com/thumbnail?sz=w640-h480&id=1NAekAmzQELRoepnFo87jGFzF75WjVItJ&fname=刀.png", "ㄉㄠ"],
+          ["嗶", "https://drive.google.com/thumbnail?sz=w640-h480&id=1bchlZ3_WQAQBKKd5suxG_4YfsE67EutV&fname=嗶.png", "ㄅㄧ"],
+          ["弟弟", "https://drive.google.com/thumbnail?sz=w640-h480&id=1CUWCbRhKmGvbjOUyaprHffxwu9e1R5Dl&fname=弟弟.png", "ㄉㄧˋ ㄉㄧ˙"],
+          ["抱貓", "https://drive.google.com/thumbnail?sz=w640-h480&id=1EfCXMpQvD1h1_6QWkFnAH7OLZ8wHDEes&fname=抱貓.png", "ㄅㄠˋ ㄇㄠ"],
+          ["毛衣", "https://drive.google.com/thumbnail?sz=w640-h480&id=1cKUeNpmmLw-4s2jTRQEO6AIHqAvf72m7&fname=毛衣.png", "ㄇㄠˊ ㄧ"],
+          ["泡泡", "https://drive.google.com/thumbnail?sz=w640-h480&id=1OdTaqhaKJQUwrNVuQGPtMKAcFaxjKg8d&fname=泡泡.png", "ㄆㄠˋ ㄆㄠˋ"],
+          ["皮包", "https://drive.google.com/thumbnail?sz=w640-h480&id=1dd943Py8QILDVPaPv6JTCfwq2k0nzNPG&fname=皮包.png", "ㄆㄧˊ ㄅㄠ"],
+          ["稻米", "https://drive.google.com/thumbnail?sz=w640-h480&id=12Uw0fpF3K9jwIu6OYeEAy7f4AMQBIgBA&fname=稻米.png", "ㄉㄠˋ ㄇㄧˇ"],
+          ["笛", "https://drive.google.com/thumbnail?sz=w640-h480&id=1VT6JTmWm6RVuoDe6gcDIMkY7zSTlZzDg&fname=笛.png", "ㄉㄧˊ"],
+          ["筆", "https://drive.google.com/thumbnail?sz=w640-h480&id=11aGxQQLXkehI9uT5zxX0Ya_W8Pi-628A&fname=筆.png", "ㄅㄧˇ"],
+          ["貓咪", "https://drive.google.com/thumbnail?sz=w640-h480&id=1oyg9JaoVE5belSM6u2j1Adsbfa10_IAi&fname=貓咪.png", "ㄇㄠ ㄇㄧ"],
+          ["跑第一", "https://drive.google.com/thumbnail?sz=w640-h480&id=1ymJn5eWIN27cuL_Ky8grM3woKOEcgydM&fname=跑第一.png", "ㄆㄠˇ ㄉㄧˋ ㄧ"]
+        ]
+      },
+      l02: {
+        title: "L2 鵝寶寶-注音高手",
+        questions: [
+          ["五隻", "https://drive.google.com/thumbnail?sz=w640-h480&id=1JXXvTe4idDlMOUYBQ8d05k3kQn2R9RwY&fname=五隻.png", "ㄨˇ ㄓ"],
+          ["哈哈哈", "https://drive.google.com/thumbnail?sz=w640-h480&id=1zlfjyaGGr2DHicADTiaDNeT-VGxEJgg2&fname=哈哈哈.png", "ㄏㄚ ㄏㄚ ㄏㄚ"],
+          ["喝茶", "https://drive.google.com/thumbnail?sz=w640-h480&id=1SMBvWtdtiP96miJ_QycYXU4CU3bZqYTx&fname=喝茶.png", "ㄏㄜ ㄔㄚˊ"],
+          ["好得意", "https://drive.google.com/thumbnail?sz=w640-h480&id=1ddifOJJo2-bWiGcQUANpzOG7bWNECb8h&fname=好得意.png", "ㄏㄠˇ ㄉㄜˊ ㄧˋ"],
+          ["媽媽", "https://drive.google.com/thumbnail?sz=w640-h480&id=1S57vYk41JlCl7Ylt2r1hbeI4e69oSy-u&fname=媽媽.png", "ㄇㄚ ㄇㄚ˙"],
+          ["孵出", "https://drive.google.com/thumbnail?sz=w640-h480&id=1twytPnB3Q5Rrf2KUGSuuXbXetrHUS8sW&fname=孵出.png", "ㄈㄨ ㄔㄨ"],
+          ["寶貝", "https://drive.google.com/thumbnail?sz=w640-h480&id=1aXVJ-o5gLQhir4a7iVkH-Ku4V60iZ2y-&fname=寶貝.png", "ㄅㄠˇ ㄅㄟˋ"],
+          ["烏鴉", "https://drive.google.com/thumbnail?sz=w640-h480&id=1t0LUbbERFBNhkpnzNkFl-ssmokqfFDq-&fname=烏鴉.png", "ㄨ ㄧㄚ"],
+          ["牙齒", "https://drive.google.com/thumbnail?sz=w640-h480&id=1tpHPtZIeoklH5J06X07NMJ6Q1o-OPf5j&fname=牙齒.png", "ㄧㄚˊ ㄔˇ"],
+          ["珠寶", "https://drive.google.com/thumbnail?sz=w640-h480&id=1dwTX47kjIig1Wsbn1XqSe9PF3lMr-OFB&fname=珠寶.png", "ㄓㄨ ㄅㄠˇ"],
+          ["茶壺", "https://drive.google.com/thumbnail?sz=w640-h480&id=1kfdXVc7v3OJzW0kZaIGUo5eu90iMdEpl&fname=茶壺.png", "ㄔㄚˊ ㄏㄨˊ"],
+          ["蜘蛛", "https://drive.google.com/thumbnail?sz=w640-h480&id=1ZiLNXdqRmL-vpcZfJxg3Xy93Qhp1rZVh&fname=蜘蛛.png", "ㄓ ㄓㄨ"],
+          ["衣服", "https://drive.google.com/thumbnail?sz=w640-h480&id=1JPS7j9Ujy9t0qqUI9C8Q7bEz_7A53k9_&fname=衣服.png", "ㄧ ㄈㄨˊ"],
+          ["遮", "https://drive.google.com/thumbnail?sz=w640-h480&id=1bo3sFUeJcXECJeOQ1pAgDn_ghViIMByV&fname=遮.png", "ㄓㄜ"],
+          ["馬車", "https://drive.google.com/thumbnail?sz=w640-h480&id=1s0hfNxVbe8EjJdn-tN0BDhSDGpGMiXjW&fname=馬車.png", "ㄇㄚˇ ㄔㄜ"],
+          ["鵝", "https://drive.google.com/thumbnail?sz=w640-h480&id=1yMujJv61QE9K1Lhxb5NbexzsQ3_FbmDJ&fname=鵝.png", "ㄜˊ"]
+        ]
+      },
+      l03: {
+        title: "L3 河馬和河狸-注音高手",
+        questions: [
+          ["半路", "https://drive.google.com/thumbnail?sz=w640-h480&id=1QkreQOx6n9bvkuuoP4yHKru9DooB7Q7g&fname=半路.png", "ㄅㄢˋ ㄌㄨˋ"],
+          ["巫婆", "https://drive.google.com/thumbnail?sz=w640-h480&id=1gK89VQ7OQOqC1ojS0DtFQQpP1N003FPs&fname=巫婆.png", "ㄨ ㄆㄛˊ"],
+          ["忙著", "https://drive.google.com/thumbnail?sz=w640-h480&id=1FTzLVOCs3mLv3xNvXr_Fs6TJXkyBb5M0&fname=忙著.png", "ㄇㄤˊ ㄓㄜ˙"],
+          ["梨子", "https://drive.google.com/thumbnail?sz=w640-h480&id=1bl0tmdgxQhhy1_o-RX8YYskZhw9gmGVA&fname=梨子.png", "ㄌㄧˊ ㄗ˙"],
+          ["棗子", "https://drive.google.com/thumbnail?sz=w640-h480&id=1t67ECxN4qdtnJRLPxIfx_3UslkLKeKJU&fname=棗子.png", "ㄗㄠˇ ㄗ˙"],
+          ["河狸", "https://drive.google.com/thumbnail?sz=w640-h480&id=1Q40RpfSjwWIsa6sttmR9zajfpkghDNbP&fname=河狸.png", "ㄏㄜˊ ㄌㄧˊ"],
+          ["河馬", "https://drive.google.com/thumbnail?sz=w640-h480&id=1WK1z-1m27EpvgaIHM8TolhPVSIf9pkW7&fname=河馬.png", "ㄏㄜˊ ㄇㄚˇ"],
+          ["泡澡", "https://drive.google.com/thumbnail?sz=w640-h480&id=1SQWe4mZoYGrzjGWZvW6jwBEja9sS3sVW&fname=泡澡.png", "ㄆㄠˋ ㄗㄠˇ"],
+          ["玻璃", "https://drive.google.com/thumbnail?sz=w640-h480&id=1vcjqOPTCFkd0I0JrUsnvJc0uinzUodWx&fname=玻璃.png", "ㄅㄛ ㄌㄧˊ"],
+          ["築巢", "https://drive.google.com/thumbnail?sz=w640-h480&id=16J27R5W0XzUvRbWXLQUawQuebXDtYu1N&fname=築巢.png", "ㄓㄨˊ ㄔㄠˊ"],
+          ["臥房", "https://drive.google.com/thumbnail?sz=w640-h480&id=1qK0hF30a1EKqqV6XwYfaMzG4GBg34FZX&fname=臥房.png", "ㄨㄛˋ ㄈㄤˊ"],
+          ["荔枝", "https://drive.google.com/thumbnail?sz=w640-h480&id=1bQfpHdBjBZsoTocL3yIQX--vUAQZH4_J&fname=荔枝.png", "ㄌㄧˋ ㄓ"],
+          ["要去", "https://drive.google.com/thumbnail?sz=w640-h480&id=1nkXpw4dRuxMteu0UR0-OidPBKaMoDKUZ&fname=要去.png", "ㄧㄠˋ ㄑㄩˋ"],
+          ["遇到", "https://drive.google.com/thumbnail?sz=w640-h480&id=1I7FPgIosPT-v44RCIq5g7CpBjZ4rJipt&fname=遇到.png", "ㄩˋ ㄉㄠˋ"],
+          ["驢子", "https://drive.google.com/thumbnail?sz=w640-h480&id=1BjYxo86nDi-1YX4gSC_j9ql_tt7yUoHP&fname=驢子.png", "ㄌㄩˊ ㄗ˙"],
+          ["魔法", "https://drive.google.com/thumbnail?sz=w640-h480&id=1OvVitzp54NBG8sgdkGuN5BBjlw8NGav6&fname=魔法.png", "ㄇㄛˊ ㄈㄚˇ"]
+        ]
+      },
+      l04: {
+        title: "L4 笑嘻嘻-注音高手",
+        questions: [
+          ["一二一", "https://drive.google.com/thumbnail?sz=w640-h480&id=1mrQNxb_eIg-fFtgaZsz27kx21oRqDbLR&fname=一二一.png", "ㄧ ㄦˋ ㄧ"],
+          ["二樓", "https://drive.google.com/thumbnail?sz=w640-h480&id=1sri_bIDc7EsWfRfH2tyPqjz_1T3oxHgF&fname=二樓.png", "ㄦˋ ㄌㄡˊ"],
+          ["企鵝", "https://drive.google.com/thumbnail?sz=w640-h480&id=14wZ1iG8TBtJD4jofiy_AzzfrvElG_MXA&fname=企鵝.png", "ㄑㄧˋ ㄜˊ"],
+          ["兒子", "https://drive.google.com/thumbnail?sz=w640-h480&id=1Vp5qqbic0RGMaLOWygT1VtGsdtk0MAXX&fname=兒子.png", "ㄦˊ ㄗ˙"],
+          ["好歡喜", "https://drive.google.com/thumbnail?sz=w640-h480&id=1481JEnPx10WNfs0qP_Ao8_qfFSiOema8&fname=好歡喜.png", "ㄏㄠˇ ㄏㄨㄢ ㄒㄧˇ"],
+          ["彎腰", "https://drive.google.com/thumbnail?sz=w640-h480&id=1F1kpXlizqbGUsF0PnJqicF3OfROsb_w0&fname=彎腰.png", "ㄨㄢ ㄧㄠ"],
+          ["手拉手", "https://drive.google.com/thumbnail?sz=w640-h480&id=1NXfnyVXt0OoOl6w8dz5atD6ubGfbRjkU&fname=手拉手.png", "ㄕㄡˇ ㄌㄚ ㄕㄡˇ"],
+          ["書包", "https://drive.google.com/thumbnail?sz=w640-h480&id=16t3CKB26JRCdb9t_O6prLFUhoo8S1ued&fname=書包.png", "ㄕㄨ ㄅㄠ"],
+          ["猴子", "https://drive.google.com/thumbnail?sz=w640-h480&id=17bNDqhfIj16g9j3jmtdTMnt91bh004Xj&fname=猴子.png", "ㄏㄡˊ ㄗ˙"],
+          ["獅子", "https://drive.google.com/thumbnail?sz=w640-h480&id=1cVYjSa-oGNy0Z7Yq0mAwpAXXryqwbLBG&fname=獅子.png", "ㄕ ㄗ˙"],
+          ["碗盤", "https://drive.google.com/thumbnail?sz=w640-h480&id=1MuDASJy-mPv_2dKmd_8CbUe5qgso6rH1&fname=碗盤.png", "ㄨㄢˇ ㄆㄢˊ"],
+          ["笑嘻嘻", "https://drive.google.com/thumbnail?sz=w640-h480&id=1YdUIrv-yrzb6ewseNMJgAwCE8yHViE54&fname=笑嘻嘻.png", "ㄒㄧㄠˋ ㄒㄧ ㄒㄧ"],
+          ["耳環", "https://drive.google.com/thumbnail?sz=w640-h480&id=1wjiGyxEnWGEu4edn3dxOMzWXcnY_jpUr&fname=耳環.png", "ㄦˇ ㄏㄨㄢˊ"],
+          ["背著", "https://drive.google.com/thumbnail?sz=w640-h480&id=1ZsL3a11RDDvlAPClPhc3Zp_C2Xw_dd_C&fname=背著.png", "ㄅㄟ ㄓㄜ˙"],
+          ["蜥蜴", "https://drive.google.com/thumbnail?sz=w640-h480&id=1tbeOyAPe0ODoh1C8_xTjudRhUH8S9_uY&fname=蜥蜴.png", "ㄒㄧ ㄧˋ"],
+          ["鱷魚", "https://drive.google.com/thumbnail?sz=w640-h480&id=1I32p8_MVgZrHtnyl9DAVk9p3RX-Js6ig&fname=鱷魚.png", "ㄜˋ ㄩˊ"]
+        ]
+      },
+      l05: {
+        title: "L5 翹翹板-注音高手",
+        questions: [
+          ["上下", "https://drive.google.com/thumbnail?sz=w640-h480&id=1pVBwHElK9kbut7W8jmHOMLh6e8ExNL6T&fname=上下.png", "ㄕㄤˋ ㄒㄧㄚˋ"],
+          ["來玩", "https://drive.google.com/thumbnail?sz=w640-h480&id=1sckwm9Wk26gvS5gI5IqB94AJW7TuH5Cv&fname=來玩.png", "ㄌㄞˊ ㄨㄢˊ"],
+          ["大象", "https://drive.google.com/thumbnail?sz=w640-h480&id=1vYWrUUTDc-JWB7N-Q70s20-hMgVq4D6L&fname=大象.png", "ㄉㄚˋ ㄒㄧㄤˋ"],
+          ["好像", "https://drive.google.com/thumbnail?sz=w640-h480&id=1tT4QoejEbS9gnyFXObrTxrOGufm5yS7O&fname=好像.png", "ㄏㄠˇ ㄒㄧㄤˋ"],
+          ["好朋友", "https://drive.google.com/thumbnail?sz=w640-h480&id=1xK3k0efW-7YcVdKQ7RcuQZbaioBkNLab&fname=好朋友.png", "ㄏㄠˇ ㄆㄥˊ ㄧㄡˇ"],
+          ["小孩", "https://drive.google.com/thumbnail?sz=w640-h480&id=11WeRRF23huP9hpQxKS8AuJlV-8fyB92P&fname=小孩.png", "ㄒㄧㄠˇ ㄏㄞˊ"],
+          ["小鳥", "https://drive.google.com/thumbnail?sz=w640-h480&id=1JqgKpbQwKdOpOcCy4GK4yRUXP_rFwJfG&fname=小鳥.png", "ㄒㄧㄠˇ ㄋㄧㄠˇ"],
+          ["牛奶", "https://drive.google.com/thumbnail?sz=w640-h480&id=18G-5Wfb8yqIJz4vjggwSm89Qor5Y2hg5&fname=牛奶.png", "ㄋㄧㄡˊ ㄋㄞˇ"],
+          ["翹翹板", "https://drive.google.com/thumbnail?sz=w640-h480&id=1pSEQZKOAj9lrOxseT6wQnNF8uZqzeae5&fname=翹翹板.png", "ㄑㄧㄠˋ ㄑㄧㄠˋ ㄅㄢˇ"],
+          ["蓋章", "https://drive.google.com/thumbnail?sz=w640-h480&id=1RyMqnLbLFsJJq6PKMGT1G7h-eV0YfM1Y&fname=蓋章.png", "ㄍㄞˋ ㄓㄤ"],
+          ["蜜蜂", "https://drive.google.com/thumbnail?sz=w640-h480&id=1hC8A1Bf4vNxEGM_Fi3J_Ut7-bKvPs3Pn&fname=蜜蜂.png", "ㄇㄧˋ ㄈㄥ"],
+          ["買魚缸", "https://drive.google.com/thumbnail?sz=w640-h480&id=1q_vqtPsWx5-biLvH6ovNvHeHWYdMCAan&fname=買魚缸.png", "ㄇㄞˇ ㄩˊ ㄍㄤ"],
+          ["釣魚竿", "https://drive.google.com/thumbnail?sz=w640-h480&id=1po-BX2tl6KH1nUq8XNG19ETKG8VhEO4h&fname=釣魚竿.png", "ㄉㄧㄠˋ ㄩˊ ㄍㄢ"],
+          ["風箏", "https://drive.google.com/thumbnail?sz=w640-h480&id=1Vybj0zM67jnhGBMIq2NIekahDUaUC6gW&fname=風箏.png", "ㄈㄥ ㄓㄥ"],
+          ["飛", "https://drive.google.com/thumbnail?sz=w640-h480&id=1ibI19A3MKEFaoScs2sqauDlQyC2FxMd-&fname=飛.png", "ㄈㄟ"],
+          ["高低", "https://drive.google.com/thumbnail?sz=w640-h480&id=1TNQag0Elhedg97IGyu9vwjKXT7y_TEIV&fname=高低.png", "ㄍㄠ ㄉㄧ"]
+        ]
+      },
+      l06: {
+        title: "L6 謝謝老師-注音高手",
+        questions: [
+          ["也教我", "https://drive.google.com/thumbnail?sz=w640-h480&id=139NIouhlVZMqWzXNEWkMzP2LpywCzkNQ&fname=也教我.png", "ㄧㄝˇ ㄐㄧㄠ ㄨㄛˇ"],
+          ["公雞", "https://drive.google.com/thumbnail?sz=w640-h480&id=1_QrUpPaYFsz-pC3uz6jn3BbdKRf51dEq&fname=公雞.png", "ㄍㄨㄥ ㄐㄧ"],
+          ["多謝", "https://drive.google.com/thumbnail?sz=w640-h480&id=1sTH_dEDtfgW9j0p0LYEQ37oudEXV1q2P&fname=多謝.png", "ㄉㄨㄛ ㄒㄧㄝˋ"],
+          ["寫字", "https://drive.google.com/thumbnail?sz=w640-h480&id=13SBAxivsFWzXSHQhWtciWm2ikbG1v5cO&fname=寫字.png", "ㄒㄧㄝˇ ㄗˋ"],
+          ["彩虹", "https://drive.google.com/thumbnail?sz=w640-h480&id=1Lw4Qiuhq1BvXcY6wsB--CRGr7Es7vdUN&fname=彩虹.png", "ㄘㄞˇ ㄏㄨㄥˊ"],
+          ["掃地", "https://drive.google.com/thumbnail?sz=w640-h480&id=1mf5xUXwi20XYHrA74DE5ulPrI2v6mtd4&fname=掃地.png", "ㄙㄠˇ ㄉㄧˋ"],
+          ["掛", "https://drive.google.com/thumbnail?sz=w640-h480&id=1OwPcSF_fXiTzrFajmqyWjr3QB8uyxHWB&fname=掛.png", "ㄍㄨㄚˋ"],
+          ["桌上", "https://drive.google.com/thumbnail?sz=w640-h480&id=1lKigj6r34yAvz_pAq2n6nvFO3SUTF_Ke&fname=桌上.png", "ㄓㄨㄛ ㄕㄤˋ"],
+          ["澆花", "https://drive.google.com/thumbnail?sz=w640-h480&id=19dUoU0q-z_EUGaJMVW_Q2bWc8c9dzhm-&fname=澆花.png", "ㄐㄧㄠ ㄏㄨㄚ"],
+          ["畫畫", "https://drive.google.com/thumbnail?sz=w640-h480&id=1_mXTKJkK1lKYrVUyJetNgb1R6cKHNf5x&fname=畫畫.png", "ㄏㄨㄚˋ ㄏㄨㄚˋ"],
+          ["紅花", "https://drive.google.com/thumbnail?sz=w640-h480&id=18cWLm1TYKOC6SdmJT5-6_jVUdAEaKf2-&fname=紅花.png", "ㄏㄨㄥˊ ㄏㄨㄚ"],
+          ["老師", "https://drive.google.com/thumbnail?sz=w640-h480&id=1cKR8yS7v7TSmqHCdTBzOO8vOoWAgG15V&fname=老師.png", "ㄌㄠˇ ㄕ"],
+          ["耶誕卡", "https://drive.google.com/thumbnail?sz=w640-h480&id=1nc_XW-0wUrEY3FKRjMLgFQsWeObp3fJ7&fname=耶誕卡.png", "ㄧㄝ ㄉㄢˋ ㄎㄚˇ"],
+          ["蘋果", "https://drive.google.com/thumbnail?sz=w640-h480&id=1od59jTgRFOoQq4SfUTtQF4tbMrJQyfsf&fname=蘋果.png", "ㄆㄧㄥˊ ㄍㄨㄛˇ"],
+          ["送一朵", "https://drive.google.com/thumbnail?sz=w640-h480&id=1M9NC2PIUh-yrNUrLoO57lIWiZRp2Ahm4&fname=送一朵.png", "ㄙㄨㄥˋ ㄧ ㄉㄨㄛˇ"],
+          ["鞋子", "https://drive.google.com/thumbnail?sz=w640-h480&id=1uQxcFAYDG5BbPgOrtqx_c8p-He97zm1C&fname=鞋子.png", "ㄒㄧㄝˊ ㄗ˙"]
+        ]
+      },
+      l07: {
+        title: "L7 龜兔賽跑-注音高手",
+        questions: [
+          ["不氣餒", "https://drive.google.com/thumbnail?sz=w640-h480&id=1DriR-5kMznfvmbkuSRHTPJwlWIqcrOrd&fname=不氣餒.png", "ㄅㄨˊ ㄑㄧˋ ㄋㄟˇ"],
+          ["仙草冰", "https://drive.google.com/thumbnail?sz=w640-h480&id=10yH3vW25lsYioQIHt-_qK94iz4FyRM6Q&fname=仙草冰.png", "ㄒㄧㄢ ㄘㄠˇ ㄅㄧㄥ"],
+          ["兔子", "https://drive.google.com/thumbnail?sz=w640-h480&id=1pvsexes3sVaiAy_ulgHSCPksnE9SxDhc&fname=兔子.png", "ㄊㄨˋ ㄗ˙"],
+          ["午睡", "https://drive.google.com/thumbnail?sz=w640-h480&id=1sfAGTQ5N3oO5xjExzXQenRue-AhV1T_2&fname=午睡.png", "ㄨˇ ㄕㄨㄟˋ"],
+          ["噴水", "https://drive.google.com/thumbnail?sz=w640-h480&id=1nZ6dQ2xurO_LbGoxsSkHF1cERkO9mmGO&fname=噴水.png", "ㄆㄣ ㄕㄨㄟˇ"],
+          ["布丁", "https://drive.google.com/thumbnail?sz=w640-h480&id=1sGNRvgmkxuXL-B2sYZgOTnx3WjCIZPlO&fname=布丁.png", "ㄅㄨˋ ㄉㄧㄥ"],
+          ["後面", "https://drive.google.com/thumbnail?sz=w640-h480&id=1E9my5oHQJxNKV9VM3ke_EKBVA0iqgDcS&fname=後面.png", "ㄏㄡˋ ㄇㄧㄢˋ"],
+          ["比看看", "https://drive.google.com/thumbnail?sz=w640-h480&id=1-H33NN8TFC09KPUzcE0Rgm5asEcDHn9a&fname=比看看.png", "ㄅㄧˇ ㄎㄢˋ ㄎㄢˋ"],
+          ["烏龜", "https://drive.google.com/thumbnail?sz=w640-h480&id=1_yXVWWjtEP9Cn79CyoUdB5FtCEsQ2LBq&fname=烏龜.png", "ㄨ ㄍㄨㄟ"],
+          ["真美味", "https://drive.google.com/thumbnail?sz=w640-h480&id=14w507Sgr04RxEKoPiiYnv_Xkef6IG2oE&fname=真美味.png", "ㄓㄣ ㄇㄟˇ ㄨㄟˋ"],
+          ["落後", "https://drive.google.com/thumbnail?sz=w640-h480&id=1TFsZOR1fWIS9P0UzxzPN-4Z1UsDmbxNZ&fname=落後.png", "ㄌㄨㄛˋ ㄏㄡˋ"],
+          ["跑得快", "https://drive.google.com/thumbnail?sz=w640-h480&id=1aZGEeeWBY4YQ-jMEXFKaXWq_962u13QO&fname=跑得快.png", "ㄆㄠˇ ㄉㄜ˙ ㄎㄨㄞˋ"],
+          ["跟在", "https://drive.google.com/thumbnail?sz=w640-h480&id=1X4oK9BEsfJTsRjqIKlcNi3Utj2_uPfT8&fname=跟在.png", "ㄍㄣ ㄗㄞˋ"],
+          ["追", "https://drive.google.com/thumbnail?sz=w640-h480&id=1DAMzdMLAhfvbXAktv_-QhFc_fglY9dzr&fname=追.png", "ㄓㄨㄟ"],
+          ["雞塊", "https://drive.google.com/thumbnail?sz=w640-h480&id=1-MWl4_Gb6AVT-x-pXMLD8tjDmoiBOLEo&fname=雞塊.png", "ㄐㄧ ㄎㄨㄞˋ"],
+          ["領先", "https://drive.google.com/thumbnail?sz=w640-h480&id=1IvFEeCC9kOQQ4hPrp7gW_bX3v9DcrRCA&fname=領先.png", "ㄌㄧㄥˇ ㄒㄧㄢ"]
+        ]
+      },
+      l08: {
+        title: "L8 拔蘿蔔-注音高手",
+        questions: [
+          ["乳酪", "https://drive.google.com/thumbnail?sz=w640-h480&id=1mKyQg8EfHaDh8px0yUDNkHXHg3WKxULU&fname=乳酪.png", "ㄖㄨˇ ㄌㄨㄛˋ"],
+          ["哎唷", "https://drive.google.com/thumbnail?sz=w640-h480&id=1-8VITU6UeBn5AgJXbVvruw6k9LtjoN-S&fname=哎唷.png", "ㄞ ㄧㄛ"],
+          ["嘿唷", "https://drive.google.com/thumbnail?sz=w640-h480&id=1FZfAYQ1EyM9o-ajmSmUpVvNgx9jq00zG&fname=嘿唷.png", "ㄏㄟ ㄧㄛ"],
+          ["快來", "https://drive.google.com/thumbnail?sz=w640-h480&id=1dLULxTqC6EhwhgDR3KNhF6fCS2iY4AZD&fname=快來.png", "ㄎㄨㄞˋ ㄌㄞˊ"],
+          ["拔蘿蔔", "https://drive.google.com/thumbnail?sz=w640-h480&id=1Dr999XR3ZCsz3lZkBxLVZQRpRY-f8sZ9&fname=拔蘿蔔.png", "ㄅㄚˊ ㄌㄨㄛˊ ㄅㄨㄛ˙"],
+          ["捲起", "https://drive.google.com/thumbnail?sz=w640-h480&id=1bbNQLfQvd_WYvEYmadLUJ4wFeEwMgTSs&fname=捲起.png", "ㄐㄩㄢˇ ㄑㄧˇ"],
+          ["浣熊", "https://drive.google.com/thumbnail?sz=w640-h480&id=1sq6yiWST2zNonTuvECKwFAgYYGqpFz9j&fname=浣熊.png", "ㄏㄨㄢˇ ㄒㄩㄥˊ"],
+          ["游泳", "https://drive.google.com/thumbnail?sz=w640-h480&id=1YaLCY7UarXQuPih1XGm70oHjVtBJNWM8&fname=游泳.png", "ㄧㄡˊ ㄩㄥˇ"],
+          ["熱鬧", "https://drive.google.com/thumbnail?sz=w640-h480&id=1mBET9kv8s-ZBOP_PTE6jXuO_PZXQ9Cat&fname=熱鬧.png", "ㄖㄜˋ ㄋㄠˋ"],
+          ["王子", "https://drive.google.com/thumbnail?sz=w640-h480&id=1DgN7VzLBxv4lSpE9K5PsBNdPP6-3Klt4&fname=王子.png", "ㄨㄤˊ ㄗˇ"],
+          ["磁鐵", "https://drive.google.com/thumbnail?sz=w640-h480&id=1X3vLoecxUzZyxMRiB0W5IVmyn73h8vxv&fname=磁鐵.png", "ㄘˊ ㄊㄧㄝˇ"],
+          ["菜園", "https://drive.google.com/thumbnail?sz=w640-h480&id=19obim8LKLycpn5yYVCBDIC1Hc6c5v4GS&fname=菜園.png", "ㄘㄞˋ ㄩㄢˊ"],
+          ["蛋捲", "https://drive.google.com/thumbnail?sz=w640-h480&id=1frbpcUwgv8pHCvN2Uste4-aiHbgYcwyX&fname=蛋捲.png", "ㄉㄢˋ ㄐㄩㄢˇ"],
+          ["袖子", "https://drive.google.com/thumbnail?sz=w640-h480&id=1NAQ3-qQ8gy3x4t7n1KGoHxVA_Q3SwJ05&fname=袖子.png", "ㄒㄧㄡˋ ㄗ˙"],
+          ["院子", "https://drive.google.com/thumbnail?sz=w640-h480&id=1Z2kj5p6Y_Z3llEoJcQQWfHXkyGqwscA7&fname=院子.png", "ㄩㄢˋ ㄗ˙"],
+          ["黃牛", "https://drive.google.com/thumbnail?sz=w640-h480&id=1Cdps2VHkUJHmdo_l-tVeDuRva1cScOFl&fname=黃牛.png", "ㄏㄨㄤˊ ㄋㄧㄡˊ"]
+        ]
+      },
+      l09: {
+        title: "L9 動物狂歡會-注音高手",
+        questions: [
+          ["咚", "https://drive.google.com/thumbnail?sz=w640-h480&id=1FwufCEEdYhXzkRrmW1XN49Om8Ts4OrS5&fname=咚.png", "ㄉㄨㄥ"],
+          ["孔雀", "https://drive.google.com/thumbnail?sz=w640-h480&id=1_Krsge1DFAn1xcCd_IkgCSWTOtOsFEgz&fname=孔雀.png", "ㄎㄨㄥˇ ㄑㄩㄝˋ"],
+          ["山崖", "https://drive.google.com/thumbnail?sz=w640-h480&id=1Bi1PlXzE9Y8kBnaQL5GEPrRpIgJCybYG&fname=山崖.png", "ㄕㄢ ㄧㄚˊ"],
+          ["慶祝", "https://drive.google.com/thumbnail?sz=w640-h480&id=1ns_GEYh26Pbnmgw4DHEIs36cvpuoo9sY&fname=慶祝.png", "ㄑㄧㄥˋ ㄓㄨˋ"],
+          ["拼圖", "https://drive.google.com/thumbnail?sz=w640-h480&id=1QFOFio3vcMCIc42oWu2Zi1-5zab89rR1&fname=拼圖.png", "ㄆㄧㄣ ㄊㄨˊ"],
+          ["月亮", "https://drive.google.com/thumbnail?sz=w640-h480&id=1LuTKrl35NK8KS_kCnnTDRahoVQZJkPzO&fname=月亮.png", "ㄩㄝˋ ㄌㄧㄤˋ"],
+          ["溫泉", "https://drive.google.com/thumbnail?sz=w640-h480&id=1zrss7e4-24UifnO2-CF-fBpn0raz7j6b&fname=溫泉.png", "ㄨㄣ ㄑㄩㄢˊ"],
+          ["滾球", "https://drive.google.com/thumbnail?sz=w640-h480&id=1htN66wPgdZ9LtaXvWUyhqci7Ezi8SKYc&fname=滾球.png", "ㄍㄨㄣˇ ㄑㄧㄡˊ"],
+          ["狂歡會", "https://drive.google.com/thumbnail?sz=w640-h480&id=1XPYzAXaf0V-H_Yuk5E_WWKWKwyPuSoSR&fname=狂歡會.png", "ㄎㄨㄤˊ ㄏㄨㄢ ㄏㄨㄟˋ"],
+          ["白雲", "https://drive.google.com/thumbnail?sz=w640-h480&id=1Ac9m2TP2qAY8kfBX5RvvZFqIjKT3OHMw&fname=白雲.png", "ㄅㄞˊ ㄩㄣˊ"],
+          ["精彩", "https://drive.google.com/thumbnail?sz=w640-h480&id=12L4frvfn3ydriSbQTV2pism6QLAP0PkO&fname=精彩.png", "ㄐㄧㄥ ㄘㄞˇ"],
+          ["蚯蚓", "https://drive.google.com/thumbnail?sz=w640-h480&id=1D3AHteCv7PLFl8AatHhQoID94x2cqpzQ&fname=蚯蚓.png", "ㄑㄧㄡ ㄧㄣˇ"],
+          ["裙子", "https://drive.google.com/thumbnail?sz=w640-h480&id=130KUecbJz7pXHr4blDiZ6XvIKvF2_ik4&fname=裙子.png", "ㄑㄩㄣˊ ㄗ˙"],
+          ["開心", "https://drive.google.com/thumbnail?sz=w640-h480&id=1afToikiTW0DLQ6htKgAhMJndCQRTEP6j&fname=開心.png", "ㄎㄞ ㄒㄧㄣ"],
+          ["雪人", "https://drive.google.com/thumbnail?sz=w640-h480&id=182Ayig2ud2LNYWflHmJRKbXhjovguATH&fname=雪人.png", "ㄒㄩㄝˇ ㄖㄣˊ"],
+          ["馴鹿", "https://drive.google.com/thumbnail?sz=w640-h480&id=1kRxT4miTfnVgzTp2fnCctK0kRBZe3ecl&fname=馴鹿.png", "ㄒㄩㄣˊ ㄌㄨˋ"]
+        ]
+      }
+    };
+
+    const lessonId = new URLSearchParams(window.location.search).get("lesson") || "l01";
+    const lesson = lessonData[lessonId];
+
+    if (!lesson) {
+      document.getElementById("loading").innerHTML = "<div><h1>找不到這一課</h1><p>請回上一頁重新選課。</p></div>";
+      throw new Error("Unknown lesson: " + lessonId);
+    }
+
+    title = lesson.title;
+    order_by_random = true;
+    character_select_enabled = false;
+    show_character = true;
+    questions_to_answer = Math.min(10, lesson.questions.length);
+    logger_url = "";
+    seperator = "##";
+    questionLines = lesson.questions
+      .map(function(item) {
+        return [item[0], "", item[1] || "", item[2]].join(seperator);
+      })
+      .join("\n");
+  </script>
+  <script id="settingJS"></script>
+  <script id="injectionJS" moduleName="phonetics_quiz" autoStart="true" src="https://gsyan888.github.io/html5_fun/html5_fun_embeded.js"></script>
+</body>
+</html>
