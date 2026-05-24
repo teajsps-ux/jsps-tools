@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>注音高手 · jsps-tools</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --header-bg: #1e3a8a;
+    --header-bg-light: #2d4ba0;
+    --page-bg: #f6f4ee;
+    --text: #2d2d2d;
+    --muted: #6b7280;
+  }
+  html, body {
+    min-height: 100%;
+    font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC", sans-serif;
+    color: var(--text);
+    background: var(--page-bg);
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .hero {
+    background: linear-gradient(135deg, var(--header-bg) 0%, var(--header-bg-light) 100%);
+    color: white;
+    padding: clamp(32px, 6vw, 60px) clamp(20px, 4vw, 48px) clamp(48px, 7vw, 78px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before, .hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+  .hero::before {
+    width: 240px; height: 240px;
+    top: -80px; left: -80px;
+  }
+  .hero::after {
+    width: 190px; height: 190px;
+    bottom: -60px; right: -50px;
+  }
+  .hero h1 {
+    font-size: clamp(30px, 5vw, 48px);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    position: relative;
+  }
+  .hero .subtitle {
+    font-size: clamp(14px, 2vw, 18px);
+    opacity: 0.9;
+    line-height: 1.7;
+    position: relative;
+  }
+  .content {
+    flex-grow: 1;
+    max-width: 1100px;
+    width: 100%;
+    margin: -40px auto 0;
+    padding: 0 clamp(16px, 3vw, 32px) clamp(40px, 5vw, 64px);
+    position: relative;
+  }
+  .panel {
+    background: white;
+    border-radius: 20px;
+    padding: clamp(20px, 3vw, 40px);
+    box-shadow: 0 10px 40px rgba(30, 58, 138, 0.12);
+  }
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #1e3a8a;
+    text-decoration: none;
+    font-weight: 700;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 999px;
+    padding: 9px 14px;
+  }
+  .back-link:hover, .back-link:focus-visible {
+    background: #dbeafe;
+    outline: none;
+  }
+  .note {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .section-title {
+    font-size: clamp(18px, 2.4vw, 22px);
+    color: #1e3a8a;
+    border-left: 6px solid #ffd93d;
+    padding-left: 12px;
+    margin-bottom: 20px;
+  }
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: clamp(14px, 2vw, 22px);
+  }
+  .lesson-card {
+    min-height: 245px;
+    aspect-ratio: 4 / 3;
+    display: block;
+    border-radius: 16px;
+    padding: clamp(16px, 2.2vw, 22px);
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.12);
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+    background: #7dd3fc;
+  }
+  .lesson-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.2) 33%, rgba(0,0,0,0.03) 62%),
+      linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0));
+    pointer-events: none;
+  }
+  .lesson-card::after {
+    content: "↗";
+    position: absolute;
+    z-index: 3;
+    top: 14px;
+    right: 16px;
+    font-size: 20px;
+    opacity: 0.8;
+  }
+  .card-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .lesson-card:hover, .lesson-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 0 rgba(0,0,0,0.15), 0 14px 30px rgba(0,0,0,0.12);
+    outline: none;
+  }
+  .lesson-card:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.12);
+  }
+  .lesson-label {
+    position: relative;
+    z-index: 2;
+    max-width: calc(100% - 34px);
+  }
+  .lesson-no {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.96;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.45);
+  }
+  .lesson-card h2 {
+    font-size: clamp(22px, 3vw, 30px);
+    line-height: 1.25;
+    margin-bottom: 0;
+    padding-right: 26px;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.5);
+  }
+  .c1 { background: linear-gradient(135deg, #818cf8 0%, #4f46e5 100%); }
+  .c2 { background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%); }
+  .c3 { background: linear-gradient(135deg, #5eead4 0%, #14b8a6 100%); }
+  .c4 { background: linear-gradient(135deg, #7ed957 0%, #4caf50 100%); }
+  .c5 { background: linear-gradient(135deg, #ffd93d 0%, #f5b700 100%); }
+  .c6 { background: linear-gradient(135deg, #ffa751 0%, #ff7e47 100%); }
+  .c7 { background: linear-gradient(135deg, #fb7185 0%, #be123c 100%); }
+  .c8 { background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%); }
+  .c9 { background: linear-gradient(135deg, #f472b6 0%, #db2777 100%); }
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+    color: #8a8572;
+    line-height: 1.8;
+  }
+  footer a { color: #3498db; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>🔤 注音高手</h1>
+    <p class="subtitle">康軒版小一首冊 · 第 1～9 課注音拼音練習</p>
+  </div>
+
+  <div class="content">
+    <div class="panel">
+      <div class="top-row">
+        <a class="back-link" href="../../">← 回工具箱首頁</a>
+        <p class="note">點選課次後會開新分頁，方便老師保留這個總入口。</p>
+      </div>
+
+      <h2 class="section-title">📚 選擇課次</h2>
+      <div class="lesson-grid">
+        <a class="lesson-card c1" href="https://reurl.cc/j6YILp" target="_blank" rel="noopener">
+          <img class="card-bg" src="./images/l01-cat.webp" alt="">
+          <div class="lesson-label">
+            <div class="lesson-no">L01</div>
+            <h2>貓咪</h2>
+          </div>
+        </a>
+
+        <a class="lesson-card c2" href="https://reurl.cc/EmLoVm" target="_blank" rel="noopener">
+          <img class="card-bg" src="./images/l02-gosling.webp" alt="">
+          <div class="lesson-label">
+            <div class="lesson-no">L02</div>
+            <h2>鵝寶寶</h2>
+          </div>
+        </a>
+
+        <a class="lesson-card c3" href="https://reurl.cc/X2NENj" target="_blank" rel="noopener">
+          <img class="card-bg" src="./images/l03-hippo-beaver.webp" alt="">
+          <div class="lesson-label">
+            <div class="lesson-no">L03</div>
+            <h2>河馬和河狸</h2>
+          </div>
+        </a>
+
+        <a class="lesson-card c4" href="https://reurl.cc/j6YD01" target="_blank" rel="noopener">
+          <img class="card-bg" src="./images/l04-smile.webp" alt="">
+          <div class="lesson-label">
+            <div class="lesson-no">L04</div>
+            <h2>笑嘻嘻</h2>
+          </div>
+        </a>
+
+        <a class="lesson-card c5" href="https://reurl.cc/M2Lym3" target="_blank" rel="noopener">
+          <img class="card-bg" src="./images/l05-seesaw.webp" alt="">
+          <div class="lesson-label">
+            <div class="lesson-no">L05</div>
+            <h2>翹翹板</h2>
+          </div>
+        </a>
+
+        <a class="lesson-card c6" href="https://reurl.cc/WbMRXy" target="_blank" rel="noopener">
+          <img class="card-bg" src="./images/l06-teacher.webp" alt="">
+          <div class="lesson-label">
+            <div class="lesson-no">L06</div>
+            <h2>謝謝老師</h2>
+          </div>
+        </a>
+
+        <a class="lesson-card c7" href="https://reurl.cc/pp4rY4" target="_blank" rel="noopener">
+          <img class="card-bg" src="./images/l07-race.webp" alt="">
+          <div class="lesson-label">
+            <div class="lesson-no">L07</div>
+            <h2>龜兔賽跑</h2>
+          </div>
+        </a>
+
+        <a class="lesson-card c8" href="https://reurl.cc/WbMRZy" target="_blank" rel="noopener">
+          <img class="card-bg" src="./images/l08-radish.webp" alt="">
+          <div class="lesson-label">
+            <div class="lesson-no">L08</div>
+            <h2>拔蘿蔔</h2>
+          </div>
+        </a>
+
+        <a class="lesson-card c9" href="https://reurl.cc/GaL41A" target="_blank" rel="noopener">
+          <img class="card-bg" src="./images/l09-animal-party.webp" alt="">
+          <div class="lesson-label">
+            <div class="lesson-no">L09</div>
+            <h2>動物狂歡會</h2>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>🛠️ jsps-tools · 用 GitHub Pages 打造</p>
+    <p><a href="../../">回老師的教學工具箱</a></p>
+  </footer>
+
+</body>
+</html>

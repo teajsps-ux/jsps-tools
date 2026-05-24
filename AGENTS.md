@@ -22,6 +22,7 @@
 (之後加新工具時會自動更新)
 - 下課跑馬燈播報員:`tools/marquee-reader/`
 - 注音節拍遊戲:`tools/say-the-word/`
+- 注音高手:`tools/zhuyin-master/`
 - 班級互動文字雲 V2:`tools/wordcloud/`
 - Word Search 找字遊戲:`tools/word-search/`
 - 作業清點矩陣:`tools/homework-matrix/`
