@@ -130,7 +130,7 @@
     position: relative;
     overflow: hidden;
     background: #7dd3fc;
-    cursor: default;
+    cursor: pointer;
   }
   .lesson-card::before {
     content: "";
@@ -143,7 +143,7 @@
     pointer-events: none;
   }
   .lesson-card::after {
-    content: "";
+    content: "↗";
     position: absolute;
     z-index: 3;
     top: 14px;
@@ -159,6 +159,15 @@
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+  .lesson-card:hover, .lesson-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 0 rgba(0,0,0,0.15), 0 14px 30px rgba(0,0,0,0.12);
+    outline: none;
+  }
+  .lesson-card:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.12);
   }
   .lesson-label {
     position: relative;
@@ -306,82 +315,82 @@
     <div class="panel">
       <div class="top-row">
         <a class="back-link" href="../../">← 回工具箱首頁</a>
-        <p class="note">課次連結整理中，暫時保留入口卡片與插圖。</p>
+        <p class="note">點選課次後會開新分頁，方便老師保留這個總入口。</p>
       </div>
 
       <h2 class="section-title">📚 選擇課次</h2>
       <div class="lesson-grid">
-        <div class="lesson-card c1">
+        <a class="lesson-card c1" href="https://gsyan888.blogspot.com/2023/08/html5-fun-game-laucher.html?sheet=1ROiMk60pEIEZHcYlqsXB1DlpaiaTYqFAajGaRgwo9ZM&amp;gid=693917025&amp;qs=1" target="_blank" rel="noopener">
           <img class="card-bg" src="./images/l01-cat.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L01</div>
             <h2>貓咪</h2>
           </div>
-        </div>
+        </a>
 
-        <div class="lesson-card c2">
+        <a class="lesson-card c2" href="https://gsyan888.blogspot.com/2023/08/html5-fun-game-laucher.html?sheet=1O3XsBIJfWdcqQils0W2M9lW1hyt0ZLuJ7mg_H-Ud2-s&amp;gid=693917025&amp;qs=1" target="_blank" rel="noopener">
           <img class="card-bg" src="./images/l02-gosling.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L02</div>
             <h2>鵝寶寶</h2>
           </div>
-        </div>
+        </a>
 
-        <div class="lesson-card c3">
+        <a class="lesson-card c3" href="https://gsyan888.blogspot.com/2023/08/html5-fun-game-laucher.html?sheet=12o8jLszKy4PwzVbl6e1FES7Hd61jShIvxU93gjJ4fbw&amp;gid=693917025&amp;qs=1" target="_blank" rel="noopener">
           <img class="card-bg" src="./images/l03-hippo-beaver.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L03</div>
             <h2>河馬和河狸</h2>
           </div>
-        </div>
+        </a>
 
-        <div class="lesson-card c4">
+        <a class="lesson-card c4" href="https://gsyan888.blogspot.com/2023/08/html5-fun-game-laucher.html?sheet=10HLW_05ETQLkkOB-QHL_82fMLVakSv9GwhRNDkcMbkU&amp;gid=693917025&amp;qs=1" target="_blank" rel="noopener">
           <img class="card-bg" src="./images/l04-smile.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L04</div>
             <h2>笑嘻嘻</h2>
           </div>
-        </div>
+        </a>
 
-        <div class="lesson-card c5">
+        <a class="lesson-card c5" href="https://gsyan888.blogspot.com/2023/08/html5-fun-game-laucher.html?sheet=1YYE7Vi1Mn5WY5FW8snAQdlyFKJWygCfVpl6FPJ8nz28&amp;gid=693917025&amp;qs=1" target="_blank" rel="noopener">
           <img class="card-bg" src="./images/l05-seesaw.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L05</div>
             <h2>翹翹板</h2>
           </div>
-        </div>
+        </a>
 
-        <div class="lesson-card c6">
+        <a class="lesson-card c6" href="https://gsyan888.blogspot.com/2023/08/html5-fun-game-laucher.html?sheet=1S2jUYibCmq9Sm12AaJRVPbQw8KkQDS-RtohmgM38ciI&amp;gid=693917025&amp;qs=1" target="_blank" rel="noopener">
           <img class="card-bg" src="./images/l06-teacher.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L06</div>
             <h2>謝謝老師</h2>
           </div>
-        </div>
+        </a>
 
-        <div class="lesson-card c7">
+        <a class="lesson-card c7" href="https://gsyan888.blogspot.com/2023/08/html5-fun-game-laucher.html?sheet=11uAeShuAHAyrSokn6oINwKIziIRZ2Ow7FD2G5sGlAcM&amp;gid=693917025&amp;qs=1" target="_blank" rel="noopener">
           <img class="card-bg" src="./images/l07-race.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L07</div>
             <h2>龜兔賽跑</h2>
           </div>
-        </div>
+        </a>
 
-        <div class="lesson-card c8">
+        <a class="lesson-card c8" href="https://gsyan888.blogspot.com/2023/08/html5-fun-game-laucher.html?sheet=1l6zS-4WiGd2MsV4H-IT4HhAKrLfb6PDfF62KEDNBDTU&amp;gid=693917025&amp;qs=1" target="_blank" rel="noopener">
           <img class="card-bg" src="./images/l08-radish.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L08</div>
             <h2>拔蘿蔔</h2>
           </div>
-        </div>
+        </a>
 
-        <div class="lesson-card c9">
+        <a class="lesson-card c9" href="https://gsyan888.blogspot.com/2023/08/html5-fun-game-laucher.html?sheet=1H8PbLdXZoyGo5UhrLPIZwIIy6awsbkdK19NQ2ZRAtmI&amp;gid=693917025&amp;qs=1" target="_blank" rel="noopener">
           <img class="card-bg" src="./images/l09-animal-party.webp" alt="">
           <div class="lesson-label">
             <div class="lesson-no">L09</div>
             <h2>動物狂歡會</h2>
           </div>
-        </div>
+        </a>
       </div>
     </div>
   </div>
