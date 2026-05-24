@@ -102,6 +102,7 @@
     color: var(--muted);
     font-size: 14px;
     line-height: 1.6;
+    max-width: 520px;
   }
   .section-title {
     font-size: clamp(18px, 2.4vw, 22px);
@@ -112,12 +113,11 @@
   }
   .lesson-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    column-gap: 28px;
-    row-gap: 28px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
   }
   .lesson-card {
-    min-height: 245px;
+    min-height: 0;
     aspect-ratio: 4 / 3;
     display: block;
     border-radius: 16px;
@@ -174,7 +174,7 @@
     text-shadow: 0 2px 5px rgba(0,0,0,0.45);
   }
   .lesson-card h2 {
-    font-size: clamp(22px, 3vw, 30px);
+    font-size: clamp(22px, 2.4vw, 30px);
     line-height: 1.25;
     margin-bottom: 0;
     padding-right: 26px;
@@ -198,6 +198,101 @@
   }
   footer a { color: #3498db; text-decoration: none; }
   footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 900px) {
+    .content {
+      max-width: 760px;
+    }
+    .panel {
+      border-radius: 18px;
+    }
+    .top-row {
+      align-items: flex-start;
+    }
+    .lesson-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+    .lesson-card {
+      border-width: 7px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding: 28px 16px 58px;
+    }
+    .hero::before {
+      width: 150px;
+      height: 150px;
+      top: -60px;
+      left: -60px;
+    }
+    .hero::after {
+      width: 130px;
+      height: 130px;
+      right: -54px;
+      bottom: -48px;
+    }
+    .hero h1 {
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+    .hero .subtitle {
+      font-size: 14px;
+    }
+    .content {
+      margin-top: -34px;
+      padding: 0 12px 36px;
+    }
+    .panel {
+      border-radius: 16px;
+      padding: 18px 14px 22px;
+    }
+    .top-row {
+      display: block;
+      margin-bottom: 18px;
+    }
+    .back-link {
+      margin-bottom: 12px;
+      max-width: 100%;
+      justify-content: center;
+    }
+    .note {
+      font-size: 13px;
+    }
+    .section-title {
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+    .lesson-grid {
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .lesson-card {
+      width: 100%;
+      border-width: 6px;
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .lesson-card h2 {
+      font-size: 26px;
+      padding-right: 0;
+      overflow-wrap: anywhere;
+    }
+    .lesson-label {
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .lesson-card h2 {
+      font-size: 23px;
+    }
+    .lesson-no {
+      font-size: 12px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -211,7 +306,7 @@
     <div class="panel">
       <div class="top-row">
         <a class="back-link" href="../../">← 回工具箱首頁</a>
-        <p class="note">點選課次後會開新分頁，方便老師保留這個總入口。</p>
+        <p class="note">課次連結整理中，暫時保留入口卡片與插圖。</p>
       </div>
 
       <h2 class="section-title">📚 選擇課次</h2>
