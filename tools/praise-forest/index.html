@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>讚美森林 · jsps-tools</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --header-bg: #166534;
+    --header-bg-light: #22a06b;
+    --page-bg: #f6f4ee;
+    --text: #26332b;
+    --muted: #647067;
+  }
+  html, body {
+    min-height: 100%;
+    font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+    color: var(--text);
+    background: var(--page-bg);
+    -webkit-tap-highlight-color: transparent;
+  }
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+  .hero {
+    background: linear-gradient(135deg, var(--header-bg) 0%, var(--header-bg-light) 100%);
+    color: white;
+    padding: clamp(32px, 6vw, 60px) clamp(20px, 4vw, 48px) clamp(48px, 7vw, 78px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before, .hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    pointer-events: none;
+  }
+  .hero::before { width: 240px; height: 240px; top: -80px; left: -80px; }
+  .hero::after { width: 190px; height: 190px; bottom: -60px; right: -50px; }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    position: relative;
+  }
+  .hero .subtitle {
+    font-size: clamp(14px, 2vw, 18px);
+    opacity: 0.92;
+    line-height: 1.7;
+    position: relative;
+  }
+  .content {
+    flex-grow: 1;
+    max-width: 980px;
+    width: 100%;
+    margin: -40px auto 0;
+    padding: 0 clamp(16px, 3vw, 32px) clamp(40px, 5vw, 64px);
+    position: relative;
+  }
+  .panel {
+    background: white;
+    border-radius: 20px;
+    padding: clamp(20px, 3vw, 40px);
+    box-shadow: 0 10px 40px rgba(22, 101, 52, 0.14);
+  }
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #166534;
+    text-decoration: none;
+    font-weight: 700;
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    border-radius: 999px;
+    padding: 9px 14px;
+  }
+  .back-link:hover, .back-link:focus-visible { background: #dcfce7; outline: none; }
+  .note {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 520px;
+  }
+  .section-title {
+    font-size: clamp(18px, 2.4vw, 22px);
+    color: #166534;
+    border-left: 6px solid #ffd93d;
+    padding-left: 12px;
+    margin-bottom: 20px;
+  }
+  .entry-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+  }
+  .entry-card {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+    display: block;
+    border-radius: 16px;
+    border: 8px solid white;
+    padding: clamp(16px, 2.2vw, 22px);
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.12), 0 0 0 1px rgba(22,101,52,0.06);
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+    background: #22c55e;
+    cursor: pointer;
+  }
+  .entry-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.22) 35%, rgba(0,0,0,0.04) 68%),
+      linear-gradient(0deg, rgba(0,0,0,0.18), rgba(0,0,0,0));
+    pointer-events: none;
+  }
+  .entry-card::after {
+    content: "↗";
+    position: absolute;
+    z-index: 3;
+    top: 14px;
+    right: 16px;
+    font-size: 20px;
+    opacity: 0.85;
+  }
+  .card-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .entry-card:hover, .entry-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 0 rgba(0,0,0,0.15), 0 14px 30px rgba(0,0,0,0.12);
+    outline: none;
+  }
+  .entry-card:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.12);
+  }
+  .entry-label {
+    position: relative;
+    z-index: 2;
+    max-width: calc(100% - 34px);
+  }
+  .entry-no {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.96;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.45);
+  }
+  .entry-card h2 {
+    font-size: clamp(24px, 3vw, 34px);
+    line-height: 1.25;
+    margin-bottom: 8px;
+    padding-right: 26px;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.5);
+  }
+  .entry-card p {
+    font-size: clamp(14px, 1.8vw, 17px);
+    line-height: 1.55;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.55);
+  }
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+    color: #8a8572;
+    line-height: 1.8;
+  }
+  footer a { color: #2f855a; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 980px) {
+    .entry-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+  }
+  @media (max-width: 760px) {
+    .entry-grid { grid-template-columns: 1fr; gap: 20px; }
+    .entry-card { border-width: 7px; }
+  }
+  @media (max-width: 480px) {
+    .hero { padding: 28px 16px 58px; }
+    .panel { border-radius: 16px; padding: 18px; }
+    .entry-card { border-width: 6px; }
+    .entry-card h2 { font-size: 27px; }
+  }
+</style>
+</head>
+<body>
+  <div class="hero">
+    <h1>🌲 讚美森林</h1>
+    <p class="subtitle">讚美讓小樹茁壯 · 班級鼓勵卡入口</p>
+  </div>
+
+  <main class="content">
+    <section class="panel">
+      <div class="top-row">
+        <a class="back-link" href="../../">← 回工具箱首頁</a>
+        <p class="note">點選入口後會開新分頁。此頁只放公開入口連結，不放試算表資料。</p>
+      </div>
+
+      <h2 class="section-title">選擇入口</h2>
+      <div class="entry-grid">
+        <a class="entry-card" href="https://script.google.com/macros/s/AKfycby0VYy_yGbZ2mvNzrWObYFbcpTXMoJqW6WQ-_TDWFQ6GHWBEdMydk44QtJhLXGybbkL/exec" target="_blank" rel="noopener" aria-label="師生讚美入口">
+          <img class="card-bg" src="./images/student-praise.webp" alt="">
+          <div class="entry-label">
+            <div class="entry-no">ENTRY 01</div>
+            <h2>師生讚美入口</h2>
+            <p>寫下讚美，送給同學。</p>
+          </div>
+        </a>
+
+        <a class="entry-card" href="https://script.google.com/macros/s/AKfycby0VYy_yGbZ2mvNzrWObYFbcpTXMoJqW6WQ-_TDWFQ6GHWBEdMydk44QtJhLXGybbkL/exec?page=gallery" target="_blank" rel="noopener" aria-label="家長欣賞讚美">
+          <img class="card-bg" src="./images/family-gallery.webp" alt="">
+          <div class="entry-label">
+            <div class="entry-no">ENTRY 02</div>
+            <h2>家長欣賞讚美</h2>
+            <p>查看孩子收到的溫暖鼓勵。</p>
+          </div>
+        </a>
+
+        <a class="entry-card" href="https://script.google.com/macros/s/AKfycbx7e-BwIWAIkOfflMLSRJV8JgFGEx_yiM3LBGlbKrZjXjlL3PctVmDpoCyMl7mZwirzKA/exec" target="_blank" rel="noopener" aria-label="新生祈願森林">
+          <img class="card-bg" src="./images/new-student-wish.webp" alt="">
+          <div class="entry-label">
+            <div class="entry-no">ENTRY 03</div>
+            <h2>新生祈願森林</h2>
+            <p>為新學期種下祝福與期待。</p>
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>jsps-tools · 讚美森林</p>
+    <p>改編自謝政倫老師的大學志願森林</p>
+    <p><a href="../../">回老師的教學工具箱</a></p>
+  </footer>
+</body>
+</html>
