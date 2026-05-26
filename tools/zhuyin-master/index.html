@@ -85,14 +85,17 @@
   .back-link {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
     color: #1e3a8a;
     text-decoration: none;
     font-weight: 700;
     background: #eef2ff;
     border: 1px solid #c7d2fe;
-    border-radius: 999px;
-    padding: 9px 14px;
+    border-radius: 12px;
+    font-size: 23px;
   }
   .back-link:hover, .back-link:focus-visible {
     background: #dbeafe;
@@ -262,11 +265,7 @@
       display: block;
       margin-bottom: 18px;
     }
-    .back-link {
-      margin-bottom: 12px;
-      max-width: 100%;
-      justify-content: center;
-    }
+    .back-link { margin-bottom: 12px; }
     .note {
       font-size: 13px;
     }
@@ -314,7 +313,7 @@
   <div class="content">
     <div class="panel">
       <div class="top-row">
-        <a class="back-link" href="../../">← 回工具箱首頁</a>
+        <a class="back-link" href="../../" aria-label="回工具箱首頁" title="回工具箱首頁">←</a>
         <p class="note">點選課次後會開新分頁，方便老師保留這個總入口。</p>
       </div>
 
@@ -397,7 +396,6 @@
 
   <footer>
     <p>🛠️ jsps-tools · 用 GitHub Pages 打造</p>
-    <p><a href="../../">回老師的教學工具箱</a></p>
   </footer>
 
 </body>

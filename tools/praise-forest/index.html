@@ -72,22 +72,20 @@
     margin-bottom: 22px;
     flex-wrap: wrap;
   }
-  .teacher-only {
-    display: none;
-  }
-  body.teacher-mode .teacher-only {
-    display: inline-flex;
-  }
   .back-link {
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
     color: #166534;
     text-decoration: none;
     font-weight: 700;
     background: #ecfdf5;
     border: 1px solid #bbf7d0;
-    border-radius: 999px;
-    padding: 9px 14px;
+    border-radius: 12px;
+    font-size: 23px;
   }
   .back-link:hover, .back-link:focus-visible { background: #dcfce7; outline: none; }
   .note {
@@ -224,7 +222,7 @@
   <main class="content">
     <section class="panel">
       <div class="top-row">
-        <a class="back-link teacher-only" href="../../">← 回工具箱首頁</a>
+        <a class="back-link" href="../../" aria-label="回工具箱首頁" title="回工具箱首頁">←</a>
         <p class="note">點選入口後會開新分頁。此頁只放公開入口連結，不放試算表資料。</p>
       </div>
 
@@ -263,12 +261,6 @@
   <footer>
     <p>jsps-tools · 讚美森林</p>
     <p>改編自謝政倫老師的大學志願森林</p>
-    <p><a class="teacher-only" href="../../">回老師的教學工具箱</a></p>
   </footer>
-  <script>
-    if (new URLSearchParams(window.location.search).get('teacher') === '1') {
-      document.body.classList.add('teacher-mode');
-    }
-  </script>
 </body>
 </html>
