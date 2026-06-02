@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML互動教材 · jsps-tools</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --header-bg: #1e3a8a;
+    --header-bg-light: #2d4ba0;
+    --page-bg: #f6f4ee;
+    --text: #2d2d2d;
+    --muted: #6b7280;
+  }
+  html, body {
+    min-height: 100%;
+    font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC", sans-serif;
+    color: var(--text);
+    background: var(--page-bg);
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .hero {
+    background: linear-gradient(135deg, var(--header-bg) 0%, var(--header-bg-light) 100%);
+    color: white;
+    padding: clamp(32px, 6vw, 60px) clamp(20px, 4vw, 48px) clamp(48px, 7vw, 78px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before, .hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+  .hero::before {
+    width: 240px; height: 240px;
+    top: -80px; left: -80px;
+  }
+  .hero::after {
+    width: 190px; height: 190px;
+    bottom: -60px; right: -50px;
+  }
+  .hero h1 {
+    font-size: clamp(30px, 5vw, 48px);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    position: relative;
+  }
+  .hero .subtitle {
+    font-size: clamp(14px, 2vw, 18px);
+    opacity: 0.9;
+    line-height: 1.7;
+    position: relative;
+  }
+  .content {
+    flex-grow: 1;
+    max-width: 1100px;
+    width: 100%;
+    margin: -40px auto 0;
+    padding: 0 clamp(16px, 3vw, 32px) clamp(40px, 5vw, 64px);
+    position: relative;
+  }
+  .panel {
+    background: white;
+    border-radius: 20px;
+    padding: clamp(20px, 3vw, 40px);
+    box-shadow: 0 10px 40px rgba(30, 58, 138, 0.12);
+  }
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    color: #1e3a8a;
+    text-decoration: none;
+    font-weight: 700;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 12px;
+    font-size: 23px;
+  }
+  .back-link:hover, .back-link:focus-visible {
+    background: #dbeafe;
+    outline: none;
+  }
+  .note {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 520px;
+  }
+  .section-title {
+    font-size: clamp(18px, 2.4vw, 22px);
+    color: #1e3a8a;
+    border-left: 6px solid #ffd93d;
+    padding-left: 12px;
+    margin-bottom: 20px;
+  }
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+  }
+  .lesson-card {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+    display: block;
+    border-radius: 16px;
+    border: 8px solid white;
+    padding: clamp(16px, 2.2vw, 22px);
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.12), 0 0 0 1px rgba(30,58,138,0.06);
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+    background: #7dd3fc;
+    cursor: pointer;
+  }
+  .lesson-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.2) 33%, rgba(0,0,0,0.03) 62%),
+      linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0));
+    pointer-events: none;
+  }
+  .lesson-card::after {
+    content: "↗";
+    position: absolute;
+    z-index: 3;
+    top: 14px;
+    right: 16px;
+    font-size: 20px;
+    opacity: 0.8;
+  }
+  .card-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .lesson-card:hover, .lesson-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 0 rgba(0,0,0,0.15), 0 14px 30px rgba(0,0,0,0.12);
+    outline: none;
+  }
+  .lesson-card:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.12);
+  }
+  .lesson-label {
+    position: relative;
+    z-index: 2;
+    max-width: calc(100% - 34px);
+  }
+  .lesson-no {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.96;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.45);
+  }
+  .lesson-card h2 {
+    font-size: clamp(16px, 2vw, 24px);
+    line-height: 1.25;
+    margin-bottom: 0;
+    padding-right: 26px;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.5);
+  }
+  .c1 { background: linear-gradient(135deg, #818cf8 0%, #4f46e5 100%); }
+  .c2 { background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%); }
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+    color: #8a8572;
+    line-height: 1.8;
+  }
+  footer a { color: #3498db; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 900px) {
+    .content {
+      max-width: 760px;
+    }
+    .panel {
+      border-radius: 18px;
+    }
+    .top-row {
+      align-items: flex-start;
+    }
+    .lesson-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+    .lesson-card {
+      border-width: 7px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding: 28px 16px 58px;
+    }
+    .hero::before {
+      width: 150px;
+      height: 150px;
+      top: -60px;
+      left: -60px;
+    }
+    .hero::after {
+      width: 130px;
+      height: 130px;
+      right: -54px;
+      bottom: -48px;
+    }
+    .hero h1 {
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+    .hero .subtitle {
+      font-size: 14px;
+    }
+    .content {
+      margin-top: -34px;
+      padding: 0 12px 36px;
+    }
+    .panel {
+      border-radius: 16px;
+      padding: 18px 14px 22px;
+    }
+    .top-row {
+      display: block;
+      margin-bottom: 18px;
+    }
+    .back-link { margin-bottom: 12px; }
+    .note {
+      font-size: 13px;
+    }
+    .section-title {
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+    .lesson-grid {
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .lesson-card {
+      width: 100%;
+      border-width: 6px;
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .lesson-card h2 {
+      font-size: 26px;
+      padding-right: 0;
+      overflow-wrap: anywhere;
+    }
+    .lesson-label {
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .lesson-card h2 {
+      font-size: 23px;
+    }
+    .lesson-no {
+      font-size: 12px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>💡 HTML互動教材</h1>
+    <p class="subtitle">自製 Reveal.js HTML 互動簡報與繪本教材</p>
+  </div>
+
+  <div class="content">
+    <div class="panel">
+      <div class="top-row">
+        <a class="back-link" href="../../" aria-label="回工具箱首頁" title="回工具箱首頁">←</a>
+        <p class="note">點選教材後會開新分頁，方便老師保留這個總入口。</p>
+      </div>
+
+      <h2 class="section-title">📚 選擇教材</h2>
+      <div class="lesson-grid">
+        <a class="lesson-card c1" href="../kungfu-story/index_opt1.html" target="_blank" rel="noopener">
+          <img class="card-bg" src="../kungfu-story/images/cover.png" alt="封面">
+          <div class="lesson-label">
+            <div class="lesson-no">L01 - 方案一</div>
+            <h2>功夫的秘密 (不透明卡紙保護)</h2>
+          </div>
+        </a>
+
+        <a class="lesson-card c2" href="../kungfu-story/index_opt2.html" target="_blank" rel="noopener">
+          <img class="card-bg" src="../kungfu-story/images/ending.png" alt="封底">
+          <div class="lesson-label">
+            <div class="lesson-no">L01 - 方案二</div>
+            <h2>功夫的秘密 (左右分欄繪本)</h2>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>🛠️ jsps-tools · 用 GitHub Pages 打造</p>
+  </footer>
+
+</body>
+</html>
