@@ -91,12 +91,22 @@
       background: rgba(22, 160, 133, 0.45) !important;
     }
 
-    /* 語音導讀同步標色樣式 */
-    .reading-highlight {
-      background-color: rgba(22, 160, 133, 0.12) !important;
-      border-radius: 4px;
-      box-shadow: 0 0 0 4px rgba(22, 160, 133, 0.12) !important;
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    /* 語音導讀卡拉 OK 式句子亮起與自動捲動 */
+    .tts-phrase {
+      transition: background-color 0.3s ease, color 0.3s ease;
+      border-radius: 6px;
+      padding: 0 4px;
+      display: inline-block;
+    }
+    .tts-highlight {
+      background-color: var(--accent) !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(211, 84, 0, 0.3);
+    }
+    body.zhuyin-mode .tts-highlight {
+      background-color: var(--accent2) !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(22, 160, 133, 0.3);
     }
 
 
@@ -799,23 +809,23 @@
     });
   }
 
-  // Web Speech API 語音導讀邏輯
+  // Web Speech API 語音導讀 (卡拉 OK 式句子亮起與自動捲動支援)
   const synth = window.speechSynthesis;
   const ttsPlayBtn = document.getElementById('tts-play-btn');
   const ttsSpeedSlider = document.getElementById('tts-speed-slider');
   const ttsSpeedVal = document.getElementById('tts-speed-val');
   let isSpeaking = false;
   let currentUtterance = null;
-  let ttsQueue = [];
-  let ttsQueueIndex = 0;
-  let isTTSStopping = false;
+  let ttsPhrases = [];
+  let currentPhraseIndex = -1;
 
   if (ttsSpeedSlider && ttsSpeedVal) {
     ttsSpeedSlider.addEventListener('input', function() {
       const val = parseFloat(this.value).toFixed(1);
       ttsSpeedVal.textContent = val + 'x';
       if (isSpeaking) {
-        speakCurrentSlide();
+        synth.cancel();
+        speakPhraseList(currentPhraseIndex);
       }
     });
   }
@@ -828,20 +838,115 @@
     }
   }
 
-  function stopSpeaking() {
-    isTTSStopping = true;
-    synth.cancel();
-    clearAllHighlights();
-    setTTSPlayState(false);
-    isTTSStopping = false;
+  function prepareTTSPhrases(slide) {
+    if (slide.querySelector('.tts-phrase')) return;
+    
+    const elements = slide.querySelectorAll('h1, h2, h3, p, li, blockquote, .adv-title, .adv-desc, .quote-box, .card-q, .card-a');
+    elements.forEach(el => {
+      if (el.closest('#tts-panel') || el.closest('#floating-toolbar') || el.closest('.slider-control') || el.closest('.word-chip')) return;
+      
+      const text = el.innerText.trim();
+      if (!text) return;
+      
+      const parts = text.split(/([，。！？：；、\n\r]+)/);
+      let newHTML = '';
+      parts.forEach(part => {
+        if (!part) return;
+        if (/^[，。！？：；、\n\r]+$/.test(part)) {
+          newHTML += part.replace(/\n/g, '<br>');
+        } else {
+          newHTML += `<span class="tts-phrase">${part}</span>`;
+        }
+      });
+      el.innerHTML = newHTML;
+    });
   }
 
-  function clearAllHighlights() {
+  function speakPhraseList(index) {
+    if (!isSpeaking || index >= ttsPhrases.length) {
+      stopSpeaking();
+      return;
+    }
+    
+    currentPhraseIndex = index;
+    const phraseEl = ttsPhrases[index];
+    
+    ttsPhrases.forEach(el => el.classList.remove('tts-highlight'));
+    phraseEl.classList.add('tts-highlight');
+    
+    // Auto-flip flip-cards during guidance
+    const cardQ = phraseEl.closest('.card-q');
+    const cardA = phraseEl.closest('.card-a');
+    if (cardQ) {
+      const card = cardQ.closest('.flip-card');
+      if (card) card.classList.remove('flipped');
+    }
+    if (cardA) {
+      const card = cardA.closest('.flip-card');
+      if (card) card.classList.add('flipped');
+    }
+    
+    phraseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    const text = phraseEl.innerText.replace(/🍬|🔊|✥|🌱|⭐/g, '').trim();
+    if (!text) {
+      speakPhraseList(index + 1);
+      return;
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = synth.getVoices();
+    const zhVoice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
+    if (zhVoice) {
+      utterance.voice = zhVoice;
+    }
+    
+    utterance.rate = ttsSpeedSlider ? parseFloat(ttsSpeedSlider.value) : 0.7;
+    utterance.pitch = 1.0;
+    
+    utterance.onend = () => {
+      speakPhraseList(index + 1);
+    };
+    
+    utterance.onerror = (e) => {
+      console.warn("TTS phrase error:", e);
+      speakPhraseList(index + 1);
+    };
+    
+    currentUtterance = utterance;
+    synth.speak(utterance);
+  }
+
+  function speakCurrentSlide() {
+    synth.cancel();
+    const activeSlide = Reveal.getCurrentSlide();
+    if (!activeSlide) return;
+    
+    const selectedText = window.getSelection().toString().trim();
+    if (selectedText) {
+      speakSelectedText(selectedText);
+      setTTSPlayState(true);
+    } else {
+      prepareTTSPhrases(activeSlide);
+      
+      ttsPhrases = Array.from(activeSlide.querySelectorAll('.tts-phrase'));
+      if (ttsPhrases.length === 0) return;
+      
+      isSpeaking = true;
+      setTTSPlayState(true);
+      speakPhraseList(0);
+    }
+  }
+
+  function stopSpeaking() {
+    synth.cancel();
+    isSpeaking = false;
+    currentPhraseIndex = -1;
+    setTTSPlayState(false);
+    
     const activeSlide = Reveal.getCurrentSlide();
     if (activeSlide) {
-      activeSlide.querySelectorAll('.reading-highlight').forEach(el => {
-        el.classList.remove('reading-highlight');
-      });
+      activeSlide.querySelectorAll('.tts-phrase').forEach(el => el.classList.remove('tts-highlight'));
     }
   }
 
@@ -858,77 +963,6 @@
     
     currentUtterance = utterance;
     synth.speak(utterance);
-  }
-
-  function speakCurrentSlide() {
-    stopSpeaking();
-    const activeSlide = Reveal.getCurrentSlide();
-    if (!activeSlide) return;
-
-    const selectedText = window.getSelection().toString().trim();
-    
-    if (selectedText) {
-      speakSelectedText(selectedText);
-      setTTSPlayState(true);
-    } else {
-      const rawElements = Array.from(activeSlide.querySelectorAll('h1, h2, h3, p, li, .adv-title, .adv-desc, .quote-box'));
-      
-      const elements = rawElements.filter(el => {
-        const text = el.innerText.replace(/🍬|🔊|✥/g, '').trim();
-        if (!text) return false;
-        if (el.offsetWidth === 0 && el.offsetHeight === 0) return false;
-        return !rawElements.some(otherEl => otherEl !== el && otherEl.contains(el));
-      });
-
-      if (elements.length === 0) return;
-
-      ttsQueue = elements.map(el => {
-        let text = el.innerText.replace(/🍬|🔊|✥/g, '').trim();
-        text = text.replace(/\s+/g, ' ');
-        return { el, text };
-      });
-      ttsQueueIndex = 0;
-
-      speakNextInQueue();
-    }
-  }
-
-  function speakNextInQueue() {
-    if (ttsQueueIndex >= ttsQueue.length) {
-      setTTSPlayState(false);
-      clearAllHighlights();
-      return;
-    }
-
-    clearAllHighlights();
-    const item = ttsQueue[ttsQueueIndex];
-    item.el.classList.add('reading-highlight');
-    item.el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-    const utterance = new SpeechSynthesisUtterance(item.text);
-    const voices = synth.getVoices();
-    const zhVoice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
-    if (zhVoice) {
-      utterance.voice = zhVoice;
-    }
-    utterance.rate = ttsSpeedSlider ? parseFloat(ttsSpeedSlider.value) : 0.7;
-    utterance.pitch = 1.0;
-
-    utterance.onend = () => {
-      if (isTTSStopping) return;
-      ttsQueueIndex++;
-      speakNextInQueue();
-    };
-    utterance.onerror = (e) => {
-      if (isTTSStopping) return;
-      console.error("TTS error:", e);
-      ttsQueueIndex++;
-      speakNextInQueue();
-    };
-
-    currentUtterance = utterance;
-    synth.speak(utterance);
-    setTTSPlayState(true);
   }
 
   if (ttsPlayBtn) {
