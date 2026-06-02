@@ -819,7 +819,9 @@
       if (isSpeaking) {
         if (isNarrationActive) {
           synth.cancel();
-          speakQueueItem();
+          setTimeout(() => {
+            if (isNarrationActive) speakQueueItem();
+          }, 100);
         } else {
           const selectedText = window.getSelection().toString().trim();
           if (selectedText) {
@@ -845,36 +847,40 @@
   }
 
   function stopSpeaking() {
+    isNarrationActive = false; // 先設為 false，避免 synth.cancel() 觸發的 onend/onerror 事件前進到下一段
     synth.cancel();
     clearQueueHighlights();
     setTTSPlayState(false);
-    isNarrationActive = false;
   }
 
   function startNarration() {
-    const activeSlide = Reveal.getCurrentSlide();
-    if (!activeSlide) return;
+    stopSpeaking(); // 先完全停止並重設狀態，避免背景語音通道被佔用
 
-    // 如果投影片切換，或是佇列未初始化，則重新建立讀取佇列
-    if (activeSlideForTTS !== activeSlide || ttsQueue.length === 0) {
-      activeSlideForTTS = activeSlide;
-      
-      // 收集目前投影片的所有可朗讀候選元素
-      const candidates = Array.from(activeSlide.querySelectorAll('h1, h2, h3, p, li, .adv-title, .adv-desc, .quote-box'));
-      
-      // 過濾出最末梢(葉子)的元素，避免重複朗讀父子嵌套的內容
-      ttsQueue = candidates.filter(el => {
-        const hasDescendantCandidate = candidates.some(other => other !== el && el.contains(other));
-        const hasText = el.innerText.replace(/🍬|🔊|✥/g, '').trim().length > 0;
-        return hasText && !hasDescendantCandidate;
-      });
+    setTimeout(() => {
+      const activeSlide = Reveal.getCurrentSlide();
+      if (!activeSlide) return;
 
-      ttsQueueIndex = 0;
-    }
+      // 如果投影片切換，或是佇列未初始化，則重新建立讀取佇列
+      if (activeSlideForTTS !== activeSlide || ttsQueue.length === 0) {
+        activeSlideForTTS = activeSlide;
+        
+        // 收集目前投影片的所有可朗讀候選元素
+        const candidates = Array.from(activeSlide.querySelectorAll('h1, h2, h3, p, li, .adv-title, .adv-desc, .quote-box'));
+        
+        // 過濾出最末梢(葉子)的元素，避免重複朗讀父子嵌套的內容
+        ttsQueue = candidates.filter(el => {
+          const hasDescendantCandidate = candidates.some(other => other !== el && el.contains(other));
+          const hasText = el.innerText.replace(/🍬|🔊|✥/g, '').trim().length > 0;
+          return hasText && !hasDescendantCandidate;
+        });
 
-    isNarrationActive = true;
-    setTTSPlayState(true);
-    speakQueueItem();
+        ttsQueueIndex = 0;
+      }
+
+      isNarrationActive = true;
+      setTTSPlayState(true);
+      speakQueueItem();
+    }, 100);
   }
 
   function speakQueueItem() {
@@ -905,11 +911,13 @@
     utterance.pitch = 1.0;
 
     utterance.onend = () => {
+      if (!isNarrationActive) return;
       ttsQueueIndex++;
       speakQueueItem();
     };
     utterance.onerror = (e) => {
       console.error("TTS error:", e);
+      if (!isNarrationActive) return;
       ttsQueueIndex++;
       speakQueueItem();
     };
@@ -921,26 +929,29 @@
   function speakSelection(text) {
     stopSpeaking();
     
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voices = synth.getVoices();
-    const zhVoice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
-    if (zhVoice) {
-      utterance.voice = zhVoice;
-    }
-    
-    utterance.rate = ttsSpeedSlider ? parseFloat(ttsSpeedSlider.value) : 0.7;
-    utterance.pitch = 1.0;
+    // 延遲 100 毫秒以讓瀏覽器的語音系統完全清除之前的播放
+    setTimeout(() => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = synth.getVoices();
+      const zhVoice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
+      if (zhVoice) {
+        utterance.voice = zhVoice;
+      }
+      
+      utterance.rate = ttsSpeedSlider ? parseFloat(ttsSpeedSlider.value) : 0.7;
+      utterance.pitch = 1.0;
 
-    utterance.onend = () => {
-      setTTSPlayState(false);
-    };
-    utterance.onerror = () => {
-      setTTSPlayState(false);
-    };
+      utterance.onend = () => {
+        setTTSPlayState(false);
+      };
+      utterance.onerror = () => {
+        setTTSPlayState(false);
+      };
 
-    currentUtterance = utterance;
-    synth.speak(utterance);
-    setTTSPlayState(true);
+      currentUtterance = utterance;
+      synth.speak(utterance);
+      setTTSPlayState(true);
+    }, 100);
   }
 
   // 監聽文件上的反選(選取)事件
