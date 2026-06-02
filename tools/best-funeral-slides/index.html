@@ -530,29 +530,31 @@
 
     <!-- Slide 7: 貼紙裝飾板 (裝飾石碑) -->
     <section id="slide-sticker-decorator" data-background-image="images/bg_tomb.png" data-background-opacity="0.15">
-      <div class="text-paper-wrap" style="width: 960px; max-width: 100vw; text-align: left; display: grid; grid-template-columns: 240px 1fr; gap: 20px; height: 500px;">
-        <!-- 左側貼紙工具箱 -->
-        <div style="display:flex; flex-direction:column; gap:10px; background:#fbf8f3; border-radius:12px; padding:15px; border:1px solid rgba(0,0,0,0.06); box-shadow:inset 0 2px 4px rgba(0,0,0,0.01);">
-          <div style="font-size:13px; font-weight:bold; color:var(--accent2); margin-bottom:5px;">🌸 點選貼紙裝飾墓碑</div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-            <button class="sticker-btn" data-emoji="🌸" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🌸 花朵</button>
-            <button class="sticker-btn" data-emoji="❤️" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">❤️ 愛心</button>
-            <button class="sticker-btn" data-emoji="✨" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">✨ 星星</button>
-            <button class="sticker-btn" data-emoji="🍃" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🍃 嫩葉</button>
-            <button class="sticker-btn" data-emoji="🪶" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🪶 羽毛</button>
-            <button class="sticker-btn" data-emoji="🎗️" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🎗️ 絲帶</button>
+      <div class="text-paper-wrap" style="width: 1060px; max-width: 95vw; box-sizing: border-box;">
+        <div style="display: grid; grid-template-columns: 240px 1fr; gap: 20px; height: 480px; width: 100%;">
+          <!-- 左側貼紙工具箱 -->
+          <div style="display:flex; flex-direction:column; gap:10px; background:#fbf8f3; border-radius:12px; padding:15px; border:1px solid rgba(0,0,0,0.06); box-shadow:inset 0 2px 4px rgba(0,0,0,0.01); height: 100%;">
+            <div style="font-size:13px; font-weight:bold; color:var(--accent2); margin-bottom:5px;">🌸 點選貼紙裝飾墓碑</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <button class="sticker-btn" data-emoji="🌸" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🌸 花朵</button>
+              <button class="sticker-btn" data-emoji="❤️" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">❤️ 愛心</button>
+              <button class="sticker-btn" data-emoji="✨" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">✨ 星星</button>
+              <button class="sticker-btn" data-emoji="🍃" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🍃 嫩葉</button>
+              <button class="sticker-btn" data-emoji="🪶" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🪶 羽毛</button>
+              <button class="sticker-btn" data-emoji="🎗️" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🎗️ 絲帶</button>
+            </div>
+            <button id="clear-stickers" style="margin-top:auto; padding:10px; background:var(--warn); color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">🗑 清除裝飾</button>
           </div>
-          <button id="clear-stickers" style="margin-top:auto; padding:10px; background:var(--warn); color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">🗑 清除裝飾</button>
-        </div>
-        
-        <!-- 右側裝飾畫布區 -->
-        <div id="decorator-canvas" style="position:relative; background:#ffffff; border: 2px dashed #cbd5e1; border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.02);">
-          <div style="position:absolute; bottom: 0; left:50%; transform:translateX(-50%); width:220px; height:280px; 
-            background:#bdc3c7; border-radius: 110px 110px 0 0; border: 4px solid #95a5a6; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 20px; box-sizing:border-box;">
-            <div style="font-size:18px; font-weight:bold; color:#7f8c8d; border-bottom: 2px solid #7f8c8d; width:80%; text-align:center; padding-bottom:5px;">小野蜂之墓</div>
-            <div style="font-size:13px; color:#95a5a6; margin-top:10px; text-align:center;">安息在<br>美麗的秘密基地</div>
+          
+          <!-- 右側裝飾畫布區 -->
+          <div id="decorator-canvas" style="position:relative; background:#ffffff; border: 2px dashed #cbd5e1; border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.02); height: 100%;">
+            <div style="position:absolute; bottom: 12px; left:50%; transform:translateX(-50%); width:220px; height:280px; 
+              background:#bdc3c7; border-radius: 110px 110px 0 0; border: 4px solid #95a5a6; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 20px; box-sizing:border-box;">
+              <div style="font-size:18px; font-weight:bold; color:#7f8c8d; border-bottom: 2px solid #7f8c8d; width:80%; text-align:center; padding-bottom:5px;">小野蜂之墓</div>
+              <div style="font-size:13px; color:#95a5a6; margin-top:10px; text-align:center;">安息在<br>美麗的秘密基地</div>
+            </div>
+            <div style="position:absolute; top:12px; left:12px; font-size:11px; color:#94a3b8; font-weight:bold; pointer-events:none;">👈 點選左側貼紙，並在墓碑上拖曳調整位置</div>
           </div>
-          <div style="position:absolute; top:12px; left:12px; font-size:11px; color:#94a3b8; font-weight:bold; pointer-events:none;">👈 點選左側貼紙，並在墓碑上拖曳調整位置</div>
         </div>
       </div>
     </section>
