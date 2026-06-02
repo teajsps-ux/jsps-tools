@@ -352,6 +352,14 @@
     .interact-title { font-size: calc(0.8em * var(--font-scale)) !important; margin-bottom: 12px; text-align: center; color: #1a202c; text-shadow: 1px 1px 0px #ffffff, 2px 2px 4px rgba(0,0,0,0.08); }
     
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* === 語音導讀文字高亮樣式 === */
+    .tts-highlighting,
+    .tts-highlighting * {
+      color: var(--accent) !important;
+      text-shadow: 0 0 10px rgba(211, 84, 0, 0.15) !important;
+      transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
   </style>
 </head>
 <body>
@@ -845,12 +853,25 @@
   let isSpeaking = false;
   let currentUtterance = null;
 
+  let ttsQueue = [];
+  let ttsQueueIndex = -1;
+  let activeSlideForTTS = null;
+  let isNarrationActive = false; // 區分是自動導讀(true)還是手動反選朗讀(false)
+
   if (ttsSpeedSlider && ttsSpeedVal) {
     ttsSpeedSlider.addEventListener('input', function() {
       const val = parseFloat(this.value).toFixed(1);
       ttsSpeedVal.textContent = val + 'x';
       if (isSpeaking) {
-        speakCurrentSlide();
+        if (isNarrationActive) {
+          synth.cancel();
+          speakQueueItem();
+        } else {
+          const selectedText = window.getSelection().toString().trim();
+          if (selectedText) {
+            speakSelection(selectedText);
+          }
+        }
       }
     });
   }
@@ -863,32 +884,62 @@
     }
   }
 
-  function stopSpeaking() {
-    synth.cancel();
-    setTTSPlayState(false);
+  function clearQueueHighlights() {
+    document.querySelectorAll('.tts-highlighting').forEach(el => {
+      el.classList.remove('tts-highlighting');
+    });
   }
 
-  function speakCurrentSlide() {
+  function stopSpeaking() {
     synth.cancel();
+    clearQueueHighlights();
+    setTTSPlayState(false);
+    isNarrationActive = false;
+  }
+
+  function startNarration() {
     const activeSlide = Reveal.getCurrentSlide();
     if (!activeSlide) return;
 
-    const selectedText = window.getSelection().toString().trim();
-    let textToRead = '';
-    
-    if (selectedText) {
-      textToRead = selectedText;
-    } else {
-      const headers = Array.from(activeSlide.querySelectorAll('h1, h2, h3'))
-        .map(el => el.innerText.replace(/🍬|🔊|✥/g, ''));
-      const paragraphs = Array.from(activeSlide.querySelectorAll('p, li, .adv-title, .adv-desc, .quote-box'))
-        .map(el => el.innerText);
-      textToRead = [...headers, ...paragraphs].join('。 ');
-    }
-    
-    textToRead = textToRead.replace(/\s+/g, ' ').trim();
-    if (!textToRead) return;
+    // 如果投影片切換，或是佇列未初始化，則重新建立讀取佇列
+    if (activeSlideForTTS !== activeSlide || ttsQueue.length === 0) {
+      activeSlideForTTS = activeSlide;
+      
+      // 收集目前投影片的所有可朗讀候選元素
+      const candidates = Array.from(activeSlide.querySelectorAll('h1, h2, h3, p, li, .adv-title, .adv-desc, .quote-box'));
+      
+      // 過濾出最末梢(葉子)的元素，避免重複朗讀父子嵌套的內容
+      ttsQueue = candidates.filter(el => {
+        const hasDescendantCandidate = candidates.some(other => other !== el && el.contains(other));
+        const hasText = el.innerText.replace(/🍬|🔊|✥/g, '').trim().length > 0;
+        return hasText && !hasDescendantCandidate;
+      });
 
+      ttsQueueIndex = 0;
+    }
+
+    isNarrationActive = true;
+    setTTSPlayState(true);
+    speakQueueItem();
+  }
+
+  function speakQueueItem() {
+    if (!isNarrationActive) return;
+    if (ttsQueueIndex < 0 || ttsQueueIndex >= ttsQueue.length) {
+      // 導讀完畢
+      stopSpeaking();
+      return;
+    }
+
+    clearQueueHighlights();
+    const el = ttsQueue[ttsQueueIndex];
+    el.classList.add('tts-highlighting');
+    
+    // 將目前正在朗讀的區塊捲動到可見範圍內 (在文字字體放大出現滾動條時尤其重要)
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    let textToRead = el.innerText.replace(/🍬|🔊|✥/g, '').replace(/\s+/g, ' ').trim();
+    
     const utterance = new SpeechSynthesisUtterance(textToRead);
     const voices = synth.getVoices();
     const zhVoice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
@@ -899,26 +950,84 @@
     utterance.rate = ttsSpeedSlider ? parseFloat(ttsSpeedSlider.value) : 0.7;
     utterance.pitch = 1.0;
 
-    utterance.onend = () => setTTSPlayState(false);
-    utterance.onerror = () => setTTSPlayState(false);
+    utterance.onend = () => {
+      ttsQueueIndex++;
+      speakQueueItem();
+    };
+    utterance.onerror = (e) => {
+      console.error("TTS error:", e);
+      ttsQueueIndex++;
+      speakQueueItem();
+    };
+
+    currentUtterance = utterance;
+    synth.speak(utterance);
+  }
+
+  function speakSelection(text) {
+    stopSpeaking();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = synth.getVoices();
+    const zhVoice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
+    if (zhVoice) {
+      utterance.voice = zhVoice;
+    }
+    
+    utterance.rate = ttsSpeedSlider ? parseFloat(ttsSpeedSlider.value) : 0.7;
+    utterance.pitch = 1.0;
+
+    utterance.onend = () => {
+      setTTSPlayState(false);
+    };
+    utterance.onerror = () => {
+      setTTSPlayState(false);
+    };
 
     currentUtterance = utterance;
     synth.speak(utterance);
     setTTSPlayState(true);
   }
 
+  // 監聽文件上的反選(選取)事件
+  let selectionTimeout = null;
+  function handleTextSelection(e) {
+    // 若點擊的是工具列、控制鈕或進度條，則不觸發反選朗讀
+    if (e.target.closest('#floating-toolbar') || e.target.closest('.controls') || e.target.closest('.progress')) {
+      return;
+    }
+    // 若正在輸入資料，亦不觸發
+    if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+      return;
+    }
+
+    clearTimeout(selectionTimeout);
+    selectionTimeout = setTimeout(() => {
+      const selectedText = window.getSelection().toString().trim();
+      if (selectedText) {
+        speakSelection(selectedText);
+      }
+    }, 150);
+  }
+
+  document.addEventListener('mouseup', handleTextSelection);
+  document.addEventListener('touchend', handleTextSelection);
+
   if (ttsPlayBtn) {
     ttsPlayBtn.addEventListener('click', () => {
-      if (isSpeaking) {
+      if (isSpeaking && isNarrationActive) {
         stopSpeaking();
       } else {
-        speakCurrentSlide();
+        startNarration();
       }
     });
   }
 
   Reveal.on('slidechanged', () => {
     stopSpeaking();
+    ttsQueue = [];
+    ttsQueueIndex = -1;
+    activeSlideForTTS = null;
   });
 </script>
 
