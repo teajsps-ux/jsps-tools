@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>世界上最棒的葬禮 - 生命教育互動簡報</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/night.css" />
+  <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
+  
+  <style>
+    /* === 全域與主題變數 (吉卜力手繪賽璐珞風格) === */
+    :root {
+      --accent:  #d35400;   /* 溫暖黏土橘 / 磚紅色 */
+      --accent2: #2c7a52;   /* 高山針葉綠 / 草原綠 */
+      --success: #2e7d32;   /* 森林綠 */
+      --warn:    #b83214;   /* 警示深紅 */
+      --bg-light: #fcfaf2;  /* 復古奶油色 / 象牙紙色 */
+      --text-main: #2c1e14; /* 深暖石板褐，替代純黑，重現手繪墨線感 */
+      --font-scale: 1.0;    /* 滾輪字體縮放比例 */
+    }
+
+    /* Bpmf Iansui 芫荽注音字型 CDN 載入 */
+    @font-face {
+      font-family: 'Bpmf Iansui';
+      src: url('https://cdn.jsdelivr.net/gh/ButTaiwan/iansui@main/fonts/webfonts/Iansui-Regular.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Iansui';
+      src: url('https://cdn.jsdelivr.net/gh/ButTaiwan/iansui@main/fonts/webfonts/Iansui-Regular.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    .reveal {
+      font-family: 'Iansui', 'Segoe UI', 'Noto Sans TC', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+    }
+    
+    .reveal .controls { color: var(--accent2); }
+    .reveal .progress { color: var(--accent); }
+    
+    .reveal .slide-background {
+      filter: none !important;
+      opacity: 0.90 !important;
+    }
+    
+    /* VIZ 插圖對比元件的定位 */
+    .viz-side {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-color: var(--bg-light);
+    }
+    #viz-before {
+      z-index: 5;
+    }
+    #viz-after {
+      z-index: 10;
+    }
+
+    .reveal h1, .reveal h2, .reveal h3 {
+      font-family: 'Iansui', 'Segoe UI', 'Noto Sans TC', sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #1a202c;
+      text-shadow: 1px 1px 0px #ffffff, 2px 2px 4px rgba(0,0,0,0.06);
+    }
+    
+    /* 縮放字型樣式套用 */
+    .reveal h1 { font-size: calc(2.0em * var(--font-scale)) !important; line-height: 1.3 !important; }
+    .reveal h2 { font-size: calc(1.3em * var(--font-scale)) !important; line-height: 1.4 !important; color: var(--accent2) !important; }
+    .reveal h3 { font-size: calc(0.95em * var(--font-scale)) !important; line-height: 1.4 !important; }
+    .reveal .fragment { opacity: 0.15; transition: all 0.5s ease; }
+    .reveal .fragment.visible { opacity: 1; }
+
+    /* 支援字級放大時的內容滾動，隱藏原生滾動條，改用自訂滾動條 */
+    .reveal .slides section {
+      max-height: 95% !important;
+      overflow-y: auto !important;
+      scrollbar-width: none; /* Firefox */
+      box-sizing: border-box;
+    }
+    .reveal .slides section::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Edge */
+    }
+
+    #custom-scrollbar-thumb:hover {
+      background: rgba(44, 122, 82, 0.45) !important;
+    }
+
+    /* === 方案一：文字保護外層 (不透明白卡紙底色) === */
+    .text-paper-wrap {
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-radius: 16px;
+      padding: 24px 36px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0,0,0,0.01);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      display: inline-block;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: left;
+      box-sizing: border-box;
+      color: var(--text-main);
+    }
+    .text-paper-wrap p {
+      font-size: calc(0.48em * var(--font-scale)) !important;
+      line-height: 1.8;
+      margin-bottom: 0.6em;
+    }
+    .text-paper-wrap blockquote {
+      border-left: 4px solid var(--accent);
+      padding-left: 15px;
+      margin: 10px 0;
+      font-style: italic;
+      background: rgba(211, 84, 0, 0.03);
+      font-size: calc(0.46em * var(--font-scale)) !important;
+      line-height: 1.6;
+    }
+
+    /* === 雙欄排版樣式 === */
+    .split-slide-container {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      height: 680px;
+      width: 1300px;
+      max-width: 100vw;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.06);
+      background: #ffffff;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .split-text-side {
+      background: #ffffff;
+      padding: 30px 25px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      height: 100%;
+      color: var(--text-main);
+      border-left: 1px solid rgba(0,0,0,0.05);
+      overflow-y: auto;
+    }
+    .split-text-side p {
+      font-size: calc(0.44em * var(--font-scale)) !important;
+      line-height: 1.7;
+      margin-bottom: 0.5em;
+    }
+    
+    .split-text-side > :first-child { margin-top: auto !important; }
+    .split-text-side > :last-child { margin-bottom: auto !important; }
+
+    /* === 注音字型切換與排版優化 === */
+    body.zhuyin-mode,
+    body.zhuyin-mode .reveal,
+    body.zhuyin-mode .reveal h1,
+    body.zhuyin-mode .reveal h2,
+    body.zhuyin-mode .reveal h3,
+    body.zhuyin-mode .reveal p,
+    body.zhuyin-mode .reveal span,
+    body.zhuyin-mode .reveal li,
+    body.zhuyin-mode .reveal div,
+    body.zhuyin-mode .reveal button,
+    body.zhuyin-mode .reveal input {
+      font-family: 'Bpmf Iansui', cursive !important;
+    }
+
+    body.zhuyin-mode .reveal h1 { font-size: calc(1.6em * var(--font-scale)) !important; line-height: 1.9 !important; }
+    body.zhuyin-mode .reveal h2 { font-size: calc(1.1em * var(--font-scale)) !important; line-height: 1.9 !important; }
+    body.zhuyin-mode .reveal h3 { font-size: calc(0.8em * var(--font-scale)) !important; line-height: 1.9 !important; }
+    body.zhuyin-mode .reveal p,
+    body.zhuyin-mode .reveal li,
+    body.zhuyin-mode .reveal span {
+      line-height: 2.1 !important;
+      margin-bottom: 0.5em !important;
+    }
+    body.zhuyin-mode .adv-card .adv-desc {
+      font-size: calc(0.36em * var(--font-scale)) !important;
+      line-height: 2.0 !important;
+    }
+    body.zhuyin-mode .adv-card .adv-title {
+      font-size: calc(0.48em * var(--font-scale)) !important;
+      line-height: 1.8 !important;
+    }
+    body.zhuyin-mode .quote-box {
+      font-size: calc(0.46em * var(--font-scale)) !important;
+      line-height: 2.1 !important;
+    }
+
+    /* === 封面樣式 === */
+    .title-slide { text-align: center; }
+    .title-slide .tag {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: calc(0.48em * var(--font-scale)) !important;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.0em;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(211, 84, 0, 0.2);
+    }
+    .title-slide .subtitle { font-size: calc(0.65em * var(--font-scale)) !important; color: #7f8c8d; margin-top: 0.5em; line-height: 1.5; }
+    .title-slide .author { margin-top: 1.8em; font-size: calc(0.42em * var(--font-scale)) !important; color: #95a5a6; line-height: 1.6; }
+
+    /* === 三欄修練卡片 === */
+    .adv-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 0.6em; }
+    .adv-card {
+      background: #ffffff;
+      border-top: 4px solid var(--accent2);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.03);
+    }
+    .adv-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+    }
+    .adv-card .adv-icon { margin-bottom: 10px; }
+    .adv-card .adv-icon img {
+      width: 64px; height: 64px; object-fit: contain;
+      display: block; margin: 0 auto;
+      filter: drop-shadow(0 2px 4px rgba(44, 122, 82, 0.15));
+    }
+    .adv-card .adv-title { font-size: calc(0.55em * var(--font-scale)) !important; font-weight: 700; color: var(--accent2); margin-bottom: 6px; }
+    .adv-card .adv-desc { font-size: calc(0.40em * var(--font-scale)) !important; color: #555; line-height: 1.6; }
+
+    /* === 視覺化 VIZ 雙層滑動對比 === */
+    .viz-container {
+      position: relative;
+      height: 380px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      background-color: var(--bg-light);
+    }
+    #viz-divider {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, var(--accent2), transparent);
+      box-shadow: 0 0 8px var(--accent2);
+      pointer-events: none;
+      transform: translateX(-50%);
+      z-index: 20;
+    }
+    .slider-control {
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    .slider-label {
+      font-size: calc(0.45em * var(--font-scale)) !important;
+      font-weight: 700;
+      color: #999;
+    }
+    .slider-label.active {
+      color: var(--accent2);
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 250px;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.1);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: 0 0 6px var(--accent2);
+      transition: transform 0.1s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* === 引用對話方塊 === */
+    .quote-box {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 16px 24px;
+      margin: 0.6em 0;
+      font-size: calc(0.52em * var(--font-scale)) !important;
+      color: var(--text-main);
+      border: 1px solid rgba(0,0,0,0.05);
+      border-left: 5px solid var(--accent);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.03);
+      font-style: italic;
+      line-height: 1.8;
+      text-align: left;
+    }
+
+    .interact-title { font-size: calc(0.7em * var(--font-scale)) !important; margin-bottom: 12px; text-align: center; color: #1a202c; text-shadow: 1px 1px 0px #ffffff; font-weight: bold; }
+    
+    /* 翻翻卡樣式 */
+    .flip-card.flipped {
+      transform: rotateY(180deg);
+    }
+    
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* 語音導讀卡拉 OK 式句子亮起與自動捲動 */
+    .tts-phrase {
+      transition: background-color 0.3s ease, color 0.3s ease;
+      border-radius: 6px;
+      padding: 0 4px;
+      display: inline-block;
+    }
+    .tts-highlight {
+      background-color: var(--accent) !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(211, 84, 0, 0.3);
+    }
+    body.zhuyin-mode .tts-highlight {
+      background-color: var(--accent2) !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(44, 122, 82, 0.3);
+    }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Slide 1: 封面 -->
+    <section data-background-image="images/bg_hills.png" data-background-opacity="0.25" data-background-size="cover">
+      <div class="text-paper-wrap title-slide" style="width: 820px;">
+        <span class="tag">📔 生命教育繪本簡報</span>
+        <h1>世界上最棒的葬禮</h1>
+        <div class="subtitle">三個孩子與小動物告別的溫馨旅程</div>
+        <div class="author">
+          作者：烏爾夫‧尼爾森 (Ulf Nilsson)<br>
+          繪者：愛娃‧艾瑞克森 (Eva Eriksson)<br>
+          設計師：Antigravity-2 智慧繪本系統
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 2: 互動破冰 (文字雲) -->
+    <section id="slide-wordcloud" data-background-image="images/bg_forest.png" data-background-opacity="0.15" data-background-size="cover">
+      <div class="interact-title">🌱 互動破冰：你覺得「死亡」是什麼？</div>
+      <div style="display:grid; grid-template-columns:280px 1fr; gap:20px; height:520px; text-align:left; width: 1260px; margin: 0 auto;">
+        <!-- 左欄：輸入 + 排行 -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="background:#ffffff; border-radius:10px; padding:14px; border:1px solid rgba(0,0,0,0.06); box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+            <div style="font-size:calc(0.38em * var(--font-scale)); color:var(--accent2); font-weight:700; margin-bottom:8px;">輸入您的想法</div>
+            <input id="wc-input" type="text" placeholder="輸入一兩個詞彙，如「睡著了」..." maxlength="20"
+              style="width:100%; padding:9px 12px; border-radius:8px; border:1px solid rgba(44,122,82,0.4);
+                     background:#fcfcfc; color:var(--text-main); font-size:13px;
+                     box-sizing:border-box; font-family:inherit; outline:none;" />
+            <button id="wc-btn"
+              style="width:100%; margin-top:8px; padding:10px; background:var(--accent2); color:#fff;
+                     border:none; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer;
+                     transition:background 0.3s; box-shadow: 0 2px 6px rgba(44,122,82,0.2);">
+              提交想法 ↵
+            </button>
+          </div>
+          <div style="background:#ffffff; border-radius:10px; padding:14px; flex:1; overflow:hidden; display:flex; flex-direction:column; border:1px solid rgba(0,0,0,0.06); box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+            <div style="font-size:calc(0.38em * var(--font-scale)); color:var(--accent2); font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+              <span>即時想法榜</span>
+              <span style="display:inline-block; background:#ff4757; color:#fff; padding:2px 6px;
+                           border-radius:10px; font-size:0.8em; font-weight:bold; animation:pulse 1.5s infinite;">LIVE</span>
+            </div>
+            <div id="wc-list" style="font-size:calc(0.34em * var(--font-scale)); overflow-y:auto; flex:1; color:#555;">
+              <div style="color:#888;padding:8px 0;text-align:center;">尚無資料</div>
+            </div>
+            <div style="margin-top:8px; font-size:calc(0.32em * var(--font-scale)); color:#718096; border-top:1px solid rgba(0,0,0,0.06); padding-top:6px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                總計：<span id="wc-total" style="color:var(--accent); font-weight:700;">0</span>　
+                詞彙：<span id="wc-unique" style="color:var(--accent2); font-weight:700;">0</span>
+              </div>
+              <button id="wc-clear-btn" style="background:#ff4757; color:#fff; border:none; border-radius:4px; padding:3px 8px; font-size:11px; font-weight:bold; cursor:pointer; font-family:inherit;">
+                清除 🗑
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右欄：畫布 -->
+        <div style="background:#ffffff; border-radius:12px; overflow:hidden;
+                    position:relative; border:1px solid rgba(0,0,0,0.06); box-shadow:0 8px 16px rgba(0,0,0,0.03);">
+          <canvas id="wc-canvas" style="width:100%; height:100%; display:block;"></canvas>
+          <div id="wc-empty" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+                                     color:#718096; font-size:calc(0.42em * var(--font-scale)); text-align:center;
+                                     pointer-events:none; line-height:2.0;">
+            等待大家的想法 ✨<br>
+            輸入後文字雲將在此即時繪製！
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 3: 故事開端 -->
+    <section data-background-image="images/bg_tomb.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 820px;">
+        <h2>那隻受傷的野蜂</h2>
+        <blockquote>「啊，好可憐、好悲慘喔！」艾絲特沙啞的說：「小野蜂，我愛你。」</blockquote>
+        <p>那一天，我們都很無聊，想做點什麼好玩的事情。艾絲特在草地上發現了一隻死掉的野蜂。牠身上有黃黑色的條紋，毛茸茸的，翅膀皺在一起，小小的腳垂了下來。</p>
+        <p>艾絲特一向很勇敢，直接把野蜂捧在手心。但我還小，生命裡有好多事情會讓我感到害怕，我也害怕死亡。全部我認識的人裡面，還沒有人死掉過。</p>
+      </div>
+    </section>
+
+    <!-- Slide 4: 生命教育翻翻牌 -->
+    <section id="slide-flip-cards" data-background-image="images/bg_forest.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 1000px; max-width: 100vw; text-align: center;">
+        <h2>生命教育大探問</h2>
+        <p style="font-size: calc(0.40em * var(--font-scale)); line-height: 1.6; margin-bottom: 20px; text-align: center;">
+          面對「死亡」與「離別」，小朋友心中常有許多小問號。點選下列卡牌翻面，看看我們能如何溫柔面對：
+        </p>
+        
+        <div style="display:flex; justify-content:center; gap: 20px; perspective: 1000px; margin-top:10px;">
+          <!-- Card 1 -->
+          <div class="flip-card" onclick="this.classList.toggle('flipped')" style="width: 280px; height: 320px; cursor: pointer; position: relative; transform-style: preserve-3d; transition: transform 0.6s;">
+            <div style="position: absolute; inset:0; backface-visibility: hidden; background: #fff; border: 2px solid var(--accent2); border-radius: 12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; box-shadow:0 8px 16px rgba(0,0,0,0.04);">
+              <div style="font-size: 50px; margin-bottom:15px;">❓</div>
+              <div style="font-size: 18px; font-weight:bold; color:var(--accent2);">死掉會痛嗎？</div>
+              <div style="font-size: 11px; color:#999; margin-top:20px;">🔍 點擊卡牌翻面</div>
+            </div>
+            <div style="position: absolute; inset:0; backface-visibility: hidden; background: rgba(44, 122, 82, 0.05); border: 2px solid var(--accent2); border-radius: 12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; transform: rotateY(180deg); box-shadow:0 8px 16px rgba(0,0,0,0.04);">
+              <div style="font-size: 32px; margin-bottom:10px;">🕊️</div>
+              <div style="font-size: 13px; line-height:1.7; color:var(--text-main); font-weight:bold; text-align:left;">
+                死掉的動物身體已經安息，不會再感到寒冷或疼痛。就像故事裡的野蜂、地鼠和兔子，牠們已經在平靜中睡著了。
+              </div>
+            </div>
+          </div>
+          
+          <!-- Card 2 -->
+          <div class="flip-card" onclick="this.classList.toggle('flipped')" style="width: 280px; height: 320px; cursor: pointer; position: relative; transform-style: preserve-3d; transition: transform 0.6s;">
+            <div style="position: absolute; inset:0; backface-visibility: hidden; background: #fff; border: 2px solid var(--accent); border-radius: 12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; box-shadow:0 8px 16px rgba(0,0,0,0.04);">
+              <div style="font-size: 50px; margin-bottom:15px;">😢</div>
+              <div style="font-size: 18px; font-weight:bold; color:var(--accent);">感到悲傷怎麼辦？</div>
+              <div style="font-size: 11px; color:#999; margin-top:20px;">🔍 點擊卡牌翻面</div>
+            </div>
+            <div style="position: absolute; inset:0; backface-visibility: hidden; background: rgba(211, 84, 0, 0.05); border: 2px solid var(--accent); border-radius: 12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; transform: rotateY(180deg); box-shadow:0 8px 16px rgba(0,0,0,0.04);">
+              <div style="font-size: 32px; margin-bottom:10px;">❤️</div>
+              <div style="font-size: 13px; line-height:1.7; color:var(--text-main); font-weight:bold; text-align:left;">
+                難過哭泣是很正常而且美好的感情，就像普特和艾絲特流淚一樣。寫一首詩、唱一首歌，或者和朋友聊聊，都是療癒悲傷的好方法。
+              </div>
+            </div>
+          </div>
+          
+          <!-- Card 3 -->
+          <div class="flip-card" onclick="this.classList.toggle('flipped')" style="width: 280px; height: 320px; cursor: pointer; position: relative; transform-style: preserve-3d; transition: transform 0.6s;">
+            <div style="position: absolute; inset:0; backface-visibility: hidden; background: #fff; border: 2px solid #9b59b6; border-radius: 12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; box-shadow:0 8px 16px rgba(0,0,0,0.04);">
+              <div style="font-size: 50px; margin-bottom:15px;">🌸</div>
+              <div style="font-size: 18px; font-weight:bold; color:#9b59b6;">什麼是最好的道別？</div>
+              <div style="font-size: 11px; color:#999; margin-top:20px;">🔍 點擊卡牌翻面</div>
+            </div>
+            <div style="position: absolute; inset:0; backface-visibility: hidden; background: rgba(155, 89, 182, 0.05); border: 2px solid #9b59b6; border-radius: 12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; transform: rotateY(180deg); box-shadow:0 8px 16px rgba(0,0,0,0.04);">
+              <div style="font-size: 32px; margin-bottom:10px;">✨</div>
+              <div style="font-size: 13px; line-height:1.7; color:var(--text-main); font-weight:bold; text-align:left;">
+                最好的道別是「帶著愛與回憶繼續前行」。為動物辦葬禮、保留回憶，第二天打起精神繼續玩新的遊戲，就是送給生命最好的禮物。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 5: 第一座墳墓 -->
+    <section data-background-image="images/bg_tomb.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 820px;">
+        <h2>第一座墳墓：小野蜂之墓</h2>
+        <div class="quote-box">
+          小小的生命，停在手心，<br>
+          來去匆匆，回到土裡。
+        </div>
+        <p>「我要挖個墳墓，把牠埋起來。」艾絲特挖了一個深深的洞，我也在一旁寫了一首詩，寫著關於死亡的哀悼。我將詩寫在墓碑的小石頭上。</p>
+        <p>我們把小野蜂埋進黑黑的洞裡，再撒下小藍花的種子，然後用黃花和紅花排成漂亮的圈。這就是我們成立公司前，為牠舉行的一場溫暖葬禮。</p>
+      </div>
+    </section>
+
+    <!-- Slide 6: 葬禮公司成立 -->
+    <section data-background-image="images/bg_forest.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 960px;">
+        <h2>「葬禮股份有限公司」成立！</h2>
+        <p>艾絲特突然想到：「世界上到處都有死掉的動物。每叢灌木後頭都有一隻死掉的小鳥、蝴蝶或是老鼠。一定要有好心人願意花時間為牠們舉行葬禮。」我們決定成立這家公司，分工合作：</p>
+        
+        <div class="adv-grid">
+          <!-- 挖土擔當 -->
+          <div class="adv-card">
+            <div class="adv-icon"><img src="images/icon_shovel.png" alt="Shovel"></div>
+            <div class="adv-title">墓穴總監 艾絲特</div>
+            <div class="adv-desc">負責尋找逝去的生命，用鐵鍬挖出深深的洞，並且在電話中向鄰居推廣葬禮服務。</div>
+          </div>
+          <!-- 詩人 -->
+          <div class="adv-card">
+            <div class="adv-icon"><img src="images/icon_quill.png" alt="Quill"></div>
+            <div class="adv-title">首席詩人 「我」</div>
+            <div class="adv-desc">負責寫詩與朗誦。雖然害怕死亡的冰冷，但我會用最溫柔的詩句去禮讚每一個消逝的生命。</div>
+          </div>
+          <!-- 哭手 -->
+          <div class="adv-card">
+            <div class="adv-icon"><img src="images/icon_cry.png" alt="Cry"></div>
+            <div class="adv-title">職業哭手 普特</div>
+            <div class="adv-desc">艾絲特的弟弟，雖然年紀很小還不懂數數，但負責在墓碑前流下最真誠、最傷心的眼淚。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7: 貼紙裝飾板 (裝飾石碑) -->
+    <section id="slide-sticker-decorator" data-background-image="images/bg_tomb.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 960px; max-width: 100vw; text-align: left; display: grid; grid-template-columns: 240px 1fr; gap: 20px; height: 500px;">
+        <!-- 左側貼紙工具箱 -->
+        <div style="display:flex; flex-direction:column; gap:10px; background:#fbf8f3; border-radius:12px; padding:15px; border:1px solid rgba(0,0,0,0.06); box-shadow:inset 0 2px 4px rgba(0,0,0,0.01);">
+          <div style="font-size:13px; font-weight:bold; color:var(--accent2); margin-bottom:5px;">🌸 點選貼紙裝飾墓碑</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <button class="sticker-btn" data-emoji="🌸" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🌸 花朵</button>
+            <button class="sticker-btn" data-emoji="❤️" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">❤️ 愛心</button>
+            <button class="sticker-btn" data-emoji="✨" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">✨ 星星</button>
+            <button class="sticker-btn" data-emoji="🍃" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🍃 嫩葉</button>
+            <button class="sticker-btn" data-emoji="🪶" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🪶 羽毛</button>
+            <button class="sticker-btn" data-emoji="🎗️" style="font-size:20px; padding:6px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">🎗️ 絲帶</button>
+          </div>
+          <button id="clear-stickers" style="margin-top:auto; padding:10px; background:var(--warn); color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">🗑 清除裝飾</button>
+        </div>
+        
+        <!-- 右側裝飾畫布區 -->
+        <div id="decorator-canvas" style="position:relative; background:#ffffff; border: 2px dashed #cbd5e1; border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.02);">
+          <div style="position:absolute; bottom: 0; left:50%; transform:translateX(-50%); width:220px; height:280px; 
+            background:#bdc3c7; border-radius: 110px 110px 0 0; border: 4px solid #95a5a6; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 20px; box-sizing:border-box;">
+            <div style="font-size:18px; font-weight:bold; color:#7f8c8d; border-bottom: 2px solid #7f8c8d; width:80%; text-align:center; padding-bottom:5px;">小野蜂之墓</div>
+            <div style="font-size:13px; color:#95a5a6; margin-top:10px; text-align:center;">安息在<br>美麗的秘密基地</div>
+          </div>
+          <div style="position:absolute; top:12px; left:12px; font-size:11px; color:#94a3b8; font-weight:bold; pointer-events:none;">👈 點選左側貼紙，並在墓碑上拖曳調整位置</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8: 工具箱介紹 -->
+    <section data-background-image="images/bg_forest.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 960px;">
+        <h2>最棒的葬禮工具箱</h2>
+        <p>我們精心準備了一個沉甸甸的箱子，裝滿了舉辦世界上最棒葬禮所需要的一切，這讓我們的公司看起來非常專業：</p>
+        
+        <div class="adv-grid">
+          <!-- 卡片 1 -->
+          <div class="adv-card">
+            <div class="adv-icon"><img src="images/icon_tools.png" alt="Tools"></div>
+            <div class="adv-title">建造十字架</div>
+            <div class="adv-desc">鐵鎚、釘子，以及做十字架的小木條。我們會為每一座墳墓敲敲打打立起小木架。</div>
+          </div>
+          <!-- 卡片 2 -->
+          <div class="adv-card">
+            <div class="adv-icon"><img src="images/icon_stone.png" alt="Stone"></div>
+            <div class="adv-title">妝點墓碑</div>
+            <div class="adv-desc">撿來的一顆顆小石頭、畫筆與顏料，用來把動物的名字和詩篇寫在石頭上。</div>
+          </div>
+          <!-- 卡片 3 -->
+          <div class="adv-card">
+            <div class="adv-icon"><img src="images/icon_sprout.png" alt="Sprout"></div>
+            <div class="adv-title">孕育新生</div>
+            <div class="adv-desc">花的種子、紅黃色塑膠花。我們將種子埋在土裡，希望死亡之後，草木依然會成長。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 9: 努努的葬禮 -->
+    <section data-background-image="images/bg_forest.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 820px;">
+        <h2>鄰居的小倉鼠：努努</h2>
+        <div class="quote-box">
+          寒冷的冬天帶走了你，<br>
+          親愛的小努努，我仰賴著你，<br>
+          感謝你的一切，啦啦啦……
+        </div>
+        <p>艾絲特打給鄰居推銷我們的服務，幫倉鼠努努辦葬禮，收費十塊錢，並保證「永久保固照顧墓地」。</p>
+        <p>當努努的小主人哭得很傷心時，普特拉著她的手安慰說：「等小努努好一點以後，我們再把牠挖出來。」雖然有些荒謬，但普特的天真卻給了悲傷一點溫暖的微笑。</p>
+      </div>
+    </section>
+
+    <!-- Slide 10: 秘密基地墓園 -->
+    <section data-background-image="images/bg_forest.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 820px;">
+        <h2>墓園裡萬物皆得安眠</h2>
+        <p>隨後我們忙得不可開交：艾絲特爸爸給的死公雞、冰箱裡的鯡魚、奶奶捕鼠器抓的九隻老鼠。我們全都為牠們舉行了命名儀式與葬禮。</p>
+        <blockquote>「我將妳命名為寶拉，而你是薛爾。我們把其中一隻胖老鼠取名為小豬胖胖。」</blockquote>
+        <div class="quote-box">
+          再見了，親愛的小豬胖胖，<br>
+          祝你快樂，在你安息的地方。
+        </div>
+        <p>雖然這些葬禮都沒讓我們賺到錢，但我們的祕密基地漸漸變成了一個真正的美麗墓園。</p>
+      </div>
+    </section>
+
+    <!-- Slide 11: 艾絲特的氣憤與大馬路 -->
+    <section data-background-image="images/bg_road.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 820px;">
+        <h2>「什麼爛公司！」艾絲特大發脾氣</h2>
+        <p>「只有這些一點也不起眼的小動物！下次我們乾脆埋死蒼蠅算了，不然就埋那些螞蟻。」艾絲特生氣了，因為大家都沒錢付給我們，她渴望為一隻巨大又壞脾氣的野豬辦葬禮。</p>
+        <div class="quote-box">
+          總有一天，生命會結束，<br>
+          無論母牛、鴨鵝還是野豬。
+        </div>
+        <p>普特問：「是被車撞了？還是被槍打中了？」這給了我們靈感。我們沿著大馬路往前走，拖著裝滿十字架和石頭的重箱子，尋找被車撞到的動物。</p>
+      </div>
+    </section>
+
+    <!-- Slide 12: 刺蝟與兔子費迪南 -->
+    <section data-background-image="images/bg_road.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 820px;">
+        <h2>多刺的刺蝟與大兔子費迪南</h2>
+        <div class="quote-box">
+          在人間，多刺的你平平扁扁；<br>
+          在天堂，快樂的你胖胖圓圓。
+        </div>
+        <p>我們在馬路旁發現了一隻扁掉的刺蝟。艾絲特戴著爸爸的皮手套，把牠放進棺材盒裡。接著，我們又發現了體型龐大的兔子「費迪南」。</p>
+        <p>艾絲特準備了小行李箱，還鋪了枕頭和毯子。普特哭著問：「那我呢？我死的時候，有沒有枕頭？」「有啦，你死的時候有你最愛的那條毯子，還有泰迪熊、蛋糕和果汁。」普特這才安心地擦乾鼻涕笑了。</p>
+      </div>
+    </section>
+
+    <!-- Slide 13: 烏鶇撞上玻璃窗 (VIZ) -->
+    <section id="slide-viz">
+      <div class="split-slide-container" style="height:680px;">
+        <div style="position:relative; height:100%; width:100%; overflow:hidden; background-color: #f5efe6;">
+          <div id="viz-before" class="viz-side" style="width:100%; height:100%;">
+            <svg viewBox="0 0 550 620" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background-color: #f5efe6; display: block;">
+              <circle cx="450" cy="150" r="120" fill="#fefae0" opacity="0.6" />
+              <path d="M 0 500 C 100 450, 200 480, 300 400 C 400 320, 480 350, 550 280" fill="none" stroke="#6d4c41" stroke-width="24" stroke-linecap="round" />
+              <path d="M 0 500 C 100 450, 200 480, 300 400 C 400 320, 480 350, 550 280" fill="none" stroke="#5d4037" stroke-width="16" stroke-linecap="round" />
+              <path d="M 220 440 C 260 410, 320 415, 380 390" fill="none" stroke="#5d4037" stroke-width="10" stroke-linecap="round" />
+              <path d="M 120 460 C 100 430, 80 430, 90 460 C 100 480, 110 480, 120 460 Z" fill="#2c7a52" />
+              <path d="M 180 445 C 190 415, 210 410, 200 440 C 190 460, 185 460, 180 445 Z" fill="#52b788" />
+              <path d="M 280 400 C 270 370, 250 375, 265 405 C 275 420, 280 415, 280 400 Z" fill="#2c7a52" />
+              <path d="M 340 380 C 350 350, 370 345, 360 380 C 350 400, 345 395, 340 380 Z" fill="#74c69d" />
+              <path d="M 420 340 C 440 310, 460 315, 445 345 C 435 360, 425 355, 420 340 Z" fill="#52b788" />
+              <path d="M 480 300 C 510 270, 530 290, 500 320 C 480 340, 470 320, 480 300 Z" fill="#2c7a52" />
+              <g class="singing-bird" transform="translate(240, 240)">
+                <line x1="45" y1="120" x2="35" y2="150" stroke="#8d6e63" stroke-width="4" stroke-linecap="round" />
+                <line x1="55" y1="120" x2="55" y2="150" stroke="#8d6e63" stroke-width="4" stroke-linecap="round" />
+                <line x1="35" y1="150" x2="25" y2="155" stroke="#8d6e63" stroke-width="3" stroke-linecap="round" />
+                <line x1="55" y1="150" x2="45" y2="155" stroke="#8d6e63" stroke-width="3" stroke-linecap="round" />
+                <path d="M 0 100 L -60 120 L -55 130 L 10 110 Z" fill="#2c1e14" />
+                <path d="M 10 50 C -20 50, -40 80, -20 110 C 0 130, 40 130, 60 110 C 80 90, 80 60, 60 50 C 45 42, 25 42, 10 50 Z" fill="#2c1e14" />
+                <path d="M 15 65 C -5 65, -15 90, 0 105 C 15 115, 35 110, 45 90 C 55 70, 35 65, 15 65 Z" fill="#3d2f24" />
+                <path d="M 18 70 C 2 70, -6 90, 5 100 C 15 108, 30 105, 38 90 C 45 75, 30 70, 18 70 Z" fill="#1e1e24" opacity="0.3" />
+                <circle cx="65" cy="40" r="30" fill="#2c1e14" />
+                <circle cx="75" cy="35" r="7" fill="#ffb703" />
+                <circle cx="75" cy="35" r="4" fill="#ffffff" />
+                <circle cx="76" cy="34" r="2" fill="#000000" />
+                <path d="M 90 43 L 115 50 L 93 48 Z" fill="#ffb703" stroke="#e67e22" stroke-width="1" />
+                <path class="upper-beak" d="M 92 35 L 120 32 L 91 43 Z" fill="#ffb703" stroke="#e67e22" stroke-width="1" />
+              </g>
+              <g class="music-notes">
+                <path class="note note-1" d="M 370 240 C 380 210, 400 210, 390 190 C 385 180, 375 185, 370 180 M 390 190 L 390 200 M 370 180 L 370 190" fill="none" stroke="#2c7a52" stroke-width="2" />
+                <text x="360" y="220" fill="#d35400" font-size="24" class="note note-2">🎵</text>
+                <text x="390" y="245" fill="#2c7a52" font-size="20" class="note note-3">🎶</text>
+              </g>
+              <style>
+                @keyframes song-pulse {
+                  0% { transform: translate(240px, 240px) scale(1); }
+                  50% { transform: translate(240px, 238px) scale(1.02); }
+                  100% { transform: translate(240px, 240px) scale(1); }
+                }
+                @keyframes beak-move {
+                  0% { transform: rotate(0deg); }
+                  50% { transform: rotate(-8deg); transform-origin: 92px 39px; }
+                  100% { transform: rotate(0deg); }
+                }
+                @keyframes float-note-1 {
+                  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+                  30% { opacity: 0.8; }
+                  100% { transform: translate(60px, -80px) scale(1.2); opacity: 0; }
+                }
+                @keyframes float-note-2 {
+                  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+                  40% { opacity: 0.8; }
+                  100% { transform: translate(40px, -120px) scale(1.1); opacity: 0; }
+                }
+                @keyframes float-note-3 {
+                  0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
+                  20% { opacity: 0.9; }
+                  100% { transform: translate(80px, -60px) scale(1); opacity: 0; }
+                }
+                .singing-bird {
+                  animation: song-pulse 2s infinite ease-in-out;
+                }
+                .upper-beak {
+                  animation: beak-move 0.6s infinite ease-in-out;
+                }
+                .note-1 {
+                  animation: float-note-1 3s infinite linear;
+                  transform-origin: 370px 240px;
+                }
+                .note-2 {
+                  animation: float-note-2 4s infinite linear 1s;
+                  transform-origin: 360px 220px;
+                }
+                .note-3 {
+                  animation: float-note-3 3.5s infinite linear 2s;
+                  transform-origin: 390px 245px;
+                }
+              </style>
+            </svg>
+          </div>
+          <div id="viz-after" class="viz-side" style="width:100%; height:100%; clip-path: inset(0 100% 0 0); background: #fcfaf2;">
+            <svg viewBox="0 0 550 620" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background-color: #f5efe6; display: block;">
+              <circle cx="450" cy="150" r="120" fill="#e0ecde" opacity="0.4" />
+              <path d="M 0 500 C 100 450, 200 480, 300 400 C 400 320, 480 350, 550 280" fill="none" stroke="#8d6e63" stroke-width="20" stroke-linecap="round" opacity="0.4" />
+              <path d="M 220 440 C 260 410, 320 415, 380 390" fill="none" stroke="#7d5a50" stroke-width="8" stroke-linecap="round" opacity="0.4" />
+              <path d="M -50 630 L 600 630 L 600 520 C 450 510, 350 540, 200 520 C 100 510, 0 530, -50 540 Z" fill="#2c7a52" opacity="0.9" />
+              <path d="M -50 630 L 600 630 L 600 535 C 480 525, 380 550, 220 535 C 120 525, 20 545, -50 550 Z" fill="#205f3e" />
+              <path d="M 80 535 Q 85 515, 95 510 Q 90 525, 85 535 Z" fill="#52b788" />
+              <path d="M 120 530 Q 128 505, 140 500 Q 132 518, 122 530 Z" fill="#74c69d" />
+              <path d="M 380 540 Q 375 520, 365 515 Q 372 528, 378 540 Z" fill="#52b788" />
+              <g class="sleeping-bird" transform="translate(180, 440)">
+                <line x1="75" y1="80" x2="85" y2="55" stroke="#8d6e63" stroke-width="3" stroke-linecap="round" />
+                <line x1="85" y1="55" x2="95" y2="52" stroke="#8d6e63" stroke-width="3" stroke-linecap="round" />
+                <line x1="83" y1="80" x2="95" y2="60" stroke="#8d6e63" stroke-width="3" stroke-linecap="round" />
+                <line x1="95" y1="60" x2="105" y2="57" stroke="#8d6e63" stroke-width="3" stroke-linecap="round" />
+                <path d="M 20 90 L -40 100 L -35 105 L 25 95 Z" fill="#2c1e14" opacity="0.85" />
+                <path d="M 30 65 C 5 65, -10 80, 10 95 C 25 102, 70 102, 90 95 C 105 85, 105 70, 85 65 C 70 60, 50 60, 30 65 Z" fill="#2c1e14" />
+                <path d="M 35 72 C 20 72, 10 82, 25 92 C 35 98, 65 98, 70 90 C 75 80, 55 72, 35 72 Z" fill="#3d2f24" />
+                <circle cx="110" cy="80" r="22" fill="#2c1e14" />
+                <path d="M 108 78 Q 113 83, 118 78" fill="none" stroke="#ffb703" stroke-width="3" stroke-linecap="round" />
+                <path d="M 128 80 L 148 76 L 129 84 Z" fill="#ffb703" opacity="0.8" />
+              </g>
+              <g class="falling-leaves">
+                <path class="leaf leaf-1" d="M 150 100 C 160 120, 150 140, 140 130 C 130 120, 140 110, 150 100 Z" fill="#d35400" />
+                <path class="leaf leaf-2" d="M 350 80 C 370 90, 380 110, 360 115 C 340 120, 340 100, 350 80 Z" fill="#e67e22" />
+                <path class="leaf leaf-3" d="M 450 200 C 460 220, 450 240, 440 230 C 430 220, 440 210, 450 200 Z" fill="#d35400" opacity="0.6" />
+              </g>
+              <style>
+                @keyframes leaf-fall-1 {
+                  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+                  10% { opacity: 0.8; }
+                  90% { opacity: 0.8; }
+                  100% { transform: translate(60px, 350px) rotate(360deg); opacity: 0; }
+                }
+                @keyframes leaf-fall-2 {
+                  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+                  15% { opacity: 0.9; }
+                  85% { opacity: 0.9; }
+                  100% { transform: translate(-80px, 400px) rotate(-180deg); opacity: 0; }
+                }
+                @keyframes leaf-fall-3 {
+                  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+                  10% { opacity: 0.7; }
+                  90% { opacity: 0.7; }
+                  100% { transform: translate(-40px, 300px) rotate(270deg); opacity: 0; }
+                }
+                .leaf-1 {
+                  animation: leaf-fall-1 6s infinite linear;
+                  transform-origin: 150px 100px;
+                }
+                .leaf-2 {
+                  animation: leaf-fall-2 8s infinite linear 2s;
+                  transform-origin: 350px 80px;
+                }
+                .leaf-3 {
+                  animation: leaf-fall-3 7s infinite linear 4s;
+                  transform-origin: 450px 200px;
+                }
+              </style>
+            </svg>
+          </div>
+          <div id="viz-divider"></div>
+        </div>
+        
+        <!-- 右側故事區 -->
+        <div class="split-text-side">
+          <h2>親眼見證死亡的瞬間</h2>
+          <p>我們走在大馬路旁，突然看到兩隻烏鶇在樹叢間追逐。</p>
+          <p>接著，其中一隻「砰」的一聲，猛烈撞上了陽臺的玻璃窗，掉在我們腳邊。</p>
+          <p>我們蹲在小鳥旁邊。牠拍了拍翅膀，打開嘴巴，雙腳抽動了一下……就這樣躺在那裡一動也不動。僅僅幾秒鐘，牠死去了。</p>
+          <p style="color:var(--accent); font-weight:bold; margin-bottom: 15px;">這是我第一次親眼看見活生生的生命在我面前死掉。我全身顫抖，完全忘記了害怕，一路抱著牠走到秘密基地。</p>
+          
+          <!-- 滑桿與狀態提示區 (移至右邊，避免遮擋左邊插圖) -->
+          <div style="margin-top:auto; padding-top:15px; border-top:1px solid rgba(0,0,0,0.06);">
+            <div class="slider-control" style="margin-bottom:12px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <span class="slider-label">生</span>
+              <input id="viz-slider" type="range" min="0" max="100" value="0" style="flex:1;">
+              <span class="slider-label">死</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding: 0 5px;">
+              <span id="label-before" class="slider-label active" style="transition: color 0.3s; font-weight:bold; font-size: 12px;">🎵 烏鶇正快樂唱歌 (生)</span>
+              <span id="label-after" class="slider-label" style="transition: color 0.3s; font-weight:bold; font-size: 12px;">🍂 撞上玻璃安息 (死)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 14: 為小爸爸辦最棒的葬禮 -->
+    <section data-background-image="images/bg_forest.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 820px;">
+        <h2>最棒的葬禮：小爸爸之墓</h2>
+        <p>我們為牠取名為「小爸爸」。空地裡濃密的樹葉圍繞在上方，像是教堂宏偉的拱頂。我們在最漂亮的石頭上刻了「小爸爸」。我抱著小鳥，朗讀著我寫的詩：</p>
+        <div class="quote-box">
+          你不再唱歌了，生命走向死亡，<br>
+          身體變冷了，一切變暗了。<br>
+          你是黑暗裡的一道光，<br>
+          謝謝你，你永遠活在我心房。
+        </div>
+        <p>另一隻烏鶇在樹梢高聲唱著動聽的歌，艾絲特默默地流下眼淚，大家都沉浸在莊嚴而神聖的氣氛中。悲傷，像一塊大黑布輕輕覆蓋住這裡。</p>
+      </div>
+    </section>
+
+    <!-- Slide 15: 填詞小詩創作板 -->
+    <section id="slide-poem-creator" data-background-image="images/bg_forest.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 900px; max-width: 100vw;">
+        <h2>生命小詩填詞創作板</h2>
+        <p style="font-size: calc(0.42em * var(--font-scale)); line-height: 1.6; margin-bottom: 12px;">
+          普特和艾絲特都很喜歡「我」寫的詩。點選底部的詩句卡牌，為逝去的小生命拼湊出一首動人詩篇吧：
+        </p>
+        
+        <!-- 詩句展示板 -->
+        <div style="background: rgba(255,255,255,0.7); border: 2px dashed var(--accent2); border-radius:12px; padding: 20px; text-align:center; min-height: 180px; display:flex; flex-direction:column; justify-content:center; gap: 8px;">
+          <div style="font-size: calc(0.55em * var(--font-scale)); font-weight:bold; color:var(--text-main);">
+            小動物啊，
+          </div>
+          <div id="poem-slot-1" style="display:inline-block; border-bottom: 2px solid var(--accent); min-width: 200px; padding: 4px 10px; font-size: calc(0.52em * var(--font-scale)); color: var(--accent); font-weight:bold; text-align:center;">（點選下方第一個詞彙）</div>
+          <div style="font-size: calc(0.55em * var(--font-scale)); font-weight:bold; color:var(--text-main); margin-top: 8px;">
+            安息吧，
+          </div>
+          <div id="poem-slot-2" style="display:inline-block; border-bottom: 2px solid var(--accent); min-width: 200px; padding: 4px 10px; font-size: calc(0.52em * var(--font-scale)); color: var(--accent); font-weight:bold; text-align:center;">（點選下方第二個詞彙）</div>
+        </div>
+        
+        <!-- 候選卡牌區 -->
+        <div style="margin-top: 16px; display:flex; flex-direction:column; gap: 8px;">
+          <div>
+            <div style="font-size:11px; font-weight:bold; color:var(--accent2); margin-bottom:4px;">填空一選項：</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="word-chip" data-slot="1" data-val="你不再唱歌了，生命走向死亡" style="padding:6px 12px; background:#fff; border:1px solid #ddd; border-radius:20px; cursor:pointer; font-size:12px; font-family:inherit;">🍂 你不再唱歌了</button>
+              <button class="word-chip" data-slot="1" data-val="小小的生命，來去匆匆回到土裡" style="padding:6px 12px; background:#fff; border:1px solid #ddd; border-radius:20px; cursor:pointer; font-size:12px; font-family:inherit;">🐝 來去匆匆回到土裡</button>
+              <button class="word-chip" data-slot="1" data-val="在人間你平平扁扁，在天堂你圓圓胖胖" style="padding:6px 12px; background:#fff; border:1px solid #ddd; border-radius:20px; cursor:pointer; font-size:12px; font-family:inherit;">🦔 天堂裡圓圓胖胖</button>
+            </div>
+          </div>
+          <div style="margin-top:5px;">
+            <div style="font-size:11px; font-weight:bold; color:var(--accent2); margin-bottom:4px;">填空二選項：</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="word-chip" data-slot="2" data-val="你是黑暗裡的一道光，永遠活在我心房" style="padding:6px 12px; background:#fff; border:1px solid #ddd; border-radius:20px; cursor:pointer; font-size:12px; font-family:inherit;">✨ 黑暗裡的一道光</button>
+              <button class="word-chip" data-slot="2" data-val="在這裡靜靜安眠，過不久我們還會再相見" style="padding:6px 12px; background:#fff; border:1px solid #ddd; border-radius:20px; cursor:pointer; font-size:12px; font-family:inherit;">🐰 我們還會再相見</button>
+              <button class="word-chip" data-slot="2" data-val="小草和青苔將會成長，墓旁的花朵會綻放" style="padding:6px 12px; background:#fff; border:1px solid #ddd; border-radius:20px; cursor:pointer; font-size:12px; font-family:inherit;">🌸 墓旁花朵會綻放</button>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 15px; text-align:right;">
+          <button id="btn-read-poem" style="padding: 8px 16px; background:var(--accent); color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px; display:inline-flex; align-items:center; gap:6px; font-family:inherit;">
+            🔊 朗讀我的小詩
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 16: 作者生命反思 -->
+    <section data-background-image="images/bg_forest.png" data-background-opacity="0.15">
+      <div class="text-paper-wrap" style="width: 960px;">
+        <h2>作者的核心生命反思</h2>
+        <p>作者烏爾夫透過溫馨、幽默又溫柔的文字，引導我們重新看見生命的循環與尊嚴：</p>
+        
+        <div class="adv-grid">
+          <!-- 反思 1 -->
+          <div class="adv-card">
+            <div class="adv-icon"><img src="images/icon_sprout.png" alt="Sprout"></div>
+            <div class="adv-title">生命自然的常態</div>
+            <div class="adv-desc">生命有始有終。無論是小如蜜蜂、地鼠，還是巨大如野豬，所有生命終將面對終點，這是大自然的運行常態，無須懼怕。</div>
+          </div>
+          <!-- 反思 2 -->
+          <div class="adv-card">
+            <div class="adv-icon"><img src="images/icon_heart.png" alt="Heart"></div>
+            <div class="adv-title">儀式釋放恐懼</div>
+            <div class="adv-desc">孩子們藉由挖土、刻石碑、朗讀詩歌的遊戲，給了自己正式向生命道別的機會。在「告別儀式」中，我們學會擁抱悲傷並撫平失落。</div>
+          </div>
+          <!-- 反思 3 -->
+          <div class="adv-card">
+            <div class="adv-icon"><img src="images/icon_bird.png" alt="Bird"></div>
+            <div class="adv-title">生命的尊重與同理</div>
+            <div class="adv-desc">從最初因為好玩而舉辦葬禮的遊戲心態，到看見活生生烏鶇逝世時的心靈震撼，孩子們心底萌發了對微小生命深切的同理與敬重。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 17: 現場票選 -->
+    <section id="slide-poll" data-background-image="images/bg_hills.png" data-background-opacity="0.15" data-background-size="cover">
+      <div class="interact-title">⭐ 現場票選：讀完這個故事，哪一個片段最觸動你？</div>
+      <div id="poll-options" style="display:flex; flex-direction:column; gap:12px; max-width:650px; margin: 0.8em auto 0 auto;">
+        <!-- 由 JS 動態生成選項 -->
+      </div>
+      <div style="font-size:calc(0.38em * var(--font-scale)); color:#555; text-align:center; margin-top:1.0em;">
+        已投票學員人數：<span id="poll-total" style="color:var(--accent); font-weight:700;">0</span> 人
+      </div>
+    </section>
+
+    <!-- Slide 18: 晝夜交替與時間循環 -->
+    <section id="slide-daynight" data-background-image="images/bg_hills.png" data-background-opacity="0.3" data-background-size="cover">
+      <div class="text-paper-wrap" id="daynight-wrap" style="transition: background 0.8s, border-color 0.8s; width: 850px;">
+        <h2>生命很長，死亡很短</h2>
+        <p style="font-size: calc(0.48em * var(--font-scale)); line-height: 1.8;">
+          死亡只在瞬間。之後，小草和青苔依然成長，墓旁的花朵綻放，一切歸於平靜……<br>
+          <span style="color:var(--accent2); font-weight:bold;">拉動下方滑桿，體驗時間與大自然的流逝：</span>
+        </p>
+        
+        <!-- 晝夜模擬器顯示面板 -->
+        <div id="daynight-sky" style="position:relative; height: 160px; border-radius: 12px; margin: 15px 0; overflow:hidden; 
+          background: linear-gradient(to bottom, #70a1ff, #dfe4ea); transition: all 0.8s ease; border: 1px solid rgba(0,0,0,0.1);">
+          <!-- 太陽 / 月亮 -->
+          <div id="daynight-celestial" style="position:absolute; bottom: 30px; left: 10%; width: 40px; height: 40px; 
+            border-radius: 50%; background: #fffa65; box-shadow: 0 0 20px #fffa65; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+          <!-- 草地剪影 -->
+          <div style="position:absolute; bottom: 0; left: 0; width: 100%; height: 30px; background: #2c7a52; opacity:0.85;"></div>
+          <div style="position:absolute; bottom: 5px; right: 10%; font-size:12px; color:rgba(255,255,255,0.9); font-weight:bold;" id="daynight-time-text">🌞 溫暖的白晝</div>
+        </div>
+        
+        <div class="slider-control" style="margin-top:15px;">
+          <span style="font-size:12px; font-weight:bold; color:#777;">白晝</span>
+          <input id="daynight-slider" type="range" min="0" max="100" value="0" style="width:300px; height:8px;">
+          <span style="font-size:12px; font-weight:bold; color:#777;">星夜</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 19: 終章與謝幕 -->
+    <section data-background-image="images/bg_hills.png" data-background-opacity="0.35" data-background-size="cover">
+      <div class="text-paper-wrap title-slide" style="width: 820px; text-align:center;">
+        <h2>一切歸於平靜</h2>
+        <div class="quote-box" style="border-left:none; text-align:center; font-size: calc(0.60em * var(--font-scale)) !important; line-height:2.0;">
+          生命很長，死亡很短，<br>
+          死亡只在瞬間。<br>
+          之後，小草和青苔成長，<br>
+          墓旁的花朵綻放，一切歸於平靜……
+        </div>
+        <p style="text-align:center; font-size: calc(0.50em * var(--font-scale)) !important; color:var(--accent); font-weight:bold; margin-top:20px;">
+          第二天，我們又忙著去玩別的遊戲了。
+        </p>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- Floating Toolbar Left: Drag Handle, Zhuyin Switch, Ambient Music & Audio Guidance Panel -->
+<div id="floating-toolbar" style="position: fixed; bottom: 20px; left: 20px; z-index: 1000; display: flex; align-items: center; gap: 12px; transform: translate3d(0, 0, 0); transition: box-shadow 0.3s; will-change: transform;">
+  <!-- Drag Handle -->
+  <div id="toolbar-drag-handle" style="cursor: grab; display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.95); color: #555; border: 1px solid rgba(0,0,0,0.1); border-radius: 50%;
+    width: 32px; height: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); user-select: none; font-size: 14px; font-weight: bold; transition: background 0.2s;">
+    ✥
+  </div>
+
+  <!-- Zhuyin Switch -->
+  <button id="font-toggle-btn" style="background: var(--accent); color: white; border: none; border-radius: 30px;
+    padding: 10px 18px; font-size: 14px; font-weight: bold; cursor: pointer;
+    box-shadow: 0 4px 15px rgba(211, 84, 0, 0.3); display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; outline: none; border: 1px solid rgba(0,0,0,0.05); font-family:inherit;">
+    <span>🍬 注音模式 (關)</span>
+  </button>
+  
+  <!-- Ambient Synthesized Music Button -->
+  <button id="ambient-btn" style="background: var(--accent2); color: white; border: none; border-radius: 30px;
+    padding: 10px 18px; font-size: 14px; font-weight: bold; cursor: pointer;
+    box-shadow: 0 4px 15px rgba(44, 122, 82, 0.3); display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; outline: none; border: 1px solid rgba(0,0,0,0.05); font-family:inherit;">
+    <span>🎵 森林音效 (關)</span>
+  </button>
+  
+  <!-- Audio Guidance Panel -->
+  <div id="tts-panel" style="background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(0,0,0,0.1); border-radius: 30px;
+    padding: 6px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <button id="tts-play-btn" style="background: var(--accent2); color: #fff; border: none; border-radius: 50%;
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; font-weight: bold; outline: none; transition: background 0.2s;">
+      ▶
+    </button>
+    <span style="font-size: 11px; color: #4a5568; font-weight: bold; white-space: nowrap;">🔊 語音導讀</span>
+    <div style="display: flex; align-items: center; gap: 6px; border-left: 1px solid rgba(0,0,0,0.1); padding-left: 10px;">
+      <span style="font-size: 10px; color: #718096; white-space: nowrap;">語速:</span>
+      <input id="tts-speed-slider" type="range" min="0.5" max="2.0" step="0.1" value="0.7" style="width: 60px; height: 4px; cursor: pointer; margin: 0;">
+      <span id="tts-speed-val" style="font-size: 10px; color: var(--accent2); font-weight: bold; width: 24px; text-align: left;">0.7x</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  // 初始化 Reveal.js
+  Reveal.initialize({
+    width: 1366,
+    height: 768,
+    margin: 0.03,
+    hash: true,
+    transition: 'slide',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    center: true,
+    progress: true,
+    controls: true,
+    slideNumber: 'c/t',
+    plugins: []
+  });
+
+  // Bpmf Iansui 注音字型切換邏輯
+  const fontToggleBtn = document.getElementById('font-toggle-btn');
+  let isZhuyinMode = localStorage.getItem('zhuyin_mode') === 'true';
+
+  function setZhuyinMode(active) {
+    if (active) {
+      document.body.classList.add('zhuyin-mode');
+      fontToggleBtn.innerHTML = '<span>🍬 注音模式 (開)</span>';
+      fontToggleBtn.style.background = 'var(--success)';
+      fontToggleBtn.style.boxShadow = '0 4px 15px rgba(129, 199, 132, 0.5)';
+    } else {
+      document.body.classList.remove('zhuyin-mode');
+      fontToggleBtn.innerHTML = '<span>🍬 注音模式 (關)</span>';
+      fontToggleBtn.style.background = 'var(--accent)';
+      fontToggleBtn.style.boxShadow = '0 4px 15px rgba(232, 100, 58, 0.5)';
+    }
+    localStorage.setItem('zhuyin_mode', active);
+    Reveal.layout();
+  }
+
+  setZhuyinMode(isZhuyinMode);
+  fontToggleBtn?.addEventListener('click', () => {
+    isZhuyinMode = !isZhuyinMode;
+    setZhuyinMode(isZhuyinMode);
+  });
+
+  // Ctrl + Mouse Wheel 縮放字體排版
+  let fontScale = parseFloat(localStorage.getItem('slide_font_scale') || '1.0');
+  
+  const scaleIndicator = document.createElement('div');
+  scaleIndicator.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 2000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    font-family: inherit;
+  `;
+  document.body.appendChild(scaleIndicator);
+
+  let scaleTimeout = null;
+  function showScaleIndicator(scale) {
+    scaleIndicator.textContent = `字型比例: ${Math.round(scale * 100)}% (按住 Ctrl + 滾輪可調整)`;
+    scaleIndicator.style.opacity = '1';
+    clearTimeout(scaleTimeout);
+    scaleTimeout = setTimeout(() => {
+      scaleIndicator.style.opacity = '0';
+    }, 1200);
+  }
+
+  function applyFontScale(scale, showIndicator = false) {
+    document.documentElement.style.setProperty('--font-scale', scale);
+    localStorage.setItem('slide_font_scale', scale);
+    Reveal.layout();
+    if (showIndicator) {
+      showScaleIndicator(scale);
+    }
+  }
+
+  applyFontScale(fontScale, false);
+
+  window.addEventListener('wheel', (e) => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        fontScale = Math.min(1.8, fontScale + 0.05);
+      } else {
+        fontScale = Math.max(0.6, fontScale - 0.05);
+      }
+      applyFontScale(fontScale, true);
+    }
+  }, { passive: false });
+
+  // Floating toolbar 拖曳
+  const toolbar = document.getElementById('floating-toolbar');
+  const dragHandle = document.getElementById('toolbar-drag-handle');
+  
+  if (toolbar && dragHandle) {
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let translateX = 0, translateY = 0;
+    
+    const savedX = localStorage.getItem('toolbar_x');
+    const savedY = localStorage.getItem('toolbar_y');
+    if (savedX && savedY) {
+      translateX = parseFloat(savedX);
+      translateY = parseFloat(savedY);
+      toolbar.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
+    }
+    
+    dragHandle.addEventListener('mousedown', startDrag);
+    dragHandle.addEventListener('touchstart', startDrag, { passive: true });
+    
+    function startDrag(e) {
+      isDragging = true;
+      dragHandle.style.background = 'rgba(44, 122, 82, 0.2)';
+      dragHandle.style.cursor = 'grabbing';
+      
+      const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      
+      startX = clientX - translateX;
+      startY = clientY - translateY;
+      
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('touchmove', drag, { passive: false });
+      document.addEventListener('mouseup', endDrag);
+      document.addEventListener('touchend', endDrag);
+    }
+    
+    function drag(e) {
+      if (!isDragging) return;
+      if (e.cancelable) e.preventDefault();
+      
+      const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      
+      translateX = clientX - startX;
+      translateY = clientY - startY;
+      
+      toolbar.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
+    }
+    
+    function endDrag() {
+      isDragging = false;
+      dragHandle.style.background = 'rgba(255, 255, 255, 0.95)';
+      dragHandle.style.cursor = 'grab';
+      
+      localStorage.setItem('toolbar_x', translateX);
+      localStorage.setItem('toolbar_y', translateY);
+      
+      document.removeEventListener('mousemove', drag);
+      document.removeEventListener('touchmove', drag);
+      document.removeEventListener('mouseup', endDrag);
+      document.removeEventListener('touchend', endDrag);
+    }
+  }
+
+  // VIZ 滑桿控制 (生與死烏鶇對比)
+  const vizSlider = document.getElementById('viz-slider');
+  const vizAfter = document.getElementById('viz-after');
+  const vizDivider = document.getElementById('viz-divider');
+  const labelBefore = document.getElementById('label-before');
+  const labelAfter = document.getElementById('label-after');
+
+  if (vizSlider && vizAfter && vizDivider) {
+    vizSlider.addEventListener('input', function() {
+      const val = parseInt(this.value);
+      vizAfter.style.clipPath = `inset(0 ${100 - val}% 0 0)`;
+      vizDivider.style.left = val + '%';
+
+      if (val > 50) {
+        labelAfter?.classList.add('active');
+        labelBefore?.classList.remove('active');
+      } else {
+        labelBefore?.classList.add('active');
+        labelAfter?.classList.remove('active');
+      }
+    });
+  }
+
+  // 紀念石碑裝飾貼紙拖曳
+  const decoratorCanvas = document.getElementById('decorator-canvas');
+  const stickerBtns = document.querySelectorAll('.sticker-btn');
+  const clearStickersBtn = document.getElementById('clear-stickers');
+  let activeDragElement = null;
+  let offsetX = 0, offsetY = 0;
+
+  stickerBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const emoji = this.getAttribute('data-emoji');
+      const sticker = document.createElement('div');
+      sticker.textContent = emoji;
+      sticker.style.cssText = `
+        position: absolute;
+        top: 80px;
+        left: 80px;
+        font-size: 36px;
+        cursor: grab;
+        user-select: none;
+        z-index: 50;
+        touch-action: none;
+      `;
+      
+      sticker.addEventListener('mousedown', dragStartSticker);
+      sticker.addEventListener('touchstart', dragStartSticker, { passive: true });
+      
+      decoratorCanvas.appendChild(sticker);
+    });
+  });
+
+  function dragStartSticker(e) {
+    activeDragElement = this;
+    activeDragElement.style.cursor = 'grabbing';
+    
+    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+    
+    const rect = activeDragElement.getBoundingClientRect();
+    
+    offsetX = clientX - rect.left;
+    offsetY = clientY - rect.top;
+    
+    document.addEventListener('mousemove', dragMoveSticker);
+    document.addEventListener('touchmove', dragMoveSticker, { passive: false });
+    document.addEventListener('mouseup', dragEndSticker);
+    document.addEventListener('touchend', dragEndSticker);
+  }
+
+  function dragMoveSticker(e) {
+    if (!activeDragElement) return;
+    if (e.cancelable) e.preventDefault();
+    
+    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+    
+    const canvasRect = decoratorCanvas.getBoundingClientRect();
+    
+    let x = clientX - canvasRect.left - offsetX;
+    let y = clientY - canvasRect.top - offsetY;
+    
+    x = Math.max(0, Math.min(x, canvasRect.width - 40));
+    y = Math.max(0, Math.min(y, canvasRect.height - 40));
+    
+    activeDragElement.style.left = x + 'px';
+    activeDragElement.style.top = y + 'px';
+  }
+
+  function dragEndSticker() {
+    if (activeDragElement) {
+      activeDragElement.style.cursor = 'grab';
+      activeDragElement = null;
+    }
+    document.removeEventListener('mousemove', dragMoveSticker);
+    document.removeEventListener('touchmove', dragMoveSticker);
+    document.removeEventListener('mouseup', dragEndSticker);
+    document.removeEventListener('touchend', dragEndSticker);
+  }
+
+  clearStickersBtn?.addEventListener('click', () => {
+    const stickers = decoratorCanvas.querySelectorAll('div[style*="z-index: 50"]');
+    stickers.forEach(s => s.remove());
+  });
+
+  // 晝夜時光交替滑桿
+  const dnSlider = document.getElementById('daynight-slider');
+  const dnSky = document.getElementById('daynight-sky');
+  const dnCelestial = document.getElementById('daynight-celestial');
+  const dnTimeText = document.getElementById('daynight-time-text');
+  const dnWrap = document.getElementById('daynight-wrap');
+
+  if (dnSlider && dnSky && dnCelestial && dnTimeText) {
+    dnSlider.addEventListener('input', function() {
+      const val = parseInt(this.value);
+      
+      dnCelestial.style.left = (10 + val * 0.75) + '%';
+      const heightOffset = Math.sin((val / 100) * Math.PI) * 60;
+      dnCelestial.style.bottom = (30 + heightOffset) + 'px';
+      
+      if (val < 30) {
+        dnSky.style.background = 'linear-gradient(to bottom, #70a1ff, #dfe4ea)';
+        dnCelestial.style.background = '#fffa65';
+        dnCelestial.style.boxShadow = '0 0 20px #fffa65';
+        dnTimeText.textContent = '🌞 溫慢的白晝';
+        dnTimeText.style.color = '#fff';
+        dnWrap.style.background = 'rgba(255, 255, 255, 0.95)';
+        dnWrap.style.color = 'var(--text-main)';
+      } else if (val < 70) {
+        dnSky.style.background = 'linear-gradient(to bottom, #ff7f50, #ff4757, #ffa502)';
+        dnCelestial.style.background = '#ff6b81';
+        dnCelestial.style.boxShadow = '0 0 30px #ff6b81';
+        dnTimeText.textContent = '🌇 柔美的黃昏';
+        dnTimeText.style.color = '#fff';
+        dnWrap.style.background = 'rgba(253, 245, 230, 0.96)';
+        dnWrap.style.color = 'var(--text-main)';
+      } else {
+        dnSky.style.background = 'linear-gradient(to bottom, #0a3d62, #070a1e)';
+        dnCelestial.style.background = '#f1f2f6';
+        dnCelestial.style.boxShadow = '0 0 15px #f1f2f6';
+        dnTimeText.textContent = '🌙 靜謐的星夜';
+        dnTimeText.style.color = '#eceff1';
+        dnWrap.style.background = 'rgba(44, 30, 20, 0.95)';
+        dnWrap.style.color = '#fcfaf2';
+      }
+    });
+  }
+
+  // Web Speech API 語音導讀 (卡拉 OK 式句子亮起與自動滾動支援)
+  const synth = window.speechSynthesis;
+  const ttsPlayBtn = document.getElementById('tts-play-btn');
+  const ttsSpeedSlider = document.getElementById('tts-speed-slider');
+  const ttsSpeedVal = document.getElementById('tts-speed-val');
+  let isTTSSpeaking = false;
+  let currentUtterance = null;
+  let ttsPhrases = [];
+  let currentPhraseIndex = -1;
+
+  if (ttsSpeedSlider && ttsSpeedVal) {
+    ttsSpeedSlider.addEventListener('input', function() {
+      const val = parseFloat(this.value).toFixed(1);
+      ttsSpeedVal.textContent = val + 'x';
+      if (isTTSSpeaking) {
+        synth.cancel();
+        speakPhraseList(currentPhraseIndex);
+      }
+    });
+  }
+
+  function setTTSPlayState(playing) {
+    isTTSSpeaking = playing;
+    if (ttsPlayBtn) {
+      ttsPlayBtn.innerHTML = playing ? '⏸' : '▶';
+      ttsPlayBtn.style.background = playing ? 'var(--warn)' : 'var(--accent2)';
+    }
+  }
+
+  function prepareTTSPhrases(slide) {
+    if (slide.querySelector('.tts-phrase')) return;
+    
+    const elements = slide.querySelectorAll('h1, h2, h3, p, li, blockquote, .adv-title, .adv-desc, .quote-box');
+    elements.forEach(el => {
+      if (el.closest('#tts-panel') || el.closest('#floating-toolbar') || el.closest('.slider-control') || el.closest('.word-chip')) return;
+      
+      const text = el.innerText.trim();
+      if (!text) return;
+      
+      const parts = text.split(/([，。！？：；、\n\r]+)/);
+      let newHTML = '';
+      parts.forEach(part => {
+        if (!part) return;
+        if (/^[，。！？：；、\n\r]+$/.test(part)) {
+          newHTML += part.replace(/\n/g, '<br>');
+        } else {
+          newHTML += `<span class="tts-phrase">${part}</span>`;
+        }
+      });
+      el.innerHTML = newHTML;
+    });
+  }
+
+  function speakPhraseList(index) {
+    if (!isTTSSpeaking || index >= ttsPhrases.length) {
+      stopTTSSpeaking();
+      return;
+    }
+    
+    currentPhraseIndex = index;
+    const phraseEl = ttsPhrases[index];
+    
+    ttsPhrases.forEach(el => el.classList.remove('tts-highlight'));
+    phraseEl.classList.add('tts-highlight');
+    
+    // 平滑捲動並置中顯示當前唸到的句子
+    phraseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    const text = phraseEl.innerText.replace(/🍬|🔊|✥|🌱|⭐/g, '').trim();
+    if (!text) {
+      speakPhraseList(index + 1);
+      return;
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = synth.getVoices();
+    const zhVoice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
+    if (zhVoice) {
+      utterance.voice = zhVoice;
+    }
+    
+    utterance.rate = ttsSpeedSlider ? parseFloat(ttsSpeedSlider.value) : 0.7;
+    utterance.pitch = 1.0;
+    
+    utterance.onend = () => {
+      speakPhraseList(index + 1);
+    };
+    
+    utterance.onerror = (e) => {
+      console.warn("TTS phrase error:", e);
+      speakPhraseList(index + 1);
+    };
+    
+    currentUtterance = utterance;
+    synth.speak(utterance);
+  }
+
+  function startTTSSpeaking() {
+    synth.cancel();
+    const activeSlide = Reveal.getCurrentSlide();
+    if (!activeSlide) return;
+    
+    prepareTTSPhrases(activeSlide);
+    
+    ttsPhrases = Array.from(activeSlide.querySelectorAll('.tts-phrase'));
+    if (ttsPhrases.length === 0) return;
+    
+    isTTSSpeaking = true;
+    setTTSPlayState(true);
+    speakPhraseList(0);
+  }
+
+  function stopTTSSpeaking() {
+    synth.cancel();
+    isTTSSpeaking = false;
+    currentPhraseIndex = -1;
+    setTTSPlayState(false);
+    
+    const activeSlide = Reveal.getCurrentSlide();
+    if (activeSlide) {
+      activeSlide.querySelectorAll('.tts-phrase').forEach(el => el.classList.remove('tts-highlight'));
+    }
+  }
+
+  function speakSelectedText(text) {
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = synth.getVoices();
+    const zhVoice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
+    if (zhVoice) {
+      utterance.voice = zhVoice;
+    }
+    utterance.rate = ttsSpeedSlider ? parseFloat(ttsSpeedSlider.value) : 0.7;
+    utterance.pitch = 1.0;
+    
+    currentUtterance = utterance;
+    synth.speak(utterance);
+  }
+
+  if (ttsPlayBtn) {
+    ttsPlayBtn.addEventListener('click', () => {
+      if (isTTSSpeaking) {
+        stopTTSSpeaking();
+      } else {
+        startTTSSpeaking();
+      }
+    });
+  }
+
+  Reveal.on('slidechanged', () => {
+    stopTTSSpeaking();
+  });
+
+  // Web Audio API 自然音效合成器 (免音訊檔)
+  const ambientBtn = document.getElementById('ambient-btn');
+  let audioCtx = null;
+  let isAmbientOn = false;
+  let ambientIntervals = [];
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  function playChime() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    // 吉卜力溫暖和弦五聲音階頻率
+    const freqs = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+    const freq = freqs[Math.floor(Math.random() * freqs.length)];
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now);
+    
+    gainNode.gain.setValueAtTime(0.04, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 3);
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 3);
+  }
+
+  function playBirdChirp() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1800 + Math.random() * 400, now);
+    osc.frequency.exponentialRampToValueAtTime(3200 + Math.random() * 800, now + 0.12);
+    
+    gainNode.gain.setValueAtTime(0.012, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
+  function startAmbientSounds() {
+    initAudio();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    
+    // 風鈴音效
+    const chimeTimer = setInterval(() => {
+      if (Math.random() > 0.4) playChime();
+    }, 2500);
+    
+    // 森林鳥鳴音效
+    const birdTimer = setInterval(() => {
+      if (Math.random() > 0.4) {
+        playBirdChirp();
+        setTimeout(playBirdChirp, 150);
+        if (Math.random() > 0.6) {
+          setTimeout(playBirdChirp, 300);
+        }
+      }
+    }, 4500);
+    
+    ambientIntervals.push(chimeTimer, birdTimer);
+  }
+
+  function stopAmbientSounds() {
+    ambientIntervals.forEach(t => clearInterval(t));
+    ambientIntervals = [];
+  }
+
+  ambientBtn?.addEventListener('click', () => {
+    isAmbientOn = !isAmbientOn;
+    if (isAmbientOn) {
+      startAmbientSounds();
+      ambientBtn.querySelector('span').textContent = '🎵 森林音效 (開)';
+      ambientBtn.style.background = 'var(--success)';
+      ambientBtn.style.boxShadow = '0 4px 15px rgba(129, 199, 132, 0.5)';
+    } else {
+      stopAmbientSounds();
+      ambientBtn.querySelector('span').textContent = '🎵 森林音效 (關)';
+      ambientBtn.style.background = 'var(--accent2)';
+      ambientBtn.style.boxShadow = '0 4px 15px rgba(44, 122, 82, 0.3)';
+    }
+  });
+</script>
+
+<!-- Firebase Module Script -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
+  import {
+    getFirestore, collection, addDoc, onSnapshot, doc, setDoc,
+    serverTimestamp, query, orderBy, getDocs, deleteDoc
+  } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
+
+  // Firebase 配置
+  const firebaseConfig = {
+    apiKey: "AIzaSyAYQhNavPSce17XtvDC5xnXyl9iUhW9KjA",
+    authDomain: "teacherstudy-109ef.firebaseapp.com",
+    projectId: "teacherstudy-109ef",
+    storageBucket: "teacherstudy-109ef.firebasestorage.app",
+    messagingSenderId: "196599230156",
+    appId: "1:196599230156:web:cfe55d364df3ae1b9d5c69"
+  };
+
+  let fdb = null;
+  let useFallback = false;
+  
+  // 建立本地 Storage 備份與 BroadcastChannel 同步通道
+  let localWords = JSON.parse(localStorage.getItem('best_funeral_words') || '[]');
+  const userId = localStorage.getItem('best_funeral_userid') || ('user_' + Math.random().toString(36).slice(2, 9));
+  localStorage.setItem('best_funeral_userid', userId);
+
+  const syncChannel = new BroadcastChannel('best_funeral_local_sync');
+
+  // 初始化 Firebase
+  try {
+    const app = initializeApp(firebaseConfig);
+    fdb = getFirestore(app);
+  } catch (e) {
+    console.warn("Firebase initialization failed, utilizing local fallback mode.", e);
+    useFallback = true;
+  }
+
+  // --- 1. 文字雲元件邏輯 ---
+  const wordsRef = collection(fdb, 'best_funeral_wordcloud');
+  const COLORS = ['#d35400', '#2c7a52', '#2e7d32', '#9c27b0', '#00acc1', '#e91e63'];
+  let wcData = [];
+  let unsubscribeWords = null;
+
+  function enableFallbackMode() {
+    useFallback = true;
+    console.log("Local fallback mode enabled for interactivity.");
+  }
+
+  if (fdb && !useFallback) {
+    try {
+      unsubscribeWords = onSnapshot(query(wordsRef, orderBy('created_at', 'asc')), snap => {
+        const words = [];
+        snap.forEach(doc => words.push(doc.data().word));
+        updateWordcloudUI(words);
+      }, error => {
+        console.warn("Firestore Wordcloud snapshot failed. Falling back to Local Storage.", error);
+        enableFallbackMode();
+        updateWordcloudUI(localWords);
+      });
+    } catch (e) {
+      console.warn("Firestore Wordcloud setup failed. Falling back to Local Storage.", e);
+      enableFallbackMode();
+      updateWordcloudUI(localWords);
+    }
+  } else {
+    enableFallbackMode();
+    updateWordcloudUI(localWords);
+  }
+
+  window.wcSubmit = async function() {
+    const input = document.getElementById('wc-input');
+    const word = input.value.trim();
+    if (!word) return;
+    const btn = document.getElementById('wc-btn');
+    btn.disabled = true;
+    try {
+      if (!useFallback && fdb) {
+        await addDoc(wordsRef, { word, created_at: serverTimestamp() });
+      } else {
+        localWords.push(word);
+        localStorage.setItem('best_funeral_words', JSON.stringify(localWords));
+        syncChannel.postMessage({ type: 'wordcloud', word });
+        updateWordcloudUI(localWords);
+      }
+      input.value = '';
+    } catch(e) { 
+      console.warn("Submit word error. Toggling fallback.", e);
+      enableFallbackMode();
+      localWords.push(word);
+      localStorage.setItem('best_funeral_words', JSON.stringify(localWords));
+      syncChannel.postMessage({ type: 'wordcloud', word });
+      updateWordcloudUI(localWords);
+      input.value = '';
+    } finally { 
+      btn.disabled = false; 
+    }
+  };
+
+  window.wcClearAll = async function() {
+    const btn = document.getElementById('wc-clear-btn');
+    if (btn) btn.disabled = true;
+    try {
+      if (!useFallback && fdb) {
+        const snap = await getDocs(wordsRef);
+        const promises = [];
+        snap.forEach(docSnap => {
+          promises.push(deleteDoc(docSnap.ref));
+        });
+        await Promise.all(promises);
+      }
+      localWords = [];
+      localStorage.removeItem('best_funeral_words');
+      syncChannel.postMessage({ type: 'wordcloud_clear' });
+      updateWordcloudUI([]);
+    } catch(e) {
+      console.warn("Clear wordcloud error, clearing locally", e);
+      localWords = [];
+      localStorage.removeItem('best_funeral_words');
+      syncChannel.postMessage({ type: 'wordcloud_clear' });
+      updateWordcloudUI([]);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  };
+
+  document.getElementById('wc-input')?.addEventListener('keypress', e => {
+    if (e.key === 'Enter') window.wcSubmit();
+  });
+  document.getElementById('wc-btn')?.addEventListener('click', window.wcSubmit);
+  document.getElementById('wc-clear-btn')?.addEventListener('click', window.wcClearAll);
+
+  function updateWordcloudUI(words) {
+    const counts = {};
+    words.forEach(w => counts[w] = (counts[w] || 0) + 1);
+    wcData = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+    const totalEl = document.getElementById('wc-total');
+    const uniqueEl = document.getElementById('wc-unique');
+    if (totalEl) totalEl.textContent = words.length;
+    if (uniqueEl) uniqueEl.textContent = wcData.length;
+
+    const listEl = document.getElementById('wc-list');
+    if (listEl) {
+      listEl.innerHTML = wcData.slice(0, 5).map(([w, c]) =>
+        `<div style="display:flex;justify-content:space-between;padding:5px 0;
+                     border-bottom:1px solid rgba(0,0,0,0.06); font-size:13px; font-weight:600; color:var(--text-main);">
+          <span>${w}</span><span style="color:var(--accent);font-weight:700;">${c} 次</span>
+        </div>`
+      ).join('') || '<div style="color:#888;padding:8px 0;text-align:center;">尚無資料</div>';
+    }
+
+    const empty = document.getElementById('wc-empty');
+    if (empty) empty.style.display = wcData.length > 0 ? 'none' : '';
+    drawWordCloud();
+  }
+
+  function drawWordCloud() {
+    const canvas = document.getElementById('wc-canvas');
+    if (!canvas || typeof WordCloud === 'undefined') return;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width < 10 || rect.height < 10) return;
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    if (wcData.length === 0) return;
+    const maxCount = wcData[0][1];
+    WordCloud(canvas, {
+      list: wcData.map(([w, c]) => [w, Math.max(16, Math.round((c / maxCount) * 50))]),
+      gridSize: 8,
+      weightFactor: 1,
+      fontFamily: isZhuyinMode ? '"Bpmf Iansui", cursive' : '"Iansui", "Segoe UI", "Noto Sans TC", sans-serif',
+      color: () => COLORS[Math.floor(Math.random() * COLORS.length)],
+      backgroundColor: 'transparent',
+      rotateRatio: 0.25,
+      shuffle: true,
+    });
+  }
+
+  // --- 2. 投票元件邏輯 ---
+  const OPTIONS = [
+    { id: 'a', label: '🐝 為第一隻小野蜂辦葬禮與朗讀第一首詩' },
+    { id: 'b', label: '🐰 普特哭著詢問自己死後有沒有枕頭與玩具' },
+    { id: 'c', label: '🐦 親眼目睹烏鶇撞上玻璃死亡的瞬間震撼' },
+  ];
+  const pollRef = doc(fdb, 'best_funeral_poll', 'results');
+  let myVote = localStorage.getItem('best_funeral_my_vote');
+
+  const pollContainer = document.getElementById('poll-options');
+  if (pollContainer) {
+    OPTIONS.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.id = `poll-btn-${opt.id}`;
+      btn.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;width:100%;">
+          <span style="flex:0 0 24px;height:24px;border-radius:50%;border:2px solid rgba(0,0,0,0.15);
+                       display:flex;align-items:center;justify-content:center;font-size:12px;"
+                id="poll-check-${opt.id}"></span>
+          <span style="flex:1;text-align:left;font-weight:600;color:var(--text-main);">${opt.label}</span>
+          <span id="poll-bar-wrap-${opt.id}"
+                style="flex:0 0 160px;height:10px;background:rgba(0,0,0,0.06);border-radius:5px;overflow:hidden;">
+            <div id="poll-bar-${opt.id}" style="height:100%;width:0;background:var(--accent2);border-radius:5px;transition:width 0.4s;"></div>
+          </span>
+          <span id="poll-pct-${opt.id}" style="flex:0 0 42px;text-align:right;font-size:0.8em;color:var(--text-main);font-weight:700;">0%</span>
+        </div>
+      `;
+      btn.style.cssText = `width:100%;padding:14px 18px;background:#ffffff;
+        border:1px solid rgba(0,0,0,0.08);border-radius:10px;color:var(--text-main);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        font-size:0.48em;cursor:pointer;font-family:inherit;text-align:left;transition:background 0.3s, border-color 0.3s, box-shadow 0.3s;`;
+      
+      btn.onmouseover = () => {
+        btn.style.background = '#fcfbf8';
+        btn.style.borderColor = 'var(--accent2)';
+      };
+      btn.onmouseout = () => {
+        btn.style.background = '#ffffff';
+        btn.style.borderColor = 'rgba(0,0,0,0.08)';
+      };
+
+      btn.onclick = () => vote(opt.id);
+      pollContainer.appendChild(btn);
+    });
+  }
+
+  async function vote(optId) {
+    myVote = optId;
+    localStorage.setItem('best_funeral_my_vote', optId);
+    
+    // Direct local update to feel fast
+    if (useFallback || !fdb) {
+      let votes = JSON.parse(localStorage.getItem('best_funeral_votes') || '{}');
+      votes[userId] = optId;
+      localStorage.setItem('best_funeral_votes', JSON.stringify(votes));
+      syncChannel.postMessage({ type: 'poll', votes });
+      renderPoll(votes);
+    } else {
+      try {
+        const data = {};
+        data[`votes.${userId}`] = optId;
+        data.updated_at = serverTimestamp();
+        await setDoc(pollRef, data, { merge: true });
+      } catch (e) {
+        console.warn("Poll setDoc failed. Switching to local fallback.", e);
+        enableFallbackMode();
+        let votes = JSON.parse(localStorage.getItem('best_funeral_votes') || '{}');
+        votes[userId] = optId;
+        localStorage.setItem('best_funeral_votes', JSON.stringify(votes));
+        syncChannel.postMessage({ type: 'poll', votes });
+        renderPoll(votes);
+      }
+    }
+  }
+
+  function renderPoll(votes) {
+    const counts = {};
+    OPTIONS.forEach(o => counts[o.id] = 0);
+    Object.values(votes).forEach(v => { if (counts[v] !== undefined) counts[v]++; });
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+
+    const totalEl = document.getElementById('poll-total');
+    if (totalEl) totalEl.textContent = total;
+    
+    OPTIONS.forEach(opt => {
+      const pct = total > 0 ? Math.round((counts[opt.id] / total) * 100) : 0;
+      const bar = document.getElementById(`poll-bar-${opt.id}`);
+      const pctLabel = document.getElementById(`poll-pct-${opt.id}`);
+      const check = document.getElementById(`poll-check-${opt.id}`);
+      
+      if (bar) bar.style.width = pct + '%';
+      if (pctLabel) pctLabel.textContent = pct + '%';
+      
+      if (check) {
+        if (myVote === opt.id) {
+          check.textContent = '✓';
+          check.style.background = 'var(--accent2)';
+          check.style.borderColor = 'var(--accent2)';
+          check.style.color = '#fff';
+        } else {
+          check.textContent = '';
+          check.style.background = 'transparent';
+          check.style.borderColor = 'rgba(0,0,0,0.15)';
+          check.style.color = 'inherit';
+        }
+      }
+    });
+  }
+
+  // Poll Firebase Listener
+  if (fdb && !useFallback) {
+    try {
+      onSnapshot(pollRef, snap => {
+        const data = snap.data() || {};
+        const votes = data.votes || {};
+        // Sync local storage
+        localStorage.setItem('best_funeral_votes', JSON.stringify(votes));
+        renderPoll(votes);
+      }, error => {
+        console.warn("Poll snapshot failed. Falling back to local data.", error);
+        enableFallbackMode();
+        const localV = JSON.parse(localStorage.getItem('best_funeral_votes') || '{}');
+        renderPoll(localV);
+      });
+    } catch (e) {
+      console.warn("Poll setup failed. Using local storage.", e);
+      enableFallbackMode();
+      const localV = JSON.parse(localStorage.getItem('best_funeral_votes') || '{}');
+      renderPoll(localV);
+    }
+  } else {
+    const localV = JSON.parse(localStorage.getItem('best_funeral_votes') || '{}');
+    renderPoll(localV);
+  }
+
+  // --- 3. Local Sync Channel for Multiple Tabs ---
+  syncChannel.onmessage = (event) => {
+    if (useFallback) {
+      if (event.data.type === 'wordcloud') {
+        localWords.push(event.data.word);
+        localStorage.setItem('best_funeral_words', JSON.stringify(localWords));
+        updateWordcloudUI(localWords);
+      } else if (event.data.type === 'wordcloud_clear') {
+        localWords = [];
+        localStorage.removeItem('best_funeral_words');
+        updateWordcloudUI([]);
+      } else if (event.data.type === 'poll') {
+        localStorage.setItem('best_funeral_votes', JSON.stringify(event.data.votes));
+        renderPoll(event.data.votes);
+      }
+    }
+  };
+
+  Reveal.on('slidechanged', e => {
+    if (e.currentSlide?.id === 'slide-wordcloud') setTimeout(drawWordCloud, 200);
+  });
+</script>
+
+<!-- Custom Full-Screen Scrollbar Sync -->
+<div id="custom-scrollbar" style="position: fixed; top: 0; right: 4px; width: 6px; height: 100vh; z-index: 9999; display: none; pointer-events: none;">
+  <div id="custom-scrollbar-thumb" style="width: 100%; background: rgba(44, 122, 82, 0.25); border-radius: 3px; position: absolute; top: 0; cursor: pointer; pointer-events: auto; transition: background 0.2s;"></div>
+</div>
+
+<script>
+  const customScrollbar = document.getElementById('custom-scrollbar');
+  const customScrollbarThumb = document.getElementById('custom-scrollbar-thumb');
+  let isDraggingScrollbar = false;
+  let startScrollY = 0;
+  let startScrollTop = 0;
+
+  function updateCustomScrollbar() {
+    const activeSlide = Reveal.getCurrentSlide();
+    if (!activeSlide || !customScrollbar || !customScrollbarThumb) return;
+
+    const sh = activeSlide.scrollHeight;
+    const ch = activeSlide.clientHeight;
+
+    if (sh > ch + 10) {
+      customScrollbar.style.display = 'block';
+      const thumbHeight = Math.max(30, (ch / sh) * window.innerHeight);
+      customScrollbarThumb.style.height = `${thumbHeight}px`;
+      
+      const scrollPercent = activeSlide.scrollTop / (sh - ch);
+      const maxTop = window.innerHeight - thumbHeight;
+      customScrollbarThumb.style.top = `${scrollPercent * maxTop}px`;
+    } else {
+      customScrollbar.style.display = 'none';
+    }
+  }
+
+  document.querySelectorAll('.reveal .slides section').forEach(sec => {
+    sec.addEventListener('scroll', updateCustomScrollbar);
+  });
+
+  Reveal.on('slidechanged', () => {
+    setTimeout(updateCustomScrollbar, 200);
+  });
+  window.addEventListener('resize', updateCustomScrollbar);
+
+  window.addEventListener('wheel', (e) => {
+    if (e.ctrlKey) {
+      setTimeout(updateCustomScrollbar, 50);
+    }
+  }, { passive: true });
+
+  customScrollbarThumb.addEventListener('mousedown', (e) => {
+    isDraggingScrollbar = true;
+    startScrollY = e.clientY;
+    const activeSlide = Reveal.getCurrentSlide();
+    if (activeSlide) {
+      startScrollTop = activeSlide.scrollTop;
+    }
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDraggingScrollbar) return;
+    const activeSlide = Reveal.getCurrentSlide();
+    if (!activeSlide) return;
+
+    const sh = activeSlide.scrollHeight;
+    const ch = activeSlide.clientHeight;
+    const thumbHeight = parseFloat(customScrollbarThumb.style.height);
+    const maxTop = window.innerHeight - thumbHeight;
+    
+    const deltaY = e.clientY - startScrollY;
+    const scrollDeltaPercent = deltaY / maxTop;
+    activeSlide.scrollTop = startScrollTop + scrollDeltaPercent * (sh - ch);
+    updateCustomScrollbar();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDraggingScrollbar) {
+      isDraggingScrollbar = false;
+      document.body.style.userSelect = '';
+      return;
+    }
+    // We add a tiny delay to let the selection settle
+    setTimeout(() => {
+      if (typeof isDragging !== 'undefined' && isDragging) return;
+
+      const selection = window.getSelection();
+      const selectedText = selection.toString().trim();
+      if (selectedText) {
+        stopTTSSpeaking();
+        speakSelectedText(selectedText);
+      }
+    }, 150);
+  });
+
+  customScrollbarThumb.addEventListener('touchstart', (e) => {
+    isDraggingScrollbar = true;
+    startScrollY = e.touches[0].clientY;
+    const activeSlide = Reveal.getCurrentSlide();
+    if (activeSlide) {
+      startScrollTop = activeSlide.scrollTop;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDraggingScrollbar) return;
+    const activeSlide = Reveal.getCurrentSlide();
+    if (!activeSlide) return;
+
+    const sh = activeSlide.scrollHeight;
+    const ch = activeSlide.clientHeight;
+    const thumbHeight = parseFloat(customScrollbarThumb.style.height);
+    const maxTop = window.innerHeight - thumbHeight;
+
+    const deltaY = e.touches[0].clientY - startScrollY;
+    const scrollDeltaPercent = deltaY / maxTop;
+    activeSlide.scrollTop = startScrollTop + scrollDeltaPercent * (sh - ch);
+    updateCustomScrollbar();
+  });
+
+  document.addEventListener('touchend', () => {
+    isDraggingScrollbar = false;
+  });
+  
+  // --- 4. 小詩填詞創作板邏輯 ---
+  const wordChips = document.querySelectorAll('.word-chip');
+  const poemSlot1 = document.getElementById('poem-slot-1');
+  const poemSlot2 = document.getElementById('poem-slot-2');
+  const btnReadPoem = document.getElementById('btn-read-poem');
+  let poemLine1 = "";
+  let poemLine2 = "";
+
+  wordChips.forEach(chip => {
+    chip.addEventListener('click', function() {
+      const slot = this.getAttribute('data-slot');
+      const val = this.getAttribute('data-val');
+      
+      document.querySelectorAll(`.word-chip[data-slot="${slot}"]`).forEach(sibling => {
+        sibling.style.background = '#fff';
+        sibling.style.color = '#333';
+        sibling.style.borderColor = '#ddd';
+      });
+
+      this.style.background = 'var(--accent2)';
+      this.style.color = '#fff';
+      this.style.borderColor = 'var(--accent2)';
+
+      if (slot === "1") {
+        poemSlot1.textContent = val;
+        poemLine1 = val;
+      } else {
+        poemSlot2.textContent = val;
+        poemLine2 = val;
+      }
+    });
+  });
+
+  btnReadPoem?.addEventListener('click', function() {
+    if (!poemLine1 || !poemLine2) {
+      alert("請先點選選項完成填空喔！");
+      return;
+    }
+    const textToRead = `小野蜂啊。 ${poemLine1}。 安息吧。 ${poemLine2}。`;
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(textToRead);
+    const voices = synth.getVoices();
+    const zhVoice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
+    if (zhVoice) utterance.voice = zhVoice;
+    utterance.rate = ttsSpeedSlider ? parseFloat(ttsSpeedSlider.value) : 0.7;
+    synth.speak(utterance);
+  });
+</script>
+</body>
+</html>
