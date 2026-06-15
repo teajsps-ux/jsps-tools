@@ -278,9 +278,17 @@
           <div class="mb-5 p-4 bg-blue-50 border-2 border-blue-100 rounded-2xl">
             <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-3">
               <label class="block font-bold text-blue-900 text-base md:text-lg">方式一：AI 讀取教材出題 (支援 📂檔案/截圖 或 ✍️貼上課文)</label>
-              <div class="flex bg-blue-100 p-1 rounded-lg gap-1 text-xs font-bold self-start sm:self-auto">
-                <button type="button" @click="sourceModeType = 'file'" class="px-3 py-1.5 rounded transition" :class="sourceModeType === 'file' ? 'bg-blue-600 text-white shadow' : 'text-blue-800 hover:bg-blue-200/50'">📂 檔案/截圖</button>
-                <button type="button" @click="sourceModeType = 'text'" class="px-3 py-1.5 rounded transition" :class="sourceModeType === 'text' ? 'bg-blue-600 text-white shadow' : 'text-blue-800 hover:bg-blue-200/50'">✍️ 貼上教材/字幕</button>
+              <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                <label class="flex items-center gap-2 bg-white/80 border border-blue-200 rounded-lg px-3 py-1.5 text-xs font-bold text-blue-900">
+                  出題數
+                  <select v-model.number="aiQuestionCount" class="bg-transparent font-black text-blue-700 focus:outline-none">
+                    <option v-for="count in aiQuestionCountOptions" :key="count" :value="count">{{ count }} 題</option>
+                  </select>
+                </label>
+                <div class="flex bg-blue-100 p-1 rounded-lg gap-1 text-xs font-bold">
+                  <button type="button" @click="sourceModeType = 'file'" class="px-3 py-1.5 rounded transition" :class="sourceModeType === 'file' ? 'bg-blue-600 text-white shadow' : 'text-blue-800 hover:bg-blue-200/50'">📂 檔案/截圖</button>
+                  <button type="button" @click="sourceModeType = 'text'" class="px-3 py-1.5 rounded transition" :class="sourceModeType === 'text' ? 'bg-blue-600 text-white shadow' : 'text-blue-800 hover:bg-blue-200/50'">✍️ 貼上教材/字幕</button>
+                </div>
               </div>
             </div>
             <div class="flex flex-col lg:flex-row gap-4 lg:items-center">
@@ -361,7 +369,7 @@
 
           <!-- YouTube URL Import -->
           <div class="mb-5 p-4 bg-amber-50 border-2 border-amber-100 rounded-2xl">
-            <label class="block font-bold mb-2 text-amber-900">方式二：輸入影片網址 (YouTube) 產生 20 題 CSV</label>
+            <label class="block font-bold mb-2 text-amber-900">方式二：輸入影片網址 (YouTube) 產生 {{ aiQuestionCount }} 題 CSV</label>
             <div class="flex flex-col lg:flex-row gap-4 lg:items-center">
               <div class="flex-1">
                 <input type="text" v-model="youtubeUrl" class="w-full p-4 border-2 border-amber-200 rounded-xl bg-white/80 font-bold text-lg text-black focus:border-amber-500 focus:outline-none" placeholder="貼上 YouTube 影片網址（例如：https://www.youtube.com/watch?v=dQw4w9WgXcQ）">
@@ -454,7 +462,7 @@
         <!-- 教學引導模式 (Single Player / Teacher Guidance) -->
         <div v-if="playMode === 'guide'" class="flex-1 flex flex-col p-8 items-center justify-center relative overflow-hidden bg-black/5 w-full h-full" id="guide-area">
           <!-- Header Info -->
-          <div class="w-full max-w-4xl flex items-center justify-between mb-4 pb-2 border-b border-black/10">
+          <div class="w-full max-w-[92vw] flex items-center justify-between mb-4 pb-2 border-b border-black/10">
             <h2 class="text-3xl md:text-4xl font-black text-blue-700 flex items-center gap-3">
               <i class="fa-solid fa-graduation-cap"></i> <span>教學引導模式</span>
             </h2>
@@ -464,12 +472,12 @@
           </div>
           
           <!-- Progress Bar -->
-          <div class="w-full max-w-4xl bg-black/10 rounded-full h-4 mb-6 overflow-hidden border border-black/5">
+          <div class="w-full max-w-[92vw] bg-black/10 rounded-full h-4 mb-6 overflow-hidden border border-black/5">
             <div class="bg-gradient-to-r from-blue-400 to-indigo-600 h-full transition-all duration-300" :style="{width: (p1State.qIdx / questions.length * 100) + '%'}"></div>
           </div>
 
           <!-- Active Question Area -->
-          <div v-if="!p1State.finished" class="w-full max-w-4xl flex-1 flex flex-col items-center justify-center overflow-y-auto">
+          <div v-if="!p1State.finished" class="w-full max-w-[92vw] flex-1 flex flex-col items-center justify-center overflow-y-auto">
             <div @click="speakQuestion('p1')" class="flex items-start justify-center gap-3 mb-8 px-4 cursor-pointer group hover:text-blue-500 transition w-full">
               <h3 class="readable-text text-3xl md:text-5xl font-bold text-center leading-normal flex-1">{{ questions[p1State.qIdx]?.q }}</h3>
               <button class="speak-btn group-hover:bg-blue-50 group-hover:text-blue-600 transition" title="朗讀題目"><i class="fa-solid fa-volume-high"></i></button>
@@ -479,11 +487,11 @@
             <div class="w-full flex flex-col gap-4 pb-8">
               <button v-for="(opt, i) in p1State.options" :key="'guide-'+i+'-'+opt.text"
                       @click="handleAnswer('p1', opt)"
-                      class="themed-btn p-5 rounded-2xl text-2xl md:text-3xl font-bold shadow-[0_6px_0_rgba(0,0,0,0.15)] active:shadow-none active:translate-y-1 w-full text-left flex items-center relative overflow-hidden min-h-[5.5rem]"
+                      class="themed-btn p-5 px-20 rounded-2xl text-2xl md:text-3xl font-bold shadow-[0_6px_0_rgba(0,0,0,0.15)] active:shadow-none active:translate-y-1 w-full text-center flex items-center justify-center relative overflow-hidden min-h-[5.5rem]"
                       :class="getBtnClass(p1State, opt)">
                 <span class="inline-block w-12 h-12 text-center leading-[3rem] bg-black/10 rounded-xl mr-4 shrink-0 text-2xl">{{ ['A','B','C','D'][i] }}</span>
-                <span class="readable-text whitespace-normal break-words leading-snug flex-1">{{ opt.text }}</span>
-                <span @click.stop.prevent="speakText(opt.text)" class="speak-btn ml-4 hover:scale-110 active:scale-95 transition" title="朗讀選項"><i class="fa-solid fa-volume-high"></i></span>
+                <span class="readable-text whitespace-normal break-words leading-snug max-w-full">{{ opt.text }}</span>
+                <span @click.stop.prevent="speakText(opt.text)" class="speak-btn absolute right-5 top-1/2 -translate-y-1/2 hover:scale-110 active:scale-95 transition" title="朗讀選項"><i class="fa-solid fa-volume-high"></i></span>
               </button>
             </div>
             
@@ -739,7 +747,7 @@
   </div>
 
   <script>
-    const { createApp, ref, reactive, computed, watch, onMounted, onUnmounted } = Vue;
+    const { createApp, ref, reactive, computed, watch, onMounted, onUnmounted, toRaw } = Vue;
 
     // Robust string cleaner (removes BOM, weird spaces)
     const cleanStr = (s) => String(s || '').replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, '').trim();
@@ -768,6 +776,17 @@
         const ytStatusType = ref('info');
         const sourceModeType = ref('file'); // 'file' or 'text'
         const sourceText = ref('');
+        const aiQuestionCountOptions = [5, 10, 15, 20, 25, 30, 40];
+        const aiQuestionCount = ref(20);
+
+        const getAiQuestionCount = () => {
+          const count = Number(aiQuestionCount.value);
+          return aiQuestionCountOptions.includes(count) ? count : 20;
+        };
+
+        const getPirlsFrameworkText = (count) => {
+          return `PIRLS 四層次平均分配，總題數 ${count} 題`;
+        };
 
         const themes = [
           { id: 'theme-cute', name: '👑 可愛風 (預設)' },
@@ -1084,8 +1103,12 @@
               }
 
               const filesData = await Promise.all(
-                sourceFiles.value.map(async (file) => {
+                sourceFiles.value.map(async (fileLike) => {
+                  const file = toRaw ? toRaw(fileLike) : fileLike;
                   const base64 = await fileToBase64(file);
+                  if (!base64) {
+                    throw new Error(`檔案「${file.name || '未命名檔案'}」讀取失敗，沒有取得可傳送的內容。請重新選取檔案再試一次。`);
+                  }
                   return {
                     filename: file.name,
                     mimeType: file.type || 'application/octet-stream',
@@ -1106,8 +1129,9 @@
               };
             }
 
-            bodyPayload.questionCount = 20;
-            bodyPayload.framework = 'PIRLS 四層次平均，各 5 題';
+            const questionCount = getAiQuestionCount();
+            bodyPayload.questionCount = questionCount;
+            bodyPayload.framework = getPirlsFrameworkText(questionCount);
             bodyPayload.csvHeader = '題目,選項A,選項B,選項C,選項D,正確答案';
 
             const response = await fetch('http://127.0.0.1:8787/quiz-csv', {
@@ -1146,8 +1170,8 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 youtubeUrl: youtubeUrl.value.trim(),
-                questionCount: 20,
-                framework: 'PIRLS 四層次平均，各 5 題',
+                questionCount: getAiQuestionCount(),
+                framework: getPirlsFrameworkText(getAiQuestionCount()),
                 csvHeader: '題目,選項A,選項B,選項C,選項D,正確答案'
               })
             });
@@ -1411,7 +1435,7 @@
           gameState, theme, themes, matchTimeLimit, scoreMode, playMode, shuffleOptions,
           useBpmfFont, bgStyle, isFullscreen, toggleFullscreen, sourceFiles, sourceStatus, sourceStatusType, isGenerating, sourceInput, importedTitle,
           youtubeUrl, ytStatus, ytStatusType, generateQuestionsFromYoutube,
-          sourceModeType, sourceText,
+          sourceModeType, sourceText, aiQuestionCount, aiQuestionCountOptions,
           avatars, p1, p2, rawQuestionsText, questions, handleFileUpload, downloadCSVTemplate,
           handleSourceUpload, generateQuestionsFromSource, downloadCurrentCSV, speakText, speakQuestion,
           startGame, globalTimeLeft, isPaused, p1State, p2State,

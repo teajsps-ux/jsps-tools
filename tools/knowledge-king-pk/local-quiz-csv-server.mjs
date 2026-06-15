@@ -50,15 +50,38 @@ function parseJsonPayload(text) {
   }
 }
 
+function getQuestionCount(body) {
+  const count = Number(body?.questionCount || 20);
+  if (!Number.isFinite(count)) return 20;
+  return Math.max(1, Math.min(50, Math.round(count)));
+}
+
+function buildPirlsPlan(count) {
+  const labels = ["直接提取", "直接推論", "詮釋整合", "比較評估"];
+  const base = Math.floor(count / labels.length);
+  let remainder = count % labels.length;
+  return labels.map(label => {
+    const n = base + (remainder > 0 ? 1 : 0);
+    remainder -= 1;
+    return `${label} ${n} 題`;
+  }).join("、");
+}
+
+function buildQuestionCountInstruction(body) {
+  const count = getQuestionCount(body);
+  return `請產生剛好 ${count} 題四選一選擇題，不要多也不要少。PIRLS 四層次請盡量平均分配：${buildPirlsPlan(count)}。`;
+}
+
 function buildPrompt(body) {
   return [
+    buildQuestionCountInstruction(body),
     "你是台灣國小老師的閱讀理解出題助手，專門根據提供的教材進行內容深究出題。",
-    "請根據老師提供的教材內容（可能是圖片或PDF），自動出20題四選一選擇題。",
-    "題目設計必須符合 PIRLS（國際閱讀素養調查）的四個理解層次，並且平均分佈（每個層次各出 5 題，總共 20 題）：",
-    "1. 直接提取：找出課文中明確寫出的資訊（共 5 題）",
-    "2. 直接推論：連結課文中的多處資訊，找出未直接寫明但合理的推論（共 5 題）",
-    "3. 詮釋、整合觀點與訊息：歸納段落大意、比較人物角色性格、理解作者意圖或課文主旨（共 5 題）",
-    "4. 檢驗、評估內容與語言：評估課文結構、寫作手法、遣詞用字或表達效果（共 5 題）",
+    "請根據老師提供的教材內容（可能是圖片或PDF），自動出指定題數的四選一選擇題。",
+    "題目設計必須符合 PIRLS（國際閱讀素養調查）的四個理解層次，並且平均分佈（依前述題數規劃分佈）：",
+    "1. 直接提取：找出課文中明確寫出的資訊",
+    "2. 直接推論：連結課文中的多處資訊，找出未直接寫明但合理的推論",
+    "3. 詮釋、整合觀點與訊息：歸納段落大意、比較人物角色性格、理解作者意圖或課文主旨",
+    "4. 檢驗、評估內容與語言：評估課文結構、寫作手法、遣詞用字或表達效果",
     "",
     "出題要求：",
     "- 題目與選項文字必須適合國小低中年級，用語自然流暢，字句清晰，不宜過度艱深刁鑽。",
@@ -71,13 +94,14 @@ function buildPrompt(body) {
 
 function buildYoutubePrompt(body) {
   return [
+    buildQuestionCountInstruction(body),
     "你是台灣國小老師的閱讀理解出題助手，專門根據影片的字幕內容進行內容深究出題。",
-    "請根據提供的影片字幕內容，自動出 20 題四選一選擇題。",
-    "題目設計必須符合 PIRLS（國際閱讀素養調查）的四個理解層次，並且平均分佈（每個層次各出 5 題，總共 20 題）：",
-    "1. 直接提取：找出影片字幕中明確說出的資訊（共 5 題）",
-    "2. 直接推論：連結影片字幕中的多處資訊，找出未直接說明但合理的推論（共 5 題）",
-    "3. 詮釋、整合觀點與訊息：歸納段落大意、比較人物角色性格、理解作者意圖或影片主旨（共 5 題）",
-    "4. 檢驗、評估內容與語言：評估影片結構、說話手法、遣詞用字或表達效果（共 5 題）",
+    "請根據提供的影片字幕內容，自動出指定題數的四選一選擇題。",
+    "題目設計必須符合 PIRLS（國際閱讀素養調查）的四個理解層次，並且平均分佈（依前述題數規劃分佈）：",
+    "1. 直接提取：找出影片字幕中明確說出的資訊",
+    "2. 直接推論：連結影片字幕中的多處資訊，找出未直接說明但合理的推論",
+    "3. 詮釋、整合觀點與訊息：歸納段落大意、比較人物角色性格、理解作者意圖或影片主旨",
+    "4. 檢驗、評估內容與語言：評估影片結構、說話手法、遣詞用字或表達效果",
     "",
     "出題要求：",
     "- 題目與選項文字必須適合國小低中年級，用語自然流暢，字句清晰，不宜過度艱深刁鑽。",
@@ -90,13 +114,14 @@ function buildYoutubePrompt(body) {
 
 function buildTextPrompt(body) {
   return [
+    buildQuestionCountInstruction(body),
     "你是台灣國小老師的閱讀理解出題助手，專門根據提供的教材文章內容進行內容深究出題。",
-    "請根據老師提供的教材文章內容，自動出20題四選一選擇題。",
-    "題目設計必須符合 PIRLS（國際閱讀素養調查）的四個理解層次，並且平均分佈（每個層次各出 5 題，總共 20 題）：",
-    "1. 直接提取：找出教材內容中明確寫出的資訊（共 5 題）",
-    "2. 直接推論：連結教材內容中的多處資訊，找出未直接寫明但合理的推論（共 5 題）",
-    "3. 詮釋、整合觀點與訊息：歸納段落大意、比較人物角色性格、理解作者意圖或課文主旨（共 5 題）",
-    "4. 檢驗、評估內容與語言：評估課文結構、寫作手法、遣詞用字或表達效果（共 5 題）",
+    "請根據老師提供的教材文章內容，自動出指定題數的四選一選擇題。",
+    "題目設計必須符合 PIRLS（國際閱讀素養調查）的四個理解層次，並且平均分佈（依前述題數規劃分佈）：",
+    "1. 直接提取：找出教材內容中明確寫出的資訊",
+    "2. 直接推論：連結教材內容中的多處資訊，找出未直接寫明但合理的推論",
+    "3. 詮釋、整合觀點與訊息：歸納段落大意、比較人物角色性格、理解作者意圖或課文主旨",
+    "4. 檢驗、評估內容與語言：評估課文結構、寫作手法、遣詞用字或表達效果",
     "",
     "出題要求：",
     "- 題目與選項文字必須適合國小低中年級，用語自然流暢，字句清晰，不宜過度艱深刁鑽。",
@@ -109,7 +134,7 @@ function buildTextPrompt(body) {
 
 function buildFileContent(body) {
   const mimeType = body.mimeType || "application/octet-stream";
-  if (!body.fileBase64) throw new Error("Missing fileBase64.");
+  if (!body.fileBase64) throw new Error(`Missing fileBase64 for ${body.filename || "uploaded file"}.`);
   if (mimeType.startsWith("image/")) {
     return {
       type: "input_image",
@@ -290,12 +315,16 @@ async function generateCsv(body) {
   if (!apiKey) throw new Error("OPENAI_API_KEY is missing from C:\\Users\\ketty\\.openai.env");
 
   let inputContent = [];
+  const questionCount = getQuestionCount(body);
+  const uploadedFiles = Array.isArray(body.files)
+    ? body.files
+    : (Array.isArray(body.filesData) ? body.filesData : []);
 
-  if (body.files && Array.isArray(body.files) && body.files.length > 0) {
+  if (uploadedFiles.length > 0) {
     inputContent = [
       { type: "input_text", text: buildPrompt(body) }
     ];
-    for (const file of body.files) {
+    for (const file of uploadedFiles) {
       inputContent.push(buildFileContent(file));
     }
   } else if (body.textSource) {
@@ -319,6 +348,9 @@ async function generateCsv(body) {
       { type: "input_text", text: `影片字幕內容如下：\n\n${transcript}` }
     ];
   } else {
+    if (!body.fileBase64) {
+      throw new Error("No source file content was received. Please re-select the files and try again.");
+    }
     inputContent = [
       { type: "input_text", text: buildPrompt(body) },
       buildFileContent(body)
@@ -349,6 +381,8 @@ async function generateCsv(body) {
               title: { type: "string", description: "教材的主旨、標題或簡短的主題（例如：魯班的故事、一年級首冊第九課），適合用來作為下載 CSV 檔的檔名。" },
               questions: {
                 type: "array",
+                minItems: questionCount,
+                maxItems: questionCount,
                 items: {
                   type: "object",
                   additionalProperties: false,
@@ -375,7 +409,11 @@ async function generateCsv(body) {
 
   if (!response.ok) throw new Error(`OpenAI failed: ${response.status} ${await response.text()}`);
   const parsed = parseJsonPayload(extractResponseText(await response.json()));
-  const csvContent = convertToCsv(parsed.questions || []);
+  const generatedQuestions = Array.isArray(parsed.questions) ? parsed.questions : [];
+  if (generatedQuestions.length !== questionCount) {
+    throw new Error(`AI returned ${generatedQuestions.length} questions, expected ${questionCount}. Please try again or choose a smaller number.`);
+  }
+  const csvContent = convertToCsv(generatedQuestions);
   return { csv: csvContent, notes: String(parsed.notes || ""), title: String(parsed.title || "知識王_AI題庫") };
 }
 
