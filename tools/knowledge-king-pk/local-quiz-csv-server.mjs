@@ -88,6 +88,25 @@ function buildYoutubePrompt(body) {
   ].join("\n");
 }
 
+function buildTextPrompt(body) {
+  return [
+    "你是台灣國小老師的閱讀理解出題助手，專門根據提供的教材文章內容進行內容深究出題。",
+    "請根據老師提供的教材文章內容，自動出20題四選一選擇題。",
+    "題目設計必須符合 PIRLS（國際閱讀素養調查）的四個理解層次，並且平均分佈（每個層次各出 5 題，總共 20 題）：",
+    "1. 直接提取：找出教材內容中明確寫出的資訊（共 5 題）",
+    "2. 直接推論：連結教材內容中的多處資訊，找出未直接寫明但合理的推論（共 5 題）",
+    "3. 詮釋、整合觀點與訊息：歸納段落大意、比較人物角色性格、理解作者意圖或課文主旨（共 5 題）",
+    "4. 檢驗、評估內容與語言：評估課文結構、寫作手法、遣詞用字或表達效果（共 5 題）",
+    "",
+    "出題要求：",
+    "- 題目與選項文字必須適合國小低中年級，用語自然流暢，字句清晰，不宜過度艱深刁鑽。",
+    "- 選項A、選項B、選項C、選項D的內容應該長度相當、具備合理的誘答性。",
+    "- 正確答案（ans）必須是選項A、選項B、選項C或選項D中其中一個選項的「完整文字內容」，不能只寫 A、B、C、D 或 1、2、3、4，必須是完全相同的字串。",
+    "- 在 notes 欄位中，簡要說明出題的設計理念，並條列各層次的題數分佈以供檢驗。",
+    `教材標題：${body.filename || "teacher-source"}`
+  ].join("\n");
+}
+
 function buildFileContent(body) {
   const mimeType = body.mimeType || "application/octet-stream";
   if (!body.fileBase64) throw new Error("Missing fileBase64.");
@@ -272,7 +291,13 @@ async function generateCsv(body) {
 
   let inputContent = [];
 
-  if (body.youtubeUrl) {
+  if (body.textSource) {
+    const filename = body.filename || "貼上教材文章";
+    inputContent = [
+      { type: "input_text", text: buildTextPrompt({ filename }) },
+      { type: "input_text", text: `教材文章內容如下：\n\n${body.textSource}` }
+    ];
+  } else if (body.youtubeUrl) {
     const videoId = extractVideoId(body.youtubeUrl);
     if (!videoId) {
       throw new Error("無效的 YouTube 影片網址，請確認網址格式正確。");
