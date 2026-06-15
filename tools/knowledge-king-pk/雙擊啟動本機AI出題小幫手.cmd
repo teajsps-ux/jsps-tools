@@ -1,41 +1,43 @@
 @echo off
-chcp 65001 > nul
-title 知識王 AI 出題本機小幫手
+title Knowledge King AI Helper
 
 echo ========================================================
-echo   正在啟動「知識王 PK 賽」AI 出題本機小幫手...
-echo   請保持此視窗開啟，不要關閉它喔！
+echo   Starting Knowledge King AI Helper Server...
+echo   Please keep this window open while using the tool.
 echo ========================================================
 echo.
 
-:: 1. 檢查金鑰檔案是否存在
+:: 1. Check if API key file exists
 set "ENV_FILE=%USERPROFILE%\.openai.env"
 if not exist "%ENV_FILE%" (
-  echo [錯誤] 找不到金鑰檔案：%ENV_FILE%
-  echo 請先在您的個人資料夾中建立此檔案，並在內部填入您的 OPENAI_API_KEY。
+  echo [ERROR] Cannot find OpenAI API key file:
+  echo %ENV_FILE%
+  echo.
+  echo Please create a file named ".openai.env" in your user folder,
+  echo and add "OPENAI_API_KEY=your_key" inside it.
   echo.
   pause
   exit /b
 )
 
-:: 2. 進入專案目錄
+:: 2. Change directory to script folder
 cd /d "%~dp0"
 
-:: 3. 檢查 Node.js 是否已安裝
+:: 3. Check if Node.js is installed
 where node >nul 2>nul
 if %errorlevel% neq 0 (
-  echo [錯誤] 偵測不到 Node.js！
-  echo 請先至官網下載並安裝 Node.js (https://nodejs.org/) 後，再重新執行此檔案。
+  echo [ERROR] Node.js is not installed!
+  echo Please download and install Node.js from https://nodejs.org/
   echo.
   pause
   exit /b
 )
 
-:: 4. 啟動伺服器
+:: 4. Start local server
 node local-quiz-csv-server.mjs
 
 if %errorlevel% neq 0 (
-  echo [錯誤] 伺服器啟動失敗或異常中止！
+  echo [ERROR] Server failed to start or crashed.
 )
 echo.
 pause
