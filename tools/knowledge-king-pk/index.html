@@ -695,24 +695,55 @@
         };
 
         const handleGlobalPaste = (event) => {
+          console.log('Paste event detected. GameState:', gameState.value, 'IsGenerating:', isGenerating.value);
           if (gameState.value !== 'LOBBY' || isGenerating.value) return;
-          const items = event.clipboardData?.items;
-          if (!items) return;
 
-          for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-              const file = items[i].getAsFile();
-              if (file) {
-                const now = new Date();
-                const dateStr = `${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}`;
-                const pFile = new File([file], `剪貼簿截圖_${dateStr}.png`, { type: 'image/png' });
-                
-                sourceFile.value = pFile;
-                sourceStatus.value = `已偵測到剪貼簿截圖：${pFile.name}，可點擊「AI 轉成 CSV」按鈕進行出題。`;
+          const clipboardData = event.clipboardData || window.clipboardData;
+          if (!clipboardData) {
+            console.log('No clipboardData found.');
+            return;
+          }
+
+          // 1. Try to get files first (most reliable for copied files/images in modern browsers)
+          const files = clipboardData.files;
+          console.log('Clipboard files count:', files ? files.length : 0);
+          if (files && files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+              console.log(`File ${i}: name=${files[i].name}, type=${files[i].type}`);
+              if (files[i].type.startsWith('image/') || files[i].type === 'application/pdf') {
+                sourceFile.value = files[i];
+                sourceStatus.value = `已偵測到剪貼簿檔案：${files[i].name}，可點擊「AI 轉成 CSV」按鈕進行出題。`;
                 sourceStatusType.value = 'success';
-                
                 event.preventDefault();
-                break;
+                return;
+              }
+            }
+          }
+
+          // 2. Try items (reliable for screenshots in Chrome/Edge)
+          const items = clipboardData.items;
+          console.log('Clipboard items count:', items ? items.length : 0);
+          if (items) {
+            for (let i = 0; i < items.length; i++) {
+              console.log(`Item ${i}: kind=${items[i].kind}, type=${items[i].type}`);
+              if (items[i].type.indexOf('image') !== -1 || items[i].kind === 'file') {
+                const file = items[i].getAsFile();
+                if (file) {
+                  console.log(`Captured file from item: name=${file.name}, type=${file.type}`);
+                  // Only accept image or pdf
+                  if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+                    const now = new Date();
+                    const dateStr = `${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}`;
+                    const pFile = new File([file], `剪貼簿截圖_${dateStr}.png`, { type: 'image/png' });
+                    
+                    sourceFile.value = pFile;
+                    sourceStatus.value = `已偵測到剪貼簿截圖：${pFile.name}，可點擊「AI 轉成 CSV」按鈕進行出題。`;
+                    sourceStatusType.value = 'success';
+                    
+                    event.preventDefault();
+                    return;
+                  }
+                }
               }
             }
           }
@@ -720,11 +751,11 @@
 
         onMounted(() => {
           parseCSVText();
-          window.addEventListener('paste', handleGlobalPaste);
+          document.addEventListener('paste', handleGlobalPaste);
         });
 
         onUnmounted(() => {
-          window.removeEventListener('paste', handleGlobalPaste);
+          document.removeEventListener('paste', handleGlobalPaste);
         });
 
         const handleFileUpload = (e) => {
