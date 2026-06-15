@@ -21,10 +21,10 @@
     }
     
     .theme-cute {
-      --app-bg: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%);
+      --app-bg: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
       --app-bg-img: url('images/bg_cute.png');
-      --panel-bg: rgba(255,255,255,0.9); --text-main: #be185d;
-      --btn-base: #fbcfe8; --btn-hover: #f9a8d4;
+      --panel-bg: rgba(255,255,255,0.95); --text-main: #92400e;
+      --btn-base: #fef3c7; --btn-hover: #fcd34d;
       font-family: 'Nunito', 'Comic Sans MS', sans-serif;
     }
     .theme-ninja {
@@ -163,6 +163,11 @@
     <div v-if="gameState === 'LOBBY'" class="flex-1 overflow-y-auto p-4 md:p-8 relative z-10">
       <!-- Lobby Header controls -->
       <div class="absolute top-4 right-4 flex items-center gap-2 z-30">
+        <button @click="playMode = (playMode === 'guide' ? 'async' : 'guide')" 
+                class="px-4 py-2 rounded-full font-bold text-sm bg-white/95 shadow-md border-2 transition flex items-center gap-2 hover:scale-105 active:scale-95"
+                :class="playMode === 'guide' ? 'border-blue-500 text-blue-600 bg-blue-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'">
+          <i class="fa-solid fa-graduation-cap"></i> <span>{{ playMode === 'guide' ? '切換對戰模式' : '切換教學模式' }}</span>
+        </button>
         <button @click="bgStyle = (bgStyle === 'gradient' ? 'illustration' : 'gradient')" 
                 class="px-4 py-2 rounded-full font-bold text-sm bg-white/95 shadow-md border-2 border-gray-300 text-gray-700 transition flex items-center gap-2 hover:scale-105 active:scale-95 hover:bg-gray-50">
           <i :class="bgStyle === 'gradient' ? 'fa-solid fa-image' : 'fa-solid fa-palette'" class="mr-1"></i>
@@ -170,7 +175,7 @@
         </button>
         <button @click="useBpmfFont = !useBpmfFont" 
                 class="px-4 py-2 rounded-full font-bold text-sm bg-white/95 shadow-md border-2 transition flex items-center gap-2 hover:scale-105 active:scale-95"
-                :class="useBpmfFont ? 'border-pink-500 text-pink-600 bg-pink-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'">
+                :class="useBpmfFont ? 'border-amber-500 text-amber-600 bg-amber-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'">
           <i class="fa-solid fa-language mr-1"></i> <span>{{ useBpmfFont ? '切換國字' : '切換注音' }}</span>
         </button>
       </div>
@@ -344,6 +349,20 @@
           </div>
         </div>
         
+        <!-- Mode Quick Toggle -->
+        <div class="lg:col-span-2 flex justify-center gap-4 mt-6">
+          <button @click="playMode = 'async'" 
+                  class="px-8 py-4 rounded-2xl font-bold text-xl shadow-md transition flex items-center gap-2 border-2 hover:scale-105 active:scale-95"
+                  :class="playMode !== 'guide' ? 'bg-orange-500 text-white border-orange-600 shadow-[0_4px_0_#c2410c]' : 'bg-white/90 text-gray-700 border-gray-300 hover:bg-gray-100'">
+            <i class="fa-solid fa-people-arrows"></i> <span>⚔️ 雙人競賽模式</span>
+          </button>
+          <button @click="playMode = 'guide'" 
+                  class="px-8 py-4 rounded-2xl font-bold text-xl shadow-md transition flex items-center gap-2 border-2 hover:scale-105 active:scale-95"
+                  :class="playMode === 'guide' ? 'bg-blue-600 text-white border-blue-700 shadow-[0_4px_0_#1d4ed8]' : 'bg-white/90 text-gray-700 border-gray-300 hover:bg-gray-100'">
+            <i class="fa-solid fa-graduation-cap"></i> <span>🧑‍🏫 教學引導模式 (單獨問答)</span>
+          </button>
+        </div>
+
         <!-- Start Button -->
         <div class="lg:col-span-2 flex justify-center mt-4">
           <button @click="startGame" :disabled="questions.length === 0" class="py-5 px-20 text-3xl font-black rounded-full shadow-[0_10px_0_rgba(0,0,0,0.2)] transition bg-gradient-to-r from-green-400 to-emerald-600 text-white hover:from-green-300 hover:to-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:translate-y-2 active:shadow-none">
@@ -371,7 +390,7 @@
           </button>
           <button @click="useBpmfFont = !useBpmfFont" 
                   class="px-4 py-2 rounded-full font-bold text-sm bg-white/90 shadow transition flex items-center gap-2 hover:scale-105 active:scale-95 border"
-                  :class="useBpmfFont ? 'border-pink-500 text-pink-600 bg-pink-50' : 'border-gray-300 text-gray-700 hover:bg-gray-100'">
+                  :class="useBpmfFont ? 'border-amber-500 text-amber-600 bg-amber-50' : 'border-gray-300 text-gray-700 hover:bg-gray-100'">
             <i class="fa-solid fa-language"></i> <span>{{ useBpmfFont ? '切換國字' : '切換注音' }}</span>
           </button>
           <button @click="isPaused = true" class="w-10 h-10 bg-white/80 rounded-full shadow hover:scale-110 transition flex items-center justify-center text-xl text-blue-600"><i class="fa-solid fa-pause"></i></button>
