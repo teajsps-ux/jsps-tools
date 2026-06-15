@@ -330,9 +330,31 @@
               {{ sourceStatus }}
             </p>
           </div>
+
+          <!-- YouTube URL Import -->
+          <div class="mb-5 p-4 bg-amber-50 border-2 border-amber-100 rounded-2xl">
+            <label class="block font-bold mb-2 text-amber-900">方式二：輸入影片網址 (YouTube) 產生 20 題 CSV</label>
+            <div class="flex flex-col lg:flex-row gap-4 lg:items-center">
+              <div class="flex-1">
+                <input type="text" v-model="youtubeUrl" class="w-full p-4 border-2 border-amber-200 rounded-xl bg-white/80 font-bold text-lg text-black focus:border-amber-500 focus:outline-none" placeholder="貼上 YouTube 影片網址（例如：https://www.youtube.com/watch?v=dQw4w9WgXcQ）">
+              </div>
+              <div class="flex gap-3 shrink-0">
+                <button @click="generateQuestionsFromYoutube" :disabled="isGenerating || !youtubeUrl.trim()" class="py-4 px-6 bg-amber-600 text-white rounded-xl font-bold shadow-lg hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition hover:scale-105 active:scale-95 flex items-center gap-2">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> <span>{{ isGenerating ? 'AI 出題中...' : 'AI 影片轉 CSV' }}</span>
+                </button>
+              </div>
+            </div>
+            <p v-if="ytStatus" class="text-sm font-bold mt-3 px-1" :class="ytStatusType === 'error' ? 'text-red-600 animate-pulse' : (ytStatusType === 'success' ? 'text-green-600' : 'text-amber-800')">
+              <i v-if="ytStatusType === 'success'" class="fa-solid fa-circle-check mr-1"></i>
+              <i v-else-if="ytStatusType === 'error'" class="fa-solid fa-circle-exclamation mr-1"></i>
+              <i v-else class="fa-solid fa-circle-info mr-1"></i>
+              {{ ytStatus }}
+            </p>
+          </div>
+
           <div class="flex flex-col md:flex-row gap-6">
             <div class="flex-1">
-              <label class="block font-bold mb-2">方式二：直接貼上題庫 (含標題列)</label>
+              <label class="block font-bold mb-2">方式三：直接貼上題庫 (含標題列)</label>
               <textarea v-model="rawQuestionsText" rows="6" class="readable-text w-full p-3 border-2 border-black/20 rounded-xl bg-white/80 font-mono text-sm leading-relaxed focus:outline-none" placeholder="題目,選項A,選項B,選項C,選項D,正確答案..."></textarea>
             </div>
             <div class="w-full md:w-64 flex flex-col justify-center gap-4">
@@ -713,6 +735,9 @@
         const isGenerating = ref(false);
         const sourceInput = ref(null);
         const importedTitle = ref('知識王_AI題庫');
+        const youtubeUrl = ref('');
+        const ytStatus = ref('');
+        const ytStatusType = ref('info');
 
         const themes = [
           { id: 'theme-cute', name: '👑 可愛風 (預設)' },
@@ -1012,6 +1037,39 @@
           }
         };
 
+        const generateQuestionsFromYoutube = async () => {
+          if (!youtubeUrl.value.trim()) return;
+          isGenerating.value = true;
+          ytStatus.value = '正在解析影片字幕中，請稍候...';
+          ytStatusType.value = 'info';
+          try {
+            const response = await fetch('http://127.0.0.1:8787/quiz-csv', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                youtubeUrl: youtubeUrl.value.trim(),
+                questionCount: 20,
+                framework: 'PIRLS 四層次平均，各 5 題',
+                csvHeader: '題目,選項A,選項B,選項C,選項D,正確答案'
+              })
+            });
+            const payload = await response.json();
+            if (!response.ok || !payload.csv) throw new Error(payload.detail || payload.error || 'AI 小幫手沒有回傳 CSV');
+            
+            rawQuestionsText.value = payload.csv.trim();
+            importedTitle.value = payload.title || '知識王_AI題庫';
+            const cleanTitle = String(importedTitle.value).replace(/[\\/:*?"<>|]/g, '_').trim();
+            downloadTextFile(rawQuestionsText.value, `${cleanTitle}.csv`);
+            ytStatus.value = `完成：已下載「${importedTitle.value}.csv」，解析 ${questions.value.length} 題。`;
+            ytStatusType.value = 'success';
+          } catch (error) {
+            ytStatus.value = `AI 小幫手處理失敗：${error.message || error}`;
+            ytStatusType.value = 'error';
+          } finally {
+            isGenerating.value = false;
+          }
+        };
+
         const speakText = (text) => {
           const clean = cleanStr(text);
           if (!clean || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
@@ -1248,6 +1306,7 @@
         return {
           gameState, theme, themes, matchTimeLimit, scoreMode, playMode, shuffleOptions,
           useBpmfFont, bgStyle, isFullscreen, toggleFullscreen, sourceFile, sourceStatus, sourceStatusType, isGenerating, sourceInput, importedTitle,
+          youtubeUrl, ytStatus, ytStatusType, generateQuestionsFromYoutube,
           avatars, p1, p2, rawQuestionsText, questions, handleFileUpload, downloadCSVTemplate,
           handleSourceUpload, generateQuestionsFromSource, downloadCurrentCSV, speakText, speakQuestion,
           startGame, globalTimeLeft, isPaused, p1State, p2State,

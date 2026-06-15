@@ -69,6 +69,25 @@ function buildPrompt(body) {
   ].join("\n");
 }
 
+function buildYoutubePrompt(body) {
+  return [
+    "你是台灣國小老師的閱讀理解出題助手，專門根據影片的字幕內容進行內容深究出題。",
+    "請根據提供的影片字幕內容，自動出 20 題四選一選擇題。",
+    "題目設計必須符合 PIRLS（國際閱讀素養調查）的四個理解層次，並且平均分佈（每個層次各出 5 題，總共 20 題）：",
+    "1. 直接提取：找出影片字幕中明確說出的資訊（共 5 題）",
+    "2. 直接推論：連結影片字幕中的多處資訊，找出未直接說明但合理的推論（共 5 題）",
+    "3. 詮釋、整合觀點與訊息：歸納段落大意、比較人物角色性格、理解作者意圖或影片主旨（共 5 題）",
+    "4. 檢驗、評估內容與語言：評估影片結構、說話手法、遣詞用字或表達效果（共 5 題）",
+    "",
+    "出題要求：",
+    "- 題目與選項文字必須適合國小低中年級，用語自然流暢，字句清晰，不宜過度艱深刁鑽。",
+    "- 選項A、選項B、選項C、選項D的內容應該長度相當、具備合理的誘答性。",
+    "- 正確答案（ans）必須是選項A、選項B、選項C或選項D中其中一個選項的「完整文字內容」，不能只寫 A、B、C、D 或 1、2、3、4，必須是完全相同的字串。",
+    "- 在 notes 欄位中，簡要說明出題的設計理念，並條列各層次的題數分佈以供檢驗。",
+    `影片標題：${body.filename || "youtube-video"}`
+  ].join("\n");
+}
+
 function buildFileContent(body) {
   const mimeType = body.mimeType || "application/octet-stream";
   if (!body.fileBase64) throw new Error("Missing fileBase64.");
@@ -86,6 +105,145 @@ function buildFileContent(body) {
     };
   }
   throw new Error("目前支援圖片檔與 PDF 檔。");
+}
+
+function extractVideoId(url) {
+  if (!url) return null;
+  const cleaned = String(url).trim();
+  if (cleaned.length === 11) return cleaned;
+  try {
+    const parsed = new URL(cleaned);
+    if (parsed.hostname === "youtu.be") {
+      return parsed.pathname.slice(1);
+    }
+    if (parsed.hostname.includes("youtube.com")) {
+      if (parsed.pathname.startsWith("/shorts/")) {
+        return parsed.pathname.split("/")[2];
+      }
+      return parsed.searchParams.get("v");
+    }
+  } catch {
+    const match = cleaned.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+async function fetchYoutubeTranscript(videoId) {
+  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  const response = await fetch(videoUrl, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+    }
+  });
+  if (!response.ok) {
+    throw new Error(`無法存取 YouTube 影片頁面，狀態碼: ${response.status}`);
+  }
+  const html = await response.text();
+
+  let playerResponseText = null;
+  const startIdx = html.indexOf("ytInitialPlayerResponse = ");
+  if (startIdx !== -1) {
+    const sub = html.slice(startIdx + "ytInitialPlayerResponse = ".length);
+    let openBraces = 0;
+    let closed = false;
+    let endIdx = 0;
+    for (let i = 0; i < sub.length; i++) {
+      if (sub[i] === "{") openBraces++;
+      else if (sub[i] === "}") {
+        openBraces--;
+        if (openBraces === 0) {
+          endIdx = i;
+          closed = true;
+          break;
+        }
+      }
+    }
+    if (closed) {
+      playerResponseText = sub.slice(0, endIdx + 1);
+    }
+  }
+
+  if (!playerResponseText) {
+    throw new Error("無法在影片網頁中解析出播放器資訊（ytInitialPlayerResponse），這可能是因為 YouTube 變更了網頁結構。");
+  }
+
+  const playerResponse = JSON.parse(playerResponseText);
+  const title = playerResponse.videoDetails?.title || "YouTube影片";
+
+  const captions = playerResponse.captions?.playerCaptionsTracklistRenderer;
+  if (!captions || !captions.captionTracks || captions.captionTracks.length === 0) {
+    throw new Error("此影片未提供任何字幕軌，請改選其他有字幕的影片。");
+  }
+
+  const tracks = captions.captionTracks;
+  let selectedTrack = tracks.find(t => t.languageCode === "zh-TW" || t.languageCode === "zh-Hant" || t.languageCode === "zh-HK");
+  let autoTranslate = false;
+
+  if (!selectedTrack) {
+    selectedTrack = tracks.find(t => t.languageCode.startsWith("zh"));
+  }
+  if (!selectedTrack) {
+    selectedTrack = tracks.find(t => t.languageCode.startsWith("en"));
+    if (selectedTrack) {
+      autoTranslate = true;
+    }
+  }
+  if (!selectedTrack) {
+    selectedTrack = tracks[0];
+    autoTranslate = true;
+  }
+
+  let captionUrl = selectedTrack.baseUrl;
+  if (autoTranslate) {
+    captionUrl += "&tlang=zh-TW";
+  }
+  captionUrl += "&fmt=json3";
+
+  const captionRes = await fetch(captionUrl, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Referer": videoUrl,
+      "Accept": "*/*",
+      "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+    }
+  });
+
+  if (!captionRes.ok) {
+    if (captionRes.status === 429) {
+      throw new Error(
+        "YouTube 傳回 429 錯誤（拒絕存取）。這通常是 YouTube 對雲端或機房 IP 的安全防護限制。若您目前正在雲端環境執行本工具，請下載此專案程式並改在您的個人本機電腦（家用或學校 IP）開啟本機伺服器執行，即可正常抓取。"
+      );
+    }
+    throw new Error(`無法下載該影片的字幕軌，狀態碼: ${captionRes.status}`);
+  }
+
+  const text = await captionRes.text();
+  if (!text || text.length === 0) {
+    throw new Error(
+      "下載之字幕內容為空。這通常是 YouTube 對雲端或機房 IP 的安全防護限制。若您目前正在雲端環境執行本工具，請下載此專案程式並改在您的個人本機電腦（家用或學校 IP）開啟本機伺服器執行，即可正常抓取。"
+    );
+  }
+
+  let captionJson;
+  try {
+    captionJson = JSON.parse(text);
+  } catch {
+    throw new Error("無法將下載之字幕解析為 JSON 結構。");
+  }
+
+  const lines = [];
+  for (const event of captionJson.events || []) {
+    if (!event.segs) continue;
+    const segText = event.segs.map(s => s.utf8).join("").trim();
+    if (segText) {
+      lines.push(segText);
+    }
+  }
+
+  const fullText = lines.join(" ");
+  return { text: fullText, title };
 }
 
 function convertToCsv(questions) {
@@ -112,6 +270,29 @@ async function generateCsv(body) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY is missing from C:\\Users\\ketty\\.openai.env");
 
+  let inputContent = [];
+
+  if (body.youtubeUrl) {
+    const videoId = extractVideoId(body.youtubeUrl);
+    if (!videoId) {
+      throw new Error("無效的 YouTube 影片網址，請確認網址格式正確。");
+    }
+    const { text: transcript, title: videoTitle } = await fetchYoutubeTranscript(videoId);
+    if (!transcript) {
+      throw new Error("無法提取影片字幕，可能因為該影片沒有字幕或此伺服器受限於 YouTube IP 封鎖。");
+    }
+    const filename = `YouTube - ${videoTitle}`;
+    inputContent = [
+      { type: "input_text", text: buildYoutubePrompt({ filename }) },
+      { type: "input_text", text: `影片字幕內容如下：\n\n${transcript}` }
+    ];
+  } else {
+    inputContent = [
+      { type: "input_text", text: buildPrompt(body) },
+      buildFileContent(body)
+    ];
+  }
+
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
@@ -122,10 +303,7 @@ async function generateCsv(body) {
       model: MODEL,
       input: [{
         role: "user",
-        content: [
-          { type: "input_text", text: buildPrompt(body) },
-          buildFileContent(body)
-        ]
+        content: inputContent
       }],
       text: {
         format: {
