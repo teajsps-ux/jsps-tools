@@ -136,6 +136,7 @@ async function generateCsv(body) {
             type: "object",
             additionalProperties: false,
             properties: {
+              title: { type: "string", description: "教材的主旨、標題或簡短的主題（例如：魯班的故事、一年級首冊第九課），適合用來作為下載 CSV 檔的檔名。" },
               questions: {
                 type: "array",
                 items: {
@@ -155,7 +156,7 @@ async function generateCsv(body) {
               },
               notes: { type: "string", description: "備註說明，例如設計理念或PIRLS題型分佈" }
             },
-            required: ["questions", "notes"]
+            required: ["title", "questions", "notes"]
           }
         }
       }
@@ -165,7 +166,7 @@ async function generateCsv(body) {
   if (!response.ok) throw new Error(`OpenAI failed: ${response.status} ${await response.text()}`);
   const parsed = parseJsonPayload(extractResponseText(await response.json()));
   const csvContent = convertToCsv(parsed.questions || []);
-  return { csv: csvContent, notes: String(parsed.notes || "") };
+  return { csv: csvContent, notes: String(parsed.notes || ""), title: String(parsed.title || "知識王_AI題庫") };
 }
 
 loadEnvFile(path.join(os.homedir(), ".openai.env"));

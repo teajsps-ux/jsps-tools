@@ -21,34 +21,68 @@
     }
     
     .theme-cute {
-      --app-bg: #fdf2f8; --panel-bg: rgba(255,255,255,0.9); --text-main: #be185d;
+      --app-bg: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%);
+      --app-bg-img: url('images/bg_cute.png');
+      --panel-bg: rgba(255,255,255,0.9); --text-main: #be185d;
       --btn-base: #fbcfe8; --btn-hover: #f9a8d4;
       font-family: 'Nunito', 'Comic Sans MS', sans-serif;
     }
     .theme-ninja {
-      --app-bg: #111827; --panel-bg: #1f2937; --text-main: #f87171;
+      --app-bg: radial-gradient(circle at 50% 50%, #1f2937 0%, #111827 100%);
+      --app-bg-img: url('images/bg_ninja.png');
+      --panel-bg: #1f2937; --text-main: #f87171;
       --btn-base: #374151; --btn-hover: #4b5563;
       font-family: 'Impact', 'Arial Black', sans-serif;
     }
     .theme-racing {
-      --app-bg: #e0f2fe; --panel-bg: #ffffff; --text-main: #0284c7;
+      --app-bg: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%);
+      --app-bg-img: url('images/bg_racing.png');
+      --panel-bg: #ffffff; --text-main: #0284c7;
       --btn-base: #fef08a; --btn-hover: #fde047;
       font-family: 'Trebuchet MS', italic, sans-serif;
     }
     .theme-arcade {
-      --app-bg: #000000; --panel-bg: #111111; --text-main: #4ade80;
+      --app-bg: radial-gradient(circle, #0e1726 0%, #030712 100%);
+      --app-bg-img: url('images/bg_arcade.png');
+      --panel-bg: #111111; --text-main: #4ade80;
       --btn-base: #000000; --btn-hover: #166534;
       font-family: 'Courier New', Courier, monospace;
     }
     .theme-nature {
-      --app-bg: #f0fdf4; --panel-bg: rgba(255,255,255,0.95); --text-main: #166534;
+      --app-bg: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      --app-bg-img: url('images/bg_nature.png');
+      --panel-bg: rgba(255,255,255,0.95); --text-main: #166534;
       --btn-base: #bbf7d0; --btn-hover: #86efac;
       font-family: 'Georgia', serif;
     }
 
     body {
-      background-color: var(--app-bg); color: var(--text-main);
-      user-select: none; touch-action: none; transition: background-color 0.5s;
+      user-select: none; touch-action: none;
+    }
+    
+    .theme-wrapper {
+      position: relative;
+      background: var(--app-bg);
+      color: var(--text-main);
+      transition: background 0.5s, color 0.5s;
+    }
+
+    .theme-wrapper::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: var(--app-bg-img, none);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .theme-wrapper.bg-illustration::before {
+      opacity: 0.55;
     }
     
     /* Styled Components */
@@ -123,12 +157,17 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"知識王 PK 賽 豪華版 - Kuse AI","description":"知識王 PK 賽 豪華版","url":"https://pages.kusesite.com/2ky115hsf7m5","author":{"@type":"Organization","name":"Kuse AI"},"publisher":{"@type":"Organization","name":"Kuse AI","url":"https://www.kuse.ai"},"inLanguage":"en","alternateName":"知識王 PK 賽 豪華版"}</script></head>
 <body>
   <div id="app" class="h-screen w-screen flex flex-col overflow-hidden">
-    <div :class="[theme, {'bpmf-mode': useBpmfFont}]" class="flex-1 flex flex-col overflow-hidden w-full h-full relative">
+    <div :class="[theme, bgStyle === 'illustration' ? 'bg-illustration' : 'bg-gradient', {'bpmf-mode': useBpmfFont}]" class="theme-wrapper flex-1 flex flex-col overflow-hidden w-full h-full relative">
     
     <!-- ================== LOBBY SCREEN ================== -->
-    <div v-if="gameState === 'LOBBY'" class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+    <div v-if="gameState === 'LOBBY'" class="flex-1 overflow-y-auto p-4 md:p-8 relative z-10">
       <!-- Lobby Header controls -->
       <div class="absolute top-4 right-4 flex items-center gap-2 z-30">
+        <button @click="bgStyle = (bgStyle === 'gradient' ? 'illustration' : 'gradient')" 
+                class="px-4 py-2 rounded-full font-bold text-sm bg-white/95 shadow-md border-2 border-gray-300 text-gray-700 transition flex items-center gap-2 hover:scale-105 active:scale-95 hover:bg-gray-50">
+          <i :class="bgStyle === 'gradient' ? 'fa-solid fa-image' : 'fa-solid fa-palette'" class="mr-1"></i>
+          <span>{{ bgStyle === 'gradient' ? '切換插圖背景' : '切換漸層背景' }}</span>
+        </button>
         <button @click="useBpmfFont = !useBpmfFont" 
                 class="px-4 py-2 rounded-full font-bold text-sm bg-white/95 shadow-md border-2 transition flex items-center gap-2 hover:scale-105 active:scale-95"
                 :class="useBpmfFont ? 'border-pink-500 text-pink-600 bg-pink-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'">
@@ -168,6 +207,7 @@
                   <option value="async">🏃 獨立進度 (各自作答比速度，不互等)</option>
                   <option value="sync">🤝 同步答題 (雙方都答才進下一題)</option>
                   <option value="race">⚡ 搶答制 (一人作答即結算雙方)</option>
+                  <option value="guide">🧑‍🏫 教學引導模式 (單一畫面，無雙人競賽)</option>
                 </select>
               </div>
             </div>
@@ -315,7 +355,7 @@
     </div>
 
     <!-- ================== PLAYING SCREEN ================== -->
-    <div v-else-if="gameState === 'PLAYING'" class="flex-1 flex flex-col relative w-full h-full">
+    <div v-else-if="gameState === 'PLAYING'" class="flex-1 flex flex-col relative w-full h-full z-10">
       
       <!-- Top Status Bar -->
       <div class="h-16 shrink-0 flex items-center justify-between px-6 bg-black/10 backdrop-blur-sm border-b-2 border-black/10 z-30">
@@ -324,6 +364,11 @@
           <span :class="{'text-red-500 animate-pulse': globalTimeLeft <= 10}">{{ formatTime(globalTimeLeft) }}</span>
         </div>
         <div class="flex gap-4 items-center">
+          <button @click="bgStyle = (bgStyle === 'gradient' ? 'illustration' : 'gradient')" 
+                  class="px-4 py-2 rounded-full font-bold text-sm bg-white/90 shadow transition flex items-center gap-2 hover:scale-105 active:scale-95 border border-gray-300 text-gray-700 hover:bg-gray-100">
+            <i :class="bgStyle === 'gradient' ? 'fa-solid fa-image' : 'fa-solid fa-palette'" class="mr-1"></i>
+            <span>{{ bgStyle === 'gradient' ? '插圖背景' : '漸層背景' }}</span>
+          </button>
           <button @click="useBpmfFont = !useBpmfFont" 
                   class="px-4 py-2 rounded-full font-bold text-sm bg-white/90 shadow transition flex items-center gap-2 hover:scale-105 active:scale-95 border"
                   :class="useBpmfFont ? 'border-pink-500 text-pink-600 bg-pink-50' : 'border-gray-300 text-gray-700 hover:bg-gray-100'">
@@ -346,8 +391,68 @@
       <!-- Split Screen Area -->
       <div class="flex-1 flex w-full h-full relative" :class="{'opacity-30': isPaused}">
         
-        <!-- P1 Area (Left) -->
-        <div class="flex-1 border-r-4 border-black/20 flex flex-col p-6 relative overflow-hidden bg-black/5" id="p1-area">
+        <!-- 教學引導模式 (Single Player / Teacher Guidance) -->
+        <div v-if="playMode === 'guide'" class="flex-1 flex flex-col p-8 items-center justify-center relative overflow-hidden bg-black/5 w-full h-full" id="guide-area">
+          <!-- Header Info -->
+          <div class="w-full max-w-4xl flex items-center justify-between mb-4 pb-2 border-b border-black/10">
+            <h2 class="text-3xl md:text-4xl font-black text-blue-700 flex items-center gap-3">
+              <i class="fa-solid fa-graduation-cap"></i> <span>教學引導模式</span>
+            </h2>
+            <div class="text-right">
+              <span class="text-2xl font-black text-gray-500">Q. {{ Math.min(p1State.qIdx + 1, questions.length) }} / {{ questions.length }}</span>
+            </div>
+          </div>
+          
+          <!-- Progress Bar -->
+          <div class="w-full max-w-4xl bg-black/10 rounded-full h-4 mb-6 overflow-hidden border border-black/5">
+            <div class="bg-gradient-to-r from-blue-400 to-indigo-600 h-full transition-all duration-300" :style="{width: (p1State.qIdx / questions.length * 100) + '%'}"></div>
+          </div>
+
+          <!-- Active Question Area -->
+          <div v-if="!p1State.finished" class="w-full max-w-4xl flex-1 flex flex-col items-center justify-center overflow-y-auto">
+            <div @click="speakQuestion('p1')" class="flex items-start justify-center gap-3 mb-8 px-4 cursor-pointer group hover:text-blue-500 transition w-full">
+              <h3 class="readable-text text-3xl md:text-5xl font-bold text-center leading-normal flex-1">{{ questions[p1State.qIdx]?.q }}</h3>
+              <button class="speak-btn group-hover:bg-blue-50 group-hover:text-blue-600 transition" title="朗讀題目"><i class="fa-solid fa-volume-high"></i></button>
+            </div>
+            
+            <!-- Options (Vertical list, large buttons) -->
+            <div class="w-full flex flex-col gap-4 pb-8">
+              <button v-for="(opt, i) in p1State.options" :key="'guide-'+i+'-'+opt.text"
+                      @click="handleAnswer('p1', opt)"
+                      class="themed-btn p-5 rounded-2xl text-2xl md:text-3xl font-bold shadow-[0_6px_0_rgba(0,0,0,0.15)] active:shadow-none active:translate-y-1 w-full text-left flex items-center relative overflow-hidden min-h-[5.5rem]"
+                      :class="getBtnClass(p1State, opt)">
+                <span class="inline-block w-12 h-12 text-center leading-[3rem] bg-black/10 rounded-xl mr-4 shrink-0 text-2xl">{{ ['A','B','C','D'][i] }}</span>
+                <span class="readable-text whitespace-normal break-words leading-snug flex-1">{{ opt.text }}</span>
+                <span @click.stop.prevent="speakText(opt.text)" class="speak-btn ml-4 hover:scale-110 active:scale-95 transition" title="朗讀選項"><i class="fa-solid fa-volume-high"></i></span>
+              </button>
+            </div>
+            
+            <!-- Next Question button (shows up after answering) -->
+            <div v-if="p1State.showCorrectAnswer" class="mt-2 w-full flex justify-center z-20">
+              <button @click="nextGuideQuestion" class="py-5 px-16 text-3xl font-black rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-[0_8px_0_#3730a3] active:translate-y-1 active:shadow-none hover:scale-105 transition flex items-center gap-3">
+                <span>下一題</span> <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Finished Area -->
+          <div v-else class="flex-1 flex flex-col items-center justify-center w-full text-center">
+             <div class="text-9xl mb-6 animate-bounce">🏆</div>
+             <h3 class="text-5xl font-black text-gray-700 drop-shadow-sm">完成全部題目教學！</h3>
+             <button @click="endGame" class="mt-8 py-5 px-16 text-3xl font-black rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-[0_8px_0_#065f46] hover:scale-105 transition">
+               查看成果與統計
+             </button>
+          </div>
+
+          <!-- Feedback Effect -->
+          <div v-if="p1State.feedback" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div class="text-[12rem] drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] feedback-anim" v-html="p1State.feedback"></div>
+          </div>
+        </div>
+
+        <template v-else>
+          <!-- P1 Area (Left) -->
+          <div class="flex-1 border-r-4 border-black/20 flex flex-col p-6 relative overflow-hidden bg-black/5" id="p1-area">
           <!-- Header Info -->
           <div class="flex items-center gap-4 mb-2">
             <div class="text-5xl md:text-6xl drop-shadow-lg">{{ p1.avatar.icon }}</div>
@@ -459,16 +564,37 @@
           </div>
           <div v-for="c in p2Coins" :key="c.id" class="coin-anim drop-shadow-xl" :style="{left: c.x+'px', top: c.y+'px'}">🪙</div>
         </div>
+      </template>
 
       </div>
     </div>
 
     <!-- ================== RESULTS SCREEN ================== -->
-    <div v-else-if="gameState === 'RESULTS'" class="flex-1 overflow-y-auto p-4 md:p-8 flex items-center justify-center relative">
+    <div v-else-if="gameState === 'RESULTS'" class="flex-1 overflow-y-auto p-4 md:p-8 flex items-center justify-center relative z-10">
       <div class="themed-panel p-6 md:p-12 rounded-[3rem] w-full max-w-7xl flex flex-col md:flex-row gap-8 lg:gap-16 items-center relative overflow-hidden z-10">
         
-        <!-- Left Area (Stats & Podium) -->
-        <div class="flex-1 w-full text-center">
+        <!-- 教學引導模式結果 (Guide Mode Results) -->
+        <div v-if="playMode === 'guide'" class="flex-1 w-full text-center animate-fade-in">
+          <h1 class="text-5xl md:text-6xl font-black mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600 drop-shadow-md">
+            🎉 課程練習完成！
+          </h1>
+          
+          <div class="text-[8rem] md:text-[10rem] mb-6 animate-bounce">📚</div>
+          
+          <div class="max-w-xl mx-auto bg-black/5 p-8 rounded-3xl border-4 border-blue-400/30 shadow-inner mb-6">
+            <h2 class="text-3xl font-black text-blue-600 mb-6 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-chart-simple"></i> 全班作答統計
+            </h2>
+            <div class="space-y-4 text-xl font-bold text-left px-4">
+              <div class="flex justify-between border-b border-black/10 pb-2"><span>📋 總題數</span> <span>{{ questions.length }} 題</span></div>
+              <div class="flex justify-between border-b border-black/10 pb-2"><span>🎯 答對題數</span> <span class="text-green-600">{{ p1.correct }} 題</span></div>
+              <div class="flex justify-between pb-2"><span>📈 整體答對率</span> <span class="text-indigo-600">{{ p1.totalAnswered > 0 ? Math.round(p1.correct/p1.totalAnswered*100) : 0 }}%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 雙人對戰模式結果 (Classic comparative stats & podium) -->
+        <div v-else class="flex-1 w-full text-center">
           <h1 class="text-5xl md:text-6xl font-black mb-8 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600 drop-shadow-md">
             🏆 {{ getWinnerText() }}
           </h1>
@@ -569,11 +695,13 @@
         const playMode = ref('async'); // Set Async as the new default
         const shuffleOptions = ref(true);
         const useBpmfFont = ref(false);
+        const bgStyle = ref('gradient'); // 'gradient' or 'illustration'
         const sourceFile = ref(null);
         const sourceStatus = ref('');
         const sourceStatusType = ref('info');
         const isGenerating = ref(false);
         const sourceInput = ref(null);
+        const importedTitle = ref('知識王_AI題庫');
 
         const themes = [
           { id: 'theme-cute', name: '👑 可愛風 (預設)' },
@@ -761,6 +889,7 @@
         const handleFileUpload = (e) => {
           const file = e.target.files[0];
           if(file) {
+            importedTitle.value = file.name.replace(/\.[^/.]+$/, "");
             Papa.parse(file, { skipEmptyLines: true, complete: (res) => {
               rawQuestionsText.value = res.data.map(r => r.join(',')).join('\n');
             }});
@@ -800,7 +929,8 @@
         };
 
         const downloadCurrentCSV = () => {
-          downloadTextFile(buildCurrentCSV(), '知識王_AI題庫.csv');
+          const cleanTitle = String(importedTitle.value).replace(/[\\/:*?"<>|]/g, '_').trim();
+          downloadTextFile(buildCurrentCSV(), `${cleanTitle}.csv`);
         };
 
         const handleSourceUpload = (e) => {
@@ -838,7 +968,9 @@
             const payload = await response.json();
             if (!response.ok || !payload.csv) throw new Error(payload.detail || payload.error || 'AI 小幫手沒有回傳 CSV');
             rawQuestionsText.value = payload.csv.trim();
-            downloadTextFile(rawQuestionsText.value, '知識王_AI題庫.csv');
+            importedTitle.value = payload.title || '知識王_AI題庫';
+            const cleanTitle = String(importedTitle.value).replace(/[\\/:*?"<>|]/g, '_').trim();
+            downloadTextFile(rawQuestionsText.value, `${cleanTitle}.csv`);
             sourceStatus.value = `完成：已產生並下載 CSV，解析 ${questions.value.length} 題。`;
             sourceStatusType.value = 'info';
           } catch (error) {
@@ -925,7 +1057,18 @@
           if (pState.finished || pState.showCorrectAnswer) return; // Ignore if processing
           if (pState.answer) return; // already answered
           
-          if (playMode.value === 'async') {
+          if (playMode.value === 'guide') {
+            pState.answer = opt;
+            pState.showCorrectAnswer = true;
+            p1.totalAnswered++;
+            if (opt.isCorrect) {
+              p1.correct++;
+              p1State.feedback = '<span class="text-green-500 drop-shadow-md"><i class="fa-solid fa-check-circle"></i></span>';
+              if (scoreMode.value === 'score') p1.score += 100;
+            } else {
+              p1State.feedback = '<span class="text-red-500 drop-shadow-md"><i class="fa-solid fa-xmark"></i></span>';
+            }
+          } else if (playMode.value === 'async') {
             // ASYNC MODE: Instant evaluation just for this player
             pState.answer = opt;
             setTimeout(() => evaluateAsync(playerKey), 100);
@@ -1006,11 +1149,22 @@
           }, 1800);
         };
 
+        const nextGuideQuestion = () => {
+          p1State.qIdx++;
+          setupQuestion('p1');
+        };
+
         const checkAllFinished = () => {
+          if (playMode.value === 'guide') {
+            if (p1State.finished) {
+              setTimeout(endGame, 1000);
+            }
+            return;
+          }
           if (p1State.finished && p2State.finished) {
             setTimeout(endGame, 1000);
           }
-        }
+        };
 
         const getBtnClass = (pState, opt) => {
           if (!pState.showCorrectAnswer) {
@@ -1026,7 +1180,7 @@
           gameState.value = 'RESULTS';
           
           setTimeout(() => {
-            if (getWinnerData().type !== 'DRAW') {
+            if (playMode.value === 'guide' || getWinnerData().type !== 'DRAW') {
                confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, zIndex: 100 });
             }
           }, 500);
@@ -1059,12 +1213,12 @@
 
         return {
           gameState, theme, themes, matchTimeLimit, scoreMode, playMode, shuffleOptions,
-          useBpmfFont, sourceFile, sourceStatus, sourceStatusType, isGenerating, sourceInput,
+          useBpmfFont, bgStyle, sourceFile, sourceStatus, sourceStatusType, isGenerating, sourceInput, importedTitle,
           avatars, p1, p2, rawQuestionsText, questions, handleFileUpload, downloadCSVTemplate,
           handleSourceUpload, generateQuestionsFromSource, downloadCurrentCSV, speakText, speakQuestion,
           startGame, globalTimeLeft, isPaused, p1State, p2State,
           p1Coins, p2Coins, handleAnswer, getBtnClass, endGame,
-          getWinnerData, getWinnerText, formatTime, handleDrop, formatSize, clearSourceFile
+          getWinnerData, getWinnerText, formatTime, handleDrop, formatSize, clearSourceFile, nextGuideQuestion
         };
       }
     }).mount('#app');
