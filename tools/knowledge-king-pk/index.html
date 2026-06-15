@@ -231,20 +231,59 @@
             </button>
           </div>
           <div class="mb-5 p-4 bg-blue-50 border-2 border-blue-100 rounded-2xl">
-            <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            <label class="block font-bold mb-2 text-blue-900">方式一：教材圖片 / PDF / 貼上截圖 產生 20 題 CSV</label>
+            <div class="flex flex-col lg:flex-row gap-4 lg:items-center">
+              
+              <!-- Drag/Drop/Paste Zone -->
               <div class="flex-1">
-                <label class="block font-bold mb-2">方式一：教材圖片 / PDF 交給 AI 產生 20 題 CSV</label>
-                <input type="file" ref="sourceInput" accept="image/*,.pdf" @change="handleSourceUpload" class="w-full p-3 border-2 border-blue-200 rounded-xl bg-white/80 font-bold">
-                <p class="text-sm text-gray-600 mt-2">會連到本機老師小幫手，不會把 API Key 放進公開網頁。題型目標：PIRLS 四層次平均，各 5 題。</p>
+                <input type="file" ref="sourceInput" accept="image/*,.pdf" @change="handleSourceUpload" class="hidden">
+                <div @dragover.prevent @drop.prevent="handleDrop" @click="sourceInput.click()"
+                     class="border-2 border-dashed border-blue-300 hover:border-blue-500 rounded-xl p-4 bg-white/50 text-center hover:bg-blue-50/50 transition cursor-pointer relative min-h-[90px] flex items-center justify-center">
+                  
+                  <div v-if="!sourceFile" class="text-gray-500 flex flex-col items-center gap-1">
+                    <div class="flex items-center gap-2">
+                      <i class="fa-solid fa-cloud-arrow-up text-xl text-blue-500"></i>
+                      <p class="font-bold text-sm text-blue-800">選擇、拖曳檔案至此，或在此按 Ctrl+V 貼上螢幕截圖</p>
+                    </div>
+                    <span class="text-xs text-gray-400">支援 JPG, PNG, PDF 格式</span>
+                  </div>
+                  
+                  <div v-else class="w-full flex items-center justify-between px-2">
+                    <div class="flex items-center gap-3">
+                      <i v-if="sourceFile.type.startsWith('image/')" class="fa-solid fa-file-image text-2xl text-blue-600"></i>
+                      <i v-else-if="sourceFile.type === 'application/pdf'" class="fa-solid fa-file-pdf text-2xl text-red-500"></i>
+                      <i v-else class="fa-solid fa-file text-2xl text-gray-500"></i>
+                      <div class="text-left">
+                        <p class="font-bold text-sm text-blue-900 truncate max-w-[200px] md:max-w-md">{{ sourceFile.name }}</p>
+                        <span class="text-xs text-gray-500">{{ formatSize(sourceFile.size) }}</span>
+                      </div>
+                    </div>
+                    <button @click.stop="clearSourceFile" class="w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 text-red-600 transition flex items-center justify-center" title="清除選取檔案">
+                      <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                  </div>
+                  
+                </div>
               </div>
-              <button @click="generateQuestionsFromSource" :disabled="isGenerating || !sourceFile" class="py-4 px-6 bg-blue-600 text-white rounded-xl font-bold shadow-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> {{ isGenerating ? 'AI 出題中...' : 'AI 轉成 CSV' }}
-              </button>
-              <button @click="downloadCurrentCSV" :disabled="questions.length === 0" class="py-4 px-6 bg-white text-blue-700 border-2 border-blue-200 rounded-xl font-bold shadow hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fa-solid fa-file-arrow-down"></i> 另存 CSV
-              </button>
+
+              <!-- Buttons -->
+              <div class="flex gap-3 shrink-0">
+                <button @click="generateQuestionsFromSource" :disabled="isGenerating || !sourceFile" class="py-4 px-6 bg-blue-600 text-white rounded-xl font-bold shadow-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition hover:scale-105 active:scale-95 flex items-center gap-2">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> <span>{{ isGenerating ? 'AI 出題中...' : 'AI 轉成 CSV' }}</span>
+                </button>
+                <button @click="downloadCurrentCSV" :disabled="questions.length === 0" class="py-4 px-6 bg-white text-blue-700 border-2 border-blue-200 rounded-xl font-bold shadow hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition hover:scale-105 active:scale-95 flex items-center gap-2">
+                  <i class="fa-solid fa-file-arrow-down"></i> <span>另存 CSV</span>
+                </button>
+              </div>
+
             </div>
-            <p v-if="sourceStatus" class="text-sm font-bold mt-3" :class="sourceStatusType === 'error' ? 'text-red-600' : 'text-blue-700'">{{ sourceStatus }}</p>
+            
+            <p v-if="sourceStatus" class="text-sm font-bold mt-3 px-1" :class="sourceStatusType === 'error' ? 'text-red-600 animate-pulse' : (sourceStatusType === 'success' ? 'text-green-600' : 'text-blue-700')">
+              <i v-if="sourceStatusType === 'success'" class="fa-solid fa-circle-check mr-1"></i>
+              <i v-else-if="sourceStatusType === 'error'" class="fa-solid fa-circle-exclamation mr-1"></i>
+              <i v-else class="fa-solid fa-circle-info mr-1"></i>
+              {{ sourceStatus }}
+            </p>
           </div>
           <div class="flex flex-col md:flex-row gap-6">
             <div class="flex-1">
@@ -534,6 +573,7 @@
         const sourceStatus = ref('');
         const sourceStatusType = ref('info');
         const isGenerating = ref(false);
+        const sourceInput = ref(null);
 
         const themes = [
           { id: 'theme-cute', name: '👑 可愛風 (預設)' },
@@ -626,7 +666,66 @@
         };
 
         watch(rawQuestionsText, parseCSVText);
-        onMounted(parseCSVText);
+        const handleDrop = (event) => {
+          const file = event.dataTransfer?.files?.[0];
+          if (file) {
+            if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+              sourceFile.value = file;
+              sourceStatus.value = `已選擇拖曳檔案：${file.name}`;
+              sourceStatusType.value = 'success';
+            } else {
+              sourceStatus.value = '僅支援圖片或 PDF 檔案！';
+              sourceStatusType.value = 'error';
+            }
+          }
+        };
+
+        const formatSize = (bytes) => {
+          if (bytes === 0) return '0 Bytes';
+          const k = 1024;
+          const sizes = ['Bytes', 'KB', 'MB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        };
+
+        const clearSourceFile = () => {
+          sourceFile.value = null;
+          sourceStatus.value = '';
+          if (sourceInput.value) sourceInput.value.value = '';
+        };
+
+        const handleGlobalPaste = (event) => {
+          if (gameState.value !== 'LOBBY' || isGenerating.value) return;
+          const items = event.clipboardData?.items;
+          if (!items) return;
+
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+              const file = items[i].getAsFile();
+              if (file) {
+                const now = new Date();
+                const dateStr = `${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}`;
+                const pFile = new File([file], `剪貼簿截圖_${dateStr}.png`, { type: 'image/png' });
+                
+                sourceFile.value = pFile;
+                sourceStatus.value = `已偵測到剪貼簿截圖：${pFile.name}，可點擊「AI 轉成 CSV」按鈕進行出題。`;
+                sourceStatusType.value = 'success';
+                
+                event.preventDefault();
+                break;
+              }
+            }
+          }
+        };
+
+        onMounted(() => {
+          parseCSVText();
+          window.addEventListener('paste', handleGlobalPaste);
+        });
+
+        onUnmounted(() => {
+          window.removeEventListener('paste', handleGlobalPaste);
+        });
 
         const handleFileUpload = (e) => {
           const file = e.target.files[0];
@@ -929,12 +1028,12 @@
 
         return {
           gameState, theme, themes, matchTimeLimit, scoreMode, playMode, shuffleOptions,
-          useBpmfFont, sourceFile, sourceStatus, sourceStatusType, isGenerating,
+          useBpmfFont, sourceFile, sourceStatus, sourceStatusType, isGenerating, sourceInput,
           avatars, p1, p2, rawQuestionsText, questions, handleFileUpload, downloadCSVTemplate,
           handleSourceUpload, generateQuestionsFromSource, downloadCurrentCSV, speakText, speakQuestion,
           startGame, globalTimeLeft, isPaused, p1State, p2State,
           p1Coins, p2Coins, handleAnswer, getBtnClass, endGame,
-          getWinnerData, getWinnerText, formatTime
+          getWinnerData, getWinnerText, formatTime, handleDrop, formatSize, clearSourceFile
         };
       }
     }).mount('#app');
