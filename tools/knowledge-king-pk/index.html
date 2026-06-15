@@ -9,6 +9,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bpmf+Iansui&display=swap" rel="stylesheet">
   
   <style>
@@ -120,7 +122,8 @@
   </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"知識王 PK 賽 豪華版 - Kuse AI","description":"知識王 PK 賽 豪華版","url":"https://pages.kusesite.com/2ky115hsf7m5","author":{"@type":"Organization","name":"Kuse AI"},"publisher":{"@type":"Organization","name":"Kuse AI","url":"https://www.kuse.ai"},"inLanguage":"en","alternateName":"知識王 PK 賽 豪華版"}</script></head>
 <body>
-  <div id="app" :class="[theme, {'bpmf-mode': useBpmfFont}]" class="h-screen w-screen flex flex-col overflow-hidden">
+  <div id="app" class="h-screen w-screen flex flex-col overflow-hidden">
+    <div :class="[theme, {'bpmf-mode': useBpmfFont}]" class="flex-1 flex flex-col overflow-hidden w-full h-full relative">
     
     <!-- ================== LOBBY SCREEN ================== -->
     <div v-if="gameState === 'LOBBY'" class="flex-1 overflow-y-auto p-4 md:p-8 relative">
@@ -507,6 +510,7 @@
       </div>
     </div>
 
+    </div>
   </div>
 
   <script>
