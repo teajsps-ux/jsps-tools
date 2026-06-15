@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>班級寵物養成系統 Pro</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #263244;
+    --line: #303949;
+    --cream: #f6edd8;
+    --mint: #c9f7df;
+    --blue: #66b8ff;
+    --pink: #ff6b93;
+    --gold: #ffd45a;
+  }
+  html, body { min-height: 100%; }
+  body {
+    font-family: "Microsoft JhengHei", "PingFang TC", system-ui, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 12% 10%, rgba(255, 212, 90, .38), transparent 28%),
+      radial-gradient(circle at 88% 18%, rgba(102, 184, 255, .28), transparent 30%),
+      linear-gradient(135deg, #fff7e5 0%, #e8fff2 48%, #eef6ff 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(16px, 3vw, 36px);
+  }
+  main {
+    width: min(1040px, 100%);
+    background: rgba(255,255,255,.84);
+    border: 5px solid var(--line);
+    border-radius: 24px;
+    box-shadow: 12px 12px 0 rgba(48,57,73,.18);
+    overflow: hidden;
+  }
+  header {
+    background: linear-gradient(135deg, var(--mint), #dceeff);
+    border-bottom: 5px solid var(--line);
+    padding: clamp(22px, 4vw, 42px);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: clamp(14px, 3vw, 28px);
+    align-items: center;
+  }
+  .pet-badge {
+    width: clamp(88px, 12vw, 128px);
+    aspect-ratio: 1;
+    border: 5px solid var(--line);
+    border-radius: 28px;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    font-size: clamp(48px, 8vw, 76px);
+    box-shadow: 6px 6px 0 rgba(48,57,73,.16);
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 52px);
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+  .subtitle {
+    margin-top: 10px;
+    font-size: clamp(15px, 2vw, 20px);
+    line-height: 1.7;
+    font-weight: 700;
+    color: #4b5563;
+  }
+  .choices {
+    padding: clamp(20px, 4vw, 42px);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(16px, 3vw, 28px);
+  }
+  .choice {
+    min-height: 320px;
+    border: 5px solid var(--line);
+    border-radius: 20px;
+    padding: clamp(20px, 3vw, 30px);
+    color: var(--ink);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 7px 7px 0 rgba(48,57,73,.16);
+    transition: transform .14s, box-shadow .14s;
+  }
+  .choice:hover, .choice:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 10px 11px 0 rgba(48,57,73,.18);
+    outline: none;
+  }
+  .choice:active {
+    transform: translateY(0);
+    box-shadow: 4px 4px 0 rgba(48,57,73,.18);
+  }
+  .full { background: linear-gradient(135deg, #fff2bf, #ffd6e3); }
+  .toolbox { background: linear-gradient(135deg, #d8fff0, #d8edff); }
+  .choice-icon {
+    font-size: clamp(48px, 7vw, 72px);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .choice h2 {
+    font-size: clamp(24px, 3.5vw, 34px);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .choice p {
+    font-size: clamp(15px, 2vw, 18px);
+    line-height: 1.65;
+    font-weight: 700;
+    color: #374151;
+  }
+  .open {
+    margin-top: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    min-height: 48px;
+    padding: 9px 18px;
+    border: 4px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    color: var(--ink);
+    font-size: 18px;
+    font-weight: 900;
+    box-shadow: 4px 4px 0 rgba(48,57,73,.18);
+  }
+  .note {
+    border-top: 5px dashed rgba(48,57,73,.32);
+    padding: 16px clamp(20px, 4vw, 42px) 22px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.6;
+    color: #526071;
+    background: rgba(255,255,255,.62);
+  }
+  @media (max-width: 760px) {
+    body { align-items: flex-start; }
+    header { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+    .choices { grid-template-columns: 1fr; }
+    .choice { min-height: 260px; }
+  }
+</style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="pet-badge" aria-hidden="true">🐾</div>
+      <div>
+        <h1>班級寵物養成系統 Pro</h1>
+        <p class="subtitle">班級經營、學生榜單、抽籤、計時器、白板、班級狀態與雲端同步整合工具。</p>
+      </div>
+    </header>
+
+    <section class="choices" aria-label="選擇使用版本">
+      <a class="choice full" href="./index-full.html">
+        <div>
+          <div class="choice-icon" aria-hidden="true">📚</div>
+          <h2>完整分頁版</h2>
+          <p>每個功能都有獨立分頁，資訊清楚、工具完整，適合大螢幕、熟悉操作流程或需要細部管理的老師。</p>
+        </div>
+        <span class="open">進入完整分頁版</span>
+      </a>
+
+      <a class="choice toolbox" href="./index-option2-toolbox.html">
+        <div>
+          <div class="choice-icon" aria-hidden="true">🧰</div>
+          <h2>工具箱版</h2>
+          <p>主要分頁更精簡，計時器、抽籤、白板與班級狀態集中在工具箱，適合低年級老師快速切換使用。</p>
+        </div>
+        <span class="open">進入工具箱版</span>
+      </a>
+    </section>
+
+    <p class="note">兩個版本保留同一套班級資料設計。老師可以依照當天教室情境選擇版本。</p>
+  </main>
+</body>
+</html>

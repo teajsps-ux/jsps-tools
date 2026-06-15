@@ -44,6 +44,22 @@ service cloud.firestore {
       }
     }
 
+    // 班級寵物養成系統 Pro:每位老師只能讀寫自己的資料
+    match /class-pet-pro-users/{userId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+
+      match /classes/{classId} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == userId;
+      }
+
+      match /daily-backups/{date} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == userId;
+      }
+    }
+
     // 作業清點矩陣同步房間:多裝置即時同步
     match /homework-matrix-rooms/{roomCode} {
       allow read: if request.auth != null;
