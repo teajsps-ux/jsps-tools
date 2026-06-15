@@ -1030,7 +1030,11 @@
             sourceStatus.value = `完成：已產生並下載 CSV，解析 ${questions.value.length} 題。`;
             sourceStatusType.value = 'info';
           } catch (error) {
-            sourceStatus.value = `AI 小幫手處理失敗：${error.message || error}`;
+            let msg = error.message || String(error);
+            if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('fetch')) {
+              msg = '無法連線至本機 AI 伺服器 (http://127.0.0.1:8787)。請確認您已在電腦上執行 `start-local-quiz-helper.ps1` 啟動本機小幫手，且該視窗仍維持開啟狀態！';
+            }
+            sourceStatus.value = `AI 小幫手處理失敗：${msg}`;
             sourceStatusType.value = 'error';
           } finally {
             isGenerating.value = false;
@@ -1063,7 +1067,11 @@
             ytStatus.value = `完成：已下載「${importedTitle.value}.csv」，解析 ${questions.value.length} 題。`;
             ytStatusType.value = 'success';
           } catch (error) {
-            ytStatus.value = `AI 小幫手處理失敗：${error.message || error}`;
+            let msg = error.message || String(error);
+            if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('fetch')) {
+              msg = '無法連線至本機 AI 伺服器 (http://127.0.0.1:8787)。請確認您已在電腦上執行 `start-local-quiz-helper.ps1` 啟動本機小幫手，且該視窗仍維持開啟狀態！';
+            }
+            ytStatus.value = `AI 小幫手處理失敗：${msg}`;
             ytStatusType.value = 'error';
           } finally {
             isGenerating.value = false;
