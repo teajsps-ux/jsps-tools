@@ -77,8 +77,24 @@
     @keyframes pop-fade { 0% { transform: scale(0.5); opacity: 1; } 20% { transform: scale(1.2); opacity: 1; } 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.8); opacity: 0; } }
 
     .bpmf-mode,
-    .bpmf-mode *:not(i):not(.fa):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not([class^="fa-"]):not([class*=" fa-"]) {
+    .bpmf-mode h1,
+    .bpmf-mode h2,
+    .bpmf-mode h3,
+    .bpmf-mode p,
+    .bpmf-mode span,
+    .bpmf-mode button,
+    .bpmf-mode select,
+    .bpmf-mode textarea,
+    .bpmf-mode input {
       font-family: 'Bpmf Iansui', "BiaoKai", "DFKai-SB", "KaiTi", "Noto Serif TC", serif !important;
+    }
+    .bpmf-mode i,
+    .bpmf-mode .fa,
+    .bpmf-mode .fas,
+    .bpmf-mode .far,
+    .bpmf-mode .fa-solid,
+    .bpmf-mode .fa-regular {
+      font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", sans-serif !important;
     }
     .bpmf-mode textarea,
     .bpmf-mode input[type="text"] {
