@@ -291,7 +291,14 @@ async function generateCsv(body) {
 
   let inputContent = [];
 
-  if (body.textSource) {
+  if (body.files && Array.isArray(body.files) && body.files.length > 0) {
+    inputContent = [
+      { type: "input_text", text: buildPrompt(body) }
+    ];
+    for (const file of body.files) {
+      inputContent.push(buildFileContent(file));
+    }
+  } else if (body.textSource) {
     const filename = body.filename || "貼上教材文章";
     inputContent = [
       { type: "input_text", text: buildTextPrompt({ filename }) },
