@@ -729,13 +729,28 @@
     let isDragging = false;
     let startX = 0, startY = 0;
     let translateX = 0, translateY = 0;
-    
+
+    // 確保工具列不超出視窗邊界
+    function clampToolbar() {
+      const rect = toolbar.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const margin = 8;
+      if (rect.left < margin) translateX += margin - rect.left;
+      if (rect.top < margin) translateY += margin - rect.top;
+      if (rect.right > vw - margin) translateX -= rect.right - (vw - margin);
+      if (rect.bottom > vh - margin) translateY -= rect.bottom - (vh - margin);
+      toolbar.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
+    }
+
     const savedX = localStorage.getItem('toolbar_x');
     const savedY = localStorage.getItem('toolbar_y');
     if (savedX && savedY) {
       translateX = parseFloat(savedX);
       translateY = parseFloat(savedY);
       toolbar.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
+      // 等 DOM 完成渲染後再 clamp（避免 getBoundingClientRect 在 layout 前失準）
+      requestAnimationFrame(clampToolbar);
     }
     
     dragHandle.addEventListener('mousedown', startDrag);
@@ -775,10 +790,11 @@
       isDragging = false;
       dragHandle.style.background = 'rgba(255, 255, 255, 0.95)';
       dragHandle.style.cursor = 'grab';
-      
+
+      clampToolbar();
       localStorage.setItem('toolbar_x', translateX);
       localStorage.setItem('toolbar_y', translateY);
-      
+
       document.removeEventListener('mousemove', drag);
       document.removeEventListener('touchmove', drag);
       document.removeEventListener('mouseup', endDrag);
