@@ -439,6 +439,11 @@ body.zhuyin-mode .if input { line-height: 2.2 !important; }
           <span>8. 數學題型 (計算與數數)</span>
           <input type="number" id="num-math" min="1" max="9" style="margin-left:auto"> 題
         </div>
+        <div class="config-item">
+          <input type="checkbox" id="cb-pirls">
+          <span>9. PIRLS四層次閱讀理解 (選擇)</span>
+          <input type="number" id="num-pirls" min="1" max="3" style="margin-left:auto"> 篇
+        </div>
       </div>
     </div>
     
@@ -519,6 +524,18 @@ const BANKS = [
       {id:'q1_16', stem:'計算： 5 + 3 = [ ]', speak:'五加三等於多少？', ans:'8', reveal:'✅ 5 + 3 = 8'},
       {id:'q1_17', stem:'比大小： 8 [ ] 12  （填入 > 、 < 或 =）', speak:'八小於十二。八和十二比大小。', ans:'<', reveal:'✅ 8 < 12'},
       {id:'q1_18', stem:'數一數： ▲▲▲▲▲ 有幾個三角形？ [ ] 個', speak:'數一數有幾個三角形？', ans:'5', reveal:'✅ 一共有 5 個三角形。'}
+    ],
+    pirls: [
+      {
+        passage: '小熊在森林裡迷路了。猴子哥哥看見了，主動走過來安慰他，並帶著他一起尋找回家的路。最後，小熊順利回到了媽媽身邊，高興地擁抱著媽媽。',
+        speakPassage: '小熊在森林裡迷路了。猴子哥哥看見了，主動走過來安慰他，並帶著他一起尋找回家的路。最後，小熊順利回到了媽媽身邊，高興地擁抱著媽媽。',
+        questions: [
+          {id:'q1_p_1', type:'choice', level:'提取特定訊息', stem:'誰在森林裡迷路了？', choices:[{v:'A',t:'小熊'},{v:'B',t:'猴子'},{v:'C',t:'松鼠'},{v:'D',t:'兔子'}], ans:'A'},
+          {id:'q1_p_2', type:'choice', level:'直接推論', stem:'猴子哥哥看到小熊後怎麼做？', choices:[{v:'A',t:'帶他找路'},{v:'B',t:'自己跑走'},{v:'C',t:'大聲嘲笑'},{v:'D',t:'叫他唱歌'}], ans:'A'},
+          {id:'q1_p_3', type:'choice', level:'詮釋整合', stem:'這個故事主要想告訴我們什麼？', choices:[{v:'A',t:'助人真快樂'},{v:'B',t:'爬樹很好玩'},{v:'C',t:'不要去森林'},{v:'D',t:'要多吃香蕉'}], ans:'A'},
+          {id:'q1_p_4', type:'choice', level:'比較評估', stem:'故事最後，小熊的心情是怎樣的？', choices:[{v:'A',t:'高興溫暖'},{v:'B',t:'生氣難過'},{v:'C',t:'害怕發抖'},{v:'D',t:'非常疲倦'}], ans:'A'}
+        ]
+      }
     ]
   },
 
@@ -581,6 +598,18 @@ const BANKS = [
       {id:'q2_16', stem:'計算： 12 + 6 = [ ]', speak:'十二加六等於多少？', ans:'18', reveal:'✅ 12 + 6 = 18'},
       {id:'q2_17', stem:'比大小： 15 [ ] 10  （填入 > 、 < 或 =）', speak:'十五大於十。十五和十比大小。', ans:'>', reveal:'✅ 15 > 10'},
       {id:'q2_18', stem:'數一數： ●●●●●● 有幾個圓形？ [ ] 個', speak:'數一數有幾個圓形？', ans:'6', reveal:'✅ 一共有 6 個圓形。'}
+    ],
+    pirls: [
+      {
+        passage: '小松鼠在大樹上存了許多松果準備過冬。有一天，風吹得特別大，把他的松果都吹落到樹下。小兔子路過，熱心地幫小松鼠一粒一粒撿起來。松鼠為了感謝他，分了一半松果給小兔子，他們都感到很滿足。',
+        speakPassage: '小松鼠在大樹上存了許多松果準備過冬。有一天，風吹得特別大，把他的松果都吹落到樹下。小兔子路過，熱心地幫小松鼠一粒一粒撿起來。松鼠為了感謝他，分了一半松果給小兔子，他們都感到很滿足。',
+        questions: [
+          {id:'q2_p_1', type:'choice', level:'提取特定訊息', stem:'小松鼠存松果是為了什麼？', choices:[{v:'A',t:'準備過冬'},{v:'B',t:'拿去送人'},{v:'C',t:'在大樹玩'},{v:'D',t:'練習丟球'}], ans:'A'},
+          {id:'q2_p_2', type:'choice', level:'直接推論', stem:'松果為什麼會掉落到樹下？', choices:[{v:'A',t:'大風吹落'},{v:'B',t:'兔子搖樹'},{v:'C',t:'松鼠丟下'},{v:'D',t:'樹枝斷了'}], ans:'A'},
+          {id:'q2_p_3', type:'choice', level:'詮釋整合', stem:'小松鼠分一半松果給兔子，是因為？', choices:[{v:'A',t:'感謝幫忙'},{v:'B',t:'松果太多'},{v:'C',t:'他不愛吃'},{v:'D',t:'兔子搶走'}], ans:'A'},
+          {id:'q2_p_4', type:'choice', level:'比較評估', stem:'從小松鼠和兔子的互動中，我們學到？', choices:[{v:'A',t:'互助與感恩'},{v:'B',t:'風大不出門'},{v:'C',t:'多吃蔬菜好'},{v:'D',t:'松鼠很小氣'}], ans:'A'}
+        ]
+      }
     ]
   },
 
@@ -643,6 +672,18 @@ const BANKS = [
       {id:'q3_16', stem:'計算： 20 - 7 = [ ]', speak:'二十減七等於多少？', ans:'13', reveal:'✅ 20 - 7 = 13'},
       {id:'q3_17', stem:'比大小： 18 [ ] 18  （填入 > 、 < 或 =）', speak:'十八和十八比大小，兩者相等。', ans:'=', reveal:'✅ 18 = 18'},
       {id:'q3_18', stem:'數一數： ■■■■■■■ 有幾個正方形？ [ ] 個', speak:'數一數有幾個正方形？', ans:'7', reveal:'✅ 一共有 7 個正方形。'}
+    ],
+    pirls: [
+      {
+        passage: '一隻小蝸牛慢慢地往葡萄樹頂端爬。樹上的黃鸝鳥笑他爬得慢，說葡萄成熟還早呢。蝸牛回答說：「黃鸝鳥，你不要笑我。等我爬上去的時候，葡萄就已經成熟了。」蝸牛沒有停下腳步，最後他真的吃到了甜甜的葡萄。',
+        speakPassage: '一隻小蝸牛慢慢地往葡萄樹頂端爬。樹上的黃鸝鳥笑他爬得慢，說葡萄成熟還早呢。蝸牛回答說：黃鸝鳥，你不要笑我。等我爬上去的時候，葡萄就已經成熟了。蝸牛沒有停下腳步，最後他真的吃到了甜甜的葡萄。',
+        questions: [
+          {id:'q3_p_1', type:'choice', level:'提取特定訊息', stem:'是誰在嘲笑小蝸牛？', choices:[{v:'A',t:'黃鸝鳥'},{v:'B',t:'小兔子'},{v:'C',t:'葡萄樹'},{v:'D',t:'松鼠哥哥'}], ans:'A'},
+          {id:'q3_p_2', type:'choice', level:'直接推論', stem:'蝸牛為什麼那麼早就開始往上爬？', choices:[{v:'A',t:'因為他走得慢'},{v:'B',t:'因為他很愛玩'},{v:'C',t:'因為黃鸝鳥叫他爬'},{v:'D',t:'因為葡萄成熟了'}], ans:'A'},
+          {id:'q3_p_3', type:'choice', level:'詮釋整合', stem:'這個故事主要想告訴我們什麼道理？', choices:[{v:'A',t:'堅持與耐心能成功'},{v:'B',t:'黃鸝鳥飛得最快'},{v:'C',t:'葡萄是甜甜的'},{v:'D',t:'蝸牛喜歡葡萄樹'}], ans:'A'},
+          {id:'q3_p_4', type:'choice', level:'比較評估', stem:'如果為這個故事選一個啟示標題，最適合的是？', choices:[{v:'A',t:'有志者事竟成'},{v:'B',t:'嘲笑別人最快樂'},{v:'C',t:'飛得高看得遠'},{v:'D',t:'葡萄成熟的季節'}], ans:'A'}
+        ]
+      }
     ]
   }
 ];
@@ -668,6 +709,7 @@ let activeConfig = {
     circle: { enabled: false, count: 2 },
     character: { enabled: false, count: 2 },
     reading: { enabled: false, count: 1 },
+    pirls: { enabled: false, count: 1 },
     math: { enabled: false, count: 3 }
   }
 };
@@ -729,6 +771,7 @@ function rebuildExam() {
     circle: [],
     character: [],
     reading: [],
+    pirls: [],
     math: []
   };
 
@@ -741,6 +784,7 @@ function rebuildExam() {
     if (bank.circles) pool.circle.push(...bank.circles);
     if (bank.characters) pool.character.push(...bank.characters);
     if (bank.readings) pool.reading.push(...bank.readings);
+    if (bank.pirls) pool.pirls.push(...bank.pirls);
     if (bank.maths) pool.math.push(...bank.maths);
   });
 
@@ -750,7 +794,7 @@ function rebuildExam() {
   let chIndex = 0; 
   let html = '';
 
-  const typesOrder = ['choice', 'zhuyin', 'match', 'sort', 'circle', 'character', 'reading', 'math'];
+  const typesOrder = ['choice', 'zhuyin', 'match', 'sort', 'circle', 'character', 'reading', 'pirls', 'math'];
   const titles = {
     choice: '選一選：看注音，選出正確的字 🔤',
     zhuyin: '填一填：點擊格子，用注音鍵盤填入正確的注音 ㄅ',
@@ -759,6 +803,7 @@ function rebuildExam() {
     circle: '圈一圈：圈出正確的答案 ⭕',
     character: '寫一寫：看注音，填入正確的國字 ✏️',
     reading: '讀一讀：閱讀理解練習 📖',
+    pirls: '讀一讀：PIRLS四層次閱讀理解 📚',
     math: '算一算：數學小達人 🔢'
   };
   const gradients = {
@@ -769,6 +814,7 @@ function rebuildExam() {
     circle: 'linear-gradient(135deg,#26C6DA 0%,#43A047 100%)',
     character: 'linear-gradient(135deg,#FFB300 0%,#FF7043 100%)',
     reading: 'linear-gradient(135deg,#E040FB 0%,#5B8DEF 100%)',
+    pirls: 'linear-gradient(135deg,#7B6CF6 0%,#E040FB 100%)',
     math: 'linear-gradient(135deg,#FF7043 0%,#E040FB 100%)'
   };
 
@@ -923,6 +969,33 @@ function rebuildExam() {
           html += `</div>`;
         });
         html += `<div class="ar" id="ar_${qid}">✅ 閱讀理解完成！請核對解析。</div></div>`;
+      });
+    } else if (type === 'pirls') {
+      qList.forEach(q => {
+        const qid = `aq_${qIndex}`;
+        activeQuestions.push({ id: qid, type: 'pirls', subQuestions: q.questions, reveal: '✅ PIRLS 閱讀理解測驗完成！', data: q });
+        html += `<div class="q" id="${qid}">
+        <div class="qstem">
+          <span class="qn">${qIndex++}.</span>
+          <span>閱讀文章，並回答下方的 PIRLS 四層次閱讀理解問題：</span>
+          <button class="rb" id="rb_${qid}" onclick="rq('${qid}','${q.speakPassage}','rb_${qid}')">🔊 朗讀文章</button>
+        </div>
+        <div class="si" style="font-size:1.1rem; line-height:2.2;" id="${qid}t">${q.passage}</div>`;
+
+        q.questions.forEach((sq, sqi) => {
+          html += `<div style="margin-top:16px; padding-left:14px; border-left:3px solid var(--p);">
+          <div style="font-weight:700; margin-bottom:8px;">(${sqi+1}) <span style="font-size:0.8rem; background:var(--pl); color:var(--p); padding:2px 8px; border-radius:99px; margin-right:4px;">${sq.level}</span> ${sq.stem}</div>`;
+          if (sq.type === 'choice') {
+            html += `<div class="choices">`;
+            sq.choices.forEach((c, ci) => {
+              html += `<div class="ch" data-q="${sq.id}" data-v="${c.v}" onclick="pick(this)" tabindex="0">
+              <span class="cl">${LABELS[ci]}</span><span>${c.t}</span></div>`;
+            });
+            html += `</div>`;
+          }
+          html += `</div>`;
+        });
+        html += `<div class="ar" id="ar_${qid}">✅ PIRLS 閱讀理解解析已顯示。</div></div>`;
       });
     } else if (type === 'math') {
       qList.forEach(q => {
@@ -1144,6 +1217,21 @@ function submitExam(){
         }
       });
       isCorrect = true; // Section container is always true, subquestions are graded individually
+    } else if (type === 'pirls') {
+      aq.subQuestions.forEach(sq => {
+        tot++;
+        if (sq.type === 'choice') {
+          const sqCorrect = (uAns[sq.id] === sq.ans);
+          if (sqCorrect) ok++;
+          detail[sq.id] = (sqCorrect ? 'O' : 'X') + ' (選' + (labelMap[uAns[sq.id]] || '空') + ')';
+          document.querySelectorAll(`[data-q="${sq.id}"]`).forEach(x => {
+            x.onclick = null;
+            if (x.dataset.v === sq.ans) x.classList.add('ok');
+            else if (x.classList.contains('sel')) x.classList.add('err');
+          });
+        }
+      });
+      isCorrect = true;
     } else if (type === 'math') {
       tot++;
       const val = (document.querySelector(`input[data-q="${qid}"]`)?.value || '').trim();
