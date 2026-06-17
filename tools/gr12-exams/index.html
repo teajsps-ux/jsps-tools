@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>低年級互動考卷 · jsps-tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --header-bg: #1e3a8a;
+    --header-bg-light: #2d4ba0;
+    --page-bg: #f6f4ee;
+    --text: #2d2d2d;
+    --muted: #6b7280;
+    
+    --guoyu-color: #4f46e5;
+    --guoyu-light: #eef2ff;
+    --math-color: #10b981;
+    --math-light: #ecfdf5;
+    --life-color: #f59e0b;
+    --life-light: #fffbeb;
+  }
+  html, body {
+    min-height: 100%;
+    font-family: 'Noto Sans TC', "Microsoft JhengHei", sans-serif;
+    color: var(--text);
+    background: var(--page-bg);
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .hero {
+    background: linear-gradient(135deg, var(--header-bg) 0%, var(--header-bg-light) 100%);
+    color: white;
+    padding: clamp(32px, 6vw, 60px) clamp(20px, 4vw, 48px) clamp(48px, 7vw, 78px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before, .hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+  .hero::before {
+    width: 240px; height: 240px;
+    top: -80px; left: -80px;
+  }
+  .hero::after {
+    width: 190px; height: 190px;
+    bottom: -60px; right: -50px;
+  }
+  .hero h1 {
+    font-size: clamp(30px, 5vw, 48px);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    position: relative;
+  }
+  .hero .subtitle {
+    font-size: clamp(14px, 2vw, 18px);
+    opacity: 0.9;
+    line-height: 1.7;
+    position: relative;
+  }
+  .content {
+    flex-grow: 1;
+    max-width: 1150px;
+    width: 100%;
+    margin: -40px auto 0;
+    padding: 0 clamp(16px, 3vw, 32px) clamp(40px, 5vw, 64px);
+    position: relative;
+    z-index: 10;
+  }
+  .panel {
+    background: white;
+    border-radius: 20px;
+    padding: clamp(20px, 3vw, 40px);
+    box-shadow: 0 10px 40px rgba(30, 58, 138, 0.12);
+  }
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    color: #1e3a8a;
+    text-decoration: none;
+    font-weight: 700;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 12px;
+    font-size: 23px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .back-link:hover, .back-link:focus-visible {
+    background: #dbeafe;
+    transform: translateX(-2px);
+    outline: none;
+  }
+  .note {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 520px;
+  }
+  
+  /* 科目版面欄位 */
+  .subject-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 10px;
+  }
+  
+  .subject-column {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .subject-header {
+    font-size: 18px;
+    font-weight: 700;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    border-bottom: 3px solid;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .subject-header.guoyu { border-color: var(--guoyu-color); color: var(--guoyu-color); }
+  .subject-header.math { border-color: var(--math-color); color: var(--math-color); }
+  .subject-header.life { border-color: var(--life-color); color: var(--life-color); }
+  
+  .exam-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex-grow: 1;
+  }
+  
+  /* 考卷卡片樣式 */
+  .exam-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  
+  .exam-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  }
+  
+  .exam-title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    color: #1e293b;
+  }
+  
+  .exam-date {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .exam-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: center;
+    cursor: pointer;
+  }
+  
+  .btn-primary {
+    background: #3b82f6;
+    color: white;
+    border: none;
+  }
+  .btn-primary:hover {
+    background: #2563eb;
+  }
+  
+  .btn-secondary {
+    background: #10b981;
+    color: white;
+    border: none;
+  }
+  .btn-secondary:hover {
+    background: #059669;
+  }
+  
+  .btn-outline {
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+    background: transparent;
+    grid-column: span 2;
+  }
+  .btn-outline:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+  
+  .placeholder-text {
+    text-align: center;
+    color: var(--muted);
+    padding: 30px 10px;
+    font-size: 14px;
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+  }
+  
+  /* QR Code 彈窗 Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  
+  .modal {
+    background: white;
+    border-radius: 20px;
+    max-width: 400px;
+    width: 100%;
+    padding: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    position: relative;
+    animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes pop {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #1e293b;
+  }
+  .modal-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .modal-qr-container {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .qr-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .qr-img {
+    width: 150px;
+    height: 150px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 4px;
+  }
+  .qr-label {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    color: white;
+  }
+  .qr-label.a-version { background: #3b82f6; }
+  .qr-label.b-version { background: #10b981; }
+  
+  .modal-close {
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    width: 100%;
+  }
+  .modal-close:hover {
+    background: #e2e8f0;
+  }
+  
+  footer {
+    text-align: center;
+    padding: 24px 20px;
+    font-size: 13px;
+    color: #8a8572;
+    margin-top: auto;
+  }
+  footer a { color: #3498db; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  
+  @media (max-width: 960px) {
+    .subject-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+  @media (max-width: 640px) {
+    .hero { padding: 28px 16px 58px; }
+    .hero h1 { font-size: 28px; }
+    .content { margin-top: -34px; padding: 0 12px 36px; }
+    .panel { border-radius: 16px; padding: 18px 14px 22px; }
+    .top-row { display: block; margin-bottom: 18px; }
+    .back-link { margin-bottom: 12px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>🎒 低年級互動考卷</h1>
+    <p class="subtitle">自動化線上考卷系統 · 支援平板施測與 QR Code 快速掃描</p>
+  </div>
+
+  <div class="content">
+    <div class="panel">
+      <div class="top-row">
+        <a class="back-link" href="../../" aria-label="回工具箱首頁" title="回工具箱首頁">←</a>
+        <p class="note">點擊考卷版本可開啟作答分頁。提供 QR Code 方便老師投影在教室螢幕供平板掃描施測。</p>
+      </div>
+
+      <div class="subject-grid">
+        <!-- 國語科 -->
+        <div class="subject-column">
+          <h3 class="subject-header guoyu">📚 國語科</h3>
+          <div class="exam-list" id="list-guoyu">
+            <div class="placeholder-text">讀取中...</div>
+          </div>
+        </div>
+
+        <!-- 數學科 -->
+        <div class="subject-column">
+          <h3 class="subject-header math">📐 數學科</h3>
+          <div class="exam-list" id="list-math">
+            <div class="placeholder-text">讀取中...</div>
+          </div>
+        </div>
+
+        <!-- 生活科 -->
+        <div class="subject-column">
+          <h3 class="subject-header life">🌱 生活科</h3>
+          <div class="exam-list" id="list-life">
+            <div class="placeholder-text">讀取中...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Code Modal -->
+  <div class="modal-overlay" id="qr-modal" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title" id="modal-title">考卷 QR Code</div>
+      <div class="modal-subtitle">請使用平板或手機鏡頭掃描即可開始測驗</div>
+      <div class="modal-qr-container">
+        <div class="qr-box">
+          <img class="qr-img" id="qr-img-a" src="" alt="A版 QR Code">
+          <span class="qr-label a-version">A 版考卷</span>
+        </div>
+        <div class="qr-box">
+          <img class="qr-img" id="qr-img-b" src="" alt="B版 QR Code">
+          <span class="qr-label b-version">B 版考卷</span>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal(null)">關閉視窗</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>🛠️ jsps-tools · 用 GitHub Pages 打造</p>
+  </footer>
+
+  <script>
+    // 取得考卷清單
+    async function loadExams() {
+      try {
+        const response = await fetch('./exams_list.json?t=' + Date.now());
+        if (!response.ok) throw new Error('無法載入考卷清單');
+        const exams = await response.ok ? await response.json() : [];
+        renderExams(exams);
+      } catch (e) {
+        console.error(e);
+        document.querySelectorAll('.exam-list').forEach(el => {
+          el.innerHTML = '<div class="placeholder-text" style="color: #ef4444;">載入失敗，請確認檔案是否存在。</div>';
+        });
+      }
+    }
+
+    function renderExams(exams) {
+      const lists = {
+        guoyu: document.getElementById('list-guoyu'),
+        math: document.getElementById('list-math'),
+        life: document.getElementById('list-life')
+      };
+
+      // 清空清單
+      Object.values(lists).forEach(el => el.innerHTML = '');
+
+      const count = { guoyu: 0, math: 0, life: 0 };
+
+      exams.forEach(exam => {
+        const sub = exam.subject || 'guoyu';
+        if (!lists[sub]) return;
+
+        count[sub]++;
+        const card = document.createElement('div');
+        card.className = 'exam-card';
+        
+        const pathA = exam.files.A;
+        const pathB = exam.files.B;
+        const qrA = exam.qrcodes.A;
+        const qrB = exam.qrcodes.B;
+
+        card.innerHTML = `
+          <div class="exam-title">${escapeHTML(exam.title)}</div>
+          <div class="exam-date">📅 出卷日期：${exam.date || '未知'}</div>
+          <div class="exam-buttons">
+            <a class="btn btn-primary" href="./${pathA}" target="_blank">A 版考卷</a>
+            <a class="btn btn-secondary" href="./${pathB}" target="_blank">B 版考卷</a>
+            <button class="btn btn-outline" onclick="showQRCodes('${escapeJS(exam.title)}', './${qrA}', './${qrB}')">📱 顯示施測 QR Code</button>
+          </div>
+        `;
+        lists[sub].appendChild(card);
+      });
+
+      // 填充空白科目
+      Object.keys(lists).forEach(key => {
+        if (count[key] === 0) {
+          lists[key].innerHTML = '<div class="placeholder-text">目前尚無此科目考卷 ☕</div>';
+        }
+      });
+    }
+
+    function showQRCodes(title, qrA, qrB) {
+      document.getElementById('modal-title').textContent = title + ' QR Code';
+      document.getElementById('qr-img-a').src = qrA;
+      document.getElementById('qr-img-b').src = qrB;
+      document.getElementById('qr-modal').classList.add('open');
+    }
+
+    function closeModal(event) {
+      if (!event || event.target === document.getElementById('qr-modal') || event.target.className === 'modal-close') {
+        document.getElementById('qr-modal').classList.remove('open');
+      }
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    function escapeJS(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    // 初始化
+    loadExams();
+  </script>
+</body>
+</html>
