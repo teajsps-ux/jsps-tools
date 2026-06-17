@@ -304,6 +304,11 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .qr-box:hover {
+    transform: scale(1.06);
   }
   .qr-img {
     width: 150px;
@@ -311,6 +316,7 @@
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     padding: 4px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
   .qr-label {
     font-size: 13px;
@@ -336,6 +342,61 @@
   }
   .modal-close:hover {
     background: #e2e8f0;
+  }
+
+  /* 單一 QR Code 全螢幕放大 */
+  .fullscreen-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: zoom-out;
+  }
+  .fullscreen-overlay.open {
+    display: flex;
+  }
+  .fullscreen-qr-img {
+    width: min(75vw, 75vh);
+    height: min(75vw, 75vh);
+    max-width: 480px;
+    max-height: 480px;
+    background: white;
+    padding: 16px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    margin-bottom: 24px;
+    animation: zoomIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes zoomIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .fullscreen-title {
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    text-align: center;
+    padding: 0 20px;
+    color: #f1f5f9;
+  }
+  .fullscreen-label {
+    font-size: 16px;
+    font-weight: 700;
+    padding: 6px 20px;
+    border-radius: 99px;
+    color: white;
+  }
+  .fullscreen-tip {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-top: 20px;
   }
   
   footer {
@@ -412,17 +473,25 @@
       <div class="modal-title" id="modal-title">考卷 QR Code</div>
       <div class="modal-subtitle">請使用平板或手機鏡頭掃描即可開始測驗</div>
       <div class="modal-qr-container">
-        <div class="qr-box">
+        <div class="qr-box" onclick="zoomQR('A')" title="點擊放大此 QR Code">
           <img class="qr-img" id="qr-img-a" src="" alt="A版 QR Code">
           <span class="qr-label a-version">A 版考卷</span>
         </div>
-        <div class="qr-box">
+        <div class="qr-box" onclick="zoomQR('B')" title="點擊放大此 QR Code">
           <img class="qr-img" id="qr-img-b" src="" alt="B版 QR Code">
           <span class="qr-label b-version">B 版考卷</span>
         </div>
       </div>
       <button class="modal-close" onclick="closeModal(null)">關閉視窗</button>
     </div>
+  </div>
+
+  <!-- 單一 QR Code 全螢幕放大 Overlay -->
+  <div class="fullscreen-overlay" id="fullscreen-overlay" onclick="closeZoom()">
+    <div class="fullscreen-title" id="fs-title">考卷標題</div>
+    <img class="fullscreen-qr-img" id="fs-img" src="" alt="放大 QR Code">
+    <span class="fullscreen-label" id="fs-label">A 版考卷</span>
+    <div class="fullscreen-tip">💡 點擊任意處可返回</div>
   </div>
 
   <footer>
@@ -490,11 +559,41 @@
       });
     }
 
+    let currentQRs = { A: '', B: '' };
+    let currentExamTitle = '';
+
     function showQRCodes(title, qrA, qrB) {
+      currentExamTitle = title;
+      currentQRs.A = qrA;
+      currentQRs.B = qrB;
       document.getElementById('modal-title').textContent = title + ' QR Code';
       document.getElementById('qr-img-a').src = qrA;
       document.getElementById('qr-img-b').src = qrB;
       document.getElementById('qr-modal').classList.add('open');
+    }
+
+    function zoomQR(version) {
+      const overlay = document.getElementById('fullscreen-overlay');
+      const img = document.getElementById('fs-img');
+      const label = document.getElementById('fs-label');
+      const title = document.getElementById('fs-title');
+
+      title.textContent = currentExamTitle;
+      img.src = currentQRs[version];
+      label.textContent = version + ' 版考卷';
+      label.className = 'fullscreen-label ' + (version === 'A' ? 'a-version' : 'b-version');
+
+      if (version === 'A') {
+        label.style.backgroundColor = '#3b82f6';
+      } else {
+        label.style.backgroundColor = '#10b981';
+      }
+
+      overlay.classList.add('open');
+    }
+
+    function closeZoom() {
+      document.getElementById('fullscreen-overlay').classList.remove('open');
     }
 
     function closeModal(event) {
