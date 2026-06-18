@@ -12,5 +12,19 @@
       "A": "guoyu/KH115-L03-A.png",
       "B": "guoyu/KH115-L03-B.png"
     }
+  },
+  {
+    "id": "KH115-M03",
+    "subject": "math",
+    "title": "一年七班 數學第3~5單元 平時測驗",
+    "date": "2026-06-18",
+    "files": {
+      "A": "math/KH115-M03-A.html",
+      "B": "math/KH115-M03-B.html"
+    },
+    "qrcodes": {
+      "A": "math/KH115-M03-A.png",
+      "B": "math/KH115-M03-B.png"
+    }
   }
 ]

@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一年級 數學科第 3~5 單元 平時測驗A版</title>
+<meta name="description" content="國小一年級數學段考互動式考卷，支援注音字型切換、語音導讀、三組題庫、教師後台、出卷設定精靈">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@600;700;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bpmf+Iansui&display=swap" rel="stylesheet">
+<style>
+/* ── 本機 Bpmf Iansui 字型 (備援 Google Fonts) ── */
+@font-face {
+  font-family: 'Bpmf Iansui';
+  src: local('BpmfIansui-Regular'),
+       local('Bpmf Iansui'),
+       local('注音芫荽BpmfIansui-Regular');
+  font-display: swap;
+}
+:root{
+  --p:#4a90e2;--pl:#e6f0fa;--ac:#ff9f1c;--al:#fff8e7;
+  --ok:#2ec4b6;--okl:#e8f8f5;--bg:#f5f7fa;--sf:#ffffff;
+  --tx:#2b2d42;--ts:#5e6472;--bd:#d2e2f7;
+  --sh:0 4px 20px rgba(74,144,226,.12);
+  --r:16px;--rs:10px;
+  --zc:#e71d36;--hl:#ffe57f;--kb:#eef2ff;--ka:#4a90e2;
+}
+[data-theme=dark] {
+  --bg:#12152A;--sf:#1E2240;--tx:#E8EAFF;--ts:#8890B8;
+  --bd:#2E3460;--sh:0 4px 20px rgba(0,0,0,.4);
+  --pl:#1A2455;--al:#2A1510;--kb:#252A50;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:18px;scroll-behavior:smooth}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;transition:background .3s,color .3s}
+ruby{ruby-align:center}
+rt{display:none;font-size:.58em;color:var(--zc);font-weight:700;letter-spacing:0;line-height:1}
+.show-zhuyin rt{display:block}
+.hl{background:var(--hl);border-radius:3px;transition:background .15s}
+#bar{position:sticky;top:0;z-index:100;background:var(--sf);border-bottom:2px solid var(--bd);
+  box-shadow:var(--sh);padding:8px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#bar-title{font-weight:700;font-size:.88rem;color:var(--p);flex:1;min-width:150px}
+.badge{background:var(--ac);color:#fff;padding:2px 10px;border-radius:99px;font-size:.75rem;font-weight:700;font-family:'Outfit',sans-serif}
+#bank-badge{background:linear-gradient(90deg,#2ec4b6,#4a90e2);color:#fff;padding:2px 10px;border-radius:99px;font-size:.72rem;font-weight:700}
+#timer{font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:700;background:var(--pl);padding:5px 12px;border-radius:99px}
+#timer.warn{color:#e71d36;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.5}}
+.cb{display:flex;align-items:center;gap:4px;padding:7px 13px;border-radius:99px;
+  border:2px solid var(--bd);background:var(--sf);color:var(--tx);
+  font-family:'Noto Sans TC',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;
+  transition:all .18s;min-height:44px;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.cb:hover,.cb:focus{border-color:var(--p);color:var(--p);transform:translateY(-1px)}
+.cb.on{background:var(--p);color:#fff;border-color:var(--p)}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+#info{background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);
+  padding:18px 20px;margin-bottom:22px;box-shadow:var(--sh)}
+#info h2{font-size:.9rem;color:var(--ts);margin-bottom:12px}
+.ir{display:flex;gap:12px;flex-wrap:wrap}
+.if{display:flex;align-items:center;gap:8px;flex:1;min-width:140px}
+.if label{font-weight:700;font-size:.9rem;white-space:nowrap;color:var(--ts)}
+.if input{flex:1;border:2px solid var(--bd);border-radius:8px;padding:8px 12px;
+  font-size:1rem;font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tx);
+  transition:border .2s;min-width:60px}
+.if input:focus{outline:none;border-color:var(--p)}
+.sec{background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);
+  margin-bottom:24px;box-shadow:var(--sh);overflow:hidden}
+.sh{color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px}
+.sn{font-family:'Outfit',sans-serif;font-size:1.05rem;font-weight:700;
+  background:rgba(255,255,255,.25);border-radius:8px;padding:2px 10px}
+.st{font-size:1rem;font-weight:700;flex:1}
+.ss{font-size:.8rem;opacity:.85}
+.sb{padding:20px}
+.si{font-size:.9rem;color:var(--ts);margin-bottom:16px;padding:10px 14px;
+  background:var(--pl);border-radius:var(--rs);border-left:4px solid var(--p);line-height:1.6}
+.q{margin-bottom:22px;padding-bottom:18px;border-bottom:1px dashed var(--bd)}
+.q:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.qstem{font-size:1.05rem;font-weight:700;line-height:2.2;margin-bottom:12px;
+  display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.qn{font-family:'Outfit',sans-serif;font-weight:700;color:var(--p);min-width:26px}
+.rb{display:inline-flex;align-items:center;gap:3px;font-size:.78rem;padding:4px 10px;
+  border-radius:99px;border:1.5px solid var(--p);color:var(--p);background:var(--pl);
+  cursor:pointer;font-family:'Noto Sans TC',sans-serif;font-weight:600;
+  transition:all .18s;min-height:32px;-webkit-tap-highlight-color:transparent}
+.rb:hover{background:var(--p);color:#fff}
+.rb.spk{background:var(--ac);border-color:var(--ac);color:#fff}
+.choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px}
+.ch{display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid var(--bd);
+  border-radius:var(--rs);cursor:pointer;transition:all .2s;user-select:none;
+  -webkit-tap-highlight-color:transparent;font-size:1rem;line-height:1.8;min-height:52px}
+.ch:hover{border-color:var(--p);background:var(--pl);transform:translateY(-2px)}
+.ch.sel{border-color:var(--p);background:var(--pl)}
+.ch.ok{border-color:var(--ok);background:var(--okl)}
+.ch.err{border-color:#E53935;background:#FFEBEE}
+.cl{font-family:'Outfit',sans-serif;font-weight:700;font-size:.85rem;background:var(--p);
+  color:#fff;border-radius:6px;padding:2px 8px;min-width:28px;text-align:center;flex-shrink:0}
+.ch.ok .cl{background:var(--ok)}
+.ch.err .cl{background:#E53935}
+.zif{border:2px solid var(--bd);border-radius:8px;padding:8px 12px;font-size:1rem;
+  min-width:80px;background:var(--bg);color:var(--zc);font-weight:700;cursor:pointer;
+  transition:border .2s;text-align:center;display:inline-block;min-height:44px;line-height:1.5}
+.zif.act{border-color:var(--p);box-shadow:0 0 0 3px rgba(74,144,226,.22)}
+.mc{display:flex;gap:16px;align-items:flex-start}
+.mcol{display:flex;flex-direction:column;gap:10px;flex:1}
+.mi{padding:11px 13px;border:2px solid var(--bd);border-radius:var(--rs);
+  font-size:1rem;font-weight:500;line-height:1.8;cursor:pointer;transition:all .2s;
+  min-height:50px;display:flex;align-items:center;-webkit-tap-highlight-color:transparent;user-select:none}
+.mi:hover{border-color:var(--p);background:var(--pl)}
+.mi.sel{border-color:var(--p);background:var(--pl)}
+.mi.mat{pointer-events:none}
+.ar{display:none;margin-top:12px;padding:11px 14px;border-radius:var(--rs);font-size:.88rem;line-height:1.7}
+.ar.show{display:block}
+.ar.oka{background:var(--okl);border-left:4px solid var(--ok);color:#2E7D32}
+.ar.era{background:#FFEBEE;border-left:4px solid #E53935;color:#C62828}
+body.teacher .ar{display:block}
+
+/* ── 填入國字 (Type 6) / 數學 (Type 8) ── */
+.char-input{width:48px;height:48px;text-align:center;border:2px solid var(--bd);border-radius:8px;
+  font-size:1.2rem;font-weight:700;background:var(--bg);color:var(--tx);transition:border-color .2s;outline:none}
+.char-input:focus{border-color:var(--p)}
+.math-input{width:64px;height:44px;text-align:center;border:2px solid var(--bd);border-radius:8px;
+  font-size:1.1rem;font-weight:700;background:var(--bg);color:var(--tx);transition:border-color .2s;outline:none}
+.math-input:focus{border-color:var(--p)}
+
+/* ── 成績卡 ── */
+#sov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  backdrop-filter:blur(8px);z-index:300;align-items:center;justify-content:center;padding:20px}
+#sov.open{display:flex}
+#scard{background:rgba(255,255,255,.93);backdrop-filter:blur(20px);
+  border:2px solid rgba(255,255,255,.6);border-radius:24px;padding:32px 28px;
+  max-width:440px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,.22);text-align:center;
+  animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+[data-theme=dark] #scard{background:rgba(30,34,64,.95);border-color:rgba(255,255,255,.12)}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+#spct{font-family:'Outfit',sans-serif;font-size:2.3rem;font-weight:900;color:var(--p);display:block;margin-bottom:4px}
+#sstars{font-size:1.9rem;margin-bottom:10px;letter-spacing:4px}
+#sdet{color:var(--ts);font-size:.9rem;margin-bottom:4px}
+#smsg{font-size:1.05rem;font-weight:700;margin:14px 0 22px}
+.sbtn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.sbtn{padding:10px 20px;border-radius:99px;border:2px solid var(--p);color:var(--p);
+  background:var(--pl);font-family:'Noto Sans TC',sans-serif;font-weight:700;
+  font-size:.92rem;cursor:pointer;transition:all .2s;min-height:44px}
+.sbtn.pri{background:var(--p);color:#fff}
+.sbtn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(74,144,226,.3)}
+
+/* ── 再試一次選單 ── */
+#retry-menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  backdrop-filter:blur(8px);z-index:310;align-items:center;justify-content:center;padding:20px}
+#retry-menu.open{display:flex}
+#retry-card{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);
+  border:2px solid rgba(255,255,255,.6);border-radius:24px;padding:28px 24px;
+  max-width:380px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,.22);text-align:center;
+  animation:pop .35s cubic-bezier(.34,1.56,.64,1)}
+[data-theme=dark] #retry-card{background:rgba(30,34,64,.95)}
+#retry-card h3{font-size:1.1rem;font-weight:900;margin-bottom:6px}
+#retry-card p{color:var(--ts);font-size:.85rem;margin-bottom:18px}
+.retry-opt{display:flex;align-items:flex-start;gap:12px;padding:14px;border:2px solid var(--bd);
+  border-radius:var(--rs);margin-bottom:10px;cursor:pointer;transition:all .2s;text-align:left;width:100%}
+.retry-opt:hover{border-color:var(--p);background:var(--pl);transform:translateY(-2px)}
+.retry-icon{font-size:1.5rem;flex-shrink:0;margin-top:2px}
+.retry-text strong{display:block;font-size:.95rem;margin-bottom:3px}
+.retry-text span{font-size:.8rem;color:var(--ts)}
+.retry-cancel{color:var(--ts);font-size:.85rem;cursor:pointer;margin-top:6px;display:block}
+.retry-cancel:hover{color:var(--p)}
+
+/* ── 出卷設定精靈 ── */
+#config-menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  backdrop-filter:blur(8px);z-index:320;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+#config-menu.open{display:flex}
+#config-card{background:var(--sf);border:2px solid var(--bd);border-radius:24px;padding:24px;
+  max-width:540px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,.22);
+  animation:pop .35s ease;max-height:90vh;overflow-y:auto}
+#config-card h3{font-size:1.2rem;font-weight:900;margin-bottom:12px;color:var(--p);text-align:center}
+.config-sec{margin-bottom:16px;text-align:left}
+.config-sec h4{font-size:.9rem;color:var(--ts);margin-bottom:8px;border-bottom:1.5px solid var(--bd);padding-bottom:4px}
+.config-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.config-item{display:flex;align-items:center;gap:10px;font-size:.9rem;font-weight:700}
+.config-item input[type=checkbox]{width:20px;height:20px;cursor:pointer}
+.config-item input[type=number]{width:58px;padding:4px 6px;border:2px solid var(--bd);border-radius:6px;text-align:center;background:var(--bg);color:var(--tx)}
+.config-bank-row{display:flex;gap:10px;margin-bottom:8px}
+.config-bank-opt{flex:1;padding:10px 6px;border:2px solid var(--bd);border-radius:10px;text-align:center;cursor:pointer;font-size:.85rem;font-weight:700;transition:all .2s}
+.config-bank-opt.sel{border-color:var(--p);background:var(--pl);color:var(--p)}
+
+/* ── 送分通知 ── */
+#send-toast{position:fixed;top:80px;right:16px;z-index:400;background:#fff;
+  border:2px solid var(--ok);border-radius:var(--rs);padding:12px 18px;
+  box-shadow:var(--sh);font-size:.88rem;font-weight:700;color:var(--ok);
+  display:none;animation:slideIn .3s ease;cursor:pointer;transition:all .2s}
+#send-toast:hover{background:var(--okl);transform:scale(1.02)}
+#send-toast.show{display:block}
+@keyframes slideIn{from{transform:translateX(120%)}to{transform:translateX(0)}}
+
+/* ── submit / print ── */
+#sub-area{text-align:center;padding:28px 0 0}
+#sub-btn{padding:15px 46px;background:linear-gradient(135deg,var(--p) 0%,#7B6CF6 100%);
+  color:#fff;border:none;border-radius:99px;font-family:'Noto Sans TC',sans-serif;
+  font-size:1.05rem;font-weight:900;cursor:pointer;
+  box-shadow:0 6px 24px rgba(74,144,226,.35);transition:all .25s;min-height:54px;letter-spacing:.05em}
+#sub-btn:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(74,144,226,.45)}
+#ph{display:none;text-align:center;font-size:1.05rem;font-weight:900;margin-bottom:14px;padding:10px;border-bottom:2px solid #000}
+@media(max-width:600px){html{font-size:17px}.choices{grid-template-columns:1fr 1fr}#bar{gap:5px;padding:7px 11px}.cb{padding:6px 10px;font-size:.75rem}}
+@media(min-width:601px) and (max-width:1024px){html{font-size:19px}}
+@media(min-width:1025px){html{font-size:20px}}
+
+/* ── 虛擬鍵盤 ── */
+#kbd{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:var(--sf);border-top:2px solid var(--bd);padding:10px 14px 14px;
+  box-shadow:0 -8px 30px rgba(0,0,0,.15)}
+#kbd.open{display:block}
+#kbd-label{font-weight:700;color:var(--p);font-size:.9rem;margin-bottom:6px}
+#kbd-display{font-size:1.3rem;font-weight:700;min-height:42px;background:var(--bg);
+  border:2px solid var(--p);border-radius:var(--rs);padding:5px 12px;margin-bottom:8px;
+  color:var(--zc);display:flex;align-items:center}
+.kr{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px}
+.kgl{width:100%;font-size:.7rem;color:var(--ts);font-weight:600;margin-bottom:2px}
+.kk{min-width:44px;height:44px;border:2px solid var(--bd);border-radius:8px;background:var(--kb);
+  color:var(--tx);font-size:0.95rem;font-family:'Noto Sans TC',sans-serif;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .12s;-webkit-tap-highlight-color:transparent;padding:0 5px}
+.kk:hover,.kk:active{background:var(--ka);color:#fff;border-color:var(--ka);transform:scale(.95)}
+.kk.tone{background:var(--al);border-color:var(--ac);color:var(--ac)}
+.kk.tone:hover{background:var(--ac);color:#fff}
+.kk.act{background:#EEE;font-size:.78rem;padding:0 9px}
+[data-theme=dark] .kk.act{background:#333}
+
+/* ── Bpmf Iansui 注音字型模式 ── */
+body.zhuyin-mode,
+body.zhuyin-mode .wrap,
+body.zhuyin-mode .qstem,
+body.zhuyin-mode .ch,
+body.zhuyin-mode .mi,
+body.zhuyin-mode .si,
+body.zhuyin-mode .if input,
+body.zhuyin-mode .ar,
+body.zhuyin-mode #scard,
+body.zhuyin-mode #retry-card {
+  font-family: 'Bpmf Iansui', 'BpmfIansui', cursive !important;
+}
+body.zhuyin-mode .qstem { line-height: 2.5 !important; }
+body.zhuyin-mode .ch    { line-height: 2.4 !important; min-height: 64px !important; }
+body.zhuyin-mode .mi    { line-height: 2.4 !important; min-height: 62px !important; }
+body.zhuyin-mode .si    { line-height: 2.2 !important; }
+body.zhuyin-mode .if input { line-height: 2.2 !important; }
+#zfont-tip {
+  display: none; position: fixed; bottom: 12px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(74,144,226,.92); color: #fff;
+  padding: 6px 22px; border-radius: 99px;
+  font-size: .8rem; font-weight: 700; z-index: 500;
+  pointer-events: none; white-space: nowrap;
+}
+#zfont-tip.show { display: block; animation: fadeUp .3s ease; }
+@keyframes fadeUp {
+  from { opacity:0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity:1; transform: translateX(-50%) translateY(0); }
+}
+@media print{
+  #bar,#kbd,#sov,#retry-menu,#sub-area,.rb,#send-toast,#config-menu{display:none!important}
+  body{background:#fff;color:#000}
+  .wrap{max-width:100%;padding:0}
+  .sec{box-shadow:none;break-inside:avoid;margin-bottom:14px}
+  rt{display:block!important}
+  #ph{display:block!important}
+  .if input{border-bottom:1px solid #000;border-top:none;border-left:none;border-right:none;border-radius:0;background:transparent}
+}
+</style>
+</head>
+<body>
+
+<div id="ph">
+  忠孝國小115學年度下學期 數學科第 3~5 單元 平時測驗【A版】
+  <div style="display:flex;justify-content:space-around;margin-top:6px;font-weight:400;font-size:.88rem">
+    <span>班級：___</span><span>座號：___</span><span>姓名：________</span><span>得分：_______</span>
+  </div>
+</div>
+
+<div id="bar">
+  <div id="bar-title">🏫 一年七班・數學科・第3~5單元</div>
+  <span class="badge">A 版</span>
+  <span id="bank-badge">Bank 1 ⭐</span>
+  <div id="timer">⏱ 30:00</div>
+  <button class="cb" id="b-config" onclick="openConfig()">⚙️ 出卷設定</button>
+  <button class="cb" id="b-zhuyin" onclick="toggleZ()">ㄅ 注音</button>
+  <button class="cb" id="b-read" onclick="toggleRead()">🔊 導讀</button>
+  <button class="cb" id="b-pause" onclick="togglePause()" style="display:none">⏸ 暫停</button>
+  <button class="cb" id="b-dark" onclick="toggleDark()">🌙 夜間</button>
+  <button class="cb" id="b-teacher" onclick="toggleTeacher()">🎓 教師</button>
+  <button class="cb" id="b-print" onclick="window.print()">🖨️ 列印</button>
+</div>
+
+<div class="wrap">
+  <div id="info">
+    <h2>📋 請先填寫你的資料</h2>
+    <div class="ir">
+      <div class="if"><label for="sc">班級</label><input type="text" id="sc" placeholder="一年＿班" maxlength="8"></div>
+      <div class="if"><label for="sn">座號</label><input type="number" id="sn" placeholder="01" min="1" max="40" style="max-width:78px"></div>
+      <div class="if"><label for="sname">姓名</label><input type="text" id="sname" placeholder="你的名字" maxlength="10"></div>
+    </div>
+  </div>
+  <div id="exam-body"></div>
+  <div id="sub-area">
+    <button id="sub-btn" onclick="submitExam()">🎯 交卷！看我的成績 ✨</button>
+  </div>
+</div>
+
+<!-- 成績卡 -->
+<div id="sov" role="dialog" aria-modal="true">
+  <div id="scard">
+    <svg width="120" height="120" viewBox="0 0 120 120" style="display:block;margin:0 auto 14px">
+      <circle cx="60" cy="60" r="50" fill="none" stroke="#DDE3FF" stroke-width="12"/>
+      <circle id="sarc" cx="60" cy="60" r="50" fill="none" stroke="#4a90e2" stroke-width="12"
+        stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314"
+        transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1.1s ease"/>
+    </svg>
+    <span id="spct">0%</span>
+    <div id="sstars">⭐</div>
+    <div id="sdet"></div>
+    <div id="smsg"></div>
+    <div class="sbtn-row">
+      <button class="sbtn" onclick="closeS()">查看解析 📖</button>
+      <button class="sbtn pri" onclick="openRetry()">再試一次 🔄</button>
+    </div>
+  </div>
+</div>
+
+<!-- 再試一次選單 -->
+<div id="retry-menu" role="dialog" aria-modal="true">
+  <div id="retry-card">
+    <h3>你想要怎麼做？🤔</h3>
+    <p id="retry-desc">選擇挑戰方式</p>
+    <button class="retry-opt" onclick="doRetry('same')">
+      <span class="retry-icon">🔄</span>
+      <span class="retry-text">
+        <strong>重做同一份試卷</strong>
+        <span>清空作答，重新作答同一組題目</span>
+      </span>
+    </button>
+    <button class="retry-opt" id="retry-next-btn" onclick="doRetry('next')">
+      <span class="retry-icon">🚀</span>
+      <span class="retry-text">
+        <strong id="retry-next-label">挑戰新題目（第 2 回合）</strong>
+        <span id="retry-next-desc">出過的題目不再出現，難度升級 ⭐⭐</span>
+      </span>
+    </button>
+    <span class="retry-cancel" onclick="closeRetry()">✕ 先看解析，不要重試</span>
+  </div>
+</div>
+
+<!-- 出卷設定選單 -->
+<div id="config-menu" role="dialog" aria-modal="true">
+  <div id="config-card">
+    <h3>⚙️ 國小低年級段考出卷設定</h3>
+    <p style="color:var(--ts);font-size:.85rem;margin-bottom:14px;text-align:center">調整出卷題庫與題型題數</p>
+    
+    <div class="config-sec">
+      <h4>1. 選擇教材題庫</h4>
+      <div class="config-bank-row">
+        <div class="config-bank-opt" id="bo-0" onclick="toggleConfigBank(0)">Bank 1<br><span style="font-size:.7rem;font-weight:normal">基礎練習</span></div>
+        <div class="config-bank-opt" id="bo-1" onclick="toggleConfigBank(1)">Bank 2<br><span style="font-size:.7rem;font-weight:normal">進階挑戰</span></div>
+        <div class="config-bank-opt" id="bo-2" onclick="toggleConfigBank(2)">Bank 3<br><span style="font-size:.7rem;font-weight:normal">資優挑戰</span></div>
+      </div>
+    </div>
+    
+    <div class="config-sec">
+      <h4>2. 選擇題型與題數</h4>
+      <div class="config-grid">
+        <div class="config-item">
+          <input type="checkbox" id="cb-choice">
+          <span>1. 選擇題 (圖文並茂，4選1)</span>
+          <input type="number" id="num-choice" min="1" max="10" style="margin-left:auto"> 題
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="cb-math">
+          <span>2. 填充計算題 (橫式/直式填空)</span>
+          <input type="number" id="num-math" min="1" max="10" style="margin-left:auto"> 題
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="cb-match">
+          <span>3. 連連看 (時鐘/錢幣/算式配對)</span>
+          <input type="number" id="num-match" min="1" max="3" style="margin-left:auto"> 組
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="cb-character">
+          <span>4. 國字填充 (數學名詞/順序)</span>
+          <input type="number" id="num-character" min="1" max="5" style="margin-left:auto"> 題
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="cb-reading">
+          <span>5. 生活應用題 (素養題情境解答)</span>
+          <input type="number" id="num-reading" min="1" max="5" style="margin-left:auto"> 題
+        </div>
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="sbtn" style="flex:1" onclick="closeConfig()">取消</button>
+      <button class="sbtn pri" style="flex:1" onclick="applyConfig()">套用並重新出卷 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- 送分提示 -->
+<div id="send-toast" style="cursor:pointer" onclick="window.open('https://docs.google.com/spreadsheets/d/1wb5gcS53D4dOdVJON_C9LFMi-twk8X6bcdjmFSASuO4/edit', '_blank')">✅ 成績已送到老師的試算表！（點此開啟 📊）</div>
+
+<!-- 數學與中文數字虛擬鍵盤 -->
+<div id="kbd">
+  <div id="kbd-label">正在輸入：</div>
+  <div id="kbd-display"></div>
+  <div class="kr"><span class="kgl">數字按鍵</span>
+    <button class="kk" onclick="ki('1')">1</button>
+    <button class="kk" onclick="ki('2')">2</button>
+    <button class="kk" onclick="ki('3')">3</button>
+    <button class="kk" onclick="ki('4')">4</button>
+    <button class="kk" onclick="ki('5')">5</button>
+    <button class="kk" onclick="ki('6')">6</button>
+    <button class="kk" onclick="ki('7')">7</button>
+    <button class="kk" onclick="ki('8')">8</button>
+    <button class="kk" onclick="ki('9')">9</button>
+    <button class="kk" onclick="ki('0')">0</button>
+  </div>
+  <div class="kr"><span class="kgl">中文數字</span>
+    <button class="kk" onclick="ki('一')">一</button>
+    <button class="kk" onclick="ki('二')">二</button>
+    <button class="kk" onclick="ki('三')">三</button>
+    <button class="kk" onclick="ki('四')">四</button>
+    <button class="kk" onclick="ki('五')">五</button>
+    <button class="kk" onclick="ki('六')">六</button>
+    <button class="kk" onclick="ki('七')">七</button>
+    <button class="kk" onclick="ki('八')">八</button>
+    <button class="kk" onclick="ki('九')">九</button>
+    <button class="kk" onclick="ki('十')">十</button>
+  </div>
+  <div class="kr"><span class="kgl">數學符號與控制</span>
+    <button class="kk tone" onclick="ki('>')">&gt;</button>
+    <button class="kk tone" onclick="ki('<')">&lt;</button>
+    <button class="kk tone" onclick="ki('=')">=</button>
+    <button class="kk tone" onclick="ki('+')">+</button>
+    <button class="kk tone" onclick="ki('−')">−</button>
+    <button class="kk act" onclick="kb()">⌫ 刪</button>
+    <button class="kk act" onclick="kc()">✕ 清</button>
+    <button class="kk act" onclick="kok()" style="background:var(--p);color:#fff;border-color:var(--p)">✓ 確認</button>
+    <button class="kk act" onclick="closeK()" style="margin-left:auto">✕ 關閉</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// Google Apps Script Web App URL
+// ════════════════════════════════════════════
+const GSHEET_URL = 'https://script.google.com/macros/s/AKfycbzIiqJuhDBeyFX1dRjZvTUQ5dMm5KiUipWTk4Gs-rIwiGk9CIUa30vZBXaG063RVGIL/exec';
+
+const BANKS = [
+  // ── Bank 1：基礎練習 ⭐ ──
+  {
+    label: 'Bank 1・基礎練習 ⭐',
+    choices: [
+      {id:'q1_1', stem:'小明有 13 顆糖，吃掉 5 顆，還剩幾顆？',
+       speak:'小明有十三顆糖，吃掉五顆，還剩幾顆？',
+       choices:[{v:'A',t:'7 顆'},{v:'B',t:'8 顆'},{v:'C',t:'9 顆'},{v:'D',t:'18 顆'}],
+       ans:'B', reveal:'✅ 正確答案是「乙、8 顆」。13 − 5 = 8，退位減法。'},
+      {id:'q1_2', stem:'下面哪一個圖形有 3 個角？',
+       speak:'下面哪一個圖形有三個角？',
+       choices:[{v:'A',t:'圓形'},{v:'B',t:'三角形'},{v:'C',t:'長方形'},{v:'D',t:'正方形'}],
+       ans:'B', reveal:'✅ 正確答案是「乙、三角形」。三角形有三個角！'},
+      {id:'q1_3', stem:'時針指在 2，分針指在 12，這時候是幾點？',
+       speak:'時針指在二，分針指在十二，這時候是幾點？',
+       choices:[{v:'A',t:'2 點整'},{v:'B',t:'12 點整'},{v:'C',t:'2 點半'},{v:'D',t:'12 點半'}],
+       ans:'A', reveal:'✅ 正確答案是「甲、2 點整」。分針指在 12 表示整點。'},
+      {id:'q1_4', stem:'5 個 10 元硬幣可以換成多少個 1 元硬幣？',
+       speak:'五個十元硬幣可以換成多少個一元硬幣？',
+       choices:[{v:'A',t:'5 個'},{v:'B',t:'10 個'},{v:'C',t:'50 個'},{v:'D',t:'100 個'}],
+       ans:'C', reveal:'✅ 正確答案是「丙、50 個」。一個 10 元等於十個 1 元，五個就是 50 個。'}
+    ],
+    maths: [
+      {id:'q1_5', stem:'7 + 8 = [ ]', speak:'七加八等於多少？', ans:'15', reveal:'✅ 7 + 8 = 15，進位加法，可用湊十法。'},
+      {id:'q1_6', stem:'15 − 8 = [ ]', speak:'十五減八等於多少？', ans:'7', reveal:'✅ 15 - 8 = 7，退位減法，15先減5再減3。'},
+      {id:'q1_7', stem:'14 [ ] 19  （填入 > 、 < 或 =）', speak:'十四和十九比大小。', ans:'<', reveal:'✅ 十四小於十九，故填入 <。'}
+    ],
+    matchPairs: [
+      {left:'3 點整', right:'短針指在 3，長針指在 12', lId:'m1_1', rId:'r1_1'},
+      {left:'6 點半', right:'短針指在 6 與 7 中間，長針指在 6', lId:'m1_2', rId:'r1_2'},
+      {left:'12 點整', right:'短針指在 12，長針指在 12', lId:'m1_3', rId:'r1_3'},
+      {left:'9 點半', right:'短針指在 9 與 10 中間，長針指在 6', lId:'m1_4', rId:'r1_4'}
+    ],
+    characters: [
+      {id:'q1_8', stem:'一個十和五個一合起來是十___。', speak:'一個十和五個一合起來是十五。五怎麼寫？', ans:'五', reveal:'✅ 一個十與五個一是 15，學名為十五。'},
+      {id:'q1_9', stem:'星期三的隔天是星期___。', speak:'星期三的隔天是星期四。四怎麼寫？', ans:'四', reveal:'✅ 星期三之後是星期四，填入四。'}
+    ],
+    readings: [
+      {
+        passage: '小華去文具店買文具。一枝鉛筆 5 元，一本筆記本 12 元。小華買了一枝鉛筆和一本筆記本，付了一個 50 元硬幣給老闆。',
+        speakPassage: '小華去文具店買文具。一枝鉛筆五元，一本筆記本十二元。小華買了一枝鉛筆和一本筆記本，付了一個五十元硬幣給老闆。',
+        questions: [
+          {id:'q1_10_1', type:'choice', stem:'買這兩樣文具一共要付幾元？',
+           choices:[{v:'A',t:'15 元'},{v:'B',t:'17 元'},{v:'C',t:'20 元'}], ans:'B'},
+          {id:'q1_10_2', type:'zhuyin', char:'找回幾元？（請寫數字）', ans:'33'}
+        ]
+      }
+    ]
+  },
+  
+  // ── Bank 2：進階挑戰 ⭐⭐ ──
+  {
+    label: 'Bank 2・進階挑戰 ⭐⭐',
+    choices: [
+      {id:'q2_1', stem:'一箱蘋果有 24 顆，吃掉 8 顆，還剩幾顆？',
+       speak:'一箱蘋果有二十四顆，吃掉八顆，還剩幾顆？',
+       choices:[{v:'A',t:'14 顆'},{v:'B',t:'16 顆'},{v:'C',t:'18 顆'},{v:'D',t:'32 顆'}],
+       ans:'B', reveal:'✅ 24 − 8 = 16，個位不夠減向十位借1。'},
+      {id:'q2_2', stem:'正方形有幾個直角？',
+       speak:'正方形有幾個直角？',
+       choices:[{v:'A',t:'2 個'},{v:'B',t:'3 個'},{v:'C',t:'4 個'},{v:'D',t:'0 個'}],
+       ans:'C', reveal:'✅ 正方形有四個角，每一個都是直角。'},
+      {id:'q2_3', stem:'時針指在 8 與 9 中間，分針指在 6，這時候是幾點？',
+       speak:'時針指在八與九中間，分針指在六，這時候是幾點？',
+       choices:[{v:'A',t:'8 點整'},{v:'B',t:'8 點半'},{v:'C',t:'9 點整'},{v:'D',t:'9 點半'}],
+       ans:'B', reveal:'✅ 時針指在 8 和 9 之間表示 8 點多，分針指 6 表示半點，所以是 8 點半。'}
+    ],
+    maths: [
+      {id:'q2_4', stem:'35 + 18 = [ ]', speak:'三十五加十八等於多少？', ans:'53', reveal:'✅ 35 + 18 = 53，進位加法。'},
+      {id:'q2_5', stem:'6 × 4 = [ ]', speak:'六乘以四等於多少？', ans:'24', reveal:'✅ 6 × 4 = 24，可套用九九乘法表。'},
+      {id:'q2_6', stem:'58 [ ] 49  （填入 > 、 < 或 =）', speak:'五十八和四十九比大小。', ans:'>', reveal:'✅ 五十八大於四十九。'}
+    ],
+    matchPairs: [
+      {left:'2 個 50 元', right:'換成 10 個 10 元', lId:'m2_1', rId:'r2_1'},
+      {left:'1 個 100 元', right:'換成 100 個 1 元', lId:'m2_2', rId:'r2_2'},
+      {left:'5 個 10 元', right:'換成 50 個 1 元', lId:'m2_3', rId:'r2_3'}
+    ],
+    characters: [
+      {id:'q2_7', stem:'正方形和長方形都有___個直角。', speak:'正方形和長方形都有四個直角。四怎麼寫？', ans:'四', reveal:'✅ 都有 4 個直角，填入四。'},
+      {id:'q2_8', stem:'一個星期有___天。', speak:'一個星期有七天。七怎麼寫？', ans:'七', reveal:'✅ 一個星期有 7 天，填入七。'}
+    ],
+    readings: [
+      {
+        passage: '媽媽去超市買水果。一斤香蕉 28 元，一斤蘋果 45 元。媽媽各買了一斤，付了一張 100 元鈔票給收銀員。',
+        speakPassage: '媽媽去超市買水果。一斤香蕉二十八元，一斤蘋果四十五元。媽媽各買了一斤，付了一張一百元鈔票給收銀員。',
+        questions: [
+          {id:'q2_9_1', type:'choice', stem:'買香蕉和蘋果一共要花幾元？',
+           choices:[{v:'A',t:'63 元'},{v:'B',t:'73 元'},{v:'C',t:'83 元'}], ans:'B'},
+          {id:'q2_9_2', type:'zhuyin', char:'找回幾元？（請寫數字）', ans:'27'}
+        ]
+      }
+    ]
+  },
+
+  // ── Bank 3：資優挑戰 ⭐⭐⭐ ──
+  {
+    label: 'Bank 3・資優挑戰 ⭐⭐⭐',
+    choices: [
+      {id:'q3_1', stem:'一條繩子對折再對折後，量出來是 5 公分，原來的繩子長幾公分？',
+       speak:'一條繩子對折再對折後，量出來是五公分，原來的繩子長幾公分？',
+       choices:[{v:'A',t:'10 公分'},{v:'B',t:'15 公分'},{v:'C',t:'20 公分'},{v:'D',t:'25 公分'}],
+       ans:'C', reveal:'✅ 對折再對折等於切成四段。 5 × 4 = 20 公分。'},
+      {id:'q3_2', stem:'小明從下午 1 點 20 分開始寫功課，寫了 40 分鐘，這時是下午幾點幾分？',
+       speak:'小明從下午一點二十分開始寫功課，寫了四十分鐘，這時是下午幾點幾分？',
+       choices:[{v:'A',t:'下午 2 點整'},{v:'B',t:'下午 2 點 10 分'},{v:'C',t:'下午 1 點 40 分'},{v:'D',t:'下午 2 點半'}],
+       ans:'A', reveal:'✅ 20 分鐘 + 40 分鐘 = 60 分鐘(一小時)，下午1點過一小時是下午2點整。'}
+    ],
+    maths: [
+      {id:'q3_3', stem:'125 + 78 − 25 = [ ]', speak:'一百二十五加七十八減二十五等於多少？', ans:'178', reveal:'✅ 先算 125 - 25 = 100，再加 78 = 178。'},
+      {id:'q3_4', stem:'□ × 8 = 56，□ = [ ]', speak:'框框乘以八等於五十六，框框是多少？', ans:'7', reveal:'✅ 根據乘法交換律與九九乘法表，七八五十六，□ = 7。'}
+    ],
+    matchPairs: [
+      {left:'三角形', right:'有 3 個邊和 3 個角', lId:'m3_1', rId:'r3_1'},
+      {left:'長方形', right:'有 4 個角，對邊一樣長', lId:'m3_2', rId:'r3_2'},
+      {left:'正方形', right:'有 4 個角，四個邊一樣長', lId:'m3_3', rId:'r3_3'}
+    ],
+    characters: [
+      {id:'q3_5', stem:'三角形有___個頂點。', speak:'三角形三個頂點。三怎麼寫？', ans:'三', reveal:'✅ 三角形有 3 個角與 3 個頂點。'},
+      {id:'q3_6', stem:'時針轉一圈是十___個小時。', speak:'時針轉一圈是十二個小時。二怎麼寫？', ans:'二', reveal:'✅ 時針轉一圈是 12 個小時，填入二。'}
+    ],
+    readings: [
+      {
+        passage: '老師分糖果。班上有 18 個學生，男生比女生多 4 人。老師買了 3 盒糖果，每盒有 8 顆。',
+        speakPassage: '老師分糖果。班上有十八個學生，男生比女生多四人。老師買了三盒糖果，每盒有八顆。',
+        questions: [
+          {id:'q3_7_1', type:'choice', stem:'請問班上的女生有幾個人？',
+           choices:[{v:'A',t:'7 人'},{v:'B',t:'9 人'},{v:'C',t:'11 人'}], ans:'A'},
+          {id:'q3_7_2', type:'zhuyin', char:'如果每人分一顆糖，糖果還剩下幾顆？（請寫數字）', ans:'6'}
+        ]
+      }
+    ]
+  }
+];
+
+const CH_NUMS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+const LABELS = ['A', 'B', 'C', 'D'];
+const MC = ['#FF7043', '#2ec4b6', '#9B5DE5', '#F15BB5'];
+
+let curBank = 0;
+let activeQuestions = [];
+let uAns = {};
+let mPairs = {};
+let mSel = null;
+let dEl = null;
+let spk = false;
+let pau = false;
+let sec = 30 * 60;
+let tiv = null;
+let lastScore = null;
+
+// 預設出卷設定
+let activeConfig = {
+  banks: [0], // 預設 Bank 1
+  types: {
+    choice: { enabled: true, count: 2 },
+    math: { enabled: true, count: 3 },
+    match: { enabled: true, count: 1 },
+    character: { enabled: true, count: 2 },
+    reading: { enabled: true, count: 1 }
+  }
+};
+
+// ── 出卷核心 ──
+function rebuildExam() {
+  uAns = {};
+  mPairs = {};
+  mSel = null;
+  activeQuestions = [];
+  
+  if (spk) { speechSynthesis.cancel(); spk = false; }
+  
+  // 合併所選題庫
+  const pool = { choice: [], math: [], match: [], character: [], reading: [] };
+  activeConfig.banks.forEach(bIdx => {
+    const b = BANKS[bIdx];
+    if (b.choices) pool.choice.push(...b.choices);
+    if (b.maths) pool.math.push(...b.maths);
+    if (b.matchPairs) pool.match.push(b.matchPairs); // 整組配對
+    if (b.characters) pool.character.push(...b.characters);
+    if (b.readings) pool.reading.push(...b.readings);
+  });
+
+  const typesOrder = ['choice', 'math', 'match', 'character', 'reading'];
+  let html = '';
+  let qIndex = 1;
+  let chIndex = 0;
+
+  const titles = {
+    choice: '選擇題 (圖文並茂，4選1) 🔢',
+    math: '填充計算題 (橫式/直式填空) ✏️',
+    match: '連連看 (時鐘/錢幣/算式配對) 🔗',
+    character: '國字填充 (數學概念名詞) 📝',
+    reading: '生活應用題 (素養題情境解答) 📖'
+  };
+  
+  const gradients = {
+    choice: 'linear-gradient(135deg,#4a90e2 0%,#7B6CF6 100%)',
+    math: 'linear-gradient(135deg,#2ec4b6 0%,#26C6DA 100%)',
+    match: 'linear-gradient(135deg,#ff9f1c 0%,#ffb300 100%)',
+    character: 'linear-gradient(135deg,#7B6CF6 0%,#E040FB 100%)',
+    reading: 'linear-gradient(135deg,#ff7043 0%,#e71d36 100%)'
+  };
+
+  typesOrder.forEach(type => {
+    const tCfg = activeConfig.types[type];
+    if (!tCfg.enabled || tCfg.count <= 0 || pool[type].length === 0) return;
+
+    // 抽樣題目
+    let qList = [];
+    if (type === 'match') {
+      qList = shuffle([...pool.match]).slice(0, Math.min(tCfg.count, pool.match.length));
+    } else {
+      qList = shuffle([...pool[type]]).slice(0, Math.min(tCfg.count, pool[type].length));
+    }
+    
+    if (qList.length === 0) return;
+
+    const roman = CH_NUMS[chIndex++];
+    html += `<div class="sec">
+      <div class="sh" style="background:${gradients[type]}">
+        <span class="sn">${roman}</span>
+        <span class="st">${titles[type]}</span>
+        <span class="ss">共 ${qList.length} 題</span>
+      </div>
+      <div class="sb">`;
+
+    if (type === 'choice') {
+      qList.forEach(q => {
+        const qid = `aq_${qIndex}`;
+        activeQuestions.push({ id: qid, type: 'choice', ans: q.ans, reveal: q.reveal, data: q });
+        html += `<div class="q" id="${qid}"><div class="qstem">
+          <span class="qn">${qIndex++}.</span>
+          <span id="${qid}t">${q.stem}</span>
+          <button class="rb" id="rb_${qid}" onclick="rq('${qid}','${q.speak}','rb_${qid}')">🔊 朗讀</button>
+        </div><div class="choices">`;
+        q.choices.forEach((c, ci) => {
+          html += `<div class="ch" data-q="${qid}" data-v="${c.v}" onclick="pick(this)" tabindex="0">
+            <span class="cl">${LABELS[ci]}</span><span>${c.t}</span></div>`;
+        });
+        html += `</div><div class="ar" id="ar_${qid}">${q.reveal}</div></div>`;
+      });
+    } else if (type === 'math') {
+      qList.forEach(q => {
+        const qid = `aq_${qIndex}`;
+        activeQuestions.push({ id: qid, type: 'math', ans: q.ans, reveal: q.reveal, data: q });
+        let stemHtml = q.stem;
+        if (q.stem.includes('[ ]')) {
+          stemHtml = q.stem.replace('[ ]', `<input type="text" class="math-input" data-q="${qid}" onclick="openK(this)" readonly maxlength="6" tabindex="0">`);
+        }
+        html += `<div class="q" id="${qid}"><div class="qstem">
+          <span class="qn">${qIndex++}.</span>
+          <span id="${qid}t">${stemHtml}</span>
+          <button class="rb" id="rb_${qid}" onclick="rq('${qid}','${q.speak}','rb_${qid}')">🔊 朗讀</button>
+        </div>
+        <div class="ar" id="ar_${qid}">${q.reveal}</div></div>`;
+      });
+    } else if (type === 'match') {
+      qList.forEach(mGroup => {
+        const pairs = shuffle([...mGroup]).slice(0, 4);
+        const qid = `aq_${qIndex}`;
+        const ansMap = {};
+        pairs.forEach(p => { ansMap[p.lId] = p.rId; });
+        activeQuestions.push({ id: qid, type: 'match', ansMap: ansMap, data: pairs, reveal: '✅ 連連看：請核對各項目與連線！' });
+
+        html += `<div class="q" id="${qid}"><div class="qstem">
+          <span class="qn">${qIndex++}.</span>
+          <span>請把左邊的題目和右邊的正確答案連起來 🔗</span>
+          <button class="rb" id="rb_${qid}" onclick="rq('${qid}','請把左邊的題目和右邊的正確答案連起來','rb_${qid}')">🔊 朗讀說明</button>
+        </div>
+        <div class="mc" id="mc_${qid}">
+          <div class="mcol">`;
+        pairs.forEach(p => {
+          html += `<div class="mi" data-id="${p.lId}" data-g="L" onclick="mClick(this)">${p.left}</div>`;
+        });
+        html += `</div><div class="mcol">`;
+        const displayOrder = shuffle(pairs.map(p => p.rId));
+        displayOrder.forEach(rId => {
+          const text = pairs.find(p => p.rId === rId).right;
+          html += `<div class="mi" data-id="${rId}" data-g="R" onclick="mClick(this)">${text}</div>`;
+        });
+        html += `</div></div><div class="ar" id="ar_${qid}">✅ 連連看：連線配對正確會顯示相同顏色！</div></div>`;
+      });
+    } else if (type === 'character') {
+      qList.forEach(q => {
+        const qid = `aq_${qIndex}`;
+        activeQuestions.push({ id: qid, type: 'character', ans: q.ans, reveal: q.reveal, data: q });
+        let stemHtml = q.stem.replace('___', `<input type="text" class="char-input" data-q="${qid}" onclick="openK(this)" readonly maxlength="2" tabindex="0">`);
+        html += `<div class="q" id="${qid}"><div class="qstem">
+          <span class="qn">${qIndex++}.</span>
+          <span id="${qid}t">${stemHtml}</span>
+          <button class="rb" id="rb_${qid}" onclick="rq('${qid}','${q.speak}','rb_${qid}')">🔊 朗讀</button>
+        </div>
+        <div class="ar" id="ar_${qid}">${q.reveal}</div></div>`;
+      });
+    } else if (type === 'reading') {
+      qList.forEach(q => {
+        const qid = `aq_${qIndex}`;
+        activeQuestions.push({ id: qid, type: 'reading', subQuestions: q.questions, reveal: '✅ 應用素養題回答完成！', data: q });
+        html += `<div class="q" id="${qid}">
+          <div class="qstem">
+            <span class="qn">${qIndex++}.</span>
+            <span>生活應用題：閱讀生活情境並寫出算式與解答 📖</span>
+            <button class="rb" id="rb_${qid}" onclick="rq('${qid}','${q.speakPassage}','rb_${qid}')">🔊 朗讀情境</button>
+          </div>
+          <div class="si" style="font-size:1.1rem; line-height:2.2;" id="${qid}t">${q.passage}</div>`;
+        
+        q.questions.forEach((sq, sqi) => {
+          html += `<div style="margin-top:14px; padding-left:14px; border-left:3px solid var(--p);">
+            <div style="font-weight:700; margin-bottom:8px;">(${sqi+1}) ${sq.stem || '請計算'}</div>`;
+          if (sq.type === 'choice') {
+            html += `<div class="choices">`;
+            sq.choices.forEach((c, ci) => {
+              html += `<div class="ch" data-q="${sq.id}" data-v="${c.v}" onclick="pick(this)" tabindex="0">
+                <span class="cl">${LABELS[ci]}</span><span>${c.t}</span></div>`;
+            });
+            html += `</div>`;
+          } else if (sq.type === 'zhuyin') {
+            html += `<div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:1.1rem;font-weight:700;">${sq.char}</span>
+              <input type="text" class="math-input" id="zf_${sq.id}" data-q="${sq.id}" onclick="openK(this)" readonly placeholder="點我輸入">
+            </div>`;
+          } else if (sq.type === 'math') {
+            html += `<div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:1.1rem;font-weight:700;">${sq.char}</span>
+              <input type="text" class="math-input" id="zf_${sq.id}" data-q="${sq.id}" onclick="openK(this)" readonly placeholder="點我輸入">
+            </div>`;
+          }
+          html += `</div>`;
+        });
+        html += `<div class="ar" id="ar_${qid}">✅ 應用題解析：買鉛筆和筆記本花17元（12+5=17），找回33元（50-17=33）。</div></div>`;
+      });
+    }
+
+    html += `</div></div>`;
+  });
+
+  document.getElementById('exam-body').innerHTML = html;
+  document.getElementById('bank-badge').textContent = `Bank ${activeConfig.banks.map(x=>x+1).join('+')} ⭐`;
+  window.scrollTo(0, 0);
+  resetTimer();
+  setZhuyinFont(zhuyinOn, false);
+}
+
+// ── 選擇題選取 ──
+function pick(el){
+  const q = el.dataset.q;
+  document.querySelectorAll('[data-q="'+q+'"]').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  uAns[q] = el.dataset.v;
+}
+
+// ── 計時器 ──
+function resetTimer() {
+  clearInterval(tiv);
+  sec = 30 * 60;
+  document.getElementById('timer').classList.remove('warn');
+  tiv = setInterval(() => {
+    if (pau) return;
+    sec--;
+    const m = String(Math.floor(sec/60)).padStart(2,'0');
+    const s = String(sec%60).padStart(2,'0');
+    const el = document.getElementById('timer');
+    el.textContent = `⏱ ${m}:${s}`;
+    if (sec <= 300) el.classList.add('warn');
+    if (sec <= 0) { clearInterval(tiv); submitExam(); }
+  }, 1000);
+}
+
+// ── Bpmf Iansui 注音字型切換 ──
+let zhuyinOn = localStorage.getItem('zhuyin_font') === 'true';
+function setZhuyinFont(on, showToast = false) {
+  zhuyinOn = on;
+  const b = document.getElementById('b-zhuyin');
+  const tip = document.getElementById('zfont-tip');
+  if (on) {
+    document.body.classList.add('zhuyin-mode');
+    if (b) {
+      b.classList.add('on');
+      b.textContent = '🍬 注音ON';
+    }
+    if (tip) tip.textContent = '🍬 批改與題目已切換為芫荽注音字型！';
+  } else {
+    document.body.classList.remove('zhuyin-mode');
+    if (b) {
+      b.classList.remove('on');
+      b.textContent = 'ㄅ 注音';
+    }
+    if (tip) tip.textContent = '注音字型已關閉';
+  }
+  localStorage.setItem('zhuyin_font', on);
+  if (showToast && tip) {
+    tip.classList.add('show');
+    clearTimeout(tip._t);
+    tip._t = setTimeout(() => tip.classList.remove('show'), 2500);
+  }
+}
+function toggleZ() { setZhuyinFont(!zhuyinOn, true); }
+
+// ── 夜間模式 ──
+function toggleDark(){
+  const d = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', d ? '' : 'dark');
+  document.getElementById('b-dark').classList.toggle('on', !d);
+}
+
+// ── 教師解析 ──
+function toggleTeacher(){
+  const on = document.body.classList.toggle('teacher');
+  document.getElementById('b-teacher').classList.toggle('on', on);
+  if (on) {
+    const p = prompt('請輸入教師密碼：');
+    if (p !== 'teacher') {
+      document.body.classList.remove('teacher');
+      document.getElementById('b-teacher').classList.remove('on');
+      alert('密碼錯誤！');
+    }
+  }
+}
+
+// ── 語音朗讀 ──
+function rq(id, text, btnId){
+  if (!('speechSynthesis' in window)) return;
+  const btn = document.getElementById(btnId);
+  if (spk) {
+    speechSynthesis.cancel();
+    spk = false;
+    document.querySelectorAll('.rb.spk').forEach(b => b.classList.remove('spk'));
+    clearHL();
+    return;
+  }
+  clearHL();
+  spk = true;
+  if (btn) btn.classList.add('spk');
+  const el = document.getElementById(id + 't');
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-TW'; u.rate = 0.85; u.pitch = 1.1;
+  u.onboundary = e => {
+    clearHL();
+    if (el) hlAt(el, e.charIndex);
+  };
+  u.onend = () => {
+    spk = false;
+    clearHL();
+    if (btn) btn.classList.remove('spk');
+  };
+  speechSynthesis.speak(u);
+}
+
+function hlAt(c, ci){
+  const w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT);
+  let n, acc = 0;
+  while ((n = w.nextNode())) {
+    const l = n.textContent.length;
+    if (acc + l > ci) {
+      const li = ci - acc, sp = document.createElement('span');
+      sp.className = 'hl';
+      const ch = n.textContent.slice(li, li + 1);
+      if (ch) {
+        const p = n.parentNode;
+        p.insertBefore(document.createTextNode(n.textContent.slice(0, li)), n);
+        p.insertBefore(sp, n);
+        sp.textContent = ch;
+        p.insertBefore(document.createTextNode(n.textContent.slice(li + 1)), n);
+        p.removeChild(n);
+      }
+      return;
+    }
+    acc += l;
+  }
+}
+
+function clearHL(){
+  document.querySelectorAll('.hl').forEach(el => {
+    const p = el.parentNode;
+    if (p) {
+      p.replaceChild(document.createTextNode(el.textContent), el);
+      p.normalize();
+    }
+  });
+}
+
+function toggleRead(){
+  const b = document.getElementById('b-read'), pb = document.getElementById('b-pause');
+  if (spk) {
+    speechSynthesis.cancel();
+    spk = false;
+    pau = false;
+    b.classList.remove('on');
+    pb.textContent = '⏸ 暫停';
+    pb.style.display = 'none';
+    return;
+  }
+  spk = true;
+  pau = false;
+  b.classList.add('on');
+  pb.style.display = 'flex';
+  pb.textContent = '⏸ 暫停';
+  const u = new SpeechSynthesisUtterance('小朋友準備好了嗎？計時開始，請仔細讀題目，加油！');
+  u.lang = 'zh-TW'; u.rate = 0.82;
+  u.onend = () => {
+    spk = false;
+    pau = false;
+    b.classList.remove('on');
+    pb.style.display = 'none';
+  };
+  speechSynthesis.speak(u);
+}
+
+function togglePause(){
+  const b = document.getElementById('b-pause');
+  if (!pau) {
+    speechSynthesis.pause();
+    pau = true;
+    b.textContent = '▶ 繼續';
+  } else {
+    speechSynthesis.resume();
+    pau = false;
+    b.textContent = '⏸ 暫停';
+  }
+}
+
+// ── 選取文字自動朗讀 ──
+document.addEventListener('mouseup', () => {
+  const s = window.getSelection().toString().trim();
+  if (s.length > 0 && !spk) {
+    const u = new SpeechSynthesisUtterance(s);
+    u.lang = 'zh-TW'; u.rate = 0.85;
+    speechSynthesis.speak(u);
+  }
+});
+document.addEventListener('touchend', () => {
+  setTimeout(() => {
+    const s = window.getSelection().toString().trim();
+    if (s.length > 0 && !spk) {
+      const u = new SpeechSynthesisUtterance(s);
+      u.lang = 'zh-TW'; u.rate = 0.85;
+      speechSynthesis.speak(u);
+    }
+  }, 100);
+});
+
+// ── 虛擬鍵盤邏輯 ──
+let kTgt = null;
+let kBuf = '';
+function openK(el) {
+  kTgt = el;
+  kBuf = el.value || el.dataset.cur || '';
+  const qEl = el.closest('.q');
+  const qnEl = qEl ? qEl.querySelector('.qn') : null;
+  const qnText = qnEl ? qnEl.textContent.trim() : '';
+  document.getElementById('kbd-label').textContent = '正在輸入（' + qnText + '）：';
+  document.getElementById('kbd-display').textContent = kBuf;
+  document.getElementById('kbd').classList.add('open');
+}
+function ki(c) {
+  kBuf += c;
+  document.getElementById('kbd-display').textContent = kBuf;
+}
+function kb() {
+  kBuf = kBuf.slice(0, -1);
+  document.getElementById('kbd-display').textContent = kBuf;
+}
+function kc() {
+  kBuf = '';
+  document.getElementById('kbd-display').textContent = '';
+}
+function kok() {
+  if (kTgt) {
+    kTgt.value = kBuf;
+    kTgt.dataset.cur = kBuf;
+    uAns[kTgt.dataset.q] = kBuf;
+  }
+  closeK();
+}
+function closeK() {
+  document.getElementById('kbd').classList.remove('open');
+  kBuf = '';
+  kTgt = null;
+}
+
+// ── 連連看互動 ──
+function mClick(el){
+  if (el.classList.contains('mat')) return;
+  if (!mSel) {
+    mSel = el;
+    el.classList.add('sel');
+  } else {
+    if (mSel.dataset.g === el.dataset.g) {
+      mSel.classList.remove('sel');
+      mSel = el;
+      el.classList.add('sel');
+      return;
+    }
+    const L = el.dataset.g === 'R' ? mSel : el,
+          R = el.dataset.g === 'R' ? el : mSel;
+    
+    mPairs[L.dataset.id] = R.dataset.id;
+    const ci = L.dataset.id.charCodeAt(L.dataset.id.length - 1) % 4;
+    const col = MC[ci] || '#4a90e2';
+    
+    [L, R].forEach(x => {
+      x.classList.remove('sel');
+      x.classList.add('mat');
+      x.style.borderColor = col;
+      x.style.background = col + '22';
+      x.style.color = col;
+    });
+    mSel = null;
+  }
+}
+
+// ── 出卷設定控制 ──
+function openConfig(){
+  document.getElementById('config-menu').classList.add('open');
+  // 載入當前設定
+  activeConfig.banks.forEach(b => {
+    const opt = document.getElementById(`bo-${b}`);
+    if (opt) opt.classList.add('sel');
+  });
+  Object.keys(activeConfig.types).forEach(type => {
+    const cfg = activeConfig.types[type];
+    document.getElementById(`cb-${type}`).checked = cfg.enabled;
+    document.getElementById(`num-${type}`).value = cfg.count;
+  });
+}
+
+function closeConfig(){
+  document.getElementById('config-menu').classList.remove('open');
+}
+
+function toggleConfigBank(idx) {
+  const opt = document.getElementById(`bo-${idx}`);
+  if (opt.classList.contains('sel')) {
+    if (activeConfig.banks.length > 1) {
+      activeConfig.banks = activeConfig.banks.filter(x => x !== idx);
+      opt.classList.remove('sel');
+    }
+  } else {
+    activeConfig.banks.push(idx);
+    opt.classList.add('sel');
+  }
+}
+
+function applyConfig(){
+  activeConfig.banks.sort();
+  Object.keys(activeConfig.types).forEach(type => {
+    activeConfig.types[type].enabled = document.getElementById(`cb-${type}`).checked;
+    activeConfig.types[type].count = parseInt(document.getElementById(`num-${type}`).value) || 0;
+  });
+  closeConfig();
+  rebuildExam();
+}
+
+// ── 提交與計分 ──
+function submitExam(){
+  const cls = document.getElementById('sc').value.trim();
+  const num = document.getElementById('sn').value.trim();
+  const name = document.getElementById('sname').value.trim();
+  if (!cls || !num) { alert('小朋友，請先填寫班級和座號唷！😊'); return; }
+  clearInterval(tiv);
+
+  let ok = 0, tot = 0;
+  const detail = {};
+  const labelMap = { A: '甲', B: '乙', C: '丙', D: '丁' };
+
+  activeQuestions.forEach(aq => {
+    const qid = aq.id;
+    const type = aq.type;
+    let isCorrect = false;
+
+    if (type === 'choice') {
+      tot++;
+      isCorrect = (uAns[qid] === aq.ans);
+      if (isCorrect) ok++;
+      detail[qid] = (isCorrect ? 'O' : 'X') + ' (選' + (labelMap[uAns[qid]] || '空') + ')';
+      document.querySelectorAll(`[data-q="${qid}"]`).forEach(x => {
+        x.onclick = null;
+        if (x.dataset.v === aq.ans) x.classList.add('ok');
+        else if (x.classList.contains('sel')) x.classList.add('err');
+      });
+    } else if (type === 'math') {
+      tot++;
+      const val = (document.querySelector(`input[data-q="${qid}"]`)?.value || '').trim().replace(/\s+/g, '');
+      isCorrect = (val === aq.ans);
+      if (isCorrect) ok++;
+      detail[qid] = (isCorrect ? 'O' : 'X') + ' (答:' + (val || '空') + ')';
+      const input = document.querySelector(`input[data-q="${qid}"]`);
+      if (input) {
+        input.disabled = true;
+        input.style.borderColor = isCorrect ? 'var(--ok)' : '#E53935';
+        input.style.background = isCorrect ? 'var(--okl)' : '#FFEBEE';
+      }
+    } else if (type === 'match') {
+      aq.data.forEach(p => {
+        tot++;
+        const isMatched = (mPairs[p.lId] === p.rId);
+        if (isMatched) ok++;
+        detail[p.lId] = isMatched ? 'O' : 'X';
+      });
+      isCorrect = aq.data.every(p => mPairs[p.lId] === p.rId);
+    } else if (type === 'character') {
+      tot++;
+      const val = (document.querySelector(`input[data-q="${qid}"]`)?.value || '').trim();
+      isCorrect = (val === aq.ans);
+      if (isCorrect) ok++;
+      detail[qid] = (isCorrect ? 'O' : 'X') + ' (答:' + (val || '空') + ')';
+      const input = document.querySelector(`input[data-q="${qid}"]`);
+      if (input) {
+        input.disabled = true;
+        input.style.borderColor = isCorrect ? 'var(--ok)' : '#E53935';
+        input.style.background = isCorrect ? 'var(--okl)' : '#FFEBEE';
+      }
+    } else if (type === 'reading') {
+      aq.subQuestions.forEach(sq => {
+        tot++;
+        if (sq.type === 'choice') {
+          const sqCorrect = (uAns[sq.id] === sq.ans);
+          if (sqCorrect) ok++;
+          detail[sq.id] = (sqCorrect ? 'O' : 'X');
+          document.querySelectorAll(`[data-q="${sq.id}"]`).forEach(x => {
+            x.onclick = null;
+            if (x.dataset.v === sq.ans) x.classList.add('ok');
+            else if (x.classList.contains('sel')) x.classList.add('err');
+          });
+        } else {
+          const val = (document.getElementById(`zf_${sq.id}`)?.value || '').trim();
+          const sqCorrect = (val === sq.ans);
+          if (sqCorrect) ok++;
+          detail[sq.id] = sqCorrect ? 'O' : 'X';
+          const input = document.getElementById(`zf_${sq.id}`);
+          if (input) {
+            input.disabled = true;
+            input.style.borderColor = sqCorrect ? 'var(--ok)' : '#E53935';
+            input.style.background = sqCorrect ? 'var(--okl)' : '#FFEBEE';
+          }
+        }
+      });
+      isCorrect = true;
+    }
+
+    const ar = document.getElementById('ar_' + qid);
+    if (ar) {
+      ar.classList.add('show');
+      ar.classList.add(isCorrect ? 'oka' : 'era');
+    }
+  });
+
+  const pct = tot > 0 ? Math.round(ok/tot*100) : 100;
+  const elapsed = (30 * 60 - sec);
+  const mm = String(Math.floor(elapsed/60)).padStart(2,'0');
+  const ss = String(elapsed%60).padStart(2,'0');
+  lastScore = { cls, num, name, ok, tot, pct, time: `${mm}:${ss}`, bank: activeConfig.banks.map(x=>x+1).join('+'), detail };
+
+  document.getElementById('sarc').style.strokeDashoffset = 314 * (1 - pct/100);
+  document.getElementById('spct').textContent = pct + '%';
+  const displayName = name ? `${name} 同學` : `座號 ${num} 號同學`;
+  document.getElementById('sdet').textContent = `${displayName}，答對 ${ok} 題，共 ${tot} 題`;
+  document.getElementById('sstars').textContent = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : '⭐';
+  
+  const msgs = ['沒關係，多練習就會更好！🌈', '有進步！再努力一點點！💪', '做得很好，再多複習一下！⭐', '哇！你是超級數學小達人！🎉'];
+  document.getElementById('smsg').textContent = msgs[pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 50 ? 1 : 0];
+  document.getElementById('sov').classList.add('open');
+
+  try {
+    const key = 'gr12_scores';
+    const arr = JSON.parse(localStorage.getItem(key)||'[]');
+    arr.push({...lastScore, ts: new Date().toLocaleString('zh-TW')});
+    localStorage.setItem(key, JSON.stringify(arr));
+  } catch(e){}
+
+  if (GSHEET_URL) sendToSheet(lastScore);
+}
+
+function sendToSheet(data) {
+  const params = new URLSearchParams({
+    action: 'addScore',
+    ts: new Date().toLocaleString('zh-TW'),
+    cls: data.cls, num: data.num, name: data.name,
+    ok: data.ok, tot: data.tot, pct: data.pct,
+    time: data.time, bank: data.bank,
+    title: document.title,
+    detail: JSON.stringify(data.detail)
+  });
+  fetch(GSHEET_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' })
+    .then(() => {
+      const t = document.getElementById('send-toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 4000);
+    }).catch(() => {});
+}
+
+// 查看解析
+function closeS(){
+  document.getElementById('sov').classList.remove('open');
+  document.querySelectorAll('.ar').forEach(el => el.classList.add('show'));
+}
+
+// 重新挑戰
+function openRetry() {
+  document.getElementById('sov').classList.remove('open');
+  const nextBank = curBank + 1;
+  const nextBtn = document.getElementById('retry-next-btn');
+  const label = document.getElementById('retry-next-label');
+  const desc = document.getElementById('retry-next-desc');
+  if (nextBank < BANKS.length) {
+    label.textContent = `挑戰新題目（第 ${nextBank+1} 回合）`;
+    desc.textContent = BANKS[nextBank].label + '，出過的題目不再出現！';
+    nextBtn.disabled = false;
+    nextBtn.style.opacity = '1';
+  } else {
+    label.textContent = '已完成全部 3 回合 🎊';
+    desc.textContent = '你已挑戰完所有題庫！可以重新從基礎開始。';
+  }
+  document.getElementById('retry-menu').classList.add('open');
+}
+
+function closeRetry() {
+  document.getElementById('retry-menu').classList.remove('open');
+  document.querySelectorAll('.ar').forEach(el => el.classList.add('show'));
+}
+
+function doRetry(mode) {
+  document.getElementById('retry-menu').classList.remove('open');
+  if (mode === 'same') {
+    rebuildExam();
+  } else {
+    const next = (curBank + 1) % BANKS.length;
+    activeConfig.banks = [next];
+    curBank = next;
+    rebuildExam();
+  }
+}
+
+// ── 輔助函式 ──
+function shuffle(array) {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  return array;
+}
+
+// ── 初始化 ──
+document.addEventListener('DOMContentLoaded', () => {
+  setZhuyinFont(zhuyinOn, false);
+  rebuildExam();
+});
+</script>
+<div id="zfont-tip"></div>
+</body>
+</html>
