@@ -1246,24 +1246,6 @@
           return arr;
         };
 
-        const sameOptionOrder = (a, b) => {
-          if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
-          return a.every((opt, index) => opt.text === b[index]?.text);
-        };
-
-        const shuffleDifferentOrder = (options, avoidOrder = null) => {
-          if (!shuffleOptions.value || options.length <= 1) return [...options];
-          let shuffled = [...options];
-          for (let attempt = 0; attempt < 8; attempt++) {
-            shuffled = shuffleArray(options);
-            if (!sameOptionOrder(shuffled, options) && !sameOptionOrder(shuffled, avoidOrder)) {
-              return shuffled;
-            }
-          }
-          const rotated = [...options.slice(1), options[0]];
-          return sameOptionOrder(rotated, avoidOrder) ? [...options.slice(2), ...options.slice(0, 2)] : rotated;
-        };
-
         const setupQuestion = (playerKey) => {
           const pState = playerKey === 'p1' ? p1State : p2State;
           pState.showCorrectAnswer = false;
@@ -1279,8 +1261,9 @@
           const q = questions.value[pState.qIdx];
           let opts = q.opts.map(text => ({ text: text, isCorrect: text === q.ans }));
 
-          const avoidOrder = playerKey === 'p2' ? p1State.options : null;
-          opts = shuffleDifferentOrder(opts, avoidOrder);
+          if (shuffleOptions.value) {
+            opts = shuffleArray(opts);
+          }
           pState.options = [...opts];
         };
 
