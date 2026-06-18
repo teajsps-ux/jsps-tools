@@ -231,7 +231,7 @@
               <div class="flex flex-col gap-3">
                 <label class="flex items-center gap-3 p-3 bg-white/50 border-2 border-black/20 rounded-xl cursor-pointer hover:bg-white/80 transition">
                   <input type="checkbox" v-model="shuffleOptions" class="w-6 h-6 rounded text-blue-600">
-                  <span class="font-bold text-black">打亂選項順序 (每題隨機，左右隊同一組順序)</span>
+                  <span class="font-bold text-black">打亂選項順序 (每一題雙方選項皆隨機)</span>
                 </label>
                 <label class="flex items-center gap-3 p-3 bg-white/50 border-2 border-black/20 rounded-xl cursor-pointer hover:bg-white/80 transition">
                   <input type="checkbox" v-model="useBpmfFont" class="w-6 h-6 rounded text-blue-600">
@@ -820,7 +820,6 @@
 
         const p1Coins = ref([]);
         const p2Coins = ref([]);
-        const shuffledQuestionOrders = ref({});
         let coinCounter = 0;
 
         // --- Logic ---
@@ -1221,7 +1220,6 @@
           
           p1State.qIdx = 0; p1State.finished = false;
           p2State.qIdx = 0; p2State.finished = false;
-          shuffledQuestionOrders.value = {};
 
           globalTimeLeft.value = matchTimeLimit.value * 60;
           isPaused.value = false;
@@ -1253,16 +1251,17 @@
           return a.every((opt, index) => opt.text === b[index]?.text);
         };
 
-        const shuffleDifferentOrder = (options) => {
+        const shuffleDifferentOrder = (options, avoidOrder = null) => {
           if (!shuffleOptions.value || options.length <= 1) return [...options];
           let shuffled = [...options];
           for (let attempt = 0; attempt < 8; attempt++) {
             shuffled = shuffleArray(options);
-            if (!sameOptionOrder(shuffled, options)) {
+            if (!sameOptionOrder(shuffled, options) && !sameOptionOrder(shuffled, avoidOrder)) {
               return shuffled;
             }
           }
-          return [...options.slice(1), options[0]];
+          const rotated = [...options.slice(1), options[0]];
+          return sameOptionOrder(rotated, avoidOrder) ? [...options.slice(2), ...options.slice(0, 2)] : rotated;
         };
 
         const setupQuestion = (playerKey) => {
@@ -1280,13 +1279,8 @@
           const q = questions.value[pState.qIdx];
           let opts = q.opts.map(text => ({ text: text, isCorrect: text === q.ans }));
 
-          if (shuffleOptions.value) {
-            const orderKey = String(pState.qIdx);
-            if (!shuffledQuestionOrders.value[orderKey]) {
-              shuffledQuestionOrders.value[orderKey] = shuffleDifferentOrder(opts);
-            }
-            opts = shuffledQuestionOrders.value[orderKey].map(opt => ({ ...opt }));
-          }
+          const avoidOrder = playerKey === 'p2' ? p1State.options : null;
+          opts = shuffleDifferentOrder(opts, avoidOrder);
           pState.options = [...opts];
         };
 
