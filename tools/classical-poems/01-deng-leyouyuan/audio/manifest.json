@@ -1,0 +1,339 @@
+﻿{
+    "workflow":  "local-first",
+    "voicesRoot":  "C:\\2026_Antigravity_語音\\voices",
+    "segments":  [
+                     {
+                         "id":  "home-guide",
+                         "file":  "audio/home-guide-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "登樂遊原。唐，李商隱。請先聽整首詩，想一想：詩人看到這麼美的夕陽，為什麼心裡還有一點捨不得？",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  1689644
+                     },
+                     {
+                         "id":  "poem-full-sadaltager",
+                         "file":  "audio/poem-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "登樂遊原。唐，李商隱。向晚意不適。驅車登古原。夕陽無限好。只是近黃昏。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  1505324
+                     },
+                     {
+                         "id":  "poem-full-sulafat",
+                         "file":  "audio/poem-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "登樂遊原。唐，李商隱。向晚意不適。驅車登古原。夕陽無限好。只是近黃昏。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  1443884
+                     },
+                     {
+                         "id":  "line1-poem-sadaltager",
+                         "file":  "audio/line1-poem-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "向晚意不適。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  199724
+                     },
+                     {
+                         "id":  "line1-poem-sulafat",
+                         "file":  "audio/line1-poem-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "向晚意不適。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  245804
+                     },
+                     {
+                         "id":  "line1-plain-sadaltager",
+                         "file":  "audio/line1-plain-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "傍晚時，詩人的心裡有點悶悶不樂。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  537644
+                     },
+                     {
+                         "id":  "line1-plain-sulafat",
+                         "file":  "audio/line1-plain-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "傍晚時，詩人的心裡有點悶悶不樂。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  491564
+                     },
+                     {
+                         "id":  "line2-poem-sadaltager",
+                         "file":  "audio/line2-poem-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "驅車登古原。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  245804
+                     },
+                     {
+                         "id":  "line2-poem-sulafat",
+                         "file":  "audio/line2-poem-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "驅車登古原。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  368684
+                     },
+                     {
+                         "id":  "line2-plain-sadaltager",
+                         "file":  "audio/line2-plain-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "他坐上車，慢慢登上高高的樂遊原。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  583724
+                     },
+                     {
+                         "id":  "line2-plain-sulafat",
+                         "file":  "audio/line2-plain-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "他坐上車，慢慢登上高高的樂遊原。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  506924
+                     },
+                     {
+                         "id":  "line3-poem-sadaltager",
+                         "file":  "audio/line3-poem-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "夕陽無限好。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  276524
+                     },
+                     {
+                         "id":  "line3-poem-sulafat",
+                         "file":  "audio/line3-poem-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "夕陽無限好。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  291884
+                     },
+                     {
+                         "id":  "line3-plain-sadaltager",
+                         "file":  "audio/line3-plain-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "夕陽的景色非常美，好像把整片天空都染亮了。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  737324
+                     },
+                     {
+                         "id":  "line3-plain-sulafat",
+                         "file":  "audio/line3-plain-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "夕陽的景色非常美，好像把整片天空都染亮了。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  798764
+                     },
+                     {
+                         "id":  "line4-poem-sadaltager",
+                         "file":  "audio/line4-poem-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "只是近黃昏。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  276524
+                     },
+                     {
+                         "id":  "line4-poem-sulafat",
+                         "file":  "audio/line4-poem-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "只是近黃昏。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  307244
+                     },
+                     {
+                         "id":  "line4-plain-sadaltager",
+                         "file":  "audio/line4-plain-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "可惜天快黑了，這麼美的夕陽也快要消失。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  706604
+                     },
+                     {
+                         "id":  "line4-plain-sulafat",
+                         "file":  "audio/line4-plain-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "可惜天快黑了，這麼美的夕陽也快要消失。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  675884
+                     },
+                     {
+                         "id":  "heart-guide",
+                         "file":  "audio/heart-guide-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "李商隱心情低落，登上樂遊原後，看見夕陽把天地照得很美。越美好的時刻，有時越讓人想到它快要過去，所以心裡會又喜歡，又捨不得。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  2073644
+                     },
+                     {
+                         "id":  "game-match-guide",
+                         "file":  "audio/game-match-guide-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "夕光配對。請點一個彩色詞語，再點它的意思。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  706604
+                     },
+                     {
+                         "id":  "game-shoot-guide",
+                         "file":  "audio/game-shoot-guide-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "溫和射字。請射中下一個正確詞語。被射中的詞會爆破，進入左欄佇列。每完成一句，系統會朗讀這一句。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  1658924
+                     },
+                     {
+                         "id":  "game-guess-guide",
+                         "file":  "audio/game-guess-guide-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "只看畫面猜詩。先看圖中人物的動作和心情，再選出對應詩句。答對後會自動換下一張圖。",
+                         "status":  "done",
+                         "source":  "local VoxCPM2",
+                         "bytes":  1397804
+                     },
+                     {
+                         "id":  "line1-meaning",
+                         "file":  "audio/line1-meaning-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "向晚意不適。傍晚時，詩人的心裡有點悶悶不樂。",
+                         "status":  "done",
+                         "source":  "local Sadaltager existing clip",
+                         "bytes":  309164
+                     },
+                     {
+                         "id":  "line2-meaning",
+                         "file":  "audio/line2-meaning-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "驅車登古原。他坐上車，慢慢登上高高的樂遊原。",
+                         "status":  "done",
+                         "source":  "local Sadaltager existing clip",
+                         "bytes":  307244
+                     },
+                     {
+                         "id":  "line3-meaning",
+                         "file":  "audio/line3-meaning-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "夕陽無限好。夕陽的景色非常美，好像把整片天空都染亮了。",
+                         "status":  "done",
+                         "source":  "local Sadaltager existing clip",
+                         "bytes":  349484
+                     },
+                     {
+                         "id":  "line4-meaning",
+                         "file":  "audio/line4-meaning-sadaltager.wav",
+                         "voice":  "Sadaltager",
+                         "text":  "只是近黃昏。可惜天快黑了，這麼美的夕陽也快要消失。",
+                         "status":  "done",
+                         "source":  "local Sadaltager existing clip",
+                         "bytes":  341804
+                     },
+                     {
+                         "id":  "right",
+                         "file":  "audio/right-hanhan.wav",
+                         "voice":  "Microsoft Hanhan Desktop",
+                         "text":  "答對了。",
+                         "status":  "done",
+                         "source":  "Windows System.Speech",
+                         "bytes":  71664
+                     },
+                     {
+                         "id":  "word-xiangwan",
+                         "file":  "audio/word-xiangwan-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "向晚。傍晚的時候，天快要暗了。",
+                         "status":  "done",
+                         "source":  "A local Sulafat approved word-explanation test",
+                         "bytes":  537644
+                     },
+                     {
+                         "id":  "word-yibushi",
+                         "file":  "audio/word-yibushi-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "意不適。心裡不太舒服，有一點悶悶不樂。",
+                         "status":  "done",
+                         "source":  "A local Sulafat approved word-explanation test",
+                         "bytes":  629804
+                     },
+                     {
+                         "id":  "word-quche",
+                         "file":  "audio/word-quche-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "驅車。乘著車子前往。",
+                         "status":  "done",
+                         "source":  "A local Sulafat approved word-explanation test",
+                         "bytes":  445484
+                     },
+                     {
+                         "id":  "word-deng",
+                         "file":  "audio/word-deng-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "登。往高處走上去。",
+                         "status":  "done",
+                         "source":  "A local Sulafat approved word-explanation test",
+                         "bytes":  414764
+                     },
+                     {
+                         "id":  "word-guyuan",
+                         "file":  "audio/word-guyuan-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "古原。古老又高大的原野。",
+                         "status":  "done",
+                         "source":  "A local Sulafat approved word-explanation test",
+                         "bytes":  445484
+                     },
+                     {
+                         "id":  "word-xiyang",
+                         "file":  "audio/word-xiyang-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "夕陽。快要落下的太陽。",
+                         "status":  "done",
+                         "source":  "A local Sulafat approved word-explanation test",
+                         "bytes":  414764
+                     },
+                     {
+                         "id":  "word-wuxianhao",
+                         "file":  "audio/word-wuxianhao-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "無限好。非常非常美，好像怎麼看都看不夠。",
+                         "status":  "done",
+                         "source":  "A local Sulafat approved word-explanation test",
+                         "bytes":  721964
+                     },
+                     {
+                         "id":  "word-zhishi",
+                         "file":  "audio/word-zhishi-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "只是。可惜的是，心裡有一點捨不得。",
+                         "status":  "done",
+                         "source":  "A local Sulafat approved word-explanation test",
+                         "bytes":  675884
+                     },
+                     {
+                         "id":  "word-jinhuanghun",
+                         "file":  "audio/word-jinhuanghun-sulafat.wav",
+                         "voice":  "Sulafat",
+                         "text":  "近黃昏。快到黃昏，天色就要暗下來了。",
+                         "status":  "done",
+                         "source":  "A local Sulafat approved word-explanation test",
+                         "bytes":  737324
+                     }
+                 ]
+}

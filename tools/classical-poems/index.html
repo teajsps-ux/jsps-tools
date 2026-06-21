@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>&#21476;&#35433;&#20114;&#21205; HTML &#31777;&#22577;</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --ink: #26362f;
+    --muted: #6f756c;
+    --green: #2f6658;
+    --paper: #fffaf0;
+    --line: rgba(38, 54, 47, 0.14);
+  }
+  body { margin: 0; min-height: 100vh; font-family: "Microsoft JhengHei", "PingFang TC", sans-serif; color: var(--ink); background: #f5f1e8; }
+  .hero { padding: clamp(28px, 6vw, 64px) clamp(18px, 5vw, 72px) clamp(22px, 4vw, 44px); background: linear-gradient(135deg, #fbf4df 0%, #dfeee7 100%); border-bottom: 1px solid var(--line); }
+  .topline { display: flex; justify-content: space-between; gap: 16px; align-items: center; max-width: 1120px; margin: 0 auto 24px; }
+  .back { color: var(--green); text-decoration: none; font-weight: 800; background: rgba(255,255,255,0.72); border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px; }
+  h1 { max-width: 1120px; margin: 0 auto 10px; font-size: clamp(34px, 7vw, 72px); line-height: 1.05; letter-spacing: 0; }
+  .intro { max-width: 1120px; margin: 0 auto; color: var(--muted); font-size: clamp(16px, 2vw, 20px); line-height: 1.7; }
+  main { max-width: 1120px; margin: 0 auto; padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 32px) 56px; }
+  .poem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; }
+  .poem-card { display: grid; grid-template-rows: auto 1fr; overflow: hidden; min-height: 420px; color: inherit; text-decoration: none; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 14px 34px rgba(38, 54, 47, 0.13); transition: transform 0.16s ease, box-shadow 0.16s ease; }
+  .poem-card:hover, .poem-card:focus-visible { transform: translateY(-4px); box-shadow: 0 18px 42px rgba(38, 54, 47, 0.2); outline: none; }
+  .cover { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #e7decf; }
+  .info { padding: 20px 22px 24px; }
+  .num { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; height: 34px; margin-bottom: 12px; border-radius: 999px; background: var(--green); color: white; font-weight: 900; letter-spacing: 0; }
+  h2 { margin: 0 0 8px; font-size: clamp(26px, 4vw, 38px); line-height: 1.15; }
+  .meta { margin: 0 0 14px; color: #76624b; font-weight: 800; }
+  .desc { margin: 0; color: var(--muted); line-height: 1.65; font-size: 16px; }
+</style>
+</head>
+<body>
+  <section class="hero">
+    <div class="topline"><a class="back" href="../../">&#22238;&#39318;&#38913;</a></div>
+    <h1>&#21476;&#35433;&#20114;&#21205; HTML &#31777;&#22577;</h1>
+    <p class="intro">&#20381;&#21407;&#22987;&#32232;&#34399;&#25490;&#24207;&#65307;&#27599;&#39318;&#35433;&#20351;&#29992;&#35433;&#24847;&#25554;&#22294;&#20316;&#28858;&#20837;&#21475;&#65292;&#40670;&#36984;&#24460;&#36914;&#20837;&#23436;&#25972;&#20114;&#21205;&#31777;&#22577;&#12290;</p>
+  </section>
+  <main>
+    <div class="poem-grid">
+      <a class="poem-card" href="./01-deng-leyouyuan/">
+        <img class="cover" src="./assets/01-deng-leyouyuan-cover.png" alt="&#30331;&#27138;&#36938;&#21407;&#20837;&#21475;&#22294;">
+        <div class="info">
+          <span class="num">01</span>
+          <h2>&#30331;&#27138;&#36938;&#21407;</h2>
+          <p class="meta">&#21776;&#12539;&#26446;&#21830;&#38577;</p>
+          <p class="desc">&#20621;&#26202;&#30331;&#19978;&#21476;&#21407;&#65292;&#36960;&#26395;&#22805;&#38525;&#29031;&#20142;&#22825;&#22320;&#65307;&#32654;&#26223;&#27491;&#22909;&#65292;&#24515;&#20013;&#21371;&#30693;&#36947;&#40643;&#26127;&#23559;&#36817;&#12290;</p>
+        </div>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

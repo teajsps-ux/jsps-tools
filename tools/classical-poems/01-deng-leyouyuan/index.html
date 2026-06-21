@@ -1,0 +1,1435 @@
+﻿<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登樂遊原 - 古詩互動 HTML 簡報</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bpmf+Iansui&family=Bpmf+Zihi+Kai+Std&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #25211d;
+      --paper: rgba(255, 253, 248, .88);
+      --soft: rgba(255, 253, 248, .72);
+      --line: rgba(55, 42, 26, .16);
+      --verb: #d85045;
+      --noun: #248067;
+      --person: #2f6fbd;
+      --time: #a36600;
+      --place: #6b58b8;
+      --feeling: #c04382;
+      --shadow: 0 20px 70px rgba(29, 24, 17, .2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow: auto;
+      color: var(--ink);
+      font-family: system-ui, "Microsoft JhengHei", sans-serif;
+      background: #f8f4ec;
+    }
+    body.font-iansui { font-family: "Bpmf Iansui", system-ui, sans-serif; }
+    body.font-kai { font-family: "Bpmf Zihi Kai Std", "Bpmf Iansui", serif; }
+    button, select {
+      border: 0;
+      border-radius: 999px;
+      min-height: 40px;
+      padding: 9px 15px;
+      font: inherit;
+      font-weight: 800;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .8);
+      box-shadow: 0 8px 24px rgba(38, 29, 18, .12);
+      cursor: pointer;
+    }
+    button:hover, select:hover { background: #fff; }
+    button.primary { color: white; background: #315f53; }
+    .deck, .slide {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: white;
+    }
+    .slide.active { display: block; }
+    .slide.active .art, .slide.active .shade { position: fixed; }
+    .art {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .shade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.9), rgba(255,255,255,.58) 48%, rgba(255,255,255,.16)),
+        radial-gradient(circle at 76% 22%, rgba(255,255,255,.24), transparent 42%);
+      pointer-events: none;
+    }
+    body.clean-view .shade,
+    body.clean-view .stage,
+    body.clean-view .audio-note,
+    body.clean-view dialog {
+      display: none;
+    }
+    body.clean-view .tools button:not(.view-toggle),
+    body.clean-view .tools select,
+    body.clean-view .pager {
+      display: none;
+    }
+    .topbar {
+      position: fixed;
+      z-index: 30;
+      pointer-events: none;
+    }
+    .tools, .pager {
+      position: fixed;
+      top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px;
+      border: 1px solid rgba(44, 35, 24, .12);
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .74);
+      backdrop-filter: blur(14px);
+      pointer-events: auto;
+      touch-action: none;
+      cursor: move;
+      user-select: none;
+    }
+    .tools { left: 16px; }
+    .pager { right: 16px; }
+    .tools button, .tools select, .pager button {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .drag-handle {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #315f53;
+      background: rgba(255, 255, 255, .62);
+      font-weight: 900;
+      cursor: move;
+    }
+    .stage {
+      position: relative;
+      z-index: 2;
+      min-height: 100%;
+      padding: clamp(78px, 9vh, 106px) clamp(24px, 5vw, 70px) clamp(56px, 7vh, 86px);
+      display: grid;
+      align-items: center;
+    }
+    .home-copy {
+      width: min(980px, 94vw);
+      display: grid;
+      gap: 18px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 7vw, 94px);
+      line-height: 1.04;
+      letter-spacing: 0;
+      color: #2e3832;
+    }
+    .author {
+      font-size: clamp(22px, 2.7vw, 36px);
+      font-weight: 800;
+      color: #64574a;
+    }
+    .prompt {
+      width: max-content;
+      max-width: min(1120px, 94vw);
+      padding: 18px 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      font-size: clamp(22px, 2.5vw, 34px);
+      line-height: 1.42;
+      font-weight: 850;
+    }
+    .poem-vertical {
+      writing-mode: horizontal-tb;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: flex-start;
+      gap: clamp(14px, 2vw, 28px);
+      min-height: 420px;
+      font-size: clamp(32px, 4.5vw, 66px);
+      line-height: 1.62;
+      font-weight: 850;
+      color: #2c332e;
+    }
+    .poem-vertical .home-line {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      min-height: 7.8em;
+      padding: .18em .12em;
+      border-radius: 10px;
+      transition: background .2s, box-shadow .2s, transform .2s;
+    }
+    .home-line.active-line,
+    .compare-row.active-line {
+      background: rgba(255, 236, 161, .78);
+      box-shadow: 0 0 0 5px rgba(255, 236, 161, .32);
+      transform: translateY(-2px);
+    }
+    .line-stage {
+      grid-template-columns: minmax(260px, .9fr) minmax(320px, 1.1fr);
+      gap: clamp(20px, 4vw, 62px);
+    }
+    .line-stage > * { min-width: 0; }
+    .line-poem {
+      display: grid;
+      gap: 18px;
+      align-content: center;
+    }
+    .line-title {
+      font-size: clamp(23px, 2.6vw, 34px);
+      font-weight: 900;
+      color: #66594b;
+    }
+    .token-line {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      min-height: min(58vh, 520px);
+      font-size: clamp(38px, 5.4vw, 74px);
+      line-height: 1.38;
+      font-weight: 900;
+    }
+    .token {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      border-radius: 8px;
+      padding: .1em .08em;
+      background: rgba(255, 255, 255, .58);
+      box-shadow: 0 8px 24px rgba(42, 31, 19, .08);
+    }
+    button.token {
+      min-height: 0;
+      border-radius: 8px;
+      font: inherit;
+      box-shadow: 0 8px 24px rgba(42, 31, 19, .08);
+    }
+    .token[data-kind="verb"] { color: var(--verb); }
+    .token[data-kind="noun"] { color: var(--noun); }
+    .token[data-kind="person"] { color: var(--person); }
+    .token[data-kind="time"] { color: var(--time); }
+    .token[data-kind="place"] { color: var(--place); }
+    .token[data-kind="feeling"] { color: var(--feeling); }
+    .plain {
+      width: min(760px, 100%);
+      max-width: min(760px, calc(100vw - 48px));
+      padding: 20px 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      font-size: clamp(22px, 2.6vw, 34px);
+      line-height: 1.45;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      white-space: normal;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #53493f;
+    }
+    .legend span {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .68);
+    }
+    .compare {
+      width: min(1180px, 96vw);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .compare-grid {
+      width: min(1220px, 96vw);
+      display: grid;
+      grid-template-columns: minmax(360px, .92fr) minmax(520px, 1.2fr);
+      gap: 12px 18px;
+      align-items: stretch;
+    }
+    .compare-head {
+      font-size: clamp(24px, 3vw, 38px);
+      font-weight: 900;
+      padding: 8px 18px;
+      justify-self: start;
+      background: rgba(255, 255, 255, .78);
+    }
+    .compare-row {
+      min-height: 84px;
+      display: grid;
+      align-items: center;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .08);
+      padding: 14px 18px;
+      font-size: clamp(21px, 2.4vw, 32px);
+      line-height: 1.36;
+      font-weight: 850;
+      transition: background .2s, box-shadow .2s, transform .2s;
+    }
+    .poem-row {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 84px;
+    }
+    .poem-row .token {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      background: transparent;
+      box-shadow: none;
+      padding: 0 .04em;
+      font-size: 1em;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 34px);
+    }
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: clamp(24px, 3vw, 38px);
+    }
+    .panel p {
+      margin: 0;
+      font-size: clamp(21px, 2.4vw, 31px);
+      line-height: 1.55;
+      font-weight: 750;
+    }
+    .scaffold {
+      color: #d85045;
+      border: 2px solid rgba(216, 80, 69, .7);
+      border-radius: 4px;
+      padding: 0 .08em;
+      background: rgba(255, 255, 255, .38);
+      white-space: nowrap;
+    }
+    .home-action-tray {
+      position: fixed;
+      z-index: 34;
+      left: 14px;
+      bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(44, 35, 24, .12);
+      background: rgba(255, 253, 248, .78);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 34px rgba(38, 29, 18, .12);
+    }
+    .home-action-tray.hidden { display: none; }
+    .home-tray-restore {
+      position: fixed;
+      z-index: 34;
+      left: 14px;
+      bottom: 14px;
+      display: none;
+      min-width: 54px;
+      height: 54px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .9);
+      color: #315f53;
+      box-shadow: 0 12px 34px rgba(38, 29, 18, .14);
+    }
+    .home-tray-restore.visible { display: inline-grid; place-items: center; }
+    .home-action-tray .round {
+      width: 42px;
+      min-width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+    }
+    .home-action-tray .primary {
+      padding-inline: clamp(16px, 2.2vw, 28px);
+    }
+    body.clean-view .home-action-tray { display: none; }
+    .game {
+      width: min(1240px, 96vw);
+      display: grid;
+      gap: 16px;
+    }
+    .game.wide { width: min(1320px, 96vw); }
+    .game-head {
+      width: max-content;
+      max-width: 100%;
+      padding: 16px 24px;
+      border-radius: 8px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      font-size: clamp(24px, 3vw, 42px);
+      line-height: 1.25;
+      font-weight: 900;
+    }
+    .game-rule {
+      width: fit-content;
+      max-width: 100%;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .84);
+      font-size: clamp(18px, 2vw, 28px);
+      font-weight: 850;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .match-board {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .match-column, .shoot-panel, .guess-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .08);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+    .match-card, .target-card, .guess-choice {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .08);
+      padding: 14px 18px;
+      font-size: clamp(20px, 2.2vw, 29px);
+      line-height: 1.38;
+      font-weight: 850;
+      text-align: left;
+    }
+    .match-card.selected { outline: 4px solid rgba(49, 95, 83, .45); }
+    .match-card[data-kind="time"] { color: var(--time); }
+    .match-card[data-kind="feeling"] { color: var(--feeling); }
+    .match-card[data-kind="noun"] { color: var(--noun); }
+    .match-card.done {
+      color: white;
+      background: #315f53;
+      pointer-events: none;
+    }
+    .shoot-layout {
+      display: grid;
+      grid-template-columns: minmax(420px, 46%) minmax(420px, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .shoot-queue {
+      min-height: clamp(380px, 56vh, 620px);
+      border-radius: 8px;
+      border: 2px solid rgba(49, 95, 83, .16);
+      background: rgba(255, 253, 248, .7);
+      padding: 18px;
+      display: grid;
+      align-content: start;
+      gap: 14px;
+    }
+    .queue-title, .arena-title {
+      justify-self: center;
+      width: max-content;
+      max-width: 100%;
+      padding: 12px 22px;
+      border-radius: 999px;
+      background: rgba(49, 95, 83, .92);
+      color: white;
+      font-size: clamp(22px, 2.5vw, 34px);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .shoot-target {
+      width: max-content;
+      max-width: 100%;
+      justify-self: center;
+      padding: 14px 24px;
+      border-radius: 999px;
+      background: rgba(49, 95, 83, .92);
+      color: white;
+      font-size: clamp(22px, 2.6vw, 34px);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .shoot-field {
+      position: relative;
+      min-height: clamp(380px, 56vh, 620px);
+      border-radius: 8px;
+      border: 2px solid rgba(49, 95, 83, .16);
+      background: rgba(255, 253, 248, .42);
+      overflow: hidden;
+    }
+    .target-card {
+      position: absolute;
+      min-width: 120px;
+      text-align: center;
+      border-radius: 999px;
+      animation: drift var(--speed, 7s) ease-in-out infinite alternate;
+    }
+    .target-card.hit {
+      animation: burst .42s ease-out forwards;
+      color: white;
+      background: #d85045;
+    }
+    @keyframes burst {
+      0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+      45% { transform: scale(1.45) rotate(4deg); opacity: 1; filter: brightness(1.35); }
+      100% { transform: scale(.15) rotate(-18deg); opacity: 0; filter: brightness(1.7); }
+    }
+    @keyframes drift {
+      from { translate: -20px -8px; }
+      to { translate: 24px 14px; }
+    }
+    .line-build {
+      display: grid;
+      gap: 14px;
+      align-items: start;
+      justify-content: stretch;
+      min-height: 64px;
+      font-size: clamp(24px, 3vw, 42px);
+      font-weight: 900;
+    }
+    .queue-line {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border-radius: 8px;
+      transition: background .2s, box-shadow .2s, transform .2s;
+    }
+    .queue-line.active-line {
+      background: rgba(255, 236, 161, .82);
+      box-shadow: 0 0 0 5px rgba(255, 236, 161, .32);
+      transform: translateY(-2px);
+    }
+    .line-slot {
+      min-width: 92px;
+      min-height: 54px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      border: 3px dashed rgba(49, 95, 83, .38);
+      background: rgba(255,255,255,.64);
+      padding: 4px 12px;
+    }
+    .line-slot.filled {
+      border-style: solid;
+      color: white;
+      background: #315f53;
+    }
+    .guess-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 520px) minmax(360px, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .guess-image {
+      width: 100%;
+      min-height: 420px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      background: white;
+    }
+    .guess-options {
+      display: grid;
+      gap: 12px;
+      align-content: center;
+    }
+    .feedback {
+      min-height: 56px;
+      padding: 4px 8px;
+      color: #315f53;
+      font-size: clamp(22px, 2.6vw, 34px);
+      font-weight: 900;
+    }
+    .correct-mark {
+      position: fixed;
+      inset: 0;
+      z-index: 82;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      font-size: clamp(210px, 32vw, 420px);
+      font-family: Arial, sans-serif;
+      font-weight: 900;
+      color: #23a45a;
+      text-shadow: 0 0 18px rgba(35, 164, 90, .9), 0 0 46px rgba(35, 164, 90, .65);
+      animation: markPop .72s ease-out both;
+    }
+    @keyframes markPop {
+      0% { transform: scale(.55); opacity: 0; }
+      20% { transform: scale(1.08); opacity: 1; }
+      70% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(.92); opacity: 0; }
+    }
+    .audio-note {
+      position: fixed;
+      z-index: 31;
+      left: 16px;
+      bottom: 14px;
+      max-width: min(46px, calc(100vw - 32px));
+      min-height: 32px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(163, 102, 0, .2);
+      background: rgba(255, 244, 218, .9);
+      color: #654400;
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: help;
+      opacity: .72;
+      transition: max-width .18s ease, opacity .18s ease, background .18s ease;
+    }
+    .audio-note::before {
+      content: "音";
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      margin-right: 8px;
+      border-radius: 999px;
+      background: #fff7df;
+      color: #654400;
+    }
+    .audio-note:hover,
+    .audio-note:focus {
+      max-width: min(920px, calc(100vw - 32px));
+      opacity: 1;
+      background: rgba(255, 244, 218, .96);
+    }
+    .fullscreen-toggle {
+      position: fixed;
+      z-index: 31;
+      left: 18px;
+      bottom: 64px;
+      width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(49, 95, 83, .18);
+      background: rgba(255, 253, 248, .9);
+      color: #315f53;
+      font-size: 21px;
+      font-weight: 900;
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .1);
+    }
+    dialog {
+      width: min(560px, 90vw);
+      border: 0;
+      border-radius: 10px;
+      padding: 0;
+      background: transparent;
+    }
+    dialog::backdrop { background: rgba(30, 24, 17, .28); }
+    .pop {
+      padding: 24px;
+      border: 1px solid rgba(44, 35, 24, .15);
+      border-radius: 10px;
+      background: rgba(255, 253, 248, .96);
+      box-shadow: var(--shadow);
+    }
+    .pop h3 {
+      margin: 0 0 8px;
+      font-size: 34px;
+    }
+    .pop p {
+      margin: 0 0 18px;
+      font-size: 24px;
+      line-height: 1.42;
+      font-weight: 760;
+    }
+    @media (max-width: 980px) {
+      body { overflow: auto; }
+      .deck, .slide { min-height: 100vh; height: auto; }
+      .slide { position: relative; }
+      .line-stage, .compare, .compare-grid, .match-board, .guess-layout, .shoot-layout { grid-template-columns: 1fr; }
+      .queue-line { flex-wrap: wrap; }
+      .stage { min-height: 100vh; }
+      .topbar { position: fixed; }
+      .prompt, .plain { width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="tools" data-draggable-control="tools">
+      <span class="drag-handle" title="拖曳移動">↕</span>
+      <select id="fontSelect" aria-label="字體">
+        <option value="normal">一般字體</option>
+        <option value="iansui">Bpmf Iansui</option>
+        <option value="kai">Bpmf Zihi Kai Std</option>
+      </select>
+      <button class="view-toggle" onclick="toggleCleanView()">只看底圖</button>
+    </div>
+    <div class="pager" data-draggable-control="pager">
+      <span class="drag-handle" title="拖曳移動">↕</span>
+      <button onclick="prevSlide()">←</button>
+      <button class="primary" onclick="nextSlide()">→</button>
+    </div>
+  </div>
+
+  <main class="deck">
+    <section class="slide active" data-auto="home-guide">
+      <img class="art" src="generated-v2/leyou-home_20260621_151129.png" alt="登樂遊原首頁插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>登樂遊原</h1>
+          <div class="author">唐・李商隱</div>
+          <div class="prompt">請想一想：詩人看到這麼美的夕陽，為什麼心裡還有一點捨不得？</div>
+          <div class="poem-vertical" id="homePoem">
+            <span class="home-line" data-line="0"><span class="token" data-kind="time">向晚</span><span class="token" data-kind="feeling">意不適</span></span>
+            <span class="home-line" data-line="1"><span class="token" data-kind="verb">驅車</span><span class="token" data-kind="verb">登</span><span class="token" data-kind="place">古原</span></span>
+            <span class="home-line" data-line="2"><span class="token" data-kind="noun">夕陽</span><span class="token" data-kind="feeling">無限好</span></span>
+            <span class="home-line" data-line="3"><span class="token" data-kind="feeling">只是</span><span class="token" data-kind="time">近黃昏</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="home-action-tray" id="homeActionTray">
+        <button class="round" onclick="hideHomeTray()" title="收起">×</button>
+        <button class="round" onclick="playSegment('home-guide')" title="聽提問">音</button>
+        <button class="primary" onclick="playHomePoem()">帶讀整首詩</button>
+        <button onclick="nextSlide()">開始一句一句看</button>
+      </div>
+      <button class="home-tray-restore" id="homeTrayRestore" onclick="showHomeTray()">朗讀</button>
+    </section>
+
+    <section class="slide" data-auto="line1-meaning">
+      <img class="art" src="generated-v2/leyou-line1_20260621_151200.png" alt="向晚意不適插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第一句</div>
+          <div class="token-line">
+            <button class="token" data-kind="time" onclick="showWord(this,'向晚','傍晚的時候，天快要暗了。')">向晚</button>
+            <button class="token" data-kind="feeling" onclick="showWord(this,'意不適','心裡不太舒服，有一點悶悶不樂。')">意不適</button>
+          </div>
+          <div class="legend"><span style="color:var(--time)">時間</span><span style="color:var(--feeling)">心情</span></div>
+        </div>
+        <div class="plain">傍晚時，詩人的心裡有點悶悶不樂。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line2-meaning">
+      <img class="art" src="generated-v2/leyou-line2_20260621_151223.png" alt="驅車登古原插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第二句</div>
+          <div class="token-line">
+            <button class="token" data-kind="verb" onclick="showWord(this,'驅車','乘著車子前往。')">驅車</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'登','往高處走上去。')">登</button>
+            <button class="token" data-kind="place" onclick="showWord(this,'古原','古老又開闊的高地，這裡指樂遊原。')">古原</button>
+          </div>
+          <div class="legend"><span style="color:var(--verb)">動作</span><span style="color:var(--place)">地點</span></div>
+        </div>
+        <div class="plain">他坐上車，慢慢登上高高的樂遊原。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line3-meaning">
+      <img class="art" src="generated-v2/leyou-line3_20260621_151245.png" alt="夕陽無限好插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第三句</div>
+          <div class="token-line">
+            <button class="token" data-kind="noun" onclick="showWord(this,'夕陽','快要落下的太陽。')">夕陽</button>
+            <button class="token" data-kind="feeling" onclick="showWord(this,'無限好','非常非常美，好像怎麼看都看不夠。')">無限好</button>
+          </div>
+          <div class="legend"><span style="color:var(--noun)">景物</span><span style="color:var(--feeling)">感受</span></div>
+        </div>
+        <div class="plain">夕陽的景色非常美，好像把整片天空都染亮了。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line4-meaning">
+      <img class="art" src="generated-v2/leyou-line4_20260621_151312.png" alt="只是近黃昏插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第四句</div>
+          <div class="token-line">
+            <button class="token" data-kind="feeling" onclick="showWord(this,'只是','可惜的是，心裡有一點捨不得。')">只是</button>
+            <button class="token" data-kind="time" onclick="showWord(this,'近黃昏','快到黃昏，天色就要暗下來了。')">近黃昏</button>
+          </div>
+          <div class="legend"><span style="color:var(--feeling)">轉折心情</span><span style="color:var(--time)">時間</span></div>
+        </div>
+        <div class="plain">可惜天快黑了，這麼美的夕陽也快要消失。</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <img class="art" src="generated-v2/leyou-compare_20260621_151338.png" alt="登樂遊原全詩白話對照插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>原詩與白話對照</h1>
+          <div class="author">登樂遊原　唐・李商隱</div>
+          <div class="compare-grid">
+            <button class="compare-head" onclick="playOriginalOnly()">讀原詩</button>
+            <button class="compare-head" onclick="playPlainOnly()">讀白話</button>
+            <div class="compare-row poem-row" data-pair="0" onclick="playComparePair(0)"><span class="token" data-kind="time">向晚</span><span class="token" data-kind="feeling">意不適</span></div>
+            <div class="compare-row plain-row" data-pair="0" onclick="playComparePair(0)">傍晚時，詩人的心裡有點悶悶不樂。</div>
+            <div class="compare-row poem-row" data-pair="1" onclick="playComparePair(1)"><span class="token" data-kind="verb">驅車</span><span class="token" data-kind="verb">登</span><span class="token" data-kind="place">古原</span></div>
+            <div class="compare-row plain-row" data-pair="1" onclick="playComparePair(1)">他坐上車，慢慢登上高高的樂遊原。</div>
+            <div class="compare-row poem-row" data-pair="2" onclick="playComparePair(2)"><span class="token" data-kind="noun">夕陽</span><span class="token" data-kind="feeling">無限好</span></div>
+            <div class="compare-row plain-row" data-pair="2" onclick="playComparePair(2)">夕陽的景色非常美，好像把整片天空都染亮了。</div>
+            <div class="compare-row poem-row" data-pair="3" onclick="playComparePair(3)"><span class="token" data-kind="feeling">只是</span><span class="token" data-kind="time">近黃昏</span></div>
+            <div class="compare-row plain-row" data-pair="3" onclick="playComparePair(3)">可惜天快黑了，這麼美的夕陽也快要消失。</div>
+          </div>
+          <button class="primary" onclick="playCompare()">原詩白話一起讀</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="heart-guide">
+      <img class="art" src="generated-v2/leyou-heart_20260621_151359.png" alt="登樂遊原詩人心情插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>詩人的心情</h1>
+          <div class="author">美好的夕陽，為什麼讓人捨不得？</div>
+          <div class="compare">
+            <div class="panel">
+              <h2>當時的心情</h2>
+              <p>李商隱<span class="scaffold">心情低落</span>，<span class="scaffold">登上樂遊原</span>後，看見<span class="scaffold">夕陽</span>把天地照得很美。</p>
+            </div>
+            <div class="panel">
+              <h2>我們學到</h2>
+              <p>越<span class="scaffold">美好</span>的時刻，有時越讓人想到它快要過去，所以心裡會又<span class="scaffold">喜歡</span>、又<span class="scaffold">捨不得</span>。</p>
+            </div>
+          </div>
+          <button class="primary" onclick="playSegment('heart-guide')">聽一聽</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-match-guide">
+      <img class="art" src="generated-v2/leyou-game-match_20260621_152901.png" alt="夕光配對遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <div class="game-head">夕光配對</div>
+          <div class="game-rule">點一個彩色詞語，再點它的意思。</div>
+          <div class="match-board" id="matchBoard">
+            <div class="match-column">
+              <button class="match-card" data-match="evening" data-kind="time">向晚</button>
+              <button class="match-card" data-match="unwell" data-kind="feeling">意不適</button>
+              <button class="match-card" data-match="sunset" data-kind="noun">夕陽</button>
+              <button class="match-card" data-match="dusk" data-kind="time">近黃昏</button>
+            </div>
+            <div class="match-column">
+              <button class="match-card" data-match="sunset">快要落下的太陽。</button>
+              <button class="match-card" data-match="dusk">天色快暗，黃昏快到了。</button>
+              <button class="match-card" data-match="evening">傍晚的時候。</button>
+              <button class="match-card" data-match="unwell">心裡悶悶不樂。</button>
+            </div>
+          </div>
+          <div class="feedback" id="matchFeedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-shoot-guide">
+      <img class="art" src="generated-v2/leyou-game-shoot_20260621_152932.png" alt="溫和射字遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <div class="game-head">溫和射字</div>
+          <div class="game-rule">不計時、不扣分。請點中下一個正確詞語，完成整首詩。</div>
+          <div class="shoot-panel">
+            <div class="shoot-target" id="shootPrompt">請點：向晚</div>
+            <div class="shoot-layout">
+              <div class="shoot-queue">
+                <div class="queue-title" id="queueTitle">佇列收集</div>
+                <div class="line-build" id="lineBuild"></div>
+              </div>
+              <div class="shoot-field" id="shootField"><div class="arena-title">射字區</div></div>
+            </div>
+            <div class="feedback" id="shootFeedback"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-guess-guide">
+      <img class="art" src="generated-v2/leyou-game-guess_20260621_152958.png" alt="只看畫面猜詩遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <div class="game-head">只看畫面猜詩</div>
+          <div class="game-rule">先看圖中人物的動作和心情，再選出對應詩句。熟練後可以切換成隨機配對。</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="primary" onclick="setGuessMode('order')">依序出現</button>
+            <button onclick="setGuessMode('random')">隨機配對</button>
+          </div>
+          <div class="guess-layout">
+            <img class="guess-image" id="guessImage" src="generated-v2/leyou-line1_20260621_151200.png" alt="猜詩圖片">
+            <div class="guess-panel">
+              <div class="guess-options" id="guessOptions"></div>
+              <div class="feedback" id="guessFeedback"></div>
+              <button class="primary" onclick="nextGuess()">換下一張圖</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="wordDialog">
+    <div class="pop">
+      <h3 id="wordTitle"></h3>
+      <p id="wordText"></p>
+      <button class="primary" onclick="closeWord()">收起</button>
+    </div>
+  </dialog>
+
+  <button class="fullscreen-toggle" id="fullscreenToggle" onclick="toggleFullscreen()" title="切換全螢幕">⛶</button>
+  <div class="audio-note" id="audioNote" tabindex="0">已接入本機 Sadaltager / Sulafat 配音；非核心音效不足時才暫用瀏覽器朗讀。</div>
+
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    let current = 0;
+    let currentAudio = null;
+    const audioText = {
+      'home-guide': '登樂遊原。唐，李商隱。請先聽整首詩，想一想：詩人看到這麼美的夕陽，為什麼心裡還有一點捨不得？',
+      'line1-meaning': '向晚意不適。傍晚時，詩人的心裡有點悶悶不樂。',
+      'line2-meaning': '驅車登古原。他坐上車，慢慢登上高高的樂遊原。',
+      'line3-meaning': '夕陽無限好。夕陽的景色非常美，好像把整片天空都染亮了。',
+      'line4-meaning': '只是近黃昏。可惜天快黑了，這麼美的夕陽也快要消失。',
+      'heart-guide': '詩人看見非常美的夕陽，可是也知道黃昏快到了。美好的時刻快要過去，所以心裡有一點捨不得。',
+      'game-match-guide': '夕光配對。請點一個彩色詞語，再點它的意思。',
+      'game-shoot-guide': '溫和射字。請點中下一個正確詞語，完成整首詩。',
+      'game-guess-guide': '只看畫面猜詩。先看圖中人物的動作和心情，再選出對應詩句。'
+    };
+    const audioFiles = {
+      'home-guide': 'audio/home-guide-sadaltager.wav',
+      'line1-meaning': 'audio/line1-meaning-sadaltager.wav',
+      'line2-meaning': 'audio/line2-meaning-sadaltager.wav',
+      'line3-meaning': 'audio/line3-meaning-sadaltager.wav',
+      'line4-meaning': 'audio/line4-meaning-sadaltager.wav',
+      'poem-full-sadaltager': 'audio/poem-sadaltager.wav',
+      'poem-full-sulafat': 'audio/poem-sulafat.wav',
+      'line1-poem-sadaltager': 'audio/line1-poem-sadaltager.wav',
+      'line1-poem-sulafat': 'audio/line1-poem-sulafat.wav',
+      'line1-plain-sadaltager': 'audio/line1-plain-sadaltager.wav',
+      'line1-plain-sulafat': 'audio/line1-plain-sulafat.wav',
+      'line2-poem-sadaltager': 'audio/line2-poem-sadaltager.wav',
+      'line2-poem-sulafat': 'audio/line2-poem-sulafat.wav',
+      'line2-plain-sadaltager': 'audio/line2-plain-sadaltager.wav',
+      'line2-plain-sulafat': 'audio/line2-plain-sulafat.wav',
+      'line3-poem-sadaltager': 'audio/line3-poem-sadaltager.wav',
+      'line3-poem-sulafat': 'audio/line3-poem-sulafat.wav',
+      'line3-plain-sadaltager': 'audio/line3-plain-sadaltager.wav',
+      'line3-plain-sulafat': 'audio/line3-plain-sulafat.wav',
+      'line4-poem-sadaltager': 'audio/line4-poem-sadaltager.wav',
+      'line4-poem-sulafat': 'audio/line4-poem-sulafat.wav',
+      'line4-plain-sadaltager': 'audio/line4-plain-sadaltager.wav',
+      'line4-plain-sulafat': 'audio/line4-plain-sulafat.wav',
+      'heart-guide': 'audio/heart-guide-sadaltager.wav',
+      'game-match-guide': 'audio/game-match-guide-sulafat.wav',
+      'game-shoot-guide': 'audio/game-shoot-guide-sulafat.wav',
+      'game-guess-guide': 'audio/game-guess-guide-sulafat.wav',
+      'right': 'audio/right-hanhan.wav',
+      'word-xiangwan': 'audio/word-xiangwan-sulafat.wav',
+      'word-yibushi': 'audio/word-yibushi-sulafat.wav',
+      'word-quche': 'audio/word-quche-sulafat.wav',
+      'word-deng': 'audio/word-deng-sulafat.wav',
+      'word-guyuan': 'audio/word-guyuan-sulafat.wav',
+      'word-xiyang': 'audio/word-xiyang-sulafat.wav',
+      'word-wuxianhao': 'audio/word-wuxianhao-sulafat.wav',
+      'word-zhishi': 'audio/word-zhishi-sulafat.wav',
+      'word-jinhuanghun': 'audio/word-jinhuanghun-sulafat.wav'
+    };
+    const poemAudioIds = ['line1-poem-sulafat', 'line2-poem-sulafat', 'line3-poem-sulafat', 'line4-poem-sulafat'];
+    const plainAudioIds = ['line1-plain-sadaltager', 'line2-plain-sadaltager', 'line3-plain-sadaltager', 'line4-plain-sadaltager'];
+    const wordAudioIds = {
+      '向晚': 'word-xiangwan',
+      '意不適': 'word-yibushi',
+      '驅車': 'word-quche',
+      '登': 'word-deng',
+      '古原': 'word-guyuan',
+      '夕陽': 'word-xiyang',
+      '無限好': 'word-wuxianhao',
+      '只是': 'word-zhishi',
+      '近黃昏': 'word-jinhuanghun'
+    };
+    const poemLines = ['向晚意不適。', '驅車登古原。', '夕陽無限好。', '只是近黃昏。'];
+    const plainLines = [
+      '傍晚時，詩人的心裡有點悶悶不樂。',
+      '他坐上車，慢慢登上高高的樂遊原。',
+      '夕陽的景色非常美，好像把整片天空都染亮了。',
+      '可惜天快黑了，這麼美的夕陽也快要消失。'
+    ];
+    const shootLines = [
+      { text: '向晚意不適。', words: ['向晚', '意不適'] },
+      { text: '驅車登古原。', words: ['驅車', '登', '古原'] },
+      { text: '夕陽無限好。', words: ['夕陽', '無限好'] },
+      { text: '只是近黃昏。', words: ['只是', '近黃昏'] }
+    ];
+    const shootWords = shootLines.flatMap(line => line.words);
+    const shootLineEnds = shootLines.reduce((items, line) => {
+      const previous = items.length ? items[items.length - 1].end : 0;
+      items.push({ end: previous + line.words.length, text: line.text });
+      return items;
+    }, []);
+    const guessItems = [
+      { image: 'generated-v2/leyou-line1_20260621_151200.png', answer: '向晚意不適', speak: '向晚意不適。' },
+      { image: 'generated-v2/leyou-line2_20260621_151223.png', answer: '驅車登古原', speak: '驅車登古原。' },
+      { image: 'generated-v2/leyou-line3_20260621_151245.png', answer: '夕陽無限好', speak: '夕陽無限好。' },
+      { image: 'generated-v2/leyou-line4_20260621_151312.png', answer: '只是近黃昏', speak: '只是近黃昏。' }
+    ];
+    let selectedMatch = null;
+    let shootIndex = 0;
+    let guessIndex = 0;
+    let guessMode = 'order';
+    let randomGuessQueue = [];
+
+    function showSlide(index) {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+      stopAudio();
+      const id = slides[current].dataset.auto;
+      updateAudioNote(id);
+      if (id === 'game-shoot-guide') window.setTimeout(initShootGame, 120);
+      if (id === 'game-guess-guide') window.setTimeout(renderGuess, 120);
+      if (id) window.setTimeout(() => playSegment(id), 260);
+    }
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+    function lineMeaningIndex(id) {
+      const match = /^line([1-4])-meaning$/.exec(id || '');
+      return match ? Number(match[1]) - 1 : -1;
+    }
+    function updateAudioNote(id) {
+      const note = document.getElementById('audioNote');
+      if (!id) {
+        note.textContent = '此頁不自動朗讀；可點按鈕或文字互動。';
+        return;
+      }
+      const lineIndex = lineMeaningIndex(id);
+      const hasLineAudio = lineIndex >= 0 && audioFiles[poemAudioIds[lineIndex]] && audioFiles[plainAudioIds[lineIndex]];
+      note.textContent = audioFiles[id] || hasLineAudio
+        ? '此頁播放本機正式配音。'
+        : '此頁正式音檔尚未完成，暫用瀏覽器朗讀。';
+    }
+    async function playSegment(id) {
+      const text = audioText[id] || '';
+      if (audioFiles[id]) return playAudioOrSpeak(id, text);
+      const lineIndex = lineMeaningIndex(id);
+      if (lineIndex >= 0) {
+        await playAudioOrSpeak(poemAudioIds[lineIndex], poemLines[lineIndex]);
+        await delay(520);
+        return playAudioOrSpeak(plainAudioIds[lineIndex], plainLines[lineIndex]);
+      }
+      if (!text) return Promise.resolve();
+      return playAudioOrSpeak(id, text);
+    }
+    function stopAudio() {
+      speechSynthesis.cancel();
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
+      }
+    }
+    function playAudioOrSpeak(id, text) {
+      const src = audioFiles[id];
+      if (!src) return speakScript(text);
+      stopAudio();
+      return new Promise(resolve => {
+        const audio = new Audio(src);
+        currentAudio = audio;
+        let settled = false;
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          if (currentAudio === audio) currentAudio = null;
+          resolve();
+        };
+        audio.onended = finish;
+        audio.onerror = () => speakScript(text).then(finish);
+        audio.play().catch(() => speakScript(text).then(finish));
+      });
+    }
+    function speakScript(text) {
+      stopAudio();
+      const parts = text.split('[pause]');
+      return parts.reduce((chain, part) => chain.then(() => speak(part.trim())).then(() => delay(360)), Promise.resolve());
+    }
+    function speak(text) {
+      if (!text) return Promise.resolve();
+      return new Promise(resolve => {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'zh-TW';
+        utter.rate = .9;
+        const voices = speechSynthesis.getVoices();
+        utter.voice = voices.find(v => /Yating|Hanhan|Taiwan|Chinese|中文/.test(v.name)) || null;
+        utter.onend = resolve;
+        utter.onerror = resolve;
+        speechSynthesis.speak(utter);
+      });
+    }
+    function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+    async function playHomePoem() {
+      stopAudio();
+      const lines = [...document.querySelectorAll('.home-line')];
+      for (let i = 0; i < poemLines.length; i += 1) {
+        lines.forEach(line => line.classList.remove('active-line'));
+        lines[i]?.classList.add('active-line');
+        await playAudioOrSpeak(poemAudioIds[i], poemLines[i]);
+        await delay(450);
+      }
+      lines.forEach(line => line.classList.remove('active-line'));
+    }
+    async function playCompare() {
+      for (let i = 0; i < poemLines.length; i += 1) {
+        await playComparePair(i);
+        await delay(350);
+      }
+    }
+    async function playComparePair(index) {
+      stopAudio();
+      const rows = document.querySelectorAll(`.compare-row[data-pair="${index}"]`);
+      rows.forEach(row => row.classList.add('active-line'));
+      await playAudioOrSpeak(poemAudioIds[index], poemLines[index]);
+      await delay(700);
+      await playAudioOrSpeak(plainAudioIds[index], plainLines[index]);
+      await delay(250);
+      rows.forEach(row => row.classList.remove('active-line'));
+    }
+    async function playOriginalOnly() {
+      stopAudio();
+      for (let i = 0; i < poemLines.length; i += 1) {
+        document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+        document.querySelector(`.poem-row[data-pair="${i}"]`)?.classList.add('active-line');
+        await playAudioOrSpeak(poemAudioIds[i], poemLines[i]);
+        await delay(450);
+      }
+      document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+    }
+    async function playPlainOnly() {
+      stopAudio();
+      for (let i = 0; i < plainLines.length; i += 1) {
+        document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+        document.querySelector(`.plain-row[data-pair="${i}"]`)?.classList.add('active-line');
+        await playAudioOrSpeak(plainAudioIds[i], plainLines[i]);
+        await delay(450);
+      }
+      document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+    }
+    function showWord(source, word, meaning) {
+      const title = document.getElementById('wordTitle');
+      title.textContent = word;
+      title.style.color = getComputedStyle(source).color;
+      document.getElementById('wordText').textContent = meaning;
+      document.getElementById('wordDialog').showModal();
+      playAudioOrSpeak(wordAudioIds[word], `${word}。[pause]${meaning}`);
+    }
+    function closeWord() {
+      document.getElementById('wordDialog').close();
+      stopAudio();
+    }
+    function hideHomeTray() {
+      document.getElementById('homeActionTray')?.classList.add('hidden');
+      document.getElementById('homeTrayRestore')?.classList.add('visible');
+    }
+    function showHomeTray() {
+      document.getElementById('homeActionTray')?.classList.remove('hidden');
+      document.getElementById('homeTrayRestore')?.classList.remove('visible');
+    }
+    function toggleCleanView() {
+      document.body.classList.toggle('clean-view');
+      document.querySelector('.view-toggle').textContent = document.body.classList.contains('clean-view') ? '恢復文字' : '只看底圖';
+    }
+    function setFont(value) {
+      document.body.classList.remove('font-iansui', 'font-kai');
+      if (value === 'iansui') document.body.classList.add('font-iansui');
+      if (value === 'kai') document.body.classList.add('font-kai');
+    }
+    document.getElementById('fontSelect').addEventListener('change', event => setFont(event.target.value));
+    setupDraggableControls();
+    async function toggleFullscreen() {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        } else {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch (error) {
+        console.warn('Fullscreen failed', error);
+      }
+    }
+    window.addEventListener('keydown', event => {
+      if (event.key === 'ArrowRight') nextSlide();
+      if (event.key === 'ArrowLeft') prevSlide();
+    });
+    document.querySelectorAll('.match-card').forEach(card => {
+      card.addEventListener('click', () => chooseMatch(card));
+    });
+    function chooseMatch(card) {
+      if (card.classList.contains('done')) return;
+      if (!selectedMatch) {
+        selectedMatch = card;
+        card.classList.add('selected');
+        return;
+      }
+      if (selectedMatch === card) {
+        selectedMatch.classList.remove('selected');
+        selectedMatch = null;
+        return;
+      }
+      if (selectedMatch.dataset.match === card.dataset.match) {
+        selectedMatch.classList.remove('selected');
+        selectedMatch.classList.add('done');
+        card.classList.add('done');
+        selectedMatch = null;
+        document.getElementById('matchFeedback').textContent = '○ 配對成功';
+        showCorrectMark();
+        playAudioOrSpeak('right', '答對了。');
+        const remaining = [...document.querySelectorAll('.match-card')].some(item => !item.classList.contains('done'));
+        if (!remaining) {
+          document.getElementById('matchFeedback').textContent = '○ 全部完成！';
+
+        }
+      } else {
+        document.getElementById('matchFeedback').textContent = '再想想，換一個意思試試。';
+        selectedMatch.classList.remove('selected');
+        selectedMatch = null;
+        playAudioOrSpeak('wrong', '再想想，換一個意思試試。');
+      }
+    }
+    function initShootGame() {
+      if (document.getElementById('lineBuild').children.length) return;
+      shootIndex = 0;
+      let slotIndex = 0;
+      document.getElementById('lineBuild').innerHTML = shootLines.map((line, lineIndex) => {
+        const slots = line.words.map(() => `<span class="line-slot" data-slot="${slotIndex++}"></span>`).join('');
+        return `<div class="queue-line" data-line-index="${lineIndex}">${slots}</div>`;
+      }).join('');
+      spawnTargets();
+    }
+    function spawnTargets() {
+      const field = document.getElementById('shootField');
+      if (!field) return;
+      field.innerHTML = '<div class="arena-title">射字區</div>';
+      if (shootIndex >= shootWords.length) {
+        document.getElementById('shootPrompt').textContent = '整首詩完成';
+        document.getElementById('queueTitle').textContent = '整首詩完成';
+        document.getElementById('shootFeedback').textContent = '○ 完成！';
+        readAllShootLines();
+        return;
+      }
+      const target = shootWords[shootIndex];
+      document.getElementById('shootPrompt').textContent = `請射中：${target}`;
+      const pool = shuffle([target, ...shootWords.filter(word => word !== target)].slice(0, 7));
+      pool.forEach((word, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'target-card';
+        btn.textContent = word;
+        btn.style.left = `${10 + Math.random() * 70}%`;
+        btn.style.top = `${16 + Math.random() * 62}%`;
+        btn.style.setProperty('--speed', `${4.6 + Math.random() * 1.8}s`);
+        btn.style.animationDelay = `${i * -0.42}s`;
+        btn.onclick = () => shootWord(word, btn);
+        field.appendChild(btn);
+      });
+    }
+    function shootWord(word, card) {
+      const target = shootWords[shootIndex];
+      const feedback = document.getElementById('shootFeedback');
+      if (word !== target) {
+        feedback.textContent = '再想想，找下一個正確詞。';
+        playAudioOrSpeak('wrong', '再想想，找下一個正確詞。');
+        return;
+      }
+      if (card) card.classList.add('hit');
+      feedback.textContent = '○ 爆破成功，進入左欄佇列。';
+      showCorrectMark();
+      window.setTimeout(() => {
+        const slot = document.querySelector(`.line-slot[data-slot="${shootIndex}"]`);
+        slot.textContent = word;
+        slot.classList.add('filled');
+        shootIndex += 1;
+        const completedLine = shootLineEnds.find(line => line.end === shootIndex);
+        if (completedLine) {
+          window.setTimeout(async () => {
+            await readCompletedShootLine(completedLine);
+            spawnTargets();
+          }, 260);
+        } else {
+          spawnTargets();
+        }
+      }, 430);
+    }
+    async function readAllShootLines() {
+      document.querySelectorAll('.queue-line').forEach(line => line.classList.remove('active-line'));
+      await delay(300);
+      for (let i = 0; i < shootLines.length; i += 1) {
+        const row = document.querySelector(`.queue-line[data-line-index="${i}"]`);
+        row?.classList.add('active-line');
+        await playAudioOrSpeak(poemAudioIds[i], shootLines[i].text);
+        await delay(350);
+        row?.classList.remove('active-line');
+      }
+    }
+    async function readCompletedShootLine(completedLine) {
+      const lineIndex = shootLineEnds.indexOf(completedLine);
+      const row = document.querySelector(`.queue-line[data-line-index="${lineIndex}"]`);
+      document.querySelectorAll('.queue-line').forEach(line => line.classList.remove('active-line'));
+      row?.classList.add('active-line');
+      await playAudioOrSpeak(poemAudioIds[lineIndex], completedLine.text);
+      row?.classList.remove('active-line');
+    }
+    function setGuessMode(mode) {
+      guessMode = mode;
+      if (mode === 'random') {
+        randomGuessQueue = shuffle([0, 1, 2, 3]);
+        guessIndex = randomGuessQueue.shift();
+      } else {
+        guessIndex = 0;
+      }
+      renderGuess();
+    }
+    function renderGuess() {
+      const item = guessItems[guessIndex];
+      const image = document.getElementById('guessImage');
+      const box = document.getElementById('guessOptions');
+      if (!image || !box) return;
+      image.src = item.image;
+      box.innerHTML = '';
+      const answers = guessMode === 'random'
+        ? shuffle(guessItems.map(x => x.answer))
+        : guessItems.map(x => x.answer);
+      answers.forEach(answer => {
+        const btn = document.createElement('button');
+        btn.className = 'guess-choice';
+        btn.textContent = answer;
+        btn.onclick = () => answerGuess(answer);
+        box.appendChild(btn);
+      });
+      document.getElementById('guessFeedback').textContent = '';
+    }
+    function answerGuess(answer) {
+      const item = guessItems[guessIndex];
+      if (answer === item.answer) {
+        document.getElementById('guessFeedback').textContent = '○ 答對了，準備換下一張圖。';
+        showCorrectMark();
+        const spokenIndex = guessItems.indexOf(item);
+        playAudioOrSpeak(poemAudioIds[spokenIndex], item.speak);
+        window.setTimeout(nextGuess, 1500);
+      } else {
+        document.getElementById('guessFeedback').textContent = '再看看人物的動作和天色。';
+        playAudioOrSpeak('wrong', '再看看人物的動作和天色。');
+      }
+    }
+    function nextGuess() {
+      if (guessMode === 'random') {
+        if (!randomGuessQueue.length) randomGuessQueue = shuffle([0, 1, 2, 3]);
+        guessIndex = randomGuessQueue.shift();
+      } else {
+        guessIndex = (guessIndex + 1) % guessItems.length;
+      }
+      renderGuess();
+    }
+    function shuffle(items) {
+      return [...items].sort(() => Math.random() - .5);
+    }
+    function showCorrectMark() {
+      document.querySelectorAll('.correct-mark').forEach(mark => mark.remove());
+      const mark = document.createElement('div');
+      mark.className = 'correct-mark';
+      mark.textContent = '○';
+      document.body.appendChild(mark);
+      window.setTimeout(() => mark.remove(), 760);
+    }
+    function setupDraggableControls() {
+      document.querySelectorAll('[data-draggable-control]').forEach(control => {
+        let dragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+        control.addEventListener('pointerdown', event => {
+          if (event.target.closest('button, select, option')) return;
+          dragging = true;
+          const rect = control.getBoundingClientRect();
+          offsetX = event.clientX - rect.left;
+          offsetY = event.clientY - rect.top;
+          control.setPointerCapture(event.pointerId);
+        });
+        control.addEventListener('pointermove', event => {
+          if (!dragging) return;
+          const maxX = window.innerWidth - control.offsetWidth - 8;
+          const maxY = window.innerHeight - control.offsetHeight - 8;
+          const x = Math.max(8, Math.min(maxX, event.clientX - offsetX));
+          const y = Math.max(8, Math.min(maxY, event.clientY - offsetY));
+          control.style.left = `${x}px`;
+          control.style.top = `${y}px`;
+          control.style.right = 'auto';
+        });
+        control.addEventListener('pointerup', event => {
+          dragging = false;
+          try { control.releasePointerCapture(event.pointerId); } catch (error) {}
+        });
+      });
+    }
+    speechSynthesis.onvoiceschanged = () => {};
+    showSlide(0);
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
