@@ -6,28 +6,34 @@
       "id": "home-guide",
       "file": "audio/home-guide-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "登樂遊原。唐，李商隱。請先聽整首詩，想一想：詩人看到這麼美的夕陽，為什麼心裡還有一點捨不得？",
+      "text": "登樂遊原。唐，李商隱。請先聽整首詩，想一想：詩人看到這麼美的細陽，為什麼心裡還有一點捨不得？",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 1689644
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 1705004,
+      "seconds": 26.3
     },
     {
       "id": "poem-full-sadaltager",
       "file": "audio/poem-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "登樂遊原。唐，李商隱。向晚意不適。驅車登古原。夕陽無限好。只是近黃昏。",
+      "text": "登樂遊原。唐，李商隱。向晚意不適。屈車，登古原。細陽無限好。只是近黃昏。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 1505324
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 1582124,
+      "seconds": 21.2
     },
     {
       "id": "poem-full-sulafat",
       "file": "audio/poem-sulafat.wav",
       "voice": "Sulafat",
-      "text": "登樂遊原。唐，李商隱。向晚意不適。驅車登古原。夕陽無限好。只是近黃昏。",
+      "text": "登樂遊原。唐，李商隱。向晚意不適。屈車，登古原。細陽無限好。只是近黃昏。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 1443884
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 1612844,
+      "seconds": 21.6
     },
     {
       "id": "line1-poem-sadaltager",
@@ -51,37 +57,45 @@
       "id": "line1-plain-sadaltager",
       "file": "audio/line1-plain-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "傍晚時，詩人的心裡有點悶悶不樂。",
+      "text": "幫晚時，詩人的心裡有點悶悶不樂。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 537644
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 568364,
+      "seconds": 8.2
     },
     {
       "id": "line1-plain-sulafat",
       "file": "audio/line1-plain-sulafat.wav",
       "voice": "Sulafat",
-      "text": "傍晚時，詩人的心裡有點悶悶不樂。",
+      "text": "幫晚時，詩人的心裡有點悶悶不樂。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 491564
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 537644,
+      "seconds": 7.7
     },
     {
       "id": "line2-poem-sadaltager",
       "file": "audio/line2-poem-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "驅車登古原。",
+      "text": "屈車，登古原。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 245804
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 322604,
+      "seconds": 5.3
     },
     {
       "id": "line2-poem-sulafat",
       "file": "audio/line2-poem-sulafat.wav",
       "voice": "Sulafat",
-      "text": "驅車登古原。",
+      "text": "屈車，登古原。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 368684
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 307244,
+      "seconds": 4.7
     },
     {
       "id": "line2-plain-sadaltager",
@@ -105,37 +119,45 @@
       "id": "line3-poem-sadaltager",
       "file": "audio/line3-poem-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "夕陽無限好。",
+      "text": "細陽無限好。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 276524
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 291884,
+      "seconds": 4.7
     },
     {
       "id": "line3-poem-sulafat",
       "file": "audio/line3-poem-sulafat.wav",
       "voice": "Sulafat",
-      "text": "夕陽無限好。",
+      "text": "細陽無限好。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 291884
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 245804,
+      "seconds": 4.0
     },
     {
       "id": "line3-plain-sadaltager",
       "file": "audio/line3-plain-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "夕陽的景色非常美，好像把整片天空都染亮了。",
+      "text": "細陽的景色非常美，好像把整片天空都染亮了。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 737324
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 783404,
+      "seconds": 10.9
     },
     {
       "id": "line3-plain-sulafat",
       "file": "audio/line3-plain-sulafat.wav",
       "voice": "Sulafat",
-      "text": "夕陽的景色非常美，好像把整片天空都染亮了。",
+      "text": "細陽的景色非常美，好像把整片天空都染亮了。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 798764
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 798764,
+      "seconds": 38.3
     },
     {
       "id": "line4-poem-sadaltager",
@@ -159,28 +181,34 @@
       "id": "line4-plain-sadaltager",
       "file": "audio/line4-plain-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "可惜天快黑了，這麼美的夕陽也快要消失。",
+      "text": "可惜天快黑了，這麼美的細陽也快要消失。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 706604
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 645164,
+      "seconds": 9.2
     },
     {
       "id": "line4-plain-sulafat",
       "file": "audio/line4-plain-sulafat.wav",
       "voice": "Sulafat",
-      "text": "可惜天快黑了，這麼美的夕陽也快要消失。",
+      "text": "可惜天快黑了，這麼美的細陽也快要消失。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 675884
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 706604,
+      "seconds": 9.8
     },
     {
       "id": "heart-guide",
       "file": "audio/heart-guide-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "李商隱心情低落，登上樂遊原後，看見夕陽把天地照得很美。越美好的時刻，有時越讓人想到它快要過去，所以心裡會又喜歡，又捨不得。",
+      "text": "詩人看見非常美的細陽，可是也知道黃昏快到了。美好的時刻快要過去，所以心裡有一點捨不得。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 2073644
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 1382444,
+      "seconds": 18.5
     },
     {
       "id": "game-match-guide",
@@ -213,37 +241,45 @@
       "id": "line1-meaning",
       "file": "audio/line1-meaning-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "向晚意不適。傍晚時，詩人的心裡有點悶悶不樂。",
+      "text": "向晚意不適。幫晚時，詩人的心裡有點悶悶不樂。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local Sadaltager existing clip",
-      "bytes": 309164
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 768044,
+      "seconds": 10.6
     },
     {
       "id": "line2-meaning",
       "file": "audio/line2-meaning-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "驅車登古原。他坐上車，慢慢登上高高的樂遊原。",
+      "text": "屈車，登古原。他坐上車，慢慢登上高高的樂遊原。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local Sadaltager existing clip",
-      "bytes": 307244
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 921644,
+      "seconds": 12.7
     },
     {
       "id": "line3-meaning",
       "file": "audio/line3-meaning-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "夕陽無限好。夕陽的景色非常美，好像把整片天空都染亮了。",
+      "text": "細陽無限好。細陽的景色非常美，好像把整片天空都染亮了。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local Sadaltager existing clip",
-      "bytes": 349484
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 1013804,
+      "seconds": 13.7
     },
     {
       "id": "line4-meaning",
       "file": "audio/line4-meaning-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "只是近黃昏。可惜天快黑了，這麼美的夕陽也快要消失。",
+      "text": "只是近黃昏。可惜天快黑了，這麼美的細陽也快要消失。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "local Sadaltager existing clip",
-      "bytes": 341804
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 967724,
+      "seconds": 13.3
     },
     {
       "id": "right",
@@ -258,10 +294,12 @@
       "id": "word-xiangwan",
       "file": "audio/word-xiangwan-sulafat.wav",
       "voice": "Sulafat",
-      "text": "向晚。傍晚的時候，天快要暗了。",
+      "text": "向晚。幫晚的時候，天快要暗了。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "A local Sulafat approved word-explanation test",
-      "bytes": 537644
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 553004,
+      "seconds": 7.9
     },
     {
       "id": "word-yibushi",
@@ -276,10 +314,12 @@
       "id": "word-quche",
       "file": "audio/word-quche-sulafat.wav",
       "voice": "Sulafat",
-      "text": "驅車。乘著車子前往。",
+      "text": "屈車。乘著車子前往。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "A local Sulafat approved word-explanation test",
-      "bytes": 445484
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 491564,
+      "seconds": 7.1
     },
     {
       "id": "word-deng",
@@ -303,10 +343,12 @@
       "id": "word-xiyang",
       "file": "audio/word-xiyang-sulafat.wav",
       "voice": "Sulafat",
-      "text": "夕陽。快要落下的太陽。",
+      "text": "細陽。快要落下的太陽。",
+      "visibleText": "HTML display remains original characters. Spoken text uses homophones with punctuation: 驅->屈, 夕->細, 傍->幫; 登 remains 登.",
       "status": "done",
-      "source": "A local Sulafat approved word-explanation test",
-      "bytes": 414764
+      "source": "local VoxCPM2 balanced pronunciation patch 2026-06-23",
+      "bytes": 476204,
+      "seconds": 6.9
     },
     {
       "id": "word-wuxianhao",
@@ -344,5 +386,17 @@
       "source": "local VoxCPM2 Sulafat feedback clip 2026-06-23",
       "bytes": 430124
     }
-  ]
+  ],
+  "pronunciationPatch": {
+    "date": "2026-06-23",
+    "rule": "Visible text unchanged. Spoken text uses homophones for mispronounced characters: 驅->屈, 夕->細, 傍->幫. Keep 登 as 登 and add punctuation before 登古原.",
+    "affected": [
+      "home",
+      "line pages",
+      "comparison",
+      "reflection",
+      "games",
+      "popup word clips"
+    ]
+  }
 }

@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
@@ -979,7 +979,7 @@
       <div class="stage">
         <div class="game wide">
           <div class="game-head">溫和射字</div>
-          <div class="game-rule">不計時、不扣分。請點任一夕陽，弓箭射破後會露出文字；找到正確詞就送進左欄佇列。</div>
+          <div class="game-rule">不計時、不扣分。7 個夕陽裡藏著 7 個語詞，請按詩句順序點出正確語詞。</div>
           <div class="shoot-panel">
             <div class="shoot-target" id="shootPrompt">請點：向晚</div>
             <div class="shoot-layout">
@@ -1107,9 +1107,9 @@
     ];
     const shootLines = [
       { text: '向晚意不適。', words: ['向晚', '意不適'] },
-      { text: '驅車登古原。', words: ['驅車', '登', '古原'] },
+      { text: '驅車登古原。', words: ['驅車', '登古原'] },
       { text: '夕陽無限好。', words: ['夕陽', '無限好'] },
-      { text: '只是近黃昏。', words: ['只是', '近黃昏'] }
+      { text: '只是近黃昏。', words: ['只是近黃昏'] }
     ];
     const shootWords = shootLines.flatMap(line => line.words);
     const shootLineEnds = shootLines.reduce((items, line) => {
@@ -1126,6 +1126,7 @@
     let selectedMatch = null;
     let shootIndex = 0;
     let wrongVoicePlayedForIndex = -1;
+    let shootAllReadStarted = false;
     let guessIndex = 0;
     let guessMode = 'order';
     let randomGuessQueue = [];
@@ -1352,33 +1353,25 @@
       if (document.getElementById('lineBuild').children.length) return;
       shootIndex = 0;
       wrongVoicePlayedForIndex = -1;
+      shootAllReadStarted = false;
       let slotIndex = 0;
       document.getElementById('lineBuild').innerHTML = shootLines.map((line, lineIndex) => {
         const slots = line.words.map(() => `<span class="line-slot" data-slot="${slotIndex++}"></span>`).join('');
         return `<div class="queue-line" data-line-index="${lineIndex}">${slots}</div>`;
       }).join('');
-      spawnTargets();
+      renderStaticTargets();
     }
-    function spawnTargets() {
+    function renderStaticTargets() {
       const field = document.getElementById('shootField');
       if (!field) return;
       field.innerHTML = '<div class="arena-title">射字區</div><div class="sunset-grid" id="sunsetGrid"></div>';
-      if (shootIndex >= shootWords.length) {
-        document.getElementById('shootPrompt').textContent = '整首詩完成';
-        document.getElementById('queueTitle').textContent = '整首詩完成';
-        document.getElementById('shootFeedback').textContent = '○ 完成！';
-        readAllShootLines();
-        return;
-      }
-      const target = shootWords[shootIndex];
-      document.getElementById('shootPrompt').textContent = `請射中：${target}`;
-      const distractors = shuffle(shootWords.filter(word => word !== target)).slice(0, 6);
-      const pool = shuffle([target, ...distractors]);
+      updateShootPrompt();
       const grid = document.getElementById('sunsetGrid');
-      pool.forEach((word, i) => {
+      shootWords.forEach((word, i) => {
         const btn = document.createElement('button');
         btn.className = 'target-card';
         btn.type = 'button';
+        btn.dataset.word = word;
         btn.setAttribute('aria-label', `射破夕陽：${word}`);
         btn.style.setProperty('--speed', `${5.2 + (i % 3) * .45}s`);
         btn.style.setProperty('--sun-tilt', `${[-7, 4, -3, 8, -5, 3, 6][i % 7]}deg`);
@@ -1387,6 +1380,19 @@
         btn.onclick = () => shootWord(word, btn);
         grid.appendChild(btn);
       });
+    }
+    function updateShootPrompt() {
+      if (shootIndex >= shootWords.length) {
+        document.getElementById('shootPrompt').textContent = '整首詩完成';
+        document.getElementById('queueTitle').textContent = '整首詩完成';
+        document.getElementById('shootFeedback').textContent = '○ 完成！';
+        if (!shootAllReadStarted) {
+          shootAllReadStarted = true;
+          readAllShootLines();
+        }
+        return;
+      }
+      document.getElementById('shootPrompt').textContent = `請射中：${shootWords[shootIndex]}`;
     }
     function sunsetTargetSvg(word) {
       return `<svg class="sun-core" viewBox="0 0 120 120" aria-hidden="true">
@@ -1430,7 +1436,6 @@
       card?.classList.add('revealed');
       if (word !== target) {
         card?.classList.add('wrong-hit');
-        if (card) card.disabled = true;
         feedback.textContent = `露出「${word}」，再想想，找下一個正確詞。`;
         if (wrongVoicePlayedForIndex !== shootIndex) {
           wrongVoicePlayedForIndex = shootIndex;
@@ -1438,7 +1443,10 @@
         }
         return;
       }
-      if (card) card.classList.add('hit');
+      if (card) {
+        card.classList.add('hit');
+        card.disabled = true;
+      }
       feedback.textContent = `○ 射中「${word}」，進入左欄佇列。`;
       showCorrectMark();
       window.setTimeout(() => {
@@ -1451,10 +1459,10 @@
         if (completedLine) {
           window.setTimeout(async () => {
             await readCompletedShootLine(completedLine);
-            spawnTargets();
+            updateShootPrompt();
           }, 260);
         } else {
-          spawnTargets();
+          updateShootPrompt();
         }
       }, 620);
     }
