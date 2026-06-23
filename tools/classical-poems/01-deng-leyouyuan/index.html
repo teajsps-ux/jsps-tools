@@ -448,7 +448,7 @@
     }
     .shoot-layout {
       display: grid;
-      grid-template-columns: minmax(420px, 46%) minmax(420px, 1fr);
+      grid-template-columns: minmax(340px, 40%) minmax(520px, 1fr);
       gap: 18px;
       align-items: stretch;
     }
@@ -460,7 +460,7 @@
       padding: 18px;
       display: grid;
       align-content: start;
-      gap: 14px;
+      gap: 18px;
     }
     .queue-title, .arena-title {
       justify-self: center;
@@ -496,17 +496,17 @@
     }
     .sunset-grid {
       position: absolute;
-      inset: 86px 24px 24px;
+      inset: 92px 28px 24px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
-      grid-auto-rows: minmax(118px, 1fr);
-      gap: 18px;
+      grid-template-columns: repeat(4, minmax(118px, 1fr));
+      grid-auto-rows: minmax(126px, 1fr);
+      gap: 18px 22px;
       align-items: center;
       justify-items: center;
     }
     .target-card {
       position: relative;
-      width: clamp(116px, 12vw, 168px);
+      width: clamp(112px, 10vw, 154px);
       aspect-ratio: 1;
       border: 0;
       padding: 0;
@@ -540,23 +540,23 @@
     }
     .target-word {
       position: absolute;
-      inset: 18% 10%;
+      inset: 18% 7%;
       display: grid;
       place-items: center;
       color: #5c2d13;
-      font-size: clamp(24px, 2.8vw, 42px);
+      font-size: clamp(22px, 2.25vw, 36px);
       font-weight: 900;
       line-height: 1.05;
       text-align: center;
-      opacity: 0;
-      transform: scale(.82);
-      transition: opacity .18s ease .12s, transform .24s ease .12s;
+      opacity: 1;
+      transform: scale(1);
+      transition: transform .24s ease .12s, color .2s ease;
       pointer-events: none;
       z-index: 2;
     }
     .target-card.revealed .target-word {
-      opacity: 1;
-      transform: scale(1);
+      transform: scale(1.08);
+      color: #1f1710;
     }
     .target-card.revealed .sun-crack {
       opacity: .18;
@@ -618,17 +618,18 @@
       gap: 14px;
       align-items: start;
       justify-content: stretch;
-      min-height: 64px;
+      min-height: 220px;
       font-size: clamp(24px, 3vw, 42px);
       font-weight: 900;
     }
     .queue-line {
       display: flex;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
       gap: 10px;
       align-items: center;
-      justify-content: center;
-      padding: 10px;
+      justify-content: flex-start;
+      min-height: 70px;
+      padding: 12px;
       border-radius: 8px;
       transition: background .2s, box-shadow .2s, transform .2s;
     }
@@ -637,20 +638,25 @@
       box-shadow: 0 0 0 5px rgba(255, 236, 161, .32);
       transform: translateY(-2px);
     }
-    .line-slot {
-      min-width: 92px;
-      min-height: 54px;
+    .queue-placeholder {
+      color: rgba(49, 95, 83, .46);
+      font-size: clamp(18px, 1.8vw, 24px);
+      font-weight: 850;
+    }
+    .line-chip {
       display: inline-grid;
       place-items: center;
+      min-height: 54px;
       border-radius: 8px;
-      border: 3px dashed rgba(49, 95, 83, .38);
-      background: rgba(255,255,255,.64);
-      padding: 4px 12px;
-    }
-    .line-slot.filled {
-      border-style: solid;
       color: white;
       background: #315f53;
+      padding: 6px 16px;
+      box-shadow: 0 8px 18px rgba(49, 95, 83, .18);
+      animation: chipIn .24s ease-out both;
+    }
+    @keyframes chipIn {
+      from { opacity: 0; transform: translateY(-10px) scale(.92); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
     .guess-layout {
       display: grid;
@@ -785,6 +791,7 @@
       .deck, .slide { min-height: 100vh; height: auto; }
       .slide { position: relative; }
       .line-stage, .compare, .compare-grid, .match-board, .guess-layout, .shoot-layout { grid-template-columns: 1fr; }
+      .sunset-grid { grid-template-columns: repeat(2, minmax(112px, 1fr)); }
       .queue-line { flex-wrap: wrap; }
       .stage { min-height: 100vh; }
       .topbar { position: fixed; }
@@ -979,7 +986,7 @@
       <div class="stage">
         <div class="game wide">
           <div class="game-head">溫和射字</div>
-          <div class="game-rule">不計時、不扣分。7 個夕陽裡藏著 7 個語詞，請按詩句順序點出正確語詞。</div>
+          <div class="game-rule">不計時、不扣分。夕陽上直接寫著語詞，請按詩句順序點中正確語詞；射中後會爆破並送進左欄。</div>
           <div class="shoot-panel">
             <div class="shoot-target" id="shootPrompt">請點：向晚</div>
             <div class="shoot-layout">
@@ -1112,6 +1119,8 @@
       { text: '只是近黃昏。', words: ['只是近黃昏'] }
     ];
     const shootWords = shootLines.flatMap(line => line.words);
+    const shootDistractors = ['登', '古原', '只是', '近黃昏', '黃昏', '樂遊原'];
+    const shootTargets = [...shootWords, ...shootDistractors];
     const shootLineEnds = shootLines.reduce((items, line) => {
       const previous = items.length ? items[items.length - 1].end : 0;
       items.push({ end: previous + line.words.length, text: line.text });
@@ -1354,11 +1363,8 @@
       shootIndex = 0;
       wrongVoicePlayedForIndex = -1;
       shootAllReadStarted = false;
-      let slotIndex = 0;
-      document.getElementById('lineBuild').innerHTML = shootLines.map((line, lineIndex) => {
-        const slots = line.words.map(() => `<span class="line-slot" data-slot="${slotIndex++}"></span>`).join('');
-        return `<div class="queue-line" data-line-index="${lineIndex}">${slots}</div>`;
-      }).join('');
+      document.getElementById('lineBuild').innerHTML = shootLines.map((line, lineIndex) => 
+        `<div class="queue-line" data-line-index="${lineIndex}"><span class="queue-placeholder">第 ${lineIndex + 1} 句</span></div>`).join('');
       renderStaticTargets();
     }
     function renderStaticTargets() {
@@ -1367,14 +1373,14 @@
       field.innerHTML = '<div class="arena-title">射字區</div><div class="sunset-grid" id="sunsetGrid"></div>';
       updateShootPrompt();
       const grid = document.getElementById('sunsetGrid');
-      shootWords.forEach((word, i) => {
+      shuffle([...shootTargets]).forEach((word, i) => {
         const btn = document.createElement('button');
         btn.className = 'target-card';
         btn.type = 'button';
         btn.dataset.word = word;
         btn.setAttribute('aria-label', `射破夕陽：${word}`);
         btn.style.setProperty('--speed', `${5.2 + (i % 3) * .45}s`);
-        btn.style.setProperty('--sun-tilt', `${[-7, 4, -3, 8, -5, 3, 6][i % 7]}deg`);
+        btn.style.setProperty('--sun-tilt', `${[-8, 5, -3, 7, -6, 2, 9, -4, 6, -7, 3, 8, -2][i % 13]}deg`);
         btn.style.animationDelay = `${i * -.24}s`;
         btn.innerHTML = sunsetTargetSvg(word);
         btn.onclick = () => shootWord(word, btn);
@@ -1450,9 +1456,13 @@
       feedback.textContent = `○ 射中「${word}」，進入左欄佇列。`;
       showCorrectMark();
       window.setTimeout(() => {
-        const slot = document.querySelector(`.line-slot[data-slot="${shootIndex}"]`);
-        slot.textContent = word;
-        slot.classList.add('filled');
+        const lineIndex = shootLineEnds.findIndex(line => shootIndex < line.end);
+        const row = document.querySelector(`.queue-line[data-line-index="${lineIndex}"]`);
+        row?.querySelector('.queue-placeholder')?.remove();
+        const chip = document.createElement('span');
+        chip.className = 'line-chip';
+        chip.textContent = word;
+        row?.appendChild(chip);
         shootIndex += 1;
         wrongVoicePlayedForIndex = -1;
         const completedLine = shootLineEnds.find(line => line.end === shootIndex);
