@@ -6,31 +6,28 @@
       "id": "home-guide",
       "file": "audio/home-guide-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "登樂遊原。唐，李商隱。請先聽整首詩，想一想：詩人看到這麼美的細陽，為什麼心裡還有一點捨不得？",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "登樂遊原。唐，李商隱。請先聽整首詩，想一想：詩人看到這麼美的夕陽，為什麼心裡還有一點捨不得？",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 1720364
+      "source": "local VoxCPM2",
+      "bytes": 1689644
     },
     {
       "id": "poem-full-sadaltager",
       "file": "audio/poem-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "登樂遊原。唐，李商隱。向晚意不適。區車登古原。細陽無限好。只是近黃昏。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "登樂遊原。唐，李商隱。向晚意不適。驅車登古原。夕陽無限好。只是近黃昏。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 1474604
+      "source": "local VoxCPM2",
+      "bytes": 1505324
     },
     {
       "id": "poem-full-sulafat",
       "file": "audio/poem-sulafat.wav",
       "voice": "Sulafat",
-      "text": "登樂遊原。唐，李商隱。向晚意不適。區車登古原。細陽無限好。只是近黃昏。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "登樂遊原。唐，李商隱。向晚意不適。驅車登古原。夕陽無限好。只是近黃昏。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 1566764
+      "source": "local VoxCPM2",
+      "bytes": 1443884
     },
     {
       "id": "line1-poem-sadaltager",
@@ -54,41 +51,37 @@
       "id": "line1-plain-sadaltager",
       "file": "audio/line1-plain-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "幫晚時，詩人的心裡有點悶悶不樂。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "傍晚時，詩人的心裡有點悶悶不樂。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 568364
+      "source": "local VoxCPM2",
+      "bytes": 537644
     },
     {
       "id": "line1-plain-sulafat",
       "file": "audio/line1-plain-sulafat.wav",
       "voice": "Sulafat",
-      "text": "幫晚時，詩人的心裡有點悶悶不樂。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "傍晚時，詩人的心裡有點悶悶不樂。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 583724
+      "source": "local VoxCPM2",
+      "bytes": 491564
     },
     {
       "id": "line2-poem-sadaltager",
       "file": "audio/line2-poem-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "區車登古原。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "驅車登古原。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 384044
+      "source": "local VoxCPM2",
+      "bytes": 245804
     },
     {
       "id": "line2-poem-sulafat",
       "file": "audio/line2-poem-sulafat.wav",
       "voice": "Sulafat",
-      "text": "區車登古原。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "驅車登古原。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 215084
+      "source": "local VoxCPM2",
+      "bytes": 368684
     },
     {
       "id": "line2-plain-sadaltager",
@@ -112,41 +105,37 @@
       "id": "line3-poem-sadaltager",
       "file": "audio/line3-poem-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "細陽無限好。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "夕陽無限好。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
+      "source": "local VoxCPM2",
       "bytes": 276524
     },
     {
       "id": "line3-poem-sulafat",
       "file": "audio/line3-poem-sulafat.wav",
       "voice": "Sulafat",
-      "text": "細陽無限好。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "夕陽無限好。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 384044
+      "source": "local VoxCPM2",
+      "bytes": 291884
     },
     {
       "id": "line3-plain-sadaltager",
       "file": "audio/line3-plain-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "細陽的景色非常美，好像把整片天空都染亮了。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "夕陽的景色非常美，好像把整片天空都染亮了。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
+      "source": "local VoxCPM2",
       "bytes": 737324
     },
     {
       "id": "line3-plain-sulafat",
       "file": "audio/line3-plain-sulafat.wav",
       "voice": "Sulafat",
-      "text": "細陽的景色非常美，好像把整片天空都染亮了。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "夕陽的景色非常美，好像把整片天空都染亮了。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 783404
+      "source": "local VoxCPM2",
+      "bytes": 798764
     },
     {
       "id": "line4-poem-sadaltager",
@@ -170,31 +159,28 @@
       "id": "line4-plain-sadaltager",
       "file": "audio/line4-plain-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "可惜天快黑了，這麼美的細陽也快要消失。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "可惜天快黑了，這麼美的夕陽也快要消失。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 675884
+      "source": "local VoxCPM2",
+      "bytes": 706604
     },
     {
       "id": "line4-plain-sulafat",
       "file": "audio/line4-plain-sulafat.wav",
       "voice": "Sulafat",
-      "text": "可惜天快黑了，這麼美的細陽也快要消失。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "可惜天快黑了，這麼美的夕陽也快要消失。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 706604
+      "source": "local VoxCPM2",
+      "bytes": 675884
     },
     {
       "id": "heart-guide",
       "file": "audio/heart-guide-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "李商隱心情低落，登上樂遊原後，看見細陽把天地照得很美。越美好的時刻，有時越讓人想到它快要過去，所以心裡會又喜歡，又捨不得。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "李商隱心情低落，登上樂遊原後，看見夕陽把天地照得很美。越美好的時刻，有時越讓人想到它快要過去，所以心裡會又喜歡，又捨不得。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 2196524
+      "source": "local VoxCPM2",
+      "bytes": 2073644
     },
     {
       "id": "game-match-guide",
@@ -227,41 +213,37 @@
       "id": "line1-meaning",
       "file": "audio/line1-meaning-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "向晚意不適。幫晚時，詩人的心裡有點悶悶不樂。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "向晚意不適。傍晚時，詩人的心裡有點悶悶不樂。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 783404
+      "source": "local Sadaltager existing clip",
+      "bytes": 309164
     },
     {
       "id": "line2-meaning",
       "file": "audio/line2-meaning-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "區車登古原。他坐上車，慢慢登上高高的樂遊原。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "驅車登古原。他坐上車，慢慢登上高高的樂遊原。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 906284
+      "source": "local Sadaltager existing clip",
+      "bytes": 307244
     },
     {
       "id": "line3-meaning",
       "file": "audio/line3-meaning-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "細陽無限好。細陽的景色非常美，好像把整片天空都染亮了。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "夕陽無限好。夕陽的景色非常美，好像把整片天空都染亮了。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 1044524
+      "source": "local Sadaltager existing clip",
+      "bytes": 349484
     },
     {
       "id": "line4-meaning",
       "file": "audio/line4-meaning-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "只是近黃昏。可惜天快黑了，這麼美的細陽也快要消失。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "只是近黃昏。可惜天快黑了，這麼美的夕陽也快要消失。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 937004
+      "source": "local Sadaltager existing clip",
+      "bytes": 341804
     },
     {
       "id": "right",
@@ -276,11 +258,10 @@
       "id": "word-xiangwan",
       "file": "audio/word-xiangwan-sulafat.wav",
       "voice": "Sulafat",
-      "text": "向晚。幫晚的時候，天快要暗了。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "向晚。傍晚的時候，天快要暗了。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 629804
+      "source": "A local Sulafat approved word-explanation test",
+      "bytes": 537644
     },
     {
       "id": "word-yibushi",
@@ -295,11 +276,10 @@
       "id": "word-quche",
       "file": "audio/word-quche-sulafat.wav",
       "voice": "Sulafat",
-      "text": "區車。乘著車子前往。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "驅車。乘著車子前往。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 506924
+      "source": "A local Sulafat approved word-explanation test",
+      "bytes": 445484
     },
     {
       "id": "word-deng",
@@ -323,11 +303,10 @@
       "id": "word-xiyang",
       "file": "audio/word-xiyang-sulafat.wav",
       "voice": "Sulafat",
-      "text": "細陽。快要落下的太陽。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
+      "text": "夕陽。快要落下的太陽。",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
-      "bytes": 460844
+      "source": "A local Sulafat approved word-explanation test",
+      "bytes": 414764
     },
     {
       "id": "word-wuxianhao",
@@ -361,21 +340,9 @@
       "file": "audio/wrong-sulafat.wav",
       "voice": "Sulafat",
       "text": "再想想，找下一個正確詞。",
-      "visibleText": "HTML display remains original Chinese characters. TTS text uses homophones: 驅->區, 夕->細, 傍->幫.",
       "status": "done",
-      "source": "local VoxCPM2 A pronunciation patch 2026-06-23",
+      "source": "local VoxCPM2 Sulafat feedback clip 2026-06-23",
       "bytes": 430124
     }
-  ],
-  "pronunciationPatch": {
-    "date": "2026-06-23",
-    "rule": "Only TTS text uses homophones: 驅->區, 夕->細, 傍->幫. Visible HTML text remains unchanged.",
-    "affectedPages": [
-      1,
-      6,
-      9,
-      10
-    ],
-    "backup": "audio/backup-before-pronunciation-20260623/"
-  }
+  ]
 }

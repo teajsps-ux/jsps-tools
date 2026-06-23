@@ -107,7 +107,7 @@
       cursor: move;
       user-select: none;
     }
-    .tools { left: 16px; }
+    .tools { right: 244px; }
     .pager { right: 16px; }
     .tools button, .tools select, .pager button {
       cursor: pointer;
@@ -515,7 +515,13 @@
       filter: drop-shadow(0 10px 14px rgba(120, 67, 16, .22));
       animation: sunFloat var(--speed, 5.8s) ease-in-out infinite alternate;
       isolation: isolate;
+      margin-block-start: var(--sun-y, 0px);
+      margin-inline-start: var(--sun-x, 0px);
+      rotate: var(--sun-tilt, 0deg);
     }
+    .target-card:nth-child(2n) { --sun-y: 22px; }
+    .target-card:nth-child(3n) { --sun-y: -12px; --sun-x: 10px; }
+    .target-card:nth-child(4n) { --sun-y: 14px; --sun-x: -12px; }
     .target-card:focus-visible {
       outline: 4px solid rgba(49, 95, 83, .72);
       outline-offset: 5px;
@@ -553,7 +559,7 @@
       transform: scale(1);
     }
     .target-card.revealed .sun-crack {
-      opacity: 1;
+      opacity: .18;
       stroke-dashoffset: 0;
     }
     .target-card.wrong-hit .sun-core {
@@ -1119,6 +1125,7 @@
     ];
     let selectedMatch = null;
     let shootIndex = 0;
+    let wrongVoicePlayedForIndex = -1;
     let guessIndex = 0;
     let guessMode = 'order';
     let randomGuessQueue = [];
@@ -1172,10 +1179,7 @@
       }
     }
     function safeTtsText(text) {
-      return String(text || '')
-        .replaceAll('驅', '區')
-        .replaceAll('夕', '細')
-        .replaceAll('傍', '幫');
+      return String(text || '');
     }
     function playAudioOrSpeak(id, text) {
       const src = audioFiles[id];
@@ -1347,6 +1351,7 @@
     function initShootGame() {
       if (document.getElementById('lineBuild').children.length) return;
       shootIndex = 0;
+      wrongVoicePlayedForIndex = -1;
       let slotIndex = 0;
       document.getElementById('lineBuild').innerHTML = shootLines.map((line, lineIndex) => {
         const slots = line.words.map(() => `<span class="line-slot" data-slot="${slotIndex++}"></span>`).join('');
@@ -1367,7 +1372,8 @@
       }
       const target = shootWords[shootIndex];
       document.getElementById('shootPrompt').textContent = `請射中：${target}`;
-      const pool = shuffle([target, ...shootWords.filter(word => word !== target)]).slice(0, 7);
+      const distractors = shuffle(shootWords.filter(word => word !== target)).slice(0, 6);
+      const pool = shuffle([target, ...distractors]);
       const grid = document.getElementById('sunsetGrid');
       pool.forEach((word, i) => {
         const btn = document.createElement('button');
@@ -1375,6 +1381,7 @@
         btn.type = 'button';
         btn.setAttribute('aria-label', `射破夕陽：${word}`);
         btn.style.setProperty('--speed', `${5.2 + (i % 3) * .45}s`);
+        btn.style.setProperty('--sun-tilt', `${[-7, 4, -3, 8, -5, 3, 6][i % 7]}deg`);
         btn.style.animationDelay = `${i * -.24}s`;
         btn.innerHTML = sunsetTargetSvg(word);
         btn.onclick = () => shootWord(word, btn);
@@ -1392,8 +1399,8 @@
           </radialGradient>
         </defs>
         <circle cx="60" cy="60" r="46" fill="url(#sunGlow)"/>
-        <path d="M18 72 C38 62, 50 82, 70 70 S98 64, 112 76" fill="none" stroke="rgba(255,255,255,.72)" stroke-width="7" stroke-linecap="round"/>
-        <path class="sun-crack" d="M58 17 L50 43 L65 57 L54 80 L72 104 M31 52 L55 60 L39 77 M88 36 L69 58 L94 70" fill="none" stroke="#7c2d12" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M20 74 C38 65, 52 80, 72 69 S98 65, 110 76" fill="none" stroke="rgba(255,255,255,.62)" stroke-width="6" stroke-linecap="round"/>
+        <path class="sun-crack" d="M58 22 L52 50 L65 64 L56 93 M35 59 L55 65 L43 80 M86 46 L68 63 L91 74" fill="none" stroke="#7c2d12" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
       </svg><span class="target-word">${word}</span>`;
     }
     function shootArrow(card) {
@@ -1425,7 +1432,10 @@
         card?.classList.add('wrong-hit');
         if (card) card.disabled = true;
         feedback.textContent = `露出「${word}」，再想想，找下一個正確詞。`;
-        playAudioOrSpeak('wrong', '再想想，找下一個正確詞。');
+        if (wrongVoicePlayedForIndex !== shootIndex) {
+          wrongVoicePlayedForIndex = shootIndex;
+          playAudioOrSpeak('wrong', '再想想，找下一個正確詞。');
+        }
         return;
       }
       if (card) card.classList.add('hit');
@@ -1436,6 +1446,7 @@
         slot.textContent = word;
         slot.classList.add('filled');
         shootIndex += 1;
+        wrongVoicePlayedForIndex = -1;
         const completedLine = shootLineEnds.find(line => line.end === shootIndex);
         if (completedLine) {
           window.setTimeout(async () => {
@@ -1562,6 +1573,11 @@
   </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
