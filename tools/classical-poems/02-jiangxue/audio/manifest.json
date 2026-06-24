@@ -1,0 +1,351 @@
+{
+  "workflow": "local-first",
+  "voicesRoot": "C:\\2026_Antigravity_語音\\voices",
+  "segments": [
+    {
+      "id": "home-guide",
+      "file": "audio/home-guide-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "江雪。唐，柳宗元。請先聽整首詩，想一想：天這麼冷，為什麼老爺爺還要一個人在江上掉魚？",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1751084
+    },
+    {
+      "id": "poem-full-sadaltager",
+      "file": "audio/poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "江雪。唐，柳宗元。千山了飛絕。萬徑人蹤滅。孤舟梭笠翁。獨掉寒江雪。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1413164,
+      "seconds": 56.3
+    },
+    {
+      "id": "poem-full-sulafat",
+      "file": "audio/poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "江雪。唐，柳宗元。千山了飛絕。萬徑人蹤滅。孤舟梭笠翁。獨掉寒江雪。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1413164,
+      "seconds": 19.0
+    },
+    {
+      "id": "line1-poem-sadaltager",
+      "file": "audio/line1-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "千山了飛絕。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 261164,
+      "seconds": 4.4
+    },
+    {
+      "id": "line1-poem-sulafat",
+      "file": "audio/line1-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "千山了飛絕。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 230444,
+      "seconds": 3.9
+    },
+    {
+      "id": "line1-plain-sadaltager",
+      "file": "audio/line1-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "連綿的高山上，連一隻了的影子都看不見了。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 691244,
+      "seconds": 9.8
+    },
+    {
+      "id": "line1-plain-sulafat",
+      "file": "audio/line1-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "連綿的高山上，連一隻了的影子都看不見了。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 568364,
+      "seconds": 10.9
+    },
+    {
+      "id": "line2-poem-sadaltager",
+      "file": "audio/line2-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "萬徑人蹤滅。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 230444
+    },
+    {
+      "id": "line2-poem-sulafat",
+      "file": "audio/line2-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "萬徑人蹤滅。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 291884
+    },
+    {
+      "id": "line2-plain-sadaltager",
+      "file": "audio/line2-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "所有道路上，也看不見人的蹤跡了。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 506924
+    },
+    {
+      "id": "line2-plain-sulafat",
+      "file": "audio/line2-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "所有道路上，也看不見人的蹤跡了。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 568364
+    },
+    {
+      "id": "line3-poem-sadaltager",
+      "file": "audio/line3-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "孤舟梭笠翁。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 307244
+    },
+    {
+      "id": "line3-poem-sulafat",
+      "file": "audio/line3-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "孤舟梭笠翁。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 261164
+    },
+    {
+      "id": "line3-plain-sadaltager",
+      "file": "audio/line3-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "只有一葉孤舟上，坐著一個穿梭衣、戴斗笠的老爺爺。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 814124
+    },
+    {
+      "id": "line3-plain-sulafat",
+      "file": "audio/line3-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "只有一葉孤舟上，坐著一個穿梭衣、戴斗笠的老爺爺。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 952364
+    },
+    {
+      "id": "line4-poem-sadaltager",
+      "file": "audio/line4-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "獨掉寒江雪。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 230444
+    },
+    {
+      "id": "line4-poem-sulafat",
+      "file": "audio/line4-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "獨掉寒江雪。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 322604
+    },
+    {
+      "id": "line4-plain-sadaltager",
+      "file": "audio/line4-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "他一個人在冷冷的大江上，冒著大雪靜靜地掉魚。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 752684
+    },
+    {
+      "id": "line4-plain-sulafat",
+      "file": "audio/line4-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "他一個人在冷冷的大江上，冒著大雪靜靜地掉魚。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 706604
+    },
+    {
+      "id": "heart-guide",
+      "file": "audio/heart-guide-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "柳宗元被派到很遠的地方，身邊沒有朋友，心裡很孤單。他看見江上那位老爺爺，在大雪裡還是安安靜靜地掉魚。詩人想告訴我們：就算身邊很冷清，也可以像老爺爺一樣，安穩、堅定地做自己想做的事。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 3041324,
+      "seconds": 38.7
+    },
+    {
+      "id": "game-guess-guide",
+      "file": "audio/game-guess-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "只看畫面猜詩。先看圖中人物和天氣，再選出對應詩句。答對後會自動換下一題。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1213484
+    },
+    {
+      "id": "game-snow-guide",
+      "file": "audio/game-snow-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "雪中尋字。大雪蓋住了詩，請輕點雪堆掃開雪，找出正確的字填回詩句。每完成一句，系統會朗讀這一句。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1520684
+    },
+    {
+      "id": "game-fish-guide",
+      "file": "audio/game-fish-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "江釣得字。老爺爺在江上掉魚，請點中游過的正確詞魚，掉起來填入詩句空格。每完成一句，系統會朗讀這一句。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 2426924,
+      "seconds": 31.2
+    },
+    {
+      "id": "word-qianshan",
+      "file": "audio/word-qianshan.wav",
+      "voice": "Sadaltager",
+      "text": "千山。好多好多座山。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 384044,
+      "seconds": 25.6
+    },
+    {
+      "id": "word-niao",
+      "file": "audio/word-niao.wav",
+      "voice": "Sadaltager",
+      "text": "了。小了。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 230444,
+      "seconds": 10.0
+    },
+    {
+      "id": "word-feijue",
+      "file": "audio/word-feijue.wav",
+      "voice": "Sadaltager",
+      "text": "飛絕。飛得不見蹤影，一隻也看不到。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 645164,
+      "seconds": 29.7
+    },
+    {
+      "id": "word-wanjing",
+      "file": "audio/word-wanjing.wav",
+      "voice": "Sadaltager",
+      "text": "萬徑。好多好多條小路。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 399404,
+      "seconds": 17.8
+    },
+    {
+      "id": "word-ren",
+      "file": "audio/word-ren.wav",
+      "voice": "Sadaltager",
+      "text": "人。人。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 276524,
+      "seconds": 11.6
+    },
+    {
+      "id": "word-zongmie",
+      "file": "audio/word-zongmie.wav",
+      "voice": "Sadaltager",
+      "text": "蹤滅。腳印都不見了，看不見人走過的痕跡。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 752684,
+      "seconds": 30.4
+    },
+    {
+      "id": "word-guzhou",
+      "file": "audio/word-guzhou.wav",
+      "voice": "Sadaltager",
+      "text": "孤舟。孤零零的一條小船。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 414764,
+      "seconds": 16.3
+    },
+    {
+      "id": "word-suoli",
+      "file": "audio/word-suoli.wav",
+      "voice": "Sadaltager",
+      "text": "梭笠。梭衣和斗笠，下雨下雪時穿的。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 706604,
+      "seconds": 27.6
+    },
+    {
+      "id": "word-weng",
+      "file": "audio/word-weng.wav",
+      "voice": "Sadaltager",
+      "text": "翁。老爺爺。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 245804,
+      "seconds": 11.0
+    },
+    {
+      "id": "word-du",
+      "file": "audio/word-du.wav",
+      "voice": "Sadaltager",
+      "text": "獨。一個人，孤單地。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 307244,
+      "seconds": 12.9
+    },
+    {
+      "id": "word-diao",
+      "file": "audio/word-diao.wav",
+      "voice": "Sadaltager",
+      "text": "掉。掉魚。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 291884,
+      "seconds": 12.2
+    },
+    {
+      "id": "word-hanjiang",
+      "file": "audio/word-hanjiang.wav",
+      "voice": "Sadaltager",
+      "text": "寒江。冷冷的大江。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 445484,
+      "seconds": 17.7
+    },
+    {
+      "id": "word-xue",
+      "file": "audio/word-xue.wav",
+      "voice": "Sadaltager",
+      "text": "雪。下著大雪。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 337964,
+      "seconds": 13.8
+    }
+  ]
+}
