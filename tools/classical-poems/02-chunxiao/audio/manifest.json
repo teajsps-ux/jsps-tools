@@ -1,0 +1,246 @@
+{
+  "workflow": "local-first",
+  "voicesRoot": "C:\\2026_Antigravity_語音\\voices",
+  "segments": [
+    {
+      "id": "home-guide",
+      "file": "audio/home-guide-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "春曉。唐，孟浩然。春天的早晨，詩人醒來後聽到了什麼？",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 983084,
+      "seconds": 25.0
+    },
+    {
+      "id": "poem-full-sadaltager",
+      "file": "audio/poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "春眠不覺曉，處處聞啼遼，夜來風雨聲，花落知多少。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 906284,
+      "seconds": 12.2
+    },
+    {
+      "id": "poem-full-sulafat",
+      "file": "audio/poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "春眠不覺曉，處處聞啼遼，夜來風雨聲，花落知多少。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 752684,
+      "seconds": 13.3
+    },
+    {
+      "id": "line1-poem-sadaltager",
+      "file": "audio/line1-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "春眠不覺曉。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 261164,
+      "seconds": 4.2
+    },
+    {
+      "id": "line1-poem-sulafat",
+      "file": "audio/line1-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "春眠不覺曉。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 307244,
+      "seconds": 4.6
+    },
+    {
+      "id": "line1-plain-sadaltager",
+      "file": "audio/line1-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "春天睡覺，不知不決天就亮了。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 522284,
+      "seconds": 7.5
+    },
+    {
+      "id": "line1-plain-sulafat",
+      "file": "audio/line1-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "春天睡覺，不知不決天就亮了。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 460844,
+      "seconds": 6.5
+    },
+    {
+      "id": "line2-poem-sadaltager",
+      "file": "audio/line2-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "處處聞啼遼。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 245804,
+      "seconds": 3.9
+    },
+    {
+      "id": "line2-poem-sulafat",
+      "file": "audio/line2-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "處處聞啼遼。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 215084,
+      "seconds": 13.6
+    },
+    {
+      "id": "line2-plain-sadaltager",
+      "file": "audio/line2-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "到處都聽到遼兒在叫。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 430124,
+      "seconds": 6.3
+    },
+    {
+      "id": "line2-plain-sulafat",
+      "file": "audio/line2-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "到處都聽到遼兒在叫。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 368684,
+      "seconds": 5.4
+    },
+    {
+      "id": "line3-poem-sadaltager",
+      "file": "audio/line3-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "夜來風雨聲。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 307244,
+      "seconds": 4.6
+    },
+    {
+      "id": "line3-poem-sulafat",
+      "file": "audio/line3-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "夜來風雨聲。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 322604,
+      "seconds": 4.8
+    },
+    {
+      "id": "line3-plain-sadaltager",
+      "file": "audio/line3-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "夜裡傳來風雨的聲音。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 353324,
+      "seconds": 5.2
+    },
+    {
+      "id": "line3-plain-sulafat",
+      "file": "audio/line3-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "夜裡傳來風雨的聲音。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 460844,
+      "seconds": 6.5
+    },
+    {
+      "id": "line4-poem-sadaltager",
+      "file": "audio/line4-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "花落知多少。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 261164,
+      "seconds": 4.0
+    },
+    {
+      "id": "line4-poem-sulafat",
+      "file": "audio/line4-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "花落知多少。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 261164,
+      "seconds": 12.9
+    },
+    {
+      "id": "line4-plain-sadaltager",
+      "file": "audio/line4-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "不知道花朵落了多少。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 399404,
+      "seconds": 5.8
+    },
+    {
+      "id": "line4-plain-sulafat",
+      "file": "audio/line4-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "不知道花朵落了多少。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 322604,
+      "seconds": 4.7
+    },
+    {
+      "id": "heart-guide",
+      "file": "audio/heart-guide-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "孟浩然在春天的一個早晨醒來，聽到遼叫，想起昨晚的風雨，心裡想：不知道花落了多少。他喜歡春天，也捨不得春天離開。詩人想告訴我們：春天的花很快就會凋謝，美好的時光要珍惜。每天睜開眼睛，就可以用心感受身邊的美好。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 3348524,
+      "seconds": 68.9
+    },
+    {
+      "id": "game-cloud-guide",
+      "file": "audio/game-cloud-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "匀朵找字。詩人仰望天空，匀朵裡藏著詞語，請點擊正確的匀，讓詞語飛回詩句。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1459244,
+      "seconds": 18.9
+    },
+    {
+      "id": "game-ink-guide",
+      "file": "audio/game-ink-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "墨積顯字。詩人正在書寫，墨滴落在紙上，請點擊正確的墨，讓墨積雲開顯現詞語。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1321004,
+      "seconds": 17.2
+    },
+    {
+      "id": "game-flower-guide",
+      "file": "audio/game-flower-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "落花收集。花瓣飄落，請點擊正確的花瓣，讓它飛入詩句空格。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1075244,
+      "seconds": 16.0
+    },
+    {
+      "id": "word-tiniao",
+      "file": "audio/word-tiniao.wav",
+      "voice": "Sulafat",
+      "text": "啼了——了在叫。",
+      "status": "fixed-mapping",
+      "source": "local VoxCPM2",
+      "bytes": 254828,
+      "seconds": 2.65
+    }
+  ]
+}

@@ -1,0 +1,1686 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>春曉 - 古詩互動 HTML 簡報</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bpmf+Iansui&family=Bpmf+Zihi+Kai+Std&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #25211d;
+      --paper: rgba(255, 253, 248, .88);
+      --soft: rgba(255, 253, 248, .72);
+      --line: rgba(55, 42, 26, .16);
+      --verb: #d85045;
+      --noun: #248067;
+      --person: #2f6fbd;
+      --time: #a36600;
+      --place: #6b58b8;
+      --feeling: #c04382;
+      --spring: #e86a82;
+      --shadow: 0 20px 70px rgba(29, 24, 17, .2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow: auto;
+      color: var(--ink);
+      font-family: system-ui, "Microsoft JhengHei", sans-serif;
+      background: #f8f4ec;
+    }
+    body.font-iansui { font-family: "Bpmf Iansui", system-ui, sans-serif; }
+    body.font-kai { font-family: "Bpmf Zihi Kai Std", "Bpmf Iansui", serif; }
+    button, select {
+      border: 0;
+      border-radius: 999px;
+      min-height: 40px;
+      padding: 9px 15px;
+      font: inherit;
+      font-weight: 800;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .8);
+      box-shadow: 0 8px 24px rgba(38, 29, 18, .12);
+      cursor: pointer;
+    }
+    button:hover, select:hover { background: #fff; }
+    button.primary { color: white; background: #315f53; }
+    .deck, .slide {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: white;
+    }
+    .slide.active { display: block; }
+    .slide.active .art, .slide.active .shade { position: fixed; }
+    .art {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .shade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.9), rgba(255,255,255,.58) 48%, rgba(255,255,255,.16)),
+        radial-gradient(circle at 76% 22%, rgba(255,255,255,.24), transparent 42%);
+      pointer-events: none;
+    }
+    body.clean-view .shade,
+    body.clean-view .stage,
+    body.clean-view .audio-note,
+    body.clean-view dialog {
+      display: none;
+    }
+    body.clean-view .tools button:not(.view-toggle),
+    body.clean-view .tools select,
+    body.clean-view .pager {
+      display: none;
+    }
+    .topbar {
+      position: fixed;
+      z-index: 30;
+      pointer-events: none;
+    }
+    .tools, .pager {
+      position: fixed;
+      top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px;
+      border: 1px solid rgba(44, 35, 24, .12);
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .74);
+      backdrop-filter: blur(14px);
+      pointer-events: auto;
+      touch-action: none;
+      cursor: move;
+      user-select: none;
+    }
+    .tools { right: 16px; left: auto; }
+    .pager { right: 16px; top: auto; bottom: 16px; }
+    .tools button, .tools select, .pager button {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .drag-handle {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #315f53;
+      background: rgba(255, 255, 255, .62);
+      font-weight: 900;
+      cursor: move;
+    }
+    .stage {
+      position: relative;
+      z-index: 2;
+      min-height: 100%;
+      padding: clamp(78px, 9vh, 106px) clamp(24px, 5vw, 70px) clamp(56px, 7vh, 86px);
+      display: grid;
+      align-items: center;
+    }
+    .home-copy {
+      width: min(980px, 94vw);
+      display: grid;
+      gap: 18px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 7vw, 94px);
+      line-height: 1.04;
+      letter-spacing: 0;
+      color: #2e3832;
+    }
+    .author {
+      font-size: clamp(22px, 2.7vw, 36px);
+      font-weight: 800;
+      color: #64574a;
+    }
+    .prompt {
+      width: max-content;
+      max-width: min(1120px, 94vw);
+      padding: 18px 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      font-size: clamp(22px, 2.5vw, 34px);
+      line-height: 1.42;
+      font-weight: 850;
+    }
+    .poem-vertical {
+      writing-mode: horizontal-tb;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: flex-start;
+      gap: clamp(14px, 2vw, 28px);
+      min-height: 420px;
+      font-size: clamp(32px, 4.5vw, 66px);
+      line-height: 1.62;
+      font-weight: 850;
+      color: #2c332e;
+    }
+    .poem-vertical .home-line {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      min-height: 7.8em;
+      padding: .18em .12em;
+      border-radius: 10px;
+      transition: background .2s, box-shadow .2s, transform .2s;
+    }
+    .home-line.active-line,
+    .compare-row.active-line {
+      background: rgba(255, 236, 161, .78);
+      box-shadow: 0 0 0 5px rgba(255, 236, 161, .32);
+      transform: translateY(-2px);
+    }
+    .line-stage {
+      grid-template-columns: minmax(260px, .9fr) minmax(320px, 1.1fr);
+      gap: clamp(20px, 4vw, 62px);
+    }
+    .line-stage > * { min-width: 0; }
+    .line-poem {
+      display: grid;
+      gap: 18px;
+      align-content: center;
+    }
+    .line-title {
+      font-size: clamp(23px, 2.6vw, 34px);
+      font-weight: 900;
+      color: #66594b;
+    }
+    .token-line {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      min-height: min(58vh, 520px);
+      font-size: clamp(38px, 5.4vw, 74px);
+      line-height: 1.38;
+      font-weight: 900;
+    }
+    .token {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      border-radius: 8px;
+      padding: .1em .08em;
+      background: rgba(255, 255, 255, .58);
+      box-shadow: 0 8px 24px rgba(42, 31, 19, .08);
+    }
+    button.token {
+      min-height: 0;
+      border-radius: 8px;
+      font: inherit;
+      box-shadow: 0 8px 24px rgba(42, 31, 19, .08);
+    }
+    .token[data-kind="verb"] { color: var(--verb); }
+    .token[data-kind="noun"] { color: var(--noun); }
+    .token[data-kind="person"] { color: var(--person); }
+    .token[data-kind="time"] { color: var(--time); }
+    .token[data-kind="place"] { color: var(--place); }
+    .token[data-kind="feeling"] { color: var(--feeling); }
+    .plain {
+      width: min(760px, 100%);
+      max-width: min(760px, calc(100vw - 48px));
+      padding: 20px 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      font-size: clamp(22px, 2.6vw, 34px);
+      line-height: 1.45;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      white-space: normal;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #53493f;
+    }
+    .legend span {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .68);
+    }
+    .compare {
+      width: min(1180px, 96vw);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .compare-grid {
+      width: min(1220px, 96vw);
+      display: grid;
+      grid-template-columns: minmax(360px, .92fr) minmax(520px, 1.2fr);
+      gap: 12px 18px;
+      align-items: stretch;
+    }
+    .compare-head {
+      font-size: clamp(24px, 3vw, 38px);
+      font-weight: 900;
+      padding: 8px 18px;
+      justify-self: start;
+      background: rgba(255, 255, 255, .78);
+    }
+    .compare-row {
+      min-height: 84px;
+      display: grid;
+      align-items: center;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .08);
+      padding: 14px 18px;
+      font-size: clamp(21px, 2.4vw, 32px);
+      line-height: 1.36;
+      font-weight: 850;
+      transition: background .2s, box-shadow .2s, transform .2s;
+    }
+    .poem-row {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 84px;
+    }
+    .poem-row .token {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      background: transparent;
+      box-shadow: none;
+      padding: 0 .04em;
+      font-size: 1em;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 34px);
+    }
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: clamp(24px, 3vw, 38px);
+    }
+    .panel p {
+      margin: 0;
+      font-size: clamp(21px, 2.4vw, 31px);
+      line-height: 1.55;
+      font-weight: 750;
+    }
+    .scaffold {
+      color: #d85045;
+      border: 2px solid rgba(216, 80, 69, .7);
+      border-radius: 4px;
+      padding: 0 .08em;
+      background: rgba(255, 255, 255, .38);
+      white-space: nowrap;
+    }
+    .home-action-tray {
+      position: fixed;
+      z-index: 34;
+      left: 14px;
+      bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(44, 35, 24, .12);
+      background: rgba(255, 253, 248, .78);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 34px rgba(38, 29, 18, .12);
+    }
+    .home-action-tray.hidden { display: none; }
+    .home-tray-restore {
+      position: fixed;
+      z-index: 34;
+      left: 14px;
+      bottom: 14px;
+      display: none;
+      min-width: 54px;
+      height: 54px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .9);
+      color: #315f53;
+      box-shadow: 0 12px 34px rgba(38, 29, 18, .14);
+    }
+    .home-tray-restore.visible { display: inline-grid; place-items: center; }
+    .home-action-tray .round {
+      width: 42px;
+      min-width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+    }
+    .home-action-tray .primary {
+      padding-inline: clamp(16px, 2.2vw, 28px);
+    }
+    body.clean-view .home-action-tray { display: none; }
+    .game {
+      width: min(1240px, 96vw);
+      display: grid;
+      gap: 16px;
+    }
+    .game.wide { width: min(1320px, 96vw); }
+    .game-head {
+      width: max-content;
+      max-width: 100%;
+      padding: 16px 24px;
+      border-radius: 8px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      font-size: clamp(24px, 3vw, 42px);
+      line-height: 1.25;
+      font-weight: 900;
+    }
+    .game-rule {
+      width: fit-content;
+      max-width: 100%;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .84);
+      font-size: clamp(18px, 2vw, 28px);
+      font-weight: 850;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .fill-layout {
+      display: grid;
+      grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .fill-poem {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 253, 248, .78);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .fill-target {
+      width: max-content;
+      max-width: 100%;
+      justify-self: center;
+      padding: 14px 24px;
+      border-radius: 999px;
+      background: rgba(49, 95, 83, .92);
+      color: white;
+      font-size: clamp(22px, 2.6vw, 34px);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .fill-line {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border-radius: 8px;
+      transition: background .2s, box-shadow .2s, transform .2s;
+      font-size: clamp(24px, 3vw, 42px);
+      font-weight: 900;
+    }
+    .fill-line.active-line {
+      background: rgba(255, 236, 161, .82);
+      box-shadow: 0 0 0 5px rgba(255, 236, 161, .32);
+      transform: translateY(-2px);
+    }
+    .fill-slot {
+      min-width: 92px;
+      min-height: 54px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      border: 3px dashed rgba(49, 95, 83, .38);
+      background: rgba(255,255,255,.64);
+      padding: 4px 12px;
+    }
+    .fill-slot.filled {
+      border-style: solid;
+      color: white;
+      background: #315f53;
+    }
+    .fill-arena {
+      position: relative;
+      min-height: clamp(380px, 56vh, 620px);
+      border-radius: 8px;
+      border: 2px solid rgba(91, 127, 168, .22);
+      background: rgba(235, 244, 255, .42);
+      overflow: hidden;
+      container-type: inline-size;
+    }
+    .arena-title {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: rgba(49, 95, 83, .88);
+      color: white;
+      font-size: clamp(18px, 2vw, 26px);
+      font-weight: 900;
+      white-space: nowrap;
+      z-index: 2;
+    }
+    .progress-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+      padding: 8px;
+    }
+    .progress-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(91, 127, 168, .28);
+    }
+    .progress-dot.reached { background: #315f53; }
+    .snow-pile, .cloud-card, .ink-drop {
+      position: absolute;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+      cursor: pointer;
+      transition: transform .18s;
+    }
+    .snow-pile:hover, .cloud-card:hover, .ink-drop:hover { transform: scale(1.04); }
+    .snow-pile svg, .cloud-card svg, .ink-drop svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+    .snow-pile .pile-body, .cloud-card .cloud-body, .ink-drop .ink-body {
+      position: absolute;
+      inset: 0;
+      transition: transform .55s cubic-bezier(.34,1.2,.64,1), opacity .45s ease;
+      transform-origin: 50% 100%;
+    }
+    .snow-pile .pile-label, .cloud-card .cloud-label, .ink-drop .ink-label {
+      position: absolute;
+      top: 58%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(.6);
+      font-size: clamp(24px, 2.6vw, 34px);
+      font-weight: 900;
+      color: var(--ink);
+      text-shadow: 0 1px 3px rgba(255,255,255,.95), 0 0 10px rgba(255,255,255,.85);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .4s ease .18s, transform .5s cubic-bezier(.34,1.4,.64,1) .18s;
+      z-index: 1;
+    }
+    .snow-pile.swept .pile-body, .cloud-card.revealed .cloud-body, .ink-drop.revealed .ink-body {
+      transform: scaleY(.12) translateY(8px);
+      opacity: .22;
+    }
+    .snow-pile.swept .pile-label, .cloud-card.revealed .cloud-label, .ink-drop.revealed .ink-label {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .snow-pile.swept, .cloud-card.revealed, .ink-drop.revealed { cursor: default; }
+    .snow-pile.taken .pile-body, .cloud-card.taken .cloud-body, .ink-drop.taken .ink-body { opacity: 0; }
+    .snow-pile.taken .pile-label, .cloud-card.taken .cloud-label, .ink-drop.taken .ink-label { opacity: 0; }
+    .snow-pile.taken, .cloud-card.taken, .ink-drop.taken { pointer-events: none; }
+    .snow-pile { width: 160px; height: 130px; }
+    .cloud-card {
+      width: 160px;
+      height: 120px;
+      animation: cloudFlow var(--speed, 9s) linear infinite;
+    }
+    @keyframes cloudFlow {
+      0%   { transform: translateX(-180px); }
+      100% { transform: translateX(calc(100cqw + 60px)); }
+    }
+    .ink-drop {
+      width: 140px;
+      height: 140px;
+      animation: inkWobble var(--speed, 5s) ease-in-out infinite alternate;
+    }
+    @keyframes inkWobble {
+      from { translate: -6px -2px; }
+      to { translate: 8px 4px; }
+    }
+    .fish-card, .flower-card {
+      position: absolute;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .fish-card svg, .flower-card svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+    .fish-card .fish-label, .flower-card .flower-label {
+      position: absolute;
+      top: 50%;
+      left: 42%;
+      transform: translate(-50%, -50%);
+      font-size: clamp(20px, 2.2vw, 28px);
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 1px 4px rgba(0,0,0,.45), 0 0 6px rgba(0,0,0,.3);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .fish-card { width: 175px; height: 100px; animation: swim var(--speed, 8s) ease-in-out infinite alternate; }
+    @keyframes swim {
+      from { translate: -30px -6px; }
+      to { translate: 30px 10px; }
+    }
+    .fish-card.caught { animation: hook .5s ease-out forwards; }
+    @keyframes hook {
+      0% { transform: scale(1) translateY(0); opacity: 1; }
+      100% { transform: scale(.3) translateY(-80px) rotate(12deg); opacity: 0; }
+    }
+    .flower-card {
+      width: 120px;
+      height: 120px;
+      animation: petalDrift var(--speed, 8s) ease-in-out infinite;
+    }
+    @keyframes petalDrift {
+      0%   { transform: translate(0, -60px); opacity: 0; }
+      8%   { opacity: 1; }
+      25%  { transform: translate(var(--s1, 12px), var(--p25, 30%)); }
+      50%  { transform: translate(var(--s2, -8px), var(--p50, 52%)); }
+      75%  { transform: translate(var(--s3, 6px), var(--p75, 75%)); }
+      100% { transform: translate(var(--s4, -4px), calc(var(--fall, 400px) + 40px)); opacity: 0.5; }
+    }
+    .flower-card.caught { animation: petalCatch .55s ease-out forwards; }
+    @keyframes petalCatch {
+      0% { transform: scale(1) translateY(0); opacity: 1; }
+      100% { transform: scale(.25) translateY(-60px); opacity: 0; }
+    }
+    .broom, .cloud-pop, .ink-pop {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      width: 78px;
+      height: 78px;
+      transform: translate(-50%, 0) rotate(-28deg);
+      pointer-events: none;
+      z-index: 3;
+    }
+    .broom { animation: sweep .7s cubic-bezier(.36,.07,.45,.99) forwards; }
+    .cloud-pop { animation: cloudPop .7s ease-out forwards; }
+    .ink-pop { animation: inkSpread .8s ease-out forwards; }
+    .broom svg, .cloud-pop svg, .ink-pop svg { width: 100%; height: 100%; display: block; }
+    @keyframes sweep {
+      0% { transform: translate(-160%, 0) rotate(-42deg); opacity: 0; }
+      18% { opacity: 1; }
+      55% { transform: translate(-30%, 10px) rotate(-20deg); }
+      82% { transform: translate(70%, 14px) rotate(-8deg); opacity: 1; }
+      100% { transform: translate(160%, 18px) rotate(2deg); opacity: 0; }
+    }
+    @keyframes cloudPop {
+      0% { transform: translate(-50%, 0) scale(.4); opacity: 0; }
+      20% { opacity: 1; }
+      60% { transform: translate(-50%, 0) scale(1.2); opacity: .8; }
+      100% { transform: translate(-50%, 0) scale(2); opacity: 0; }
+    }
+    @keyframes inkSpread {
+      0% { transform: translate(-50%, 0) scale(.6); opacity: .9; }
+      100% { transform: translate(-50%, 0) scale(2.5); opacity: 0; }
+    }
+    .feedback {
+      min-height: 56px;
+      padding: 4px 8px;
+      color: #315f53;
+      font-size: clamp(22px, 2.6vw, 34px);
+      font-weight: 900;
+    }
+    .correct-mark {
+      position: fixed;
+      inset: 0;
+      z-index: 82;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      font-size: clamp(210px, 32vw, 420px);
+      font-family: Arial, sans-serif;
+      font-weight: 900;
+      color: #23a45a;
+      text-shadow: 0 0 18px rgba(35, 164, 90, .9), 0 0 46px rgba(35, 164, 90, .65);
+      animation: markPop .72s ease-out both;
+    }
+    @keyframes markPop {
+      0% { transform: scale(.55); opacity: 0; }
+      20% { transform: scale(1.08); opacity: 1; }
+      70% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(.92); opacity: 0; }
+    }
+    .confetti {
+      position: fixed;
+      inset: 0;
+      z-index: 81;
+      pointer-events: none;
+    }
+    .confetti i {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      animation: fall 3s linear forwards;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-20px) rotate(0); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(540deg); opacity: .4; }
+    }
+    .audio-note {
+      position: fixed;
+      z-index: 31;
+      left: 16px;
+      bottom: 14px;
+      max-width: min(46px, calc(100vw - 32px));
+      min-height: 32px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(163, 102, 0, .2);
+      background: rgba(255, 244, 218, .9);
+      color: #654400;
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: help;
+      opacity: .72;
+      transition: max-width .18s ease, opacity .18s ease, background .18s ease;
+    }
+    .audio-note::before {
+      content: "音";
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      margin-right: 8px;
+      border-radius: 999px;
+      background: #fff7df;
+      color: #654400;
+    }
+    .audio-note:hover, .audio-note:focus {
+      max-width: min(920px, calc(100vw - 32px));
+      opacity: 1;
+      background: rgba(255, 244, 218, .96);
+    }
+    .fullscreen-toggle {
+      position: fixed;
+      z-index: 31;
+      left: 18px;
+      bottom: 64px;
+      width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(49, 95, 83, .18);
+      background: rgba(255, 253, 248, .9);
+      color: #315f53;
+      font-size: 21px;
+      font-weight: 900;
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .1);
+    }
+    dialog {
+      width: min(560px, 90vw);
+      border: 0;
+      border-radius: 10px;
+      padding: 0;
+      background: transparent;
+    }
+    dialog::backdrop { background: rgba(30, 24, 17, .28); }
+    .pop {
+      padding: 24px;
+      border: 1px solid rgba(44, 35, 24, .15);
+      border-radius: 10px;
+      background: rgba(255, 253, 248, .96);
+      box-shadow: var(--shadow);
+    }
+    .pop h3 {
+      margin: 0 0 8px;
+      font-size: 34px;
+    }
+    .pop p {
+      margin: 0 0 18px;
+      font-size: 24px;
+      line-height: 1.42;
+      font-weight: 760;
+    }
+    @media (max-width: 980px) {
+      body { overflow: auto; }
+      .deck, .slide { min-height: 100vh; height: auto; }
+      .slide { position: relative; }
+      .line-stage, .compare, .compare-grid, .fill-layout { grid-template-columns: 1fr; }
+      .fill-line { flex-wrap: wrap; }
+      .stage { min-height: 100vh; }
+      .topbar { position: fixed; }
+      .prompt, .plain { width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="tools" data-draggable-control="tools">
+      <span class="drag-handle" title="拖曳移動">↕</span>
+      <select id="fontSelect" aria-label="字體">
+        <option value="normal">一般字體</option>
+        <option value="iansui">Bpmf Iansui</option>
+        <option value="kai">Bpmf Zihi Kai Std</option>
+      </select>
+      <button class="view-toggle" onclick="toggleCleanView()">只看底圖</button>
+    </div>
+    <div class="pager" data-draggable-control="pager">
+      <span class="drag-handle" title="拖曳移動">↕</span>
+      <button onclick="prevSlide()">←</button>
+      <button class="primary" onclick="nextSlide()">→</button>
+    </div>
+  </div>
+
+  <main class="deck">
+    <section class="slide active" data-auto="home-guide">
+      <img class="art" src="generated/chunxiao-home_20260624_123217.png" alt="春曉首頁插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>春曉</h1>
+          <div class="author">唐・孟浩然</div>
+          <div class="prompt">春天的早晨，詩人醒來後聽到了什麼？</div>
+          <div class="poem-vertical" id="homePoem">
+            <span class="home-line" data-line="0"><span class="token" data-kind="time">春</span><span class="token" data-kind="verb">眠</span><span class="token" data-kind="verb">不覺</span><span class="token" data-kind="time">曉</span></span>
+            <span class="home-line" data-line="1"><span class="token" data-kind="place">處處</span><span class="token" data-kind="verb">聞</span><span class="token" data-kind="noun">啼鳥</span></span>
+            <span class="home-line" data-line="2"><span class="token" data-kind="time">夜來</span><span class="token" data-kind="noun">風雨</span><span class="token" data-kind="noun">聲</span></span>
+            <span class="home-line" data-line="3"><span class="token" data-kind="noun">花落</span><span class="token" data-kind="verb">知</span><span class="token" data-kind="noun">多少</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="home-action-tray" id="homeActionTray">
+        <button class="round" onclick="hideHomeTray()" title="收起">×</button>
+        <button class="round" onclick="playSegment('home-guide')" title="聽提問">音</button>
+        <button class="primary" onclick="playHomePoem()">帶讀整首詩</button>
+        <button onclick="nextSlide()">開始一句一句看</button>
+      </div>
+      <button class="home-tray-restore" id="homeTrayRestore" onclick="showHomeTray()">朗讀</button>
+    </section>
+
+    <section class="slide" data-auto="line1-meaning">
+      <img class="art" src="generated/chunxiao-line1_20260624_123223.png" alt="春眠不覺曉插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第一句</div>
+          <div class="token-line">
+            <button class="token" data-kind="time" onclick="showWord(this,'春眠','春天睡覺。')">春眠</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'不覺','沒有感覺到。')">不覺</button>
+            <button class="token" data-kind="time" onclick="showWord(this,'曉','天亮。')">曉</button>
+          </div>
+          <div class="legend"><span style="color:var(--time)">時間</span><span style="color:var(--verb)">動作／狀態</span></div>
+        </div>
+        <div class="plain">春天睡覺，不知不覺天就亮了。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line2-meaning">
+      <img class="art" src="generated/chunxiao-line2_20260624_123226.png" alt="處處聞啼鳥插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第二句</div>
+          <div class="token-line">
+            <button class="token" data-kind="place" onclick="showWord(this,'處處','每個地方，到處。')">處處</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'聞','聽到。')">聞</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'啼鳥','鳥在叫。')">啼鳥</button>
+          </div>
+          <div class="legend"><span style="color:var(--place)">地方</span><span style="color:var(--verb)">動作</span><span style="color:var(--noun)">事物</span></div>
+        </div>
+        <div class="plain">到處都聽到鳥兒在叫。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line3-meaning">
+      <img class="art" src="generated/chunxiao-line3_20260624_123251.png" alt="夜來風雨聲插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第三句</div>
+          <div class="token-line">
+            <button class="token" data-kind="time" onclick="showWord(this,'夜來','夜晚來了。')">夜來</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'風雨','風和雨。')">風雨</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'聲','聲音。')">聲</button>
+          </div>
+          <div class="legend"><span style="color:var(--time)">時間</span><span style="color:var(--noun)">事物</span></div>
+        </div>
+        <div class="plain">夜裡傳來風雨的聲音。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line4-meaning">
+      <img class="art" src="generated/chunxiao-line4_20260624_123423.png" alt="花落知多少插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第四句</div>
+          <div class="token-line">
+            <button class="token" data-kind="noun" onclick="showWord(this,'花落','花掉下來。')">花落</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'知','知道。')">知</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'多少','很多還是很少。')">多少</button>
+          </div>
+          <div class="legend"><span style="color:var(--noun)">事物</span><span style="color:var(--verb)">動作</span></div>
+        </div>
+        <div class="plain">不知道花朵落了多少。</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <img class="art" src="generated/chunxiao-compare_20260624_123421.png" alt="春曉全詩白話對照插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>原詩與白話對照</h1>
+          <div class="author">春曉　唐・孟浩然</div>
+          <div class="compare-grid">
+            <button class="compare-head" onclick="playOriginalOnly()">讀原詩</button>
+            <button class="compare-head" onclick="playPlainOnly()">讀白話</button>
+            <div class="compare-row poem-row" data-pair="0" onclick="playComparePair(0)"><span class="token" data-kind="time">春眠</span><span class="token" data-kind="verb">不覺</span><span class="token" data-kind="time">曉</span></div>
+            <div class="compare-row plain-row" data-pair="0" onclick="playComparePair(0)">春天睡覺，不知不覺天就亮了。</div>
+            <div class="compare-row poem-row" data-pair="1" onclick="playComparePair(1)"><span class="token" data-kind="place">處處</span><span class="token" data-kind="verb">聞</span><span class="token" data-kind="noun">啼鳥</span></div>
+            <div class="compare-row plain-row" data-pair="1" onclick="playComparePair(1)">到處都聽到鳥兒在叫。</div>
+            <div class="compare-row poem-row" data-pair="2" onclick="playComparePair(2)"><span class="token" data-kind="time">夜來</span><span class="token" data-kind="noun">風雨</span><span class="token" data-kind="noun">聲</span></div>
+            <div class="compare-row plain-row" data-pair="2" onclick="playComparePair(2)">夜裡傳來風雨的聲音。</div>
+            <div class="compare-row poem-row" data-pair="3" onclick="playComparePair(3)"><span class="token" data-kind="noun">花落</span><span class="token" data-kind="verb">知</span><span class="token" data-kind="noun">多少</span></div>
+            <div class="compare-row plain-row" data-pair="3" onclick="playComparePair(3)">不知道花朵落了多少。</div>
+          </div>
+          <button class="primary" onclick="playCompare()">原詩白話一起讀</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="heart-guide">
+      <img class="art" src="generated/chunxiao-heart_20260624_123424.png" alt="春曉詩人心情插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>詩人的心情</h1>
+          <div class="author">愛春天，也捨不得春天</div>
+          <div class="compare">
+            <div class="panel">
+              <h2>當時的心情</h2>
+              <p>孟浩然在春天的一個早晨醒來，聽到鳥叫，想起昨晚的風雨，心裡想：不知道花落了多少。他<span class="scaffold">喜歡</span>春天，也<span class="scaffold">捨不得</span>春天離開。</p>
+            </div>
+            <div class="panel">
+              <h2>我們學到</h2>
+              <p>春天的花很快就會凋謝，美好的時光要<span class="scaffold">珍惜</span>。每天睜開眼睛，就可以用心感受身邊的<span class="scaffold">美好</span>。</p>
+            </div>
+          </div>
+          <button class="primary" onclick="playSegment('heart-guide')">聽一聽</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-cloud-guide">
+      <img class="art" src="generated/chunxiao-game-cloud-v2_20260624_135927.png" alt="雲朵找字遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <div class="game-head">雲朵找字</div>
+          <div class="game-rule">詩人仰望天空，雲朵裡藏著詞語。點擊正確的雲，讓詞語飛回詩句。</div>
+          <div class="fill-layout">
+            <div class="fill-poem">
+              <div class="fill-target" id="cloudTarget">下一個要點：春眠</div>
+              <div id="cloudBuild"></div>
+              <div class="progress-bar" id="cloudProgress"></div>
+            </div>
+            <div class="fill-arena" id="cloudArena">
+              <div class="arena-title">天空區　點雲找字</div>
+            </div>
+          </div>
+          <div class="feedback" id="cloudFeedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-ink-guide">
+      <img class="art" src="generated/chunxiao-game-ink-v2_20260624_134727.png" alt="墨跡顯字遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <div class="game-head">墨跡顯字</div>
+          <div class="game-rule">詩人正在書寫，墨滴落在紙上。點擊正確的墨，讓墨跡暈開顯現詞語。</div>
+          <div class="fill-layout">
+            <div class="fill-poem">
+              <div class="fill-target" id="inkTarget">下一個要點：春眠</div>
+              <div id="inkBuild"></div>
+              <div class="progress-bar" id="inkProgress"></div>
+            </div>
+            <div class="fill-arena" id="inkArena">
+              <div class="arena-title">墨池區　點墨顯字</div>
+            </div>
+          </div>
+          <div class="feedback" id="inkFeedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-flower-guide">
+      <img class="art" src="generated/chunxiao-game-flower-v2_20260624_134725.png" alt="落花收集遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <div class="game-head">落花收集</div>
+          <div class="game-rule">花瓣飄落，詩人伸手接住。點擊正確的花，讓花瓣飛入詩句空格。</div>
+          <div class="fill-layout">
+            <div class="fill-poem">
+              <div class="fill-target" id="flowerTarget">下一個要點：春眠</div>
+              <div id="flowerBuild"></div>
+              <div class="progress-bar" id="flowerProgress"></div>
+            </div>
+            <div class="fill-arena" id="flowerArena">
+              <div class="arena-title">花園區　點花收字</div>
+            </div>
+          </div>
+          <div class="feedback" id="flowerFeedback"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="wordDialog">
+    <div class="pop">
+      <h3 id="wordTitle"></h3>
+      <p id="wordText"></p>
+      <button class="primary" onclick="closeWord()">收起</button>
+    </div>
+  </dialog>
+
+  <button class="fullscreen-toggle" id="fullscreenToggle" onclick="toggleFullscreen()" title="切換全螢幕">⛶</button>
+  <div class="audio-note" id="audioNote" tabindex="0">已接入本機 Sadaltager / Sulafat 配音。</div>
+
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    let current = 0;
+    let currentAudio = null;
+    const audioText = {
+      'home-guide': '春曉。唐，孟浩然。春天的早晨，詩人醒來後聽到了什麼？',
+      'line1-meaning': '春眠不覺曉。春天睡覺，不知不覺天就亮了。',
+      'line2-meaning': '處處聞啼鳥。到處都聽到鳥兒在叫。',
+      'line3-meaning': '夜來風雨聲。夜裡傳來風雨的聲音。',
+      'line4-meaning': '花落知多少。不知道花朵落了多少。',
+      'heart-guide': '孟浩然在春天的一個早晨醒來，聽到鳥叫，想起昨晚的風雨，心裡想：不知道花落了多少。他喜歡春天，也捨不得春天離開。詩人想告訴我們：春天的花很快就會凋謝，美好的時光要珍惜。每天睜開眼睛，就可以用心感受身邊的美好。',
+      'game-cloud-guide': '雲朵找字。詩人仰望天空，雲朵裡藏著詞語，請點擊正確的雲，讓詞語飛回詩句。',
+      'game-ink-guide': '墨痕顯字。詩人正在書寫，墨點落在紙上，請點擊正確的墨，讓墨痕擴散顯現詞語。',
+      'game-flower-guide': '落花收集。花瓣飄落，請點擊正確的花瓣，讓它飛入詩句空格。'
+    };
+    const audioFiles = {
+      'home-guide': 'audio/home-guide-sadaltager.wav',
+      'poem-full-sadaltager': 'audio/poem-sadaltager.wav',
+      'poem-full-sulafat': 'audio/poem-sulafat.wav',
+      'line1-poem-sadaltager': 'audio/line1-poem-sadaltager.wav',
+      'line1-poem-sulafat': 'audio/line1-poem-sulafat.wav',
+      'line1-plain-sadaltager': 'audio/line1-plain-sadaltager.wav',
+      'line1-plain-sulafat': 'audio/line1-plain-sulafat.wav',
+      'line2-poem-sadaltager': 'audio/line2-poem-sadaltager.wav',
+      'line2-poem-sulafat': 'audio/line2-poem-sulafat.wav',
+      'line2-plain-sadaltager': 'audio/line2-plain-sadaltager.wav',
+      'line2-plain-sulafat': 'audio/line2-plain-sulafat.wav',
+      'line3-poem-sadaltager': 'audio/line3-poem-sadaltager.wav',
+      'line3-poem-sulafat': 'audio/line3-poem-sulafat.wav',
+      'line3-plain-sadaltager': 'audio/line3-plain-sadaltager.wav',
+      'line3-plain-sulafat': 'audio/line3-plain-sulafat.wav',
+      'line4-poem-sadaltager': 'audio/line4-poem-sadaltager.wav',
+      'line4-poem-sulafat': 'audio/line4-poem-sulafat.wav',
+      'line4-plain-sadaltager': 'audio/line4-plain-sadaltager.wav',
+      'line4-plain-sulafat': 'audio/line4-plain-sulafat.wav',
+      'heart-guide': 'audio/heart-guide-sadaltager.wav',
+      'game-cloud-guide': 'audio/game-cloud-guide-sulafat.wav',
+      'game-ink-guide': 'audio/game-ink-guide-sulafat.wav',
+      'game-flower-guide': 'audio/game-flower-guide-sulafat.wav',
+      'word-chunmian': 'audio/word-chunmian.wav',
+      'word-bujue': 'audio/word-bujue.wav',
+      'word-xiao': 'audio/word-xiao.wav',
+      'word-chuchu': 'audio/word-chuchu.wav',
+      'word-wen': 'audio/word-wen.wav',
+      'word-tiniao': 'audio/word-tiniao.wav',
+      'word-yelai': 'audio/word-yelai.wav',
+      'word-fengyu': 'audio/word-fengyu.wav',
+      'word-sheng': 'audio/word-sheng.wav',
+      'word-hualuo': 'audio/word-hualuo.wav',
+      'word-zhi': 'audio/word-zhi.wav',
+      'word-duoshao': 'audio/word-duoshao.wav'
+    };
+    const poemAudioIds = ['line1-poem-sulafat', 'line2-poem-sulafat', 'line3-poem-sulafat', 'line4-poem-sulafat'];
+    const plainAudioIds = ['line1-plain-sadaltager', 'line2-plain-sadaltager', 'line3-plain-sadaltager', 'line4-plain-sadaltager'];
+    const wordAudioIds = {
+      '春眠': 'word-chunmian', '不覺': 'word-bujue', '曉': 'word-xiao',
+      '處處': 'word-chuchu', '聞': 'word-wen', '啼鳥': 'word-tiniao',
+      '夜來': 'word-yelai', '風雨': 'word-fengyu', '聲': 'word-sheng',
+      '花落': 'word-hualuo', '知': 'word-zhi', '多少': 'word-duoshao'
+    };
+    const poemLines = ['春眠不覺曉。', '處處聞啼鳥。', '夜來風雨聲。', '花落知多少。'];
+    const plainLines = [
+      '春天睡覺，不知不覺天就亮了。',
+      '到處都聽到鳥兒在叫。',
+      '夜裡傳來風雨的聲音。',
+      '不知道花朵落了多少。'
+    ];
+    const fillLines = [
+      { text: '春眠不覺曉。', words: ['春眠', '不覺', '曉'] },
+      { text: '處處聞啼鳥。', words: ['處處', '聞', '啼鳥'] },
+      { text: '夜來風雨聲。', words: ['夜來', '風雨', '聲'] },
+      { text: '花落知多少。', words: ['花落', '知', '多少'] }
+    ];
+    const fillWords = fillLines.flatMap(line => line.words);
+    const fillLineEnds = fillLines.reduce((items, line) => {
+      const previous = items.length ? items[items.length - 1].end : 0;
+      items.push({ end: previous + line.words.length, text: line.text });
+      return items;
+    }, []);
+
+    function showSlide(index) {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+      stopAudio();
+      const id = slides[current].dataset.auto;
+      updateAudioNote(id);
+      if (id === 'game-cloud-guide') window.setTimeout(initCloudGame, 120);
+      if (id === 'game-ink-guide') window.setTimeout(initInkGame, 120);
+      if (id === 'game-flower-guide') window.setTimeout(initFlowerGame, 120);
+      if (id) window.setTimeout(() => playSegment(id), 260);
+    }
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+    function lineMeaningIndex(id) {
+      const match = /^line([1-4])-meaning$/.exec(id || '');
+      return match ? Number(match[1]) - 1 : -1;
+    }
+    function updateAudioNote(id) {
+      const note = document.getElementById('audioNote');
+      if (!id) { note.textContent = '此頁不自動朗讀；可點按鈕或文字互動。'; return; }
+      const lineIndex = lineMeaningIndex(id);
+      const hasLineAudio = lineIndex >= 0 && audioFiles[poemAudioIds[lineIndex]] && audioFiles[plainAudioIds[lineIndex]];
+      note.textContent = (audioFiles[id] || hasLineAudio)
+        ? '此頁播放本機正式配音（Sadaltager / Sulafat）。'
+        : '此頁正式音檔尚未完成，暫用瀏覽器朗讀。';
+    }
+    async function playSegment(id) {
+      const text = audioText[id] || '';
+      if (audioFiles[id]) return playAudioOrSpeak(id, text);
+      const lineIndex = lineMeaningIndex(id);
+      if (lineIndex >= 0) {
+        await playAudioOrSpeak(poemAudioIds[lineIndex], poemLines[lineIndex]);
+        await delay(520);
+        return playAudioOrSpeak(plainAudioIds[lineIndex], plainLines[lineIndex]);
+      }
+      if (!text) return Promise.resolve();
+      return playAudioOrSpeak(id, text);
+    }
+    function stopAudio() {
+      speechSynthesis.cancel();
+      if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; }
+    }
+    function playAudioOrSpeak(id, text) {
+      const src = audioFiles[id];
+      if (!src) return speakScript(text);
+      stopAudio();
+      return new Promise(resolve => {
+        const audio = new Audio();
+        let finished = false;
+        const finish = () => { if (finished) return; finished = true; if (currentAudio === audio) currentAudio = null; resolve(); };
+        audio.onended = () => { if (!finished) finish(); };
+        audio.onerror = () => {
+          finished = true;
+          speakScript(text).then(() => { finished = false; finish(); });
+        };
+        audio.src = src;
+        currentAudio = audio;
+        audio.play().catch(() => {});
+      });
+    }
+    function speakScript(text) {
+      stopAudio();
+      const parts = text.split('[pause]');
+      return parts.reduce((chain, part) => chain.then(() => speak(part.trim())).then(() => delay(360)), Promise.resolve());
+    }
+    function speak(text) {
+      if (!text) return Promise.resolve();
+      return new Promise(resolve => {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'zh-TW'; utter.rate = .9;
+        const voices = speechSynthesis.getVoices();
+        utter.voice = voices.find(v => /Yating|雅婷|Hanhan|Taiwan|Chinese|中文/.test(v.name)) || null;
+        utter.onend = resolve; utter.onerror = resolve;
+        speechSynthesis.speak(utter);
+      });
+    }
+    function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+    async function playHomePoem() {
+      stopAudio();
+      const lines = [...document.querySelectorAll('.home-line')];
+      for (let i = 0; i < poemLines.length; i += 1) {
+        lines.forEach(line => line.classList.remove('active-line'));
+        lines[i]?.classList.add('active-line');
+        await playAudioOrSpeak(poemAudioIds[i], poemLines[i]);
+        await delay(450);
+      }
+      lines.forEach(line => line.classList.remove('active-line'));
+    }
+    async function playCompare() {
+      for (let i = 0; i < poemLines.length; i += 1) { await playComparePair(i); await delay(350); }
+    }
+    async function playComparePair(index) {
+      stopAudio();
+      const rows = document.querySelectorAll(`.compare-row[data-pair="${index}"]`);
+      rows.forEach(row => row.classList.add('active-line'));
+      await playAudioOrSpeak(poemAudioIds[index], poemLines[index]);
+      await delay(700);
+      await playAudioOrSpeak(plainAudioIds[index], plainLines[index]);
+      await delay(250);
+      rows.forEach(row => row.classList.remove('active-line'));
+    }
+    async function playOriginalOnly() {
+      stopAudio();
+      for (let i = 0; i < poemLines.length; i += 1) {
+        document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+        document.querySelector(`.poem-row[data-pair="${i}"]`)?.classList.add('active-line');
+        await playAudioOrSpeak(poemAudioIds[i], poemLines[i]);
+        await delay(450);
+      }
+      document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+    }
+    async function playPlainOnly() {
+      stopAudio();
+      for (let i = 0; i < plainLines.length; i += 1) {
+        document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+        document.querySelector(`.plain-row[data-pair="${i}"]`)?.classList.add('active-line');
+        await playAudioOrSpeak(plainAudioIds[i], plainLines[i]);
+        await delay(450);
+      }
+      document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+    }
+    function showWord(source, word, meaning) {
+      const title = document.getElementById('wordTitle');
+      title.textContent = word;
+      title.style.color = getComputedStyle(source).color;
+      document.getElementById('wordText').textContent = meaning;
+      const dialog = document.getElementById('wordDialog');
+      dialog.showModal();
+      const id = wordAudioIds[word];
+      if (id && audioFiles[id]) {
+        playAudioFileOnly(id);
+      } else {
+        speak(word + '。[pause]' + meaning);
+      }
+    }
+    function playAudioFileOnly(id) {
+      const src = audioFiles[id];
+      if (!src) return Promise.resolve();
+      stopAudio();
+      return new Promise(resolve => {
+        const audio = new Audio(src);
+        currentAudio = audio;
+        audio.onended = () => { if (currentAudio === audio) currentAudio = null; resolve(); };
+        audio.onerror = () => { if (currentAudio === audio) currentAudio = null; resolve(); };
+        audio.play().catch(() => { if (currentAudio === audio) currentAudio = null; resolve(); });
+      });
+    }
+    function closeWord() { document.getElementById('wordDialog').close(); stopAudio(); }
+    (function() {
+      const dialog = document.getElementById('wordDialog');
+      dialog.addEventListener('click', function(e) { if (e.target === dialog) closeWord(); });
+    })();
+    function hideHomeTray() {
+      document.getElementById('homeActionTray')?.classList.add('hidden');
+      document.getElementById('homeTrayRestore')?.classList.add('visible');
+    }
+    function showHomeTray() {
+      document.getElementById('homeActionTray')?.classList.remove('hidden');
+      document.getElementById('homeTrayRestore')?.classList.remove('visible');
+    }
+    function toggleCleanView() {
+      document.body.classList.toggle('clean-view');
+      document.querySelector('.view-toggle').textContent = document.body.classList.contains('clean-view') ? '恢復文字' : '只看底圖';
+    }
+    function setFont(value) {
+      document.body.classList.remove('font-iansui', 'font-kai');
+      if (value === 'iansui') document.body.classList.add('font-iansui');
+      if (value === 'kai') document.body.classList.add('font-kai');
+    }
+    document.getElementById('fontSelect').addEventListener('change', event => setFont(event.target.value));
+    setupDraggableControls();
+    async function toggleFullscreen() {
+      try {
+        if (document.fullscreenElement) { await document.exitFullscreen(); }
+        else { await document.documentElement.requestFullscreen(); }
+      } catch (error) { console.warn('Fullscreen failed', error); }
+    }
+    window.addEventListener('keydown', event => {
+      if (event.key === 'ArrowRight') nextSlide();
+      if (event.key === 'ArrowLeft') prevSlide();
+    });
+
+    let cloudIndex = 0;
+    let cloudLocked = false;
+    function initCloudGame() {
+      if (document.getElementById('cloudBuild').children.length) return;
+      cloudIndex = 0; cloudLocked = false;
+      let slotIndex = 0;
+      document.getElementById('cloudBuild').innerHTML = fillLines.map((line, lineIndex) => {
+        const slots = line.words.map(() => `<span class="fill-slot" data-cloud-slot="${slotIndex++}"></span>`).join('');
+        return `<div class="fill-line" data-line-index="${lineIndex}">${slots}</div>`;
+      }).join('');
+      renderProgress('cloudProgress', 0, fillWords.length);
+      spawnClouds();
+    }
+    function spawnClouds() {
+      const arena = document.getElementById('cloudArena');
+      if (!arena) return;
+      arena.innerHTML = '<div class="arena-title">天空區　點雲找字</div>';
+      if (cloudIndex >= fillWords.length) {
+        document.getElementById('cloudTarget').textContent = '整首詩完成';
+        document.getElementById('cloudFeedback').textContent = '○ 全部完成！';
+        readAllFillLines('cloudBuild');
+        launchConfetti();
+        return;
+      }
+      const target = fillWords[cloudIndex];
+      document.getElementById('cloudTarget').textContent = `下一個要點：${target}`;
+      const pool = shuffle([target, ...fillWords.filter(word => word !== target)].slice(0, 6));
+      const revealCount = Math.floor(pool.length / 2);
+      const revealIndices = shuffle([...Array(pool.length).keys()]).slice(0, revealCount);
+      const rows = [8, 18, 28, 38, 48, 58];
+      const rowPool = shuffle([...rows]);
+      pool.forEach((word, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'cloud-card' + (revealIndices.includes(i) ? ' revealed' : '');
+        btn.dataset.word = word;
+        btn.innerHTML = cloudSvg() + `<span class="cloud-label">${word}</span>`;
+        btn.style.left = '0';
+        btn.style.top = `${rowPool[i % rows.length]}%`;
+        const speed = 10 + Math.random() * 8;
+        btn.style.setProperty('--speed', `${speed}s`);
+        btn.style.animationDelay = `${-Math.random() * speed}s`;
+        btn.onclick = () => tryCloudWord(word, btn);
+        arena.appendChild(btn);
+      });
+    }
+    function tryCloudWord(word, cloud) {
+      if (cloudLocked || cloud.classList.contains('taken')) return;
+      const wasRevealed = cloud.classList.contains('revealed');
+      const target = fillWords[cloudIndex];
+      const feedback = document.getElementById('cloudFeedback');
+      if (!wasRevealed) {
+        cloudLocked = true;
+        cloud.classList.add('revealed');
+        cloud.style.animationPlayState = 'paused';
+        const pop = document.createElement('span');
+        pop.className = 'cloud-pop';
+        pop.innerHTML = cloudPopSvg();
+        cloud.appendChild(pop);
+        window.setTimeout(() => pop.remove(), 750);
+        window.setTimeout(() => {
+          cloudLocked = false;
+          finishCloudTry(word, cloud, wasRevealed);
+        }, 720);
+      } else {
+        finishCloudTry(word, cloud, wasRevealed);
+      }
+    }
+    function finishCloudTry(word, cloud, wasRevealed) {
+      const target = fillWords[cloudIndex];
+      const feedback = document.getElementById('cloudFeedback');
+      if (word === target) {
+        feedback.textContent = `○ 找到「${word}」了！`;
+        showCorrectMark();
+        window.setTimeout(() => {
+          cloud.classList.add('taken');
+          const slot = document.querySelector(`#cloudBuild .fill-slot[data-cloud-slot="${cloudIndex}"]`);
+          if (slot) { slot.textContent = word; slot.classList.add('filled'); }
+          cloudIndex += 1;
+          renderProgress('cloudProgress', cloudIndex, fillWords.length);
+          const completedLine = fillLineEnds.find(line => line.end === cloudIndex);
+          if (completedLine) {
+            window.setTimeout(async () => { await readCompletedFillLine(completedLine, 'cloudBuild'); spawnClouds(); }, 260);
+          } else { spawnClouds(); }
+        }, wasRevealed ? 100 : 360);
+      } else {
+        feedback.textContent = `這是「${word}」，再找「${target}」。`;
+        if (!wasRevealed) {
+          cloud.classList.remove('revealed');
+          cloud.style.animationPlayState = 'running';
+        }
+      }
+    }
+
+    let inkIndex = 0;
+    let inkLocked = false;
+    function initInkGame() {
+      if (document.getElementById('inkBuild').children.length) return;
+      inkIndex = 0; inkLocked = false;
+      let slotIndex = 0;
+      document.getElementById('inkBuild').innerHTML = fillLines.map((line, lineIndex) => {
+        const slots = line.words.map(() => `<span class="fill-slot" data-ink-slot="${slotIndex++}"></span>`).join('');
+        return `<div class="fill-line" data-line-index="${lineIndex}">${slots}</div>`;
+      }).join('');
+      renderProgress('inkProgress', 0, fillWords.length);
+      spawnInks();
+    }
+    function spawnInks() {
+      const arena = document.getElementById('inkArena');
+      if (!arena) return;
+      arena.innerHTML = '<div class="arena-title">墨池區　點墨顯字</div>';
+      if (inkIndex >= fillWords.length) {
+        document.getElementById('inkTarget').textContent = '整首詩完成';
+        document.getElementById('inkFeedback').textContent = '○ 全部完成！';
+        readAllFillLines('inkBuild');
+        launchConfetti();
+        return;
+      }
+      const target = fillWords[inkIndex];
+      document.getElementById('inkTarget').textContent = `下一個要點：${target}`;
+      const pool = shuffle([target, ...fillWords.filter(word => word !== target)].slice(0, 6));
+      const cols = 3; const rows = 2;
+      const cells = [];
+      for (let r = 0; r < rows; r += 1) for (let c = 0; c < cols; c += 1) cells.push({ r, c });
+      const placed = shuffle(cells).slice(0, pool.length);
+      pool.forEach((word, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'ink-drop';
+        btn.dataset.word = word;
+        btn.innerHTML = inkSvg() + `<span class="ink-label">${word}</span>`;
+        const cell = placed[i];
+        const leftPct = 4 + cell.c * 31 + (Math.random() * 5 - 2.5);
+        const topPct = 20 + cell.r * 38 + (Math.random() * 5 - 2.5);
+        btn.style.left = `${leftPct}%`; btn.style.top = `${topPct}%`;
+        btn.style.setProperty('--speed', `${5 + Math.random() * 3}s`);
+        btn.style.animationDelay = `${i * -0.6}s`;
+        btn.onclick = () => tryInkWord(word, btn);
+        arena.appendChild(btn);
+      });
+    }
+    function tryInkWord(word, ink) {
+      if (inkLocked || ink.classList.contains('revealed') || ink.classList.contains('taken')) return;
+      const target = fillWords[inkIndex];
+      const feedback = document.getElementById('inkFeedback');
+      inkLocked = true;
+      ink.classList.add('revealed');
+      const pop = document.createElement('span');
+      pop.className = 'ink-pop';
+      pop.innerHTML = inkSpreadSvg();
+      ink.appendChild(pop);
+      window.setTimeout(() => pop.remove(), 850);
+      window.setTimeout(() => {
+        inkLocked = false;
+        if (word === target) {
+          feedback.textContent = `○ 找到「${word}」了！`;
+          showCorrectMark();
+          window.setTimeout(() => {
+            ink.classList.add('taken');
+            const slot = document.querySelector(`#inkBuild .fill-slot[data-ink-slot="${inkIndex}"]`);
+            if (slot) { slot.textContent = word; slot.classList.add('filled'); }
+            inkIndex += 1;
+            renderProgress('inkProgress', inkIndex, fillWords.length);
+            const completedLine = fillLineEnds.find(line => line.end === inkIndex);
+            if (completedLine) {
+              window.setTimeout(async () => { await readCompletedFillLine(completedLine, 'inkBuild'); spawnInks(); }, 260);
+            } else { spawnInks(); }
+          }, 360);
+        } else {
+          feedback.textContent = `這是「${word}」，再找「${target}」。`;
+          ink.classList.remove('revealed');
+        }
+      }, 820);
+    }
+
+    let flowerIndex = 0;
+    let flowerWrongLock = false;
+    function initFlowerGame() {
+      if (document.getElementById('flowerBuild').children.length) return;
+      flowerIndex = 0; flowerWrongLock = false;
+      let slotIndex = 0;
+      document.getElementById('flowerBuild').innerHTML = fillLines.map((line, lineIndex) => {
+        const slots = line.words.map(() => `<span class="fill-slot" data-flower-slot="${slotIndex++}"></span>`).join('');
+        return `<div class="fill-line" data-line-index="${lineIndex}">${slots}</div>`;
+      }).join('');
+      renderProgress('flowerProgress', 0, fillWords.length);
+      spawnFlowers();
+    }
+    function spawnFlowers() {
+      const arena = document.getElementById('flowerArena');
+      if (!arena) return;
+      arena.innerHTML = '<div class="arena-title">花園區　點花收字</div>';
+      if (flowerIndex >= fillWords.length) {
+        document.getElementById('flowerTarget').textContent = '整首詩完成';
+        document.getElementById('flowerFeedback').textContent = '○ 全部完成！';
+        readAllFillLines('flowerBuild');
+        launchConfetti();
+        return;
+      }
+      const target = fillWords[flowerIndex];
+      document.getElementById('flowerTarget').textContent = `下一個要點：${target}`;
+      const pool = shuffle([target, ...fillWords.filter(word => word !== target)].slice(0, 6));
+      const lanes = [5, 18, 31, 44, 57, 70];
+      const lanePool = shuffle([...lanes]);
+      pool.forEach((word, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'flower-card';
+        btn.innerHTML = flowerSvg() + `<span class="flower-label">${word}</span>`;
+        btn.style.left = `${lanePool[i % lanes.length]}%`;
+        btn.style.top = '0';
+        const arenaH = arena.clientHeight || 500;
+        btn.style.setProperty('--fall', `${arenaH}px`);
+        btn.style.setProperty('--p25', `${20 + Math.random() * 15}%`);
+        btn.style.setProperty('--p50', `${45 + Math.random() * 10}%`);
+        btn.style.setProperty('--p75', `${68 + Math.random() * 12}%`);
+        btn.style.setProperty('--s1', `${(Math.random() - .5) * 50}px`);
+        btn.style.setProperty('--s2', `${(Math.random() - .5) * 40}px`);
+        btn.style.setProperty('--s3', `${(Math.random() - .5) * 45}px`);
+        btn.style.setProperty('--s4', `${(Math.random() - .5) * 30}px`);
+        const speed = 3 + Math.random() * 10;
+        btn.style.setProperty('--speed', `${speed}s`);
+        btn.style.animationDelay = `${-Math.random() * speed * 0.3}s`;
+        btn.onclick = () => tryFlowerWord(word, btn);
+        arena.appendChild(btn);
+      });
+    }
+    function tryFlowerWord(word, flower) {
+      const target = fillWords[flowerIndex];
+      const feedback = document.getElementById('flowerFeedback');
+      if (word !== target) {
+        if (flowerWrongLock) return;
+        flowerWrongLock = true;
+        feedback.textContent = '再想想，換一朵花試試。';
+        speak('再想想，換一朵花試試。').then(() => { flowerWrongLock = false; });
+        return;
+      }
+      flowerWrongLock = false;
+      flower.classList.add('caught');
+      showCorrectMark();
+      window.setTimeout(() => {
+        const slot = document.querySelector(`#flowerBuild .fill-slot[data-flower-slot="${flowerIndex}"]`);
+        if (slot) { slot.textContent = word; slot.classList.add('filled'); }
+        flowerIndex += 1;
+        renderProgress('flowerProgress', flowerIndex, fillWords.length);
+        const completedLine = fillLineEnds.find(line => line.end === flowerIndex);
+        if (completedLine) {
+          window.setTimeout(async () => { await readCompletedFillLine(completedLine, 'flowerBuild'); spawnFlowers(); }, 260);
+        } else { spawnFlowers(); }
+      }, 430);
+    }
+
+    function renderProgress(id, current, total) {
+      const bar = document.getElementById(id);
+      if (!bar) return;
+      bar.innerHTML = '';
+      for (let i = 0; i <= total; i += 1) {
+        const dot = document.createElement('span');
+        dot.className = 'progress-dot' + (i <= current ? ' reached' : '');
+        bar.appendChild(dot);
+      }
+    }
+    async function readCompletedFillLine(completedLine, buildId) {
+      const lineIndex = fillLineEnds.indexOf(completedLine);
+      const row = document.querySelector(`#${buildId} .fill-line[data-line-index="${lineIndex}"]`);
+      document.querySelectorAll(`#${buildId} .fill-line`).forEach(line => line.classList.remove('active-line'));
+      row?.classList.add('active-line');
+      await playAudioOrSpeak(poemAudioIds[lineIndex], completedLine.text);
+      row?.classList.remove('active-line');
+    }
+    async function readAllFillLines(buildId) {
+      document.querySelectorAll(`#${buildId} .fill-line`).forEach(line => line.classList.remove('active-line'));
+      await delay(300);
+      for (let i = 0; i < fillLines.length; i += 1) {
+        const row = document.querySelector(`#${buildId} .fill-line[data-line-index="${i}"]`);
+        row?.classList.add('active-line');
+        await playAudioOrSpeak(poemAudioIds[i], fillLines[i].text);
+        await delay(350);
+        row?.classList.remove('active-line');
+      }
+    }
+    function cloudSvg() {
+      const gid = 'cg' + Math.random().toString(36).slice(2,7);
+      return `<svg viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="${gid}" cx="40%" cy="28%" r="70%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+            <stop offset="50%" stop-color="#f5f8ff" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#dbe4f5" stop-opacity=".9"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="80" cy="110" rx="64" ry="9" fill="rgba(140,180,220,.2)"/>
+        <path d="M14,72 Q6,28 55,19 Q70,4 100,14 Q130,8 135,42 Q152,48 138,72 Z" fill="url(#${gid})" stroke="rgba(180,200,230,.5)" stroke-width="1.4"/>
+        <circle cx="52" cy="38" r="3.2" fill="#fff" opacity=".85"/>
+        <circle cx="90" cy="30" r="2.5" fill="#fff" opacity=".7"/>
+        <circle cx="118" cy="48" r="2.8" fill="#fff" opacity=".75"/>
+        <circle cx="38" cy="58" r="2" fill="#fff" opacity=".6"/>
+      </svg>`;
+    }
+    function cloudPopSvg() {
+      return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="30" fill="#fff" opacity=".7" stroke="#a0c0e8" stroke-width="2"/>
+        <circle cx="30" cy="34" r="6" fill="#fff" opacity=".5"/>
+        <circle cx="52" cy="38" r="5" fill="#fff" opacity=".4"/>
+        <circle cx="40" cy="48" r="4" fill="#fff" opacity=".35"/>
+      </svg>`;
+    }
+    function inkSvg() {
+      const gid = 'ig' + Math.random().toString(36).slice(2,7);
+      return `<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="${gid}" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#2a2a2a" stop-opacity=".95"/>
+            <stop offset="40%" stop-color="#1a1a1a" stop-opacity=".85"/>
+            <stop offset="100%" stop-color="#0a0a0a" stop-opacity=".55"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="70" cy="126" rx="52" ry="8" fill="rgba(0,0,0,.12)"/>
+        <path d="M36,70 Q24,36 58,28 Q70,6 94,22 Q126,18 116,56 Q132,78 104,100 Q82,124 58,108 Q24,102 36,70 Z" fill="url(#${gid})"/>
+        <path d="M48,56 Q52,46 62,50" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.2"/>
+        <path d="M78,38 Q84,32 92,42" fill="none" stroke="rgba(255,255,255,.1)" stroke-width=".9"/>
+      </svg>`;
+    }
+    function inkSpreadSvg() {
+      return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="28" fill="#1a1a1a" opacity=".7"/>
+        <circle cx="40" cy="40" r="22" fill="none" stroke="#333" stroke-width="2" opacity=".6"/>
+      </svg>`;
+    }
+    function flowerSvg() {
+      const gid = 'flg' + Math.random().toString(36).slice(2,7);
+      return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="${gid}" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#ffcad4"/>
+            <stop offset="50%" stop-color="#ff8fa3"/>
+            <stop offset="100%" stop-color="#e05780"/>
+          </radialGradient>
+        </defs>
+        <g transform="translate(60,60)">
+          <circle cx="0" cy="0" r="12" fill="#ffd93d"/>
+          <ellipse cx="0" cy="-26" rx="12" ry="22" fill="url(#${gid})" transform="rotate(0)"/>
+          <ellipse cx="0" cy="-26" rx="12" ry="22" fill="url(#${gid})" transform="rotate(72)"/>
+          <ellipse cx="0" cy="-26" rx="12" ry="22" fill="url(#${gid})" transform="rotate(144)"/>
+          <ellipse cx="0" cy="-26" rx="12" ry="22" fill="url(#${gid})" transform="rotate(216)"/>
+          <ellipse cx="0" cy="-26" rx="12" ry="22" fill="url(#${gid})" transform="rotate(288)"/>
+        </g>
+      </svg>`;
+    }
+    function shuffle(items) { return [...items].sort(() => Math.random() - .5); }
+    function showCorrectMark() {
+      document.querySelectorAll('.correct-mark').forEach(mark => mark.remove());
+      const mark = document.createElement('div');
+      mark.className = 'correct-mark';
+      mark.textContent = '○';
+      document.body.appendChild(mark);
+      window.setTimeout(() => mark.remove(), 750);
+    }
+    function launchConfetti() {
+      const box = document.createElement('div');
+      box.className = 'confetti';
+      const colors = ['#d85045', '#248067', '#2f6fbd', '#a36600', '#6b58b8', '#c04382', '#e86a82'];
+      for (let i = 0; i < 80; i += 1) {
+        const piece = document.createElement('i');
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = `${Math.random() * 1.5}s`;
+        piece.style.animationDuration = `${2.5 + Math.random() * 2}s`;
+        box.appendChild(piece);
+      }
+      document.body.appendChild(box);
+      window.setTimeout(() => box.remove(), 5500);
+    }
+    function setupDraggableControls() {
+      document.querySelectorAll('[data-draggable-control]').forEach(control => {
+        let dragging = false; let offsetX = 0; let offsetY = 0;
+        control.addEventListener('pointerdown', event => {
+          if (event.target.closest('button, select, option')) return;
+          dragging = true;
+          const rect = control.getBoundingClientRect();
+          offsetX = event.clientX - rect.left; offsetY = event.clientY - rect.top;
+          control.setPointerCapture(event.pointerId);
+        });
+        control.addEventListener('pointermove', event => {
+          if (!dragging) return;
+          const maxX = window.innerWidth - control.offsetWidth - 8;
+          const maxY = window.innerHeight - control.offsetHeight - 8;
+          const x = Math.max(8, Math.min(maxX, event.clientX - offsetX));
+          const y = Math.max(8, Math.min(maxY, event.clientY - offsetY));
+          control.style.left = `${x}px`; control.style.top = `${y}px`; control.style.right = 'auto';
+        });
+        control.addEventListener('pointerup', event => {
+          dragging = false;
+          try { control.releasePointerCapture(event.pointerId); } catch (error) {}
+        });
+      });
+    }
+    speechSynthesis.onvoiceschanged = () => {};
+    showSlide(0);
+  </script>
+</body>
+</html>
