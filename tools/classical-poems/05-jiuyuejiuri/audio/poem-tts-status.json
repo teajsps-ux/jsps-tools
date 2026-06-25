@@ -1,0 +1,20 @@
+[
+  {
+    "id": "poem-sadaltager",
+    "voice": "Sadaltager",
+    "file": "poem-sadaltager.wav",
+    "status": "done",
+    "error": "",
+    "model": "gemini-3.1-flash-tts-preview",
+    "bytes": 1063724
+  },
+  {
+    "id": "poem-sulafat",
+    "voice": "Sulafat",
+    "file": "poem-sulafat.wav",
+    "status": "done",
+    "error": "",
+    "model": "gemini-3.1-flash-tts-preview",
+    "bytes": 1167404
+  }
+]

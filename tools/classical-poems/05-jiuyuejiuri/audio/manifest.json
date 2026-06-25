@@ -1,0 +1,74 @@
+﻿[
+    {
+        "id":  "001-guide",
+        "voice":  "Sadaltager",
+        "text":  "今天我們要讀唐詩九月九日憶山東兄弟。請先聽詩題，再想一想，詩人為什麼會特別想念家人。",
+        "file":  "audio/001-guide-sadaltager.wav",
+        "status":  "failed",
+        "model":  "",
+        "error":  "The remote server returned an error: (500) Internal Server Error."
+    },
+    {
+        "id":  "002-full",
+        "voice":  "Sulafat",
+        "text":  "九月九日憶山東兄弟。唐，王維。獨在異鄉為異客，每逢佳節倍思親。遙知兄弟登高處，遍插茱萸少一人。",
+        "file":  "audio/002-full-sulafat.wav",
+        "status":  "failed",
+        "model":  "",
+        "error":  "The remote server returned an error: (429) Too Many Requests."
+    },
+    {
+        "id":  "003-line1",
+        "voice":  "Sulafat",
+        "text":  "獨在異鄉為異客",
+        "file":  "audio/003-line1-sulafat.wav",
+        "status":  "failed",
+        "model":  "",
+        "error":  "The remote server returned an error: (429) Too Many Requests."
+    },
+    {
+        "id":  "004-line2",
+        "voice":  "Sulafat",
+        "text":  "每逢佳節倍思親",
+        "file":  "audio/004-line2-sulafat.wav",
+        "status":  "failed",
+        "model":  "",
+        "error":  "Cannot index into a null array."
+    },
+    {
+        "id":  "005-line3",
+        "voice":  "Sulafat",
+        "text":  "遙知兄弟登高處",
+        "file":  "audio/005-line3-sulafat.wav",
+        "status":  "failed",
+        "model":  "",
+        "error":  "Unable to find type [short]."
+    },
+    {
+        "id":  "006-line4",
+        "voice":  "Sulafat",
+        "text":  "遍插茱萸少一人",
+        "file":  "audio/006-line4-sulafat.wav",
+        "status":  "failed",
+        "model":  "",
+        "error":  "Unable to find type [short]."
+    },
+    {
+        "id":  "007-meaning1",
+        "voice":  "Sadaltager",
+        "text":  "這一句是在說，詩人一個人在外地，覺得自己像離開家鄉的客人。",
+        "file":  "audio/007-meaning1-sadaltager.wav",
+        "status":  "failed",
+        "model":  "",
+        "error":  "The remote server returned an error: (429) Too Many Requests."
+    },
+    {
+        "id":  "008-meaning2",
+        "voice":  "Sadaltager",
+        "text":  "這一句是在說，每次遇到重要的節日，就比平常更想念親人。",
+        "file":  "audio/008-meaning2-sadaltager.wav",
+        "status":  "failed",
+        "model":  "",
+        "error":  "Unable to find type [short]."
+    }
+]

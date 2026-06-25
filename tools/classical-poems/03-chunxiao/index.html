@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>江雪 - 古詩互動 HTML 簡報</title>
+  <title>春曉 - 古詩互動 HTML 簡報</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bpmf+Iansui&family=Bpmf+Zihi+Kai+Std&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
       --time: #a36600;
       --place: #6b58b8;
       --feeling: #c04382;
-      --snow: #5b7fa8;
+      --spring: #e86a82;
       --shadow: 0 20px 70px rgba(29, 24, 17, .2);
     }
     * { box-sizing: border-box; }
@@ -413,54 +413,6 @@
       white-space: normal;
       overflow-wrap: anywhere;
     }
-    .guess-layout {
-      display: grid;
-      grid-template-columns: minmax(280px, 520px) minmax(360px, 1fr);
-      gap: 18px;
-      align-items: stretch;
-    }
-    .guess-image-col {
-      display: grid;
-      gap: 10px;
-      align-content: start;
-    }
-    .guess-image {
-      width: 100%;
-      min-height: 420px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      background: white;
-    }
-    .guess-image.selected {
-      outline: 5px solid rgba(49, 95, 83, .5);
-    }
-    .guess-panel {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--paper);
-      box-shadow: 0 10px 26px rgba(29, 24, 17, .08);
-      padding: 16px;
-      display: grid;
-      gap: 12px;
-    }
-    .guess-options {
-      display: grid;
-      gap: 12px;
-      align-content: center;
-    }
-    .guess-choice {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--paper);
-      box-shadow: 0 10px 26px rgba(29, 24, 17, .08);
-      padding: 14px 18px;
-      font-size: clamp(20px, 2.2vw, 29px);
-      line-height: 1.38;
-      font-weight: 850;
-      text-align: left;
-    }
     .fill-layout {
       display: grid;
       grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
@@ -527,6 +479,7 @@
       border: 2px solid rgba(91, 127, 168, .22);
       background: rgba(235, 244, 255, .42);
       overflow: hidden;
+      container-type: inline-size;
     }
     .arena-title {
       position: absolute;
@@ -556,10 +509,8 @@
       background: rgba(91, 127, 168, .28);
     }
     .progress-dot.reached { background: #315f53; }
-    .snow-pile {
+    .snow-pile, .cloud-card, .ink-drop {
       position: absolute;
-      width: 160px;
-      height: 130px;
       border: 0;
       background: transparent;
       box-shadow: none;
@@ -567,15 +518,15 @@
       cursor: pointer;
       transition: transform .18s;
     }
-    .snow-pile:hover { transform: scale(1.04); }
-    .snow-pile svg { width: 100%; height: 100%; display: block; pointer-events: none; }
-    .snow-pile .pile-body {
+    .snow-pile:hover, .cloud-card:hover, .ink-drop:hover { transform: scale(1.04); }
+    .snow-pile svg, .cloud-card svg, .ink-drop svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+    .snow-pile .pile-body, .cloud-card .cloud-body, .ink-drop .ink-body {
       position: absolute;
       inset: 0;
       transition: transform .55s cubic-bezier(.34,1.2,.64,1), opacity .45s ease;
       transform-origin: 50% 100%;
     }
-    .snow-pile .pile-label {
+    .snow-pile .pile-label, .cloud-card .cloud-label, .ink-drop .ink-label {
       position: absolute;
       top: 58%;
       left: 50%;
@@ -589,55 +540,47 @@
       transition: opacity .4s ease .18s, transform .5s cubic-bezier(.34,1.4,.64,1) .18s;
       z-index: 1;
     }
-    .snow-pile.swept .pile-body {
+    .snow-pile.swept .pile-body, .cloud-card.revealed .cloud-body, .ink-drop.revealed .ink-body {
       transform: scaleY(.12) translateY(8px);
       opacity: .22;
     }
-    .snow-pile.swept .pile-label {
+    .snow-pile.swept .pile-label, .cloud-card.revealed .cloud-label, .ink-drop.revealed .ink-label {
       opacity: 1;
       transform: translate(-50%, -50%) scale(1);
     }
-    .snow-pile.swept { cursor: default; }
-    .snow-pile.taken .pile-body { opacity: 0; }
-    .snow-pile.taken .pile-label { opacity: 0; }
-    .snow-pile.taken { pointer-events: none; }
-    .broom {
+    .snow-pile.swept, .cloud-card.revealed, .ink-drop.revealed { cursor: default; }
+    .snow-pile.taken .pile-body, .cloud-card.taken .cloud-body, .ink-drop.taken .ink-body { opacity: 0; }
+    .snow-pile.taken .pile-label, .cloud-card.taken .cloud-label, .ink-drop.taken .ink-label { opacity: 0; }
+    .snow-pile.taken, .cloud-card.taken, .ink-drop.taken { pointer-events: none; }
+    .snow-pile { width: 160px; height: 130px; }
+    .cloud-card {
+      width: 160px;
+      height: 120px;
+      animation: cloudFlow var(--speed, 9s) linear infinite;
+    }
+    @keyframes cloudFlow {
+      0%   { transform: translateX(-180px); }
+      100% { transform: translateX(calc(100cqw + 60px)); }
+    }
+    .ink-drop {
+      width: 140px;
+      height: 140px;
+      animation: inkWobble var(--speed, 5s) ease-in-out infinite alternate;
+    }
+    @keyframes inkWobble {
+      from { translate: -6px -2px; }
+      to { translate: 8px 4px; }
+    }
+    .fish-card, .flower-card {
       position: absolute;
-      top: -8px;
-      left: 50%;
-      width: 78px;
-      height: 78px;
-      transform: translate(-50%, 0) rotate(-28deg);
-      pointer-events: none;
-      z-index: 3;
-      animation: sweep .7s cubic-bezier(.36,.07,.45,.99) forwards;
-    }
-    .broom svg { width: 100%; height: 100%; display: block; }
-    @keyframes sweep {
-      0%   { transform: translate(-160%, 0) rotate(-42deg); opacity: 0; }
-      18%  { opacity: 1; }
-      55%  { transform: translate(-30%, 10px) rotate(-20deg); }
-      82%  { transform: translate(70%, 14px) rotate(-8deg); opacity: 1; }
-      100% { transform: translate(160%, 18px) rotate(2deg); opacity: 0; }
-    }
-    .snow-pile.caught { animation: melt .45s ease-out .15s forwards; }
-    @keyframes melt {
-      0% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(.2) translateY(18px); opacity: 0; }
-    }
-    .fish-card {
-      position: absolute;
-      width: 175px;
-      height: 100px;
       border: 0;
       background: transparent;
       box-shadow: none;
       padding: 0;
       cursor: pointer;
-      animation: swim var(--speed, 8s) ease-in-out infinite alternate;
     }
-    .fish-card svg { width: 100%; height: 100%; display: block; pointer-events: none; }
-    .fish-card .fish-label {
+    .fish-card svg, .flower-card svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+    .fish-card .fish-label, .flower-card .flower-label {
       position: absolute;
       top: 50%;
       left: 42%;
@@ -649,14 +592,64 @@
       pointer-events: none;
       white-space: nowrap;
     }
+    .fish-card { width: 175px; height: 100px; animation: swim var(--speed, 8s) ease-in-out infinite alternate; }
+    @keyframes swim {
+      from { translate: -30px -6px; }
+      to { translate: 30px 10px; }
+    }
     .fish-card.caught { animation: hook .5s ease-out forwards; }
     @keyframes hook {
       0% { transform: scale(1) translateY(0); opacity: 1; }
       100% { transform: scale(.3) translateY(-80px) rotate(12deg); opacity: 0; }
     }
-    @keyframes swim {
-      from { translate: -30px -6px; }
-      to { translate: 30px 10px; }
+    .flower-card {
+      width: 120px;
+      height: 120px;
+      animation: petalDrift var(--speed, 8s) ease-in-out infinite;
+    }
+    @keyframes petalDrift {
+      0%   { transform: translate(0, -60px); opacity: 0; }
+      8%   { opacity: 1; }
+      25%  { transform: translate(var(--s1, 12px), var(--p25, 30%)); }
+      50%  { transform: translate(var(--s2, -8px), var(--p50, 52%)); }
+      75%  { transform: translate(var(--s3, 6px), var(--p75, 75%)); }
+      100% { transform: translate(var(--s4, -4px), calc(var(--fall, 400px) + 40px)); opacity: 0.5; }
+    }
+    .flower-card.caught { animation: petalCatch .55s ease-out forwards; }
+    @keyframes petalCatch {
+      0% { transform: scale(1) translateY(0); opacity: 1; }
+      100% { transform: scale(.25) translateY(-60px); opacity: 0; }
+    }
+    .broom, .cloud-pop, .ink-pop {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      width: 78px;
+      height: 78px;
+      transform: translate(-50%, 0) rotate(-28deg);
+      pointer-events: none;
+      z-index: 3;
+    }
+    .broom { animation: sweep .7s cubic-bezier(.36,.07,.45,.99) forwards; }
+    .cloud-pop { animation: cloudPop .7s ease-out forwards; }
+    .ink-pop { animation: inkSpread .8s ease-out forwards; }
+    .broom svg, .cloud-pop svg, .ink-pop svg { width: 100%; height: 100%; display: block; }
+    @keyframes sweep {
+      0% { transform: translate(-160%, 0) rotate(-42deg); opacity: 0; }
+      18% { opacity: 1; }
+      55% { transform: translate(-30%, 10px) rotate(-20deg); }
+      82% { transform: translate(70%, 14px) rotate(-8deg); opacity: 1; }
+      100% { transform: translate(160%, 18px) rotate(2deg); opacity: 0; }
+    }
+    @keyframes cloudPop {
+      0% { transform: translate(-50%, 0) scale(.4); opacity: 0; }
+      20% { opacity: 1; }
+      60% { transform: translate(-50%, 0) scale(1.2); opacity: .8; }
+      100% { transform: translate(-50%, 0) scale(2); opacity: 0; }
+    }
+    @keyframes inkSpread {
+      0% { transform: translate(-50%, 0) scale(.6); opacity: .9; }
+      100% { transform: translate(-50%, 0) scale(2.5); opacity: 0; }
     }
     .feedback {
       min-height: 56px;
@@ -664,6 +657,14 @@
       color: #315f53;
       font-size: clamp(22px, 2.6vw, 34px);
       font-weight: 900;
+    }
+    .game-timer {
+      font-size: 15px;
+      font-weight: 700;
+      color: #315f53;
+      text-align: center;
+      min-height: 22px;
+      line-height: 22px;
     }
     .correct-mark {
       position: fixed;
@@ -702,14 +703,6 @@
       0% { transform: translateY(-20px) rotate(0); opacity: 1; }
       100% { transform: translateY(110vh) rotate(540deg); opacity: .4; }
     }
-    .game-timer {
-      font-size: 15px;
-      font-weight: 700;
-      color: #315f53;
-      text-align: center;
-      min-height: 22px;
-      line-height: 22px;
-    }
     .audio-note {
       position: fixed;
       z-index: 31;
@@ -741,8 +734,7 @@
       background: #fff7df;
       color: #654400;
     }
-    .audio-note:hover,
-    .audio-note:focus {
+    .audio-note:hover, .audio-note:focus {
       max-width: min(920px, calc(100vw - 32px));
       opacity: 1;
       background: rgba(255, 244, 218, .96);
@@ -795,7 +787,7 @@
       body { overflow: auto; }
       .deck, .slide { min-height: 100vh; height: auto; }
       .slide { position: relative; }
-      .line-stage, .compare, .compare-grid, .guess-layout, .fill-layout { grid-template-columns: 1fr; }
+      .line-stage, .compare, .compare-grid, .fill-layout { grid-template-columns: 1fr; }
       .fill-line { flex-wrap: wrap; }
       .stage { min-height: 100vh; }
       .topbar { position: fixed; }
@@ -823,18 +815,18 @@
 
   <main class="deck">
     <section class="slide active" data-auto="home-guide">
-      <img class="art" src="generated/jiangxue-home_20260622_232108.png?v=2" alt="江雪首頁插圖">
+      <img class="art" src="generated/chunxiao-home_20260624_123217.png" alt="春曉首頁插圖">
       <div class="shade"></div>
       <div class="stage">
         <div class="home-copy">
-          <h1>江雪</h1>
-          <div class="author">唐・柳宗元</div>
-          <div class="prompt">請想一想：天這麼冷，為什麼老爺爺還要一個人在江上釣魚？</div>
+          <h1>春曉</h1>
+          <div class="author">唐・孟浩然</div>
+          <div class="prompt">春天的早晨，詩人醒來後聽到了什麼？</div>
           <div class="poem-vertical" id="homePoem">
-            <span class="home-line" data-line="0"><span class="token" data-kind="place">千山</span><span class="token" data-kind="noun">鳥</span><span class="token" data-kind="verb">飛絕</span></span>
-            <span class="home-line" data-line="1"><span class="token" data-kind="place">萬徑</span><span class="token" data-kind="person">人</span><span class="token" data-kind="verb">蹤滅</span></span>
-            <span class="home-line" data-line="2"><span class="token" data-kind="noun">孤舟</span><span class="token" data-kind="noun">簑笠</span><span class="token" data-kind="person">翁</span></span>
-            <span class="home-line" data-line="3"><span class="token" data-kind="verb">獨</span><span class="token" data-kind="verb">釣</span><span class="token" data-kind="place">寒江</span><span class="token" data-kind="noun">雪</span></span>
+            <span class="home-line" data-line="0"><span class="token" data-kind="time">春</span><span class="token" data-kind="verb">眠</span><span class="token" data-kind="verb">不覺</span><span class="token" data-kind="time">曉</span></span>
+            <span class="home-line" data-line="1"><span class="token" data-kind="place">處處</span><span class="token" data-kind="verb">聞</span><span class="token" data-kind="noun">啼鳥</span></span>
+            <span class="home-line" data-line="2"><span class="token" data-kind="time">夜來</span><span class="token" data-kind="noun">風雨</span><span class="token" data-kind="noun">聲</span></span>
+            <span class="home-line" data-line="3"><span class="token" data-kind="noun">花落</span><span class="token" data-kind="verb">知</span><span class="token" data-kind="noun">多少</span></span>
           </div>
         </div>
       </div>
@@ -848,92 +840,91 @@
     </section>
 
     <section class="slide" data-auto="line1-meaning">
-      <img class="art" src="generated/jiangxue-line1_20260622_233353.png?v=2" alt="千山鳥飛絕插圖">
+      <img class="art" src="generated/chunxiao-line1_20260624_123223.png" alt="春眠不覺曉插圖">
       <div class="shade"></div>
       <div class="stage line-stage">
         <div class="line-poem">
           <div class="line-title">第一句</div>
           <div class="token-line">
-            <button class="token" data-kind="place" onclick="showWord(this,'千山','好多好多座山。')">千山</button>
-            <button class="token" data-kind="noun" onclick="showWord(this,'鳥','小鳥。')">鳥</button>
-            <button class="token" data-kind="verb" onclick="showWord(this,'飛絕','飛得不見蹤影，一隻也看不到。')">飛絕</button>
+            <button class="token" data-kind="time" onclick="showWord(this,'春眠','春天睡覺。')">春眠</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'不覺','沒有感覺到。')">不覺</button>
+            <button class="token" data-kind="time" onclick="showWord(this,'曉','天亮。')">曉</button>
           </div>
-          <div class="legend"><span style="color:var(--place)">地點</span><span style="color:var(--noun)">物件</span><span style="color:var(--verb)">動作</span></div>
+          <div class="legend"><span style="color:var(--time)">時間</span><span style="color:var(--verb)">動作／狀態</span></div>
         </div>
-        <div class="plain">連綿的高山上，連一隻鳥的影子都看不見了。</div>
+        <div class="plain">春天睡覺，不知不覺天就亮了。</div>
       </div>
     </section>
 
     <section class="slide" data-auto="line2-meaning">
-      <img class="art" src="generated/jiangxue-line2_20260622_233513.png?v=2" alt="萬徑人蹤滅插圖">
+      <img class="art" src="generated/chunxiao-line2_20260624_123226.png" alt="處處聞啼鳥插圖">
       <div class="shade"></div>
       <div class="stage line-stage">
         <div class="line-poem">
           <div class="line-title">第二句</div>
           <div class="token-line">
-            <button class="token" data-kind="place" onclick="showWord(this,'萬徑','好多好多條小路。')">萬徑</button>
-            <button class="token" data-kind="person" onclick="showWord(this,'人','人。')">人</button>
-            <button class="token" data-kind="verb" onclick="showWord(this,'蹤滅','腳印都不見了，看不見人走過的痕跡。')">蹤滅</button>
+            <button class="token" data-kind="place" onclick="showWord(this,'處處','每個地方，到處。')">處處</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'聞','聽到。')">聞</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'啼鳥','鳥在叫。')">啼鳥</button>
           </div>
-          <div class="legend"><span style="color:var(--place)">地點</span><span style="color:var(--person)">人物</span><span style="color:var(--verb)">狀態</span></div>
+          <div class="legend"><span style="color:var(--place)">地方</span><span style="color:var(--verb)">動作</span><span style="color:var(--noun)">事物</span></div>
         </div>
-        <div class="plain">所有道路上，也看不見人的蹤跡了。</div>
+        <div class="plain">到處都聽到鳥兒在叫。</div>
       </div>
     </section>
 
     <section class="slide" data-auto="line3-meaning">
-      <img class="art" src="generated/jiangxue-line3_20260622_234220.png?v=2" alt="孤舟簑笠翁插圖">
+      <img class="art" src="generated/chunxiao-line3_20260624_123251.png" alt="夜來風雨聲插圖">
       <div class="shade"></div>
       <div class="stage line-stage">
         <div class="line-poem">
           <div class="line-title">第三句</div>
           <div class="token-line">
-            <button class="token" data-kind="noun" onclick="showWord(this,'孤舟','孤零零的一條小船。')">孤舟</button>
-            <button class="token" data-kind="noun" onclick="showWord(this,'簑笠','簑衣和斗笠，下雨下雪時穿的。')">簑笠</button>
-            <button class="token" data-kind="person" onclick="showWord(this,'翁','老爺爺。')">翁</button>
+            <button class="token" data-kind="time" onclick="showWord(this,'夜來','夜晚來了。')">夜來</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'風雨','風和雨。')">風雨</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'聲','聲音。')">聲</button>
           </div>
-          <div class="legend"><span style="color:var(--noun)">物件</span><span style="color:var(--person)">人物</span></div>
+          <div class="legend"><span style="color:var(--time)">時間</span><span style="color:var(--noun)">事物</span></div>
         </div>
-        <div class="plain">只有一葉孤舟上，坐著一個穿簑衣、戴斗笠的老爺爺。</div>
+        <div class="plain">夜裡傳來風雨的聲音。</div>
       </div>
     </section>
 
     <section class="slide" data-auto="line4-meaning">
-      <img class="art" src="generated/jiangxue-line4_20260622_233610.png?v=2" alt="獨釣寒江雪插圖">
+      <img class="art" src="generated/chunxiao-line4_20260624_123423.png" alt="花落知多少插圖">
       <div class="shade"></div>
       <div class="stage line-stage">
         <div class="line-poem">
           <div class="line-title">第四句</div>
           <div class="token-line">
-            <button class="token" data-kind="verb" onclick="showWord(this,'獨','一個人，孤單地。')">獨</button>
-            <button class="token" data-kind="verb" onclick="showWord(this,'釣','釣魚。')">釣</button>
-            <button class="token" data-kind="place" onclick="showWord(this,'寒江','冷冷的大江。')">寒江</button>
-            <button class="token" data-kind="noun" onclick="showWord(this,'雪','下著大雪。')">雪</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'花落','花掉下來。')">花落</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'知','知道。')">知</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'多少','很多還是很少。')">多少</button>
           </div>
-          <div class="legend"><span style="color:var(--verb)">動作</span><span style="color:var(--place)">地點</span><span style="color:var(--noun)">天氣</span></div>
+          <div class="legend"><span style="color:var(--noun)">事物</span><span style="color:var(--verb)">動作</span></div>
         </div>
-        <div class="plain">他一個人在冷冷的大江上，冒著大雪靜靜地釣魚。</div>
+        <div class="plain">不知道花朵落了多少。</div>
       </div>
     </section>
 
     <section class="slide">
-      <img class="art" src="generated/jiangxue-compare_20260622_233609.png?v=2" alt="江雪全詩白話對照插圖">
+      <img class="art" src="generated/chunxiao-compare_20260624_123421.png" alt="春曉全詩白話對照插圖">
       <div class="shade"></div>
       <div class="stage">
         <div class="home-copy">
           <h1>原詩與白話對照</h1>
-          <div class="author">江雪　唐・柳宗元</div>
+          <div class="author">春曉　唐・孟浩然</div>
           <div class="compare-grid">
             <button class="compare-head" onclick="playOriginalOnly()">讀原詩</button>
             <button class="compare-head" onclick="playPlainOnly()">讀白話</button>
-            <div class="compare-row poem-row" data-pair="0" onclick="playComparePair(0)"><span class="token" data-kind="place">千山</span><span class="token" data-kind="noun">鳥</span><span class="token" data-kind="verb">飛絕</span></div>
-            <div class="compare-row plain-row" data-pair="0" onclick="playComparePair(0)">連綿的高山上，連一隻鳥的影子都看不見了。</div>
-            <div class="compare-row poem-row" data-pair="1" onclick="playComparePair(1)"><span class="token" data-kind="place">萬徑</span><span class="token" data-kind="person">人</span><span class="token" data-kind="verb">蹤滅</span></div>
-            <div class="compare-row plain-row" data-pair="1" onclick="playComparePair(1)">所有道路上，也看不見人的蹤跡了。</div>
-            <div class="compare-row poem-row" data-pair="2" onclick="playComparePair(2)"><span class="token" data-kind="noun">孤舟</span><span class="token" data-kind="noun">簑笠</span><span class="token" data-kind="person">翁</span></div>
-            <div class="compare-row plain-row" data-pair="2" onclick="playComparePair(2)">只有一葉孤舟上，坐著一個穿簑衣、戴斗笠的老爺爺。</div>
-            <div class="compare-row poem-row" data-pair="3" onclick="playComparePair(3)"><span class="token" data-kind="verb">獨</span><span class="token" data-kind="verb">釣</span><span class="token" data-kind="place">寒江</span><span class="token" data-kind="noun">雪</span></div>
-            <div class="compare-row plain-row" data-pair="3" onclick="playComparePair(3)">他一個人在冷冷的大江上，冒著大雪靜靜地釣魚。</div>
+            <div class="compare-row poem-row" data-pair="0" onclick="playComparePair(0)"><span class="token" data-kind="time">春眠</span><span class="token" data-kind="verb">不覺</span><span class="token" data-kind="time">曉</span></div>
+            <div class="compare-row plain-row" data-pair="0" onclick="playComparePair(0)">春天睡覺，不知不覺天就亮了。</div>
+            <div class="compare-row poem-row" data-pair="1" onclick="playComparePair(1)"><span class="token" data-kind="place">處處</span><span class="token" data-kind="verb">聞</span><span class="token" data-kind="noun">啼鳥</span></div>
+            <div class="compare-row plain-row" data-pair="1" onclick="playComparePair(1)">到處都聽到鳥兒在叫。</div>
+            <div class="compare-row poem-row" data-pair="2" onclick="playComparePair(2)"><span class="token" data-kind="time">夜來</span><span class="token" data-kind="noun">風雨</span><span class="token" data-kind="noun">聲</span></div>
+            <div class="compare-row plain-row" data-pair="2" onclick="playComparePair(2)">夜裡傳來風雨的聲音。</div>
+            <div class="compare-row poem-row" data-pair="3" onclick="playComparePair(3)"><span class="token" data-kind="noun">花落</span><span class="token" data-kind="verb">知</span><span class="token" data-kind="noun">多少</span></div>
+            <div class="compare-row plain-row" data-pair="3" onclick="playComparePair(3)">不知道花朵落了多少。</div>
           </div>
           <button class="primary" onclick="playCompare()">原詩白話一起讀</button>
         </div>
@@ -941,20 +932,20 @@
     </section>
 
     <section class="slide" data-auto="heart-guide">
-      <img class="art" src="generated/jiangxue-heart_20260622_234224.png?v=2" alt="江雪詩人心情插圖">
+      <img class="art" src="generated/chunxiao-heart_20260624_123424.png" alt="春曉詩人心情插圖">
       <div class="shade"></div>
       <div class="stage">
         <div class="home-copy">
           <h1>詩人的心情</h1>
-          <div class="author">孤單，卻很堅定</div>
+          <div class="author">愛春天，也捨不得春天</div>
           <div class="compare">
             <div class="panel">
               <h2>當時的心情</h2>
-              <p>柳宗元被派到很遠的地方，身邊沒有朋友，心裡很<span class="scaffold">孤單</span>。他看見江上那位老爺爺，在大雪裡還是安安靜靜地釣魚。</p>
+              <p>孟浩然在春天的一個早晨醒來，聽到鳥叫，想起昨晚的風雨，心裡想：不知道花落了多少。他<span class="scaffold">喜歡</span>春天，也<span class="scaffold">捨不得</span>春天離開。</p>
             </div>
             <div class="panel">
               <h2>我們學到</h2>
-              <p>就算身邊很<span class="scaffold">冷清</span>，也可以像老爺爺一樣，<span class="scaffold">安穩</span>、<span class="scaffold">堅定</span>地做自己想做的事。</p>
+              <p>春天的花很快就會凋謝，美好的時光要<span class="scaffold">珍惜</span>。每天睜開眼睛，就可以用心感受身邊的<span class="scaffold">美好</span>。</p>
             </div>
           </div>
           <button class="primary" onclick="playSegment('heart-guide')">聽一聽</button>
@@ -962,77 +953,71 @@
       </div>
     </section>
 
-    <section class="slide" data-auto="game-guess-guide">
-      <img class="art" src="generated/jiangxue-game-guess_20260622_233606.png?v=2" alt="選句配圖遊戲插圖">
+    <section class="slide" data-auto="game-cloud-guide">
+      <img class="art" src="generated/chunxiao-game-cloud-v2_20260624_135927.png" alt="雲朵找字遊戲插圖">
       <div class="shade"></div>
       <div class="stage">
         <div class="game wide">
-          <div class="game-head">只看畫面猜詩</div>
-          <div class="game-rule">看圖選詩句，或聽詩句選圖片。答對自動換下一題，完成全部會撒彩帶。</div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-            <button class="primary" id="guessModeImg" onclick="setGuessMode('img')">看圖選句</button>
-            <button id="guessModeAudio" onclick="setGuessMode('audio')">聽句選圖</button>
-            <span class="feedback" id="guessProgress" style="min-height:auto;padding:0 8px;">0 / 4</span>
-            <div class="game-timer" id="guessTimer"></div>
-            <button onclick="resetGuess()">重新開始</button>
-          </div>
-          <div class="guess-layout" id="guessLayout">
-            <div class="guess-image-col" id="guessImageCol">
-              <img class="guess-image" id="guessImage" src="generated/jiangxue-line1_20260622_233353.png?v=2" alt="猜詩圖片">
-              <button class="primary" onclick="replayGuessAudio()" id="guessReplayBtn" style="display:none;">再聽一次</button>
+          <div class="game-head">雲朵找字</div>
+          <div class="game-rule">詩人仰望天空，雲朵裡藏著詞語。點擊正確的雲，讓詞語飛回詩句。</div>
+          <div class="fill-layout">
+            <div class="fill-poem">
+              <div class="fill-target" id="cloudTarget">下一個要點：春眠</div>
+              <div id="cloudBuild"></div>
+              <div class="progress-bar" id="cloudProgress"></div>
+              <div class="game-timer" id="cloudTimer"></div>
             </div>
-            <div class="guess-panel">
-              <div class="guess-options" id="guessOptions"></div>
-              <div class="feedback" id="guessFeedback"></div>
-              <button class="primary" onclick="nextGuess()" id="guessNextBtn">換下一題</button>
+            <div class="fill-arena" id="cloudArena">
+              <div class="arena-title">天空區　點雲找字</div>
             </div>
           </div>
+          <div class="feedback" id="cloudFeedback"></div>
         </div>
       </div>
     </section>
 
-    <section class="slide" data-auto="game-snow-guide">
-      <img class="art" src="generated/jiangxue-game-snow_20260622_234417.png?v=2" alt="雪中尋字遊戲插圖">
+    <section class="slide" data-auto="game-ink-guide">
+      <img class="art" src="generated/chunxiao-game-ink-v2_20260624_134727.png" alt="墨跡顯字遊戲插圖">
       <div class="shade"></div>
       <div class="stage">
         <div class="game wide">
-          <div class="game-head">雪中尋字</div>
-          <div class="game-rule">大雪蓋住了詩。輕點雪堆掃開雪，找出正確的字填回詩句。每完成一句，系統會朗讀這一句。</div>
+          <div class="game-head">墨跡顯字</div>
+          <div class="game-rule">詩人正在書寫，墨滴落在紙上。點擊正確的墨，讓墨跡暈開顯現詞語。</div>
           <div class="fill-layout">
             <div class="fill-poem">
-              <div class="fill-target" id="snowTarget">下一個要點：千山</div>
-              <div id="snowBuild"></div>
-              <div class="progress-bar" id="snowProgress"></div>
-              <div class="game-timer" id="snowTimer"></div>
+              <div class="fill-target" id="inkTarget">下一個要點：春眠</div>
+              <div id="inkBuild"></div>
+              <div class="progress-bar" id="inkProgress"></div>
+              <div class="game-timer" id="inkTimer"></div>
             </div>
-            <div class="fill-arena" id="snowArena">
-              <div class="arena-title">雪堆區　輕點掃雪</div>
+            <div class="fill-arena" id="inkArena">
+              <div class="arena-title">墨池區　點墨顯字</div>
             </div>
           </div>
-          <div class="feedback" id="snowFeedback"></div>
+          <div class="feedback" id="inkFeedback"></div>
         </div>
       </div>
     </section>
 
-    <section class="slide" data-auto="game-fish-guide">
-      <img class="art" src="generated/jiangxue-game-fish_20260622_234617.png?v=2" alt="江釣得字遊戲插圖">
+    <section class="slide" data-auto="game-flower-guide">
+      <img class="art" src="generated/chunxiao-game-flower-v2_20260624_134725.png" alt="落花收集遊戲插圖">
       <div class="shade"></div>
       <div class="stage">
         <div class="game wide">
-          <div class="game-head">江釣得字</div>
-          <div class="game-rule">老爺爺在江上釣魚。點中游過的正確詞魚，釣起來填入詩句空格。每完成一句，系統會朗讀這一句。</div>
+          <div class="game-head">落花收集</div>
+          <div class="game-rule">花瓣飄落，詩人伸手接住。點擊正確的花，讓花瓣飛入詩句空格。</div>
           <div class="fill-layout">
             <div class="fill-poem">
-              <div class="fill-target" id="fishTarget">下一個要點：千山</div>
-              <div id="fishBuild"></div>
-              <div class="progress-bar" id="fishProgress"></div>
-              <div class="game-timer" id="fishTimer"></div>
+              <div class="fill-target" id="flowerTarget">下一個要點：春眠</div>
+              <div id="flowerBuild"></div>
+              <div class="progress-bar" id="flowerProgress"></div>
+              <div class="game-timer" id="flowerTimer"></div>
             </div>
-            <div class="fill-arena" id="fishArena">
-              <div class="arena-title">寒江區　點魚釣字</div>
+            <div class="fill-arena" id="flowerArena">
+              <div class="arena-title">花園區　點花收字</div>
             </div>
           </div>
-          <div class="feedback" id="fishFeedback"></div>
+          <div class="feedback" id="flowerFeedback"></div>
         </div>
       </div>
     </section>
@@ -1054,15 +1039,15 @@
     let current = 0;
     let currentAudio = null;
     const audioText = {
-      'home-guide': '江雪。唐，柳宗元。請先聽整首詩，想一想：天這麼冷，為什麼老爺爺還要一個人在江上釣魚？',
-      'line1-meaning': '千山鳥飛絕。連綿的高山上，連一隻鳥的影子都看不見了。',
-      'line2-meaning': '萬徑人蹤滅。所有道路上，也看不見人的蹤跡了。',
-      'line3-meaning': '孤舟簑笠翁。只有一葉孤舟上，坐著一個穿簑衣、戴斗笠的老爺爺。',
-      'line4-meaning': '獨釣寒江雪。他一個人在冷冷的大江上，冒著大雪靜靜地釣魚。',
-      'heart-guide': '柳宗元被派到很遠的地方，身邊沒有朋友，心裡很孤單。他看見江上那位老爺爺，在大雪裡還是安安靜靜地釣魚。詩人想告訴我們：就算身邊很冷清，也可以像老爺爺一樣，安穩、堅定地做自己想做的事。',
-      'game-guess-guide': '只看畫面猜詩。先看圖中人物和天氣，再選出對應詩句。',
-      'game-snow-guide': '雪中尋字。大雪蓋住了詩，請輕點雪堆掃開雪，找出正確的字填回詩句。',
-      'game-fish-guide': '江釣得字。老爺爺在江上釣魚，請點中游過的正確詞魚，釣起來填入詩句空格。'
+      'home-guide': '春曉。唐，孟浩然。春天的早晨，詩人醒來後聽到了什麼？',
+      'line1-meaning': '春眠不覺曉。春天睡覺，不知不覺天就亮了。',
+      'line2-meaning': '處處聞啼鳥。到處都聽到鳥兒在叫。',
+      'line3-meaning': '夜來風雨聲。夜裡傳來風雨的聲音。',
+      'line4-meaning': '花落知多少。不知道花朵落了多少。',
+      'heart-guide': '孟浩然在春天的一個早晨醒來，聽到鳥叫，想起昨晚的風雨，心裡想：不知道花落了多少。他喜歡春天，也捨不得春天離開。詩人想告訴我們：春天的花很快就會凋謝，美好的時光要珍惜。每天睜開眼睛，就可以用心感受身邊的美好。',
+      'game-cloud-guide': '雲朵找字。詩人仰望天空，雲朵裡藏著詞語，請點擊正確的雲，讓詞語飛回詩句。',
+      'game-ink-guide': '墨痕顯字。詩人正在書寫，墨點落在紙上，請點擊正確的墨，讓墨痕擴散顯現詞語。',
+      'game-flower-guide': '落花收集。花瓣飄落，請點擊正確的花瓣，讓它飛入詩句空格。'
     };
     const audioFiles = {
       'home-guide': 'audio/home-guide-sadaltager.wav',
@@ -1085,51 +1070,42 @@
       'line4-plain-sadaltager': 'audio/line4-plain-sadaltager.wav',
       'line4-plain-sulafat': 'audio/line4-plain-sulafat.wav',
       'heart-guide': 'audio/heart-guide-sadaltager.wav',
-      'game-guess-guide': 'audio/game-guess-guide-sulafat.wav',
-      'game-snow-guide': 'audio/game-snow-guide-sulafat.wav',
-      'game-fish-guide': 'audio/game-fish-guide-sulafat.wav',
-      'word-qianshan': 'audio/word-qianshan.wav',
-      'word-niao': 'audio/word-niao.wav',
-      'word-feijue': 'audio/word-feijue.wav',
-      'word-wanjing': 'audio/word-wanjing.wav',
-      'word-ren': 'audio/word-ren.wav',
-      'word-zongmie': 'audio/word-zongmie.wav',
-      'word-guzhou': 'audio/word-guzhou.wav',
-      'word-suoli': 'audio/word-suoli.wav',
-      'word-weng': 'audio/word-weng.wav',
-      'word-du': 'audio/word-du.wav',
-      'word-diao': 'audio/word-diao.wav',
-      'word-hanjiang': 'audio/word-hanjiang.wav',
-      'word-xue': 'audio/word-xue.wav'
+      'game-cloud-guide': 'audio/game-cloud-guide-sulafat.wav',
+      'game-ink-guide': 'audio/game-ink-guide-sulafat.wav',
+      'game-flower-guide': 'audio/game-flower-guide-sulafat.wav',
+      'word-chunmian': 'audio/word-chunmian.wav',
+      'word-bujue': 'audio/word-bujue.wav',
+      'word-xiao': 'audio/word-xiao.wav',
+      'word-chuchu': 'audio/word-chuchu.wav',
+      'word-wen': 'audio/word-wen.wav',
+      'word-tiniao': 'audio/word-tiniao.wav',
+      'word-yelai': 'audio/word-yelai.wav',
+      'word-fengyu': 'audio/word-fengyu.wav',
+      'word-sheng': 'audio/word-sheng.wav',
+      'word-hualuo': 'audio/word-hualuo.wav',
+      'word-zhi': 'audio/word-zhi.wav',
+      'word-duoshao': 'audio/word-duoshao.wav'
     };
     const poemAudioIds = ['line1-poem-sulafat', 'line2-poem-sulafat', 'line3-poem-sulafat', 'line4-poem-sulafat'];
     const plainAudioIds = ['line1-plain-sadaltager', 'line2-plain-sadaltager', 'line3-plain-sadaltager', 'line4-plain-sadaltager'];
     const wordAudioIds = {
-      '千山': 'word-qianshan',
-      '飛絕': 'word-feijue',
-      '萬徑': 'word-wanjing',
-      '人': 'word-ren',
-      '蹤滅': 'word-zongmie',
-      '孤舟': 'word-guzhou',
-      '簑笠': 'word-suoli',
-      '翁': 'word-weng',
-      '獨': 'word-du',
-      '釣': 'word-diao',
-      '寒江': 'word-hanjiang',
-      '雪': 'word-xue'
+      '春眠': 'word-chunmian', '不覺': 'word-bujue', '曉': 'word-xiao',
+      '處處': 'word-chuchu', '聞': 'word-wen', '啼鳥': 'word-tiniao',
+      '夜來': 'word-yelai', '風雨': 'word-fengyu', '聲': 'word-sheng',
+      '花落': 'word-hualuo', '知': 'word-zhi', '多少': 'word-duoshao'
     };
-    const poemLines = ['千山鳥飛絕。', '萬徑人蹤滅。', '孤舟簑笠翁。', '獨釣寒江雪。'];
+    const poemLines = ['春眠不覺曉。', '處處聞啼鳥。', '夜來風雨聲。', '花落知多少。'];
     const plainLines = [
-      '連綿的高山上，連一隻鳥的影子都看不見了。',
-      '所有道路上，也看不見人的蹤跡了。',
-      '只有一葉孤舟上，坐著一個穿簑衣、戴斗笠的老爺爺。',
-      '他一個人在冷冷的大江上，冒著大雪靜靜地釣魚。'
+      '春天睡覺，不知不覺天就亮了。',
+      '到處都聽到鳥兒在叫。',
+      '夜裡傳來風雨的聲音。',
+      '不知道花朵落了多少。'
     ];
     const fillLines = [
-      { text: '千山鳥飛絕。', words: ['千山', '鳥', '飛絕'] },
-      { text: '萬徑人蹤滅。', words: ['萬徑', '人', '蹤滅'] },
-      { text: '孤舟簑笠翁。', words: ['孤舟', '簑笠', '翁'] },
-      { text: '獨釣寒江雪。', words: ['獨', '釣', '寒江', '雪'] }
+      { text: '春眠不覺曉。', words: ['春眠', '不覺', '曉'] },
+      { text: '處處聞啼鳥。', words: ['處處', '聞', '啼鳥'] },
+      { text: '夜來風雨聲。', words: ['夜來', '風雨', '聲'] },
+      { text: '花落知多少。', words: ['花落', '知', '多少'] }
     ];
     const fillWords = fillLines.flatMap(line => line.words);
     const fillLineEnds = fillLines.reduce((items, line) => {
@@ -1137,17 +1113,6 @@
       items.push({ end: previous + line.words.length, text: line.text });
       return items;
     }, []);
-    const guessItems = [
-      { image: 'generated/jiangxue-line1_20260622_233353.png', answer: '千山鳥飛絕', speak: '千山鳥飛絕。' },
-      { image: 'generated/jiangxue-line2_20260622_233513.png', answer: '萬徑人蹤滅', speak: '萬徑人蹤滅。' },
-      { image: 'generated/jiangxue-line3_20260622_234220.png', answer: '孤舟簑笠翁', speak: '孤舟簑笠翁。' },
-      { image: 'generated/jiangxue-line4_20260622_233610.png?v=2', answer: '獨釣寒江雪', speak: '獨釣寒江雪。' }
-    ];
-    let guessIndex = 0;
-    let guessMode = 'img';
-    let guessDone = 0;
-    let guessOrder = [0, 1, 2, 3];
-    let guessRound = 0;
 
     // Timer utilities for games
     const timers = {};
@@ -1187,9 +1152,9 @@
       stopAudio();
       const id = slides[current].dataset.auto;
       updateAudioNote(id);
-      if (id === 'game-snow-guide') { resetTimer('snow'); window.setTimeout(initSnowGame, 120); }
-      if (id === 'game-fish-guide') { resetTimer('fish'); window.setTimeout(initFishGame, 120); }
-      if (id === 'game-guess-guide') { guessDone = 0; resetTimer('guess'); window.setTimeout(() => { setGuessMode('img'); }, 120); }
+      if (id === 'game-cloud-guide') { resetTimer('cloud'); window.setTimeout(initCloudGame, 120); }
+      if (id === 'game-ink-guide') { resetTimer('ink'); window.setTimeout(initInkGame, 120); }
+      if (id === 'game-flower-guide') { resetTimer('flower'); window.setTimeout(initFlowerGame, 120); }
       if (id) window.setTimeout(() => playSegment(id), 260);
     }
     function nextSlide() { showSlide(current + 1); }
@@ -1200,10 +1165,7 @@
     }
     function updateAudioNote(id) {
       const note = document.getElementById('audioNote');
-      if (!id) {
-        note.textContent = '此頁不自動朗讀；可點按鈕或文字互動。';
-        return;
-      }
+      if (!id) { note.textContent = '此頁不自動朗讀；可點按鈕或文字互動。'; return; }
       const lineIndex = lineMeaningIndex(id);
       const hasLineAudio = lineIndex >= 0 && audioFiles[poemAudioIds[lineIndex]] && audioFiles[plainAudioIds[lineIndex]];
       note.textContent = (audioFiles[id] || hasLineAudio)
@@ -1224,29 +1186,24 @@
     }
     function stopAudio() {
       speechSynthesis.cancel();
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-        currentAudio = null;
-      }
+      if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; }
     }
     function playAudioOrSpeak(id, text) {
       const src = audioFiles[id];
       if (!src) return speakScript(text);
       stopAudio();
       return new Promise(resolve => {
-        const audio = new Audio(src);
-        currentAudio = audio;
-        let settled = false;
-        const finish = () => {
-          if (settled) return;
-          settled = true;
-          if (currentAudio === audio) currentAudio = null;
-          resolve();
+        const audio = new Audio();
+        let finished = false;
+        const finish = () => { if (finished) return; finished = true; if (currentAudio === audio) currentAudio = null; resolve(); };
+        audio.onended = () => { if (!finished) finish(); };
+        audio.onerror = () => {
+          finished = true;
+          speakScript(text).then(() => { finished = false; finish(); });
         };
-        audio.onended = finish;
-        audio.onerror = () => speakScript(text).then(finish);
-        audio.play().catch(() => speakScript(text).then(finish));
+        audio.src = src;
+        currentAudio = audio;
+        audio.play().catch(() => {});
       });
     }
     function speakScript(text) {
@@ -1258,12 +1215,10 @@
       if (!text) return Promise.resolve();
       return new Promise(resolve => {
         const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'zh-TW';
-        utter.rate = .9;
+        utter.lang = 'zh-TW'; utter.rate = .9;
         const voices = speechSynthesis.getVoices();
         utter.voice = voices.find(v => /Yating|雅婷|Hanhan|Taiwan|Chinese|中文/.test(v.name)) || null;
-        utter.onend = resolve;
-        utter.onerror = resolve;
+        utter.onend = resolve; utter.onerror = resolve;
         speechSynthesis.speak(utter);
       });
     }
@@ -1280,10 +1235,7 @@
       lines.forEach(line => line.classList.remove('active-line'));
     }
     async function playCompare() {
-      for (let i = 0; i < poemLines.length; i += 1) {
-        await playComparePair(i);
-        await delay(350);
-      }
+      for (let i = 0; i < poemLines.length; i += 1) { await playComparePair(i); await delay(350); }
     }
     async function playComparePair(index) {
       stopAudio();
@@ -1322,17 +1274,29 @@
       document.getElementById('wordText').textContent = meaning;
       const dialog = document.getElementById('wordDialog');
       dialog.showModal();
-      playAudioOrSpeak(wordAudioIds[word], `${word}。[pause]${meaning}`);
+      const id = wordAudioIds[word];
+      if (id && audioFiles[id]) {
+        playAudioFileOnly(id);
+      } else {
+        speak(word + '。[pause]' + meaning);
+      }
     }
-    function closeWord() {
-      document.getElementById('wordDialog').close();
+    function playAudioFileOnly(id) {
+      const src = audioFiles[id];
+      if (!src) return Promise.resolve();
       stopAudio();
+      return new Promise(resolve => {
+        const audio = new Audio(src);
+        currentAudio = audio;
+        audio.onended = () => { if (currentAudio === audio) currentAudio = null; resolve(); };
+        audio.onerror = () => { if (currentAudio === audio) currentAudio = null; resolve(); };
+        audio.play().catch(() => { if (currentAudio === audio) currentAudio = null; resolve(); });
+      });
     }
+    function closeWord() { document.getElementById('wordDialog').close(); stopAudio(); }
     (function() {
       const dialog = document.getElementById('wordDialog');
-      dialog.addEventListener('click', function(e) {
-        if (e.target === dialog) closeWord();
-      });
+      dialog.addEventListener('click', function(e) { if (e.target === dialog) closeWord(); });
     })();
     function hideHomeTray() {
       document.getElementById('homeActionTray')?.classList.add('hidden');
@@ -1355,302 +1319,270 @@
     setupDraggableControls();
     async function toggleFullscreen() {
       try {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
-        } else {
-          await document.documentElement.requestFullscreen();
-        }
-      } catch (error) {
-        console.warn('Fullscreen failed', error);
-      }
+        if (document.fullscreenElement) { await document.exitFullscreen(); }
+        else { await document.documentElement.requestFullscreen(); }
+      } catch (error) { console.warn('Fullscreen failed', error); }
     }
     window.addEventListener('keydown', event => {
       if (event.key === 'ArrowRight') nextSlide();
       if (event.key === 'ArrowLeft') prevSlide();
     });
 
-    function setGuessMode(mode) {
-      guessMode = mode;
-      document.getElementById('guessModeImg').classList.toggle('primary', mode === 'img');
-      document.getElementById('guessModeAudio').classList.toggle('primary', mode === 'audio');
-      document.getElementById('guessReplayBtn').style.display = mode === 'audio' ? '' : 'none';
-      resetGuess();
-    }
-    function resetGuess() {
-      guessDone = 0;
-      guessRound = 0;
-      guessOrder = shuffle([0, 1, 2, 3]);
-      guessIndex = guessOrder[0];
-      renderGuess();
-      updateGuessProgress();
-    }
-    function updateGuessProgress() {
-      const bar = document.getElementById('guessProgress');
-      if (bar) bar.textContent = `${guessDone} / 4`;
-    }
-    function renderGuess() {
-      const item = guessItems[guessIndex];
-      const image = document.getElementById('guessImage');
-      const box = document.getElementById('guessOptions');
-      if (!image || !box) return;
-      image.classList.remove('selected');
-      image.src = item.image;
-      box.innerHTML = '';
-      if (guessMode === 'img') {
-        const answers = shuffle(guessItems.map(x => x.answer));
-        answers.forEach(answer => {
-          const btn = document.createElement('button');
-          btn.className = 'guess-choice';
-          btn.textContent = answer;
-          btn.onclick = () => answerGuess(answer);
-          box.appendChild(btn);
-        });
-      } else {
-        const indices = shuffle([0, 1, 2, 3]);
-        indices.forEach(idx => {
-          const btn = document.createElement('button');
-          btn.className = 'guess-choice';
-          btn.textContent = guessItems[idx].answer;
-          btn.dataset.guessIdx = idx;
-          btn.onclick = () => answerGuessImage(idx);
-          box.appendChild(btn);
-        });
-      }
-      document.getElementById('guessFeedback').textContent = '';
-      if (guessMode === 'audio') window.setTimeout(() => replayGuessAudio(), 300);
-    }
-    function replayGuessAudio() {
-      const item = guessItems[guessIndex];
-      playAudioOrSpeak(poemAudioIds[guessItems.indexOf(item)], item.speak);
-    }
-    function answerGuess(answer) {
-      const item = guessItems[guessIndex];
-      if (answer === item.answer) {
-        guessDone += 1;
-        if (guessDone === 1) startTimer('guess');
-        if (guessDone === guessItems.length) stopTimer('guess');
-        document.getElementById('guessFeedback').textContent = '○ 答對了，準備換下一題。';
-        showCorrectMark();
-        const spokenIndex = guessItems.indexOf(item);
-        playAudioOrSpeak(poemAudioIds[spokenIndex], item.speak);
-        updateGuessProgress();
-        window.setTimeout(nextGuess, 1500);
-      } else {
-        document.getElementById('guessFeedback').textContent = '再看看人物的動作和天氣。';
-        speak('再看看人物的動作和天氣。');
-      }
-    }
-    function answerGuessImage(idx) {
-      if (idx === guessIndex) {
-        guessDone += 1;
-        if (guessDone === 1) startTimer('guess');
-        if (guessDone === guessItems.length) stopTimer('guess');
-        document.getElementById('guessImage').classList.add('selected');
-        document.getElementById('guessFeedback').textContent = '○ 答對了，準備換下一題。';
-        showCorrectMark();
-        const spokenIndex = guessIndex;
-        playAudioOrSpeak(poemAudioIds[spokenIndex], guessItems[guessIndex].speak);
-        updateGuessProgress();
-        window.setTimeout(nextGuess, 1500);
-      } else {
-        document.getElementById('guessFeedback').textContent = '再聽一次，換一張圖試試。';
-        speak('再聽一次，換一張圖試試。');
-      }
-    }
-    function nextGuess() {
-      guessRound += 1;
-      if (guessRound >= guessItems.length) {
-        document.getElementById('guessFeedback').textContent = '○ 全部完成！';
-        launchConfetti();
-        return;
-      }
-      guessIndex = guessOrder[guessRound];
-      renderGuess();
-    }
-
-    let snowIndex = 0;
-    function initSnowGame() {
-      if (document.getElementById('snowBuild').children.length) return;
-      snowIndex = 0;
-      resetTimer('snow');
+    let cloudIndex = 0;
+    let cloudLocked = false;
+    function initCloudGame() {
+      if (document.getElementById('cloudBuild').children.length) return;
+      cloudIndex = 0; cloudLocked = false;
+      resetTimer('cloud');
       let slotIndex = 0;
-      document.getElementById('snowBuild').innerHTML = fillLines.map((line, lineIndex) => {
-        const slots = line.words.map(() => `<span class="fill-slot" data-snow-slot="${slotIndex++}"></span>`).join('');
+      document.getElementById('cloudBuild').innerHTML = fillLines.map((line, lineIndex) => {
+        const slots = line.words.map(() => `<span class="fill-slot" data-cloud-slot="${slotIndex++}"></span>`).join('');
         return `<div class="fill-line" data-line-index="${lineIndex}">${slots}</div>`;
       }).join('');
-      renderProgress('snowProgress', 0, fillWords.length);
-      spawnSnowPiles();
+      renderProgress('cloudProgress', 0, fillWords.length);
+      spawnClouds();
     }
-    function spawnSnowPiles() {
-      const arena = document.getElementById('snowArena');
+    function spawnClouds() {
+      const arena = document.getElementById('cloudArena');
       if (!arena) return;
-      arena.innerHTML = '<div class="arena-title">雪堆區　輕點掃雪</div>';
-      if (snowIndex >= fillWords.length) {
-        document.getElementById('snowTarget').textContent = '整首詩完成';
-        document.getElementById('snowFeedback').textContent = '○ 全部完成！';
-        readAllFillLines('snowBuild');
+      arena.innerHTML = '<div class="arena-title">天空區　點雲找字</div>';
+      if (cloudIndex >= fillWords.length) {
+        document.getElementById('cloudTarget').textContent = '整首詩完成';
+        document.getElementById('cloudFeedback').textContent = '○ 全部完成！';
+        readAllFillLines('cloudBuild');
         launchConfetti();
         return;
       }
-      const target = fillWords[snowIndex];
-      document.getElementById('snowTarget').textContent = `下一個要點：${target}`;
+      const target = fillWords[cloudIndex];
+      document.getElementById('cloudTarget').textContent = `下一個要點：${target}`;
       const pool = shuffle([target, ...fillWords.filter(word => word !== target)].slice(0, 6));
-      const cols = 3;
-      const rows = 2;
-      const cells = [];
-      for (let r = 0; r < rows; r += 1) {
-        for (let c = 0; c < cols; c += 1) {
-          cells.push({ r, c });
-        }
-      }
-      const placed = shuffle(cells).slice(0, pool.length);
+      const revealCount = Math.floor(pool.length / 2);
+      const revealIndices = shuffle([...Array(pool.length).keys()]).slice(0, revealCount);
+      const rows = [8, 18, 28, 38, 48, 58];
+      const rowPool = shuffle([...rows]);
       pool.forEach((word, i) => {
         const btn = document.createElement('button');
-        btn.className = 'snow-pile';
+        btn.className = 'cloud-card' + (revealIndices.includes(i) ? ' revealed' : '');
         btn.dataset.word = word;
-        btn.innerHTML = `<span class="pile-body">${snowPileSvg()}</span><span class="pile-label">${word}</span>`;
-        const cell = placed[i];
-        const leftPct = 4 + cell.c * 31 + (Math.random() * 5 - 2.5);
-        const topPct = 20 + cell.r * 38 + (Math.random() * 5 - 2.5);
-        btn.style.left = `${leftPct}%`;
-        btn.style.top = `${topPct}%`;
-        btn.onclick = () => trySnowWord(word, btn);
+        btn.innerHTML = cloudSvg() + `<span class="cloud-label">${word}</span>`;
+        btn.style.left = '0';
+        btn.style.top = `${rowPool[i % rows.length]}%`;
+        const speed = 10 + Math.random() * 8;
+        btn.style.setProperty('--speed', `${speed}s`);
+        btn.style.animationDelay = `${-Math.random() * speed}s`;
+        btn.onclick = () => tryCloudWord(word, btn);
         arena.appendChild(btn);
       });
     }
-    let snowLocked = false;
-    function trySnowWord(word, pile) {
-      if (snowLocked) return;
-      if (pile.classList.contains('swept') || pile.classList.contains('taken')) return;
-      const target = fillWords[snowIndex];
-      const feedback = document.getElementById('snowFeedback');
-      snowLocked = true;
-      sweepPile(pile);
+    function tryCloudWord(word, cloud) {
+      if (cloudLocked || cloud.classList.contains('taken')) return;
+      const wasRevealed = cloud.classList.contains('revealed');
+      const target = fillWords[cloudIndex];
+      const feedback = document.getElementById('cloudFeedback');
+      if (!wasRevealed) {
+        cloudLocked = true;
+        cloud.classList.add('revealed');
+        cloud.style.animationPlayState = 'paused';
+        const pop = document.createElement('span');
+        pop.className = 'cloud-pop';
+        pop.innerHTML = cloudPopSvg();
+        cloud.appendChild(pop);
+        window.setTimeout(() => pop.remove(), 750);
+        window.setTimeout(() => {
+          cloudLocked = false;
+          finishCloudTry(word, cloud, wasRevealed);
+        }, 720);
+      } else {
+        finishCloudTry(word, cloud, wasRevealed);
+      }
+    }
+    function finishCloudTry(word, cloud, wasRevealed) {
+      const target = fillWords[cloudIndex];
+      const feedback = document.getElementById('cloudFeedback');
+      if (word === target) {
+        feedback.textContent = `○ 找到「${word}」了！`;
+        showCorrectMark();
+        window.setTimeout(() => {
+          cloud.classList.add('taken');
+          const slot = document.querySelector(`#cloudBuild .fill-slot[data-cloud-slot="${cloudIndex}"]`);
+          if (slot) { slot.textContent = word; slot.classList.add('filled'); }
+          cloudIndex += 1;
+          if (cloudIndex === 1) startTimer('cloud');
+          if (cloudIndex === fillWords.length) stopTimer('cloud');
+          renderProgress('cloudProgress', cloudIndex, fillWords.length);
+          const completedLine = fillLineEnds.find(line => line.end === cloudIndex);
+          if (completedLine) {
+            window.setTimeout(async () => { await readCompletedFillLine(completedLine, 'cloudBuild'); spawnClouds(); }, 260);
+          } else { spawnClouds(); }
+        }, wasRevealed ? 100 : 360);
+      } else {
+        feedback.textContent = `這是「${word}」，再找「${target}」。`;
+        if (!wasRevealed) {
+          cloud.classList.remove('revealed');
+          cloud.style.animationPlayState = 'running';
+        }
+      }
+    }
+
+    let inkIndex = 0;
+    let inkLocked = false;
+    function initInkGame() {
+      if (document.getElementById('inkBuild').children.length) return;
+      inkIndex = 0; inkLocked = false;
+      resetTimer('ink');
+      let slotIndex = 0;
+      document.getElementById('inkBuild').innerHTML = fillLines.map((line, lineIndex) => {
+        const slots = line.words.map(() => `<span class="fill-slot" data-ink-slot="${slotIndex++}"></span>`).join('');
+        return `<div class="fill-line" data-line-index="${lineIndex}">${slots}</div>`;
+      }).join('');
+      renderProgress('inkProgress', 0, fillWords.length);
+      spawnInks();
+    }
+    function spawnInks() {
+      const arena = document.getElementById('inkArena');
+      if (!arena) return;
+      arena.innerHTML = '<div class="arena-title">墨池區　點墨顯字</div>';
+      if (inkIndex >= fillWords.length) {
+        document.getElementById('inkTarget').textContent = '整首詩完成';
+        document.getElementById('inkFeedback').textContent = '○ 全部完成！';
+        readAllFillLines('inkBuild');
+        launchConfetti();
+        return;
+      }
+      const target = fillWords[inkIndex];
+      document.getElementById('inkTarget').textContent = `下一個要點：${target}`;
+      const pool = shuffle([target, ...fillWords.filter(word => word !== target)].slice(0, 6));
+      const cols = 3; const rows = 2;
+      const cells = [];
+      for (let r = 0; r < rows; r += 1) for (let c = 0; c < cols; c += 1) cells.push({ r, c });
+      const placed = shuffle(cells).slice(0, pool.length);
+      pool.forEach((word, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'ink-drop';
+        btn.dataset.word = word;
+        btn.innerHTML = inkSvg() + `<span class="ink-label">${word}</span>`;
+        const cell = placed[i];
+        const leftPct = 4 + cell.c * 31 + (Math.random() * 5 - 2.5);
+        const topPct = 20 + cell.r * 38 + (Math.random() * 5 - 2.5);
+        btn.style.left = `${leftPct}%`; btn.style.top = `${topPct}%`;
+        btn.style.setProperty('--speed', `${5 + Math.random() * 3}s`);
+        btn.style.animationDelay = `${i * -0.6}s`;
+        btn.onclick = () => tryInkWord(word, btn);
+        arena.appendChild(btn);
+      });
+    }
+    function tryInkWord(word, ink) {
+      if (inkLocked || ink.classList.contains('revealed') || ink.classList.contains('taken')) return;
+      const target = fillWords[inkIndex];
+      const feedback = document.getElementById('inkFeedback');
+      inkLocked = true;
+      ink.classList.add('revealed');
+      const pop = document.createElement('span');
+      pop.className = 'ink-pop';
+      pop.innerHTML = inkSpreadSvg();
+      ink.appendChild(pop);
+      window.setTimeout(() => pop.remove(), 850);
       window.setTimeout(() => {
-        snowLocked = false;
+        inkLocked = false;
         if (word === target) {
           feedback.textContent = `○ 找到「${word}」了！`;
           showCorrectMark();
           window.setTimeout(() => {
-            pile.classList.add('taken');
-            const slot = document.querySelector(`#snowBuild .fill-slot[data-snow-slot="${snowIndex}"]`);
-            if (slot) {
-              slot.textContent = word;
-              slot.classList.add('filled');
-            }
-            snowIndex += 1;
-            if (snowIndex === 1) startTimer('snow');
-            if (snowIndex === fillWords.length) stopTimer('snow');
-            renderProgress('snowProgress', snowIndex, fillWords.length);
-            const completedLine = fillLineEnds.find(line => line.end === snowIndex);
+            ink.classList.add('taken');
+            const slot = document.querySelector(`#inkBuild .fill-slot[data-ink-slot="${inkIndex}"]`);
+            if (slot) { slot.textContent = word; slot.classList.add('filled'); }
+            inkIndex += 1;
+            if (inkIndex === 1) startTimer('ink');
+            if (inkIndex === fillWords.length) stopTimer('ink');
+            renderProgress('inkProgress', inkIndex, fillWords.length);
+            const completedLine = fillLineEnds.find(line => line.end === inkIndex);
             if (completedLine) {
-              window.setTimeout(async () => {
-                await readCompletedFillLine(completedLine, 'snowBuild');
-                spawnSnowPiles();
-              }, 260);
-            } else {
-              spawnSnowPiles();
-            }
+              window.setTimeout(async () => { await readCompletedFillLine(completedLine, 'inkBuild'); spawnInks(); }, 260);
+            } else { spawnInks(); }
           }, 360);
         } else {
           feedback.textContent = `這是「${word}」，再找「${target}」。`;
+          ink.classList.remove('revealed');
         }
-      }, 720);
-    }
-    function sweepPile(pile) {
-      const broom = document.createElement('span');
-      broom.className = 'broom';
-      broom.innerHTML = broomSvg();
-      pile.appendChild(broom);
-      pile.classList.add('swept');
-      window.setTimeout(() => broom.remove(), 750);
+      }, 820);
     }
 
-    let fishIndex = 0;
-    let fishWrongLock = false;
-    function initFishGame() {
-      if (document.getElementById('fishBuild').children.length) return;
-      fishIndex = 0;
-      fishWrongLock = false;
-      resetTimer('fish');
+    let flowerIndex = 0;
+    let flowerWrongLock = false;
+    function initFlowerGame() {
+      if (document.getElementById('flowerBuild').children.length) return;
+      flowerIndex = 0; flowerWrongLock = false;
+      resetTimer('flower');
       let slotIndex = 0;
-      document.getElementById('fishBuild').innerHTML = fillLines.map((line, lineIndex) => {
-        const slots = line.words.map(() => `<span class="fill-slot" data-fish-slot="${slotIndex++}"></span>`).join('');
+      document.getElementById('flowerBuild').innerHTML = fillLines.map((line, lineIndex) => {
+        const slots = line.words.map(() => `<span class="fill-slot" data-flower-slot="${slotIndex++}"></span>`).join('');
         return `<div class="fill-line" data-line-index="${lineIndex}">${slots}</div>`;
       }).join('');
-      renderProgress('fishProgress', 0, fillWords.length);
-      spawnFish();
+      renderProgress('flowerProgress', 0, fillWords.length);
+      spawnFlowers();
     }
-    function spawnFish() {
-      const arena = document.getElementById('fishArena');
+    function spawnFlowers() {
+      const arena = document.getElementById('flowerArena');
       if (!arena) return;
-      arena.innerHTML = '<div class="arena-title">寒江區　點魚釣字</div>';
-      if (fishIndex >= fillWords.length) {
-        document.getElementById('fishTarget').textContent = '整首詩完成';
-        document.getElementById('fishFeedback').textContent = '○ 全部完成！';
-        readAllFillLines('fishBuild');
+      arena.innerHTML = '<div class="arena-title">花園區　點花收字</div>';
+      if (flowerIndex >= fillWords.length) {
+        document.getElementById('flowerTarget').textContent = '整首詩完成';
+        document.getElementById('flowerFeedback').textContent = '○ 全部完成！';
+        readAllFillLines('flowerBuild');
         launchConfetti();
         return;
       }
-      const target = fillWords[fishIndex];
-      document.getElementById('fishTarget').textContent = `下一個要點：${target}`;
+      const target = fillWords[flowerIndex];
+      document.getElementById('flowerTarget').textContent = `下一個要點：${target}`;
       const pool = shuffle([target, ...fillWords.filter(word => word !== target)].slice(0, 6));
-      const cols = 3;
-      const rows = 2;
-      const cells = [];
-      for (let r = 0; r < rows; r += 1) {
-        for (let c = 0; c < cols; c += 1) {
-          cells.push({ r, c });
-        }
-      }
-      const placed = shuffle(cells).slice(0, pool.length);
+      const lanes = [5, 18, 31, 44, 57, 70];
+      const lanePool = shuffle([...lanes]);
       pool.forEach((word, i) => {
         const btn = document.createElement('button');
-        btn.className = 'fish-card';
-        btn.innerHTML = fishSvg() + `<span class="fish-label">${word}</span>`;
-        const cell = placed[i];
-        const leftPct = 4 + cell.c * 31 + (Math.random() * 5 - 2.5);
-        const topPct = 20 + cell.r * 38 + (Math.random() * 5 - 2.5);
-        btn.style.left = `${leftPct}%`;
-        btn.style.top = `${topPct}%`;
-        btn.style.setProperty('--speed', `${5 + Math.random() * 2.5}s`);
-        btn.style.animationDelay = `${i * -0.5}s`;
-        btn.onclick = () => tryFishWord(word, btn);
+        btn.className = 'flower-card';
+        btn.innerHTML = flowerSvg() + `<span class="flower-label">${word}</span>`;
+        btn.style.left = `${lanePool[i % lanes.length]}%`;
+        btn.style.top = '0';
+        const arenaH = arena.clientHeight || 500;
+        btn.style.setProperty('--fall', `${arenaH}px`);
+        btn.style.setProperty('--p25', `${20 + Math.random() * 15}%`);
+        btn.style.setProperty('--p50', `${45 + Math.random() * 10}%`);
+        btn.style.setProperty('--p75', `${68 + Math.random() * 12}%`);
+        btn.style.setProperty('--s1', `${(Math.random() - .5) * 50}px`);
+        btn.style.setProperty('--s2', `${(Math.random() - .5) * 40}px`);
+        btn.style.setProperty('--s3', `${(Math.random() - .5) * 45}px`);
+        btn.style.setProperty('--s4', `${(Math.random() - .5) * 30}px`);
+        const speed = 3 + Math.random() * 10;
+        btn.style.setProperty('--speed', `${speed}s`);
+        btn.style.animationDelay = `${-Math.random() * speed * 0.3}s`;
+        btn.onclick = () => tryFlowerWord(word, btn);
         arena.appendChild(btn);
       });
     }
-    function tryFishWord(word, fish) {
-      const target = fillWords[fishIndex];
-      const feedback = document.getElementById('fishFeedback');
+    function tryFlowerWord(word, flower) {
+      const target = fillWords[flowerIndex];
+      const feedback = document.getElementById('flowerFeedback');
       if (word !== target) {
-        if (fishWrongLock) return;
-        fishWrongLock = true;
-        feedback.textContent = '再想想，換一條魚試試。';
-        speak('再想想，換一條魚試試。').then(() => { fishWrongLock = false; });
+        if (flowerWrongLock) return;
+        flowerWrongLock = true;
+        feedback.textContent = '再想想，換一朵花試試。';
+        speak('再想想，換一朵花試試。').then(() => { flowerWrongLock = false; });
         return;
       }
-      fishWrongLock = false;
-      fish.classList.add('caught');
+      flowerWrongLock = false;
+      flower.classList.add('caught');
       showCorrectMark();
       window.setTimeout(() => {
-        const slot = document.querySelector(`#fishBuild .fill-slot[data-fish-slot="${fishIndex}"]`);
-        if (slot) {
-          slot.textContent = word;
-          slot.classList.add('filled');
-        }
-        fishIndex += 1;
-        if (fishIndex === 1) startTimer('fish');
-        if (fishIndex === fillWords.length) stopTimer('fish');
-        renderProgress('fishProgress', fishIndex, fillWords.length);
-        const completedLine = fillLineEnds.find(line => line.end === fishIndex);
+        const slot = document.querySelector(`#flowerBuild .fill-slot[data-flower-slot="${flowerIndex}"]`);
+        if (slot) { slot.textContent = word; slot.classList.add('filled'); }
+        flowerIndex += 1;
+        if (flowerIndex === 1) startTimer('flower');
+        if (flowerIndex === fillWords.length) stopTimer('flower');
+        renderProgress('flowerProgress', flowerIndex, fillWords.length);
+        const completedLine = fillLineEnds.find(line => line.end === flowerIndex);
         if (completedLine) {
-          window.setTimeout(async () => {
-            await readCompletedFillLine(completedLine, 'fishBuild');
-            spawnFish();
-          }, 260);
-        } else {
-          spawnFish();
-        }
+          window.setTimeout(async () => { await readCompletedFillLine(completedLine, 'flowerBuild'); spawnFlowers(); }, 260);
+        } else { spawnFlowers(); }
       }, 430);
     }
 
@@ -1683,77 +1615,87 @@
         row?.classList.remove('active-line');
       }
     }
-    function broomSvg() {
+    function cloudSvg() {
+      const gid = 'cg' + Math.random().toString(36).slice(2,7);
+      return `<svg viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="${gid}" cx="40%" cy="28%" r="70%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+            <stop offset="50%" stop-color="#f5f8ff" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#dbe4f5" stop-opacity=".9"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="80" cy="110" rx="64" ry="9" fill="rgba(140,180,220,.2)"/>
+        <path d="M14,72 Q6,28 55,19 Q70,4 100,14 Q130,8 135,42 Q152,48 138,72 Z" fill="url(#${gid})" stroke="rgba(180,200,230,.5)" stroke-width="1.4"/>
+        <circle cx="52" cy="38" r="3.2" fill="#fff" opacity=".85"/>
+        <circle cx="90" cy="30" r="2.5" fill="#fff" opacity=".7"/>
+        <circle cx="118" cy="48" r="2.8" fill="#fff" opacity=".75"/>
+        <circle cx="38" cy="58" r="2" fill="#fff" opacity=".6"/>
+      </svg>`;
+    }
+    function cloudPopSvg() {
       return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-        <g transform="rotate(0 40 40)">
-          <rect x="36" y="4" width="7" height="40" rx="3" fill="#9a6b3f" stroke="#6e4a28" stroke-width="1"/>
-          <rect x="33" y="6" width="13" height="6" rx="2" fill="#7a5435"/>
-          <path d="M20,44 L60,44 L56,74 L24,74 Z" fill="#d4a25a" stroke="#9a6b3f" stroke-width="1"/>
-          <path d="M24,44 L24,74 M30,44 L30,76 M36,44 L36,78 M42,44 L42,78 M48,44 L48,76 M54,44 L54,74" stroke="#b8853e" stroke-width="1.4" fill="none"/>
-          <path d="M20,44 L60,44" stroke="#6e4a28" stroke-width="1.5"/>
-          <circle cx="39" cy="14" r="3" fill="#b8853e"/>
+        <circle cx="40" cy="40" r="30" fill="#fff" opacity=".7" stroke="#a0c0e8" stroke-width="2"/>
+        <circle cx="30" cy="34" r="6" fill="#fff" opacity=".5"/>
+        <circle cx="52" cy="38" r="5" fill="#fff" opacity=".4"/>
+        <circle cx="40" cy="48" r="4" fill="#fff" opacity=".35"/>
+      </svg>`;
+    }
+    function inkSvg() {
+      const gid = 'ig' + Math.random().toString(36).slice(2,7);
+      return `<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="${gid}" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#2a2a2a" stop-opacity=".95"/>
+            <stop offset="40%" stop-color="#1a1a1a" stop-opacity=".85"/>
+            <stop offset="100%" stop-color="#0a0a0a" stop-opacity=".55"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="70" cy="126" rx="52" ry="8" fill="rgba(0,0,0,.12)"/>
+        <path d="M36,70 Q24,36 58,28 Q70,6 94,22 Q126,18 116,56 Q132,78 104,100 Q82,124 58,108 Q24,102 36,70 Z" fill="url(#${gid})"/>
+        <path d="M48,56 Q52,46 62,50" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.2"/>
+        <path d="M78,38 Q84,32 92,42" fill="none" stroke="rgba(255,255,255,.1)" stroke-width=".9"/>
+      </svg>`;
+    }
+    function inkSpreadSvg() {
+      return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="28" fill="#1a1a1a" opacity=".7"/>
+        <circle cx="40" cy="40" r="22" fill="none" stroke="#333" stroke-width="2" opacity=".6"/>
+      </svg>`;
+    }
+    function flowerSvg() {
+      const gid = 'flg' + Math.random().toString(36).slice(2,7);
+      return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="${gid}" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#ffcad4"/>
+            <stop offset="50%" stop-color="#ff8fa3"/>
+            <stop offset="100%" stop-color="#e05780"/>
+          </radialGradient>
+        </defs>
+        <g transform="translate(60,60)">
+          <circle cx="0" cy="0" r="12" fill="#ffd93d"/>
+          <ellipse cx="0" cy="-26" rx="12" ry="22" fill="url(#${gid})" transform="rotate(0)"/>
+          <ellipse cx="0" cy="-26" rx="12" ry="22" fill="url(#${gid})" transform="rotate(72)"/>
+          <ellipse cx="0" cy="-26" rx="12" ry="22" fill="url(#${gid})" transform="rotate(144)"/>
+          <ellipse cx="0" cy="-26" rx="12" ry="22" fill="url(#${gid})" transform="rotate(216)"/>
+          <ellipse cx="0" cy="-26" rx="12" ry="22" fill="url(#${gid})" transform="rotate(288)"/>
         </g>
       </svg>`;
     }
-    function snowPileSvg() {
-      const gid = 'snowG' + Math.random();
-      return `<svg viewBox="0 0 160 130" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="${gid}" cx="42%" cy="28%" r="75%">
-            <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
-            <stop offset="55%" stop-color="#f0f6fc" stop-opacity="1"/>
-            <stop offset="100%" stop-color="#cee0f3" stop-opacity="1"/>
-          </radialGradient>
-        </defs>
-        <ellipse cx="80" cy="118" rx="68" ry="9" fill="rgba(120,160,210,.25)"/>
-        <path d="M10,112 Q6,35 80,22 Q154,35 150,112 Z" fill="url(#${gid})" stroke="rgba(160,195,230,.7)" stroke-width="1.5" opacity="0.97"/>
-        <path d="M26,95 Q32,55 80,45 Q128,55 134,95" fill="none" stroke="rgba(195,220,240,.5)" stroke-width="1"/>
-        <circle cx="52" cy="52" r="2.4" fill="#fff" opacity=".9"/>
-        <circle cx="108" cy="60" r="1.8" fill="#fff" opacity=".8"/>
-        <circle cx="82" cy="40" r="2.1" fill="#fff" opacity=".7"/>
-        <circle cx="40" cy="78" r="1.5" fill="#fff" opacity=".65"/>
-        <circle cx="118" cy="82" r="1.3" fill="#fff" opacity=".6"/>
-        <circle cx="68" cy="72" r="1.2" fill="#fff" opacity=".5"/>
-      </svg>`;
-    }
-    function fishSvg() {
-      const gid = 'fg' + Math.random();
-      return `<svg viewBox="0 0 185 100" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="${gid}" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#9bc0ee"/>
-            <stop offset="50%" stop-color="#5d8ac8"/>
-            <stop offset="100%" stop-color="#3c689c"/>
-          </linearGradient>
-        </defs>
-        <path d="M152,50 L182,18 L172,50 L182,82 Z" fill="#4a78b4"/>
-        <path d="M18,50 Q26,12 80,12 Q140,12 152,50 Q140,88 80,88 Q26,88 18,50 Z" fill="url(#${gid})" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
-        <path d="M62,16 Q78,2 98,16 Z" fill="#4a78b4" opacity=".88"/>
-        <path d="M58,58 Q50,80 74,70 Z" fill="#3c689c" opacity=".72"/>
-        <path d="M120,84 Q128,95 108,90 Z" fill="#3c689c" opacity=".6"/>
-        <circle cx="38" cy="40" r="7" fill="#fff"/>
-        <circle cx="35" cy="42" r="3.6" fill="#16202c"/>
-        <circle cx="34" cy="40" r="1.2" fill="#fff"/>
-        <path d="M68,28 Q74,50 68,72" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1.2"/>
-        <path d="M92,26 Q98,50 92,74" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1.2"/>
-        <path d="M116,30 Q121,50 116,70" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
-      </svg>`;
-    }
-    function shuffle(items) {
-      return [...items].sort(() => Math.random() - .5);
-    }
+    function shuffle(items) { return [...items].sort(() => Math.random() - .5); }
     function showCorrectMark() {
       document.querySelectorAll('.correct-mark').forEach(mark => mark.remove());
       const mark = document.createElement('div');
       mark.className = 'correct-mark';
       mark.textContent = '○';
       document.body.appendChild(mark);
-      window.setTimeout(() => mark.remove(), 760);
+      window.setTimeout(() => mark.remove(), 750);
     }
     function launchConfetti() {
       const box = document.createElement('div');
       box.className = 'confetti';
-      const colors = ['#d85045', '#248067', '#2f6fbd', '#a36600', '#6b58b8', '#c04382', '#5b7fa8'];
+      const colors = ['#d85045', '#248067', '#2f6fbd', '#a36600', '#6b58b8', '#c04382', '#e86a82'];
       for (let i = 0; i < 80; i += 1) {
         const piece = document.createElement('i');
         piece.style.left = `${Math.random() * 100}%`;
@@ -1767,15 +1709,12 @@
     }
     function setupDraggableControls() {
       document.querySelectorAll('[data-draggable-control]').forEach(control => {
-        let dragging = false;
-        let offsetX = 0;
-        let offsetY = 0;
+        let dragging = false; let offsetX = 0; let offsetY = 0;
         control.addEventListener('pointerdown', event => {
           if (event.target.closest('button, select, option')) return;
           dragging = true;
           const rect = control.getBoundingClientRect();
-          offsetX = event.clientX - rect.left;
-          offsetY = event.clientY - rect.top;
+          offsetX = event.clientX - rect.left; offsetY = event.clientY - rect.top;
           control.setPointerCapture(event.pointerId);
         });
         control.addEventListener('pointermove', event => {
@@ -1784,9 +1723,7 @@
           const maxY = window.innerHeight - control.offsetHeight - 8;
           const x = Math.max(8, Math.min(maxX, event.clientX - offsetX));
           const y = Math.max(8, Math.min(maxY, event.clientY - offsetY));
-          control.style.left = `${x}px`;
-          control.style.top = `${y}px`;
-          control.style.right = 'auto';
+          control.style.left = `${x}px`; control.style.top = `${y}px`; control.style.right = 'auto';
         });
         control.addEventListener('pointerup', event => {
           dragging = false;

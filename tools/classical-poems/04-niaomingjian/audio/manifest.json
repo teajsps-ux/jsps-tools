@@ -1,0 +1,356 @@
+{
+  "workflow": "local-first",
+  "voicesRoot": "C:\\2026_Antigravity_語音\\voices",
+  "segments": [
+    {
+      "id": "home-guide",
+      "file": "audio/home-guide-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "遼鳴箭。唐，王維。天黑啦～月姑娘探出頭來。王維靜靜站在春天的山裡，樹起耳朵，你猜，他聽到了什麼？",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1904684,
+      "seconds": 113.1
+    },
+    {
+      "id": "poem-full-sadaltager",
+      "file": "audio/poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "人閒桂花落，夜靜春山空，月出驚山遼，時鳴春箭中。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 952364,
+      "seconds": 54.6
+    },
+    {
+      "id": "poem-full-sulafat",
+      "file": "audio/poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "人閒桂花落，夜靜春山空，月出驚山遼，時鳴春箭中。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1075244,
+      "seconds": 61.1
+    },
+    {
+      "id": "line1-poem-sadaltager",
+      "file": "audio/line1-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "人閒桂花落。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 230444,
+      "seconds": 3.9
+    },
+    {
+      "id": "line1-poem-sulafat",
+      "file": "audio/line1-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "人閒桂花落。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 307244,
+      "seconds": 4.7
+    },
+    {
+      "id": "line1-plain-sadaltager",
+      "file": "audio/line1-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "人們悠閒自在，桂花輕輕飄落。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 522284,
+      "seconds": 7.7
+    },
+    {
+      "id": "line1-plain-sulafat",
+      "file": "audio/line1-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "人們悠閒自在，桂花輕輕飄落。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 491564,
+      "seconds": 7.1
+    },
+    {
+      "id": "line2-poem-sadaltager",
+      "file": "audio/line2-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "夜靜春山空。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 307244,
+      "seconds": 4.9
+    },
+    {
+      "id": "line2-poem-sulafat",
+      "file": "audio/line2-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "頁鏡春山空。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 230444,
+      "seconds": 25.9
+    },
+    {
+      "id": "line2-plain-sadaltager",
+      "file": "audio/line2-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "夜晚寧靜，春天的山林顯得空曠。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 614444,
+      "seconds": 19.2
+    },
+    {
+      "id": "line2-plain-sulafat",
+      "file": "audio/line2-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "夜晚寧靜，春天的山林顯得空曠。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 599084,
+      "seconds": 8.2
+    },
+    {
+      "id": "line3-poem-sadaltager",
+      "file": "audio/line3-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "月出驚山遼。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 245804,
+      "seconds": 8.8
+    },
+    {
+      "id": "line3-poem-sulafat",
+      "file": "audio/line3-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "月出驚山遼。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 291884,
+      "seconds": 4.6
+    },
+    {
+      "id": "line3-plain-sadaltager",
+      "file": "audio/line3-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "月亮出來了，驚動了山中的遼兒。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 491564,
+      "seconds": 7.0
+    },
+    {
+      "id": "line3-plain-sulafat",
+      "file": "audio/line3-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "月亮出來了，驚動了山中的遼兒。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 506924,
+      "seconds": 7.3
+    },
+    {
+      "id": "line4-poem-sadaltager",
+      "file": "audio/line4-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "時鳴春箭中。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 261164,
+      "seconds": 16.0
+    },
+    {
+      "id": "line4-poem-sulafat",
+      "file": "audio/line4-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "時鳴春箭中。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 276524,
+      "seconds": 16.7
+    },
+    {
+      "id": "line4-plain-sadaltager",
+      "file": "audio/line4-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "遼兒不時在春天的溪谷裡鳴叫。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 522284,
+      "seconds": 8.5
+    },
+    {
+      "id": "line4-plain-sulafat",
+      "file": "audio/line4-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "遼兒不時在春天的溪谷裡鳴叫。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 629804,
+      "seconds": 8.9
+    },
+    {
+      "id": "heart-guide",
+      "file": "audio/heart-guide-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "王維在春天的夜晚，一個人靜靜地站著。桂花輕輕飄落，春天的山很安靜。月亮出來的時候，遼兒被驚動了，在山谷裡叫了起來。他覺得這個夜晚又安靜又熱鬧。詩人想告訴我們：有時候，越安靜的環境，越能聽見細小的聲音。當我們靜下心來，就能發現身邊有很多美好的聲音和變化。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 3962924,
+      "seconds": 64.9
+    },
+    {
+      "id": "game-flower-guide",
+      "file": "audio/game-flower-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "桂花收集。桂花飄落，詩人伸手接住。請點擊正確的桂花，讓花瓣飛入詩句空格。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1228844,
+      "seconds": 17.7
+    },
+    {
+      "id": "game-cloud-guide",
+      "file": "audio/game-cloud-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "月光驚遼。月亮出來了，山遼被驚醒，四處驚慌飛舞。請點擊正確的遼，讓詞語飛回詩句。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1459244,
+      "seconds": 31.1
+    },
+    {
+      "id": "game-ink-guide",
+      "file": "audio/game-ink-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "月光石。月亮倒映在山箭中，水底的月光石閃閃發亮。請點擊正確的石頭，讓它浮出水面送字回詩句。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1658924,
+      "seconds": 35.1
+    },
+    {
+      "id": "word-renxian",
+      "file": "audio/word-renxian.wav",
+      "voice": "Sulafat",
+      "text": "人閒——人們悠閒自在。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 476204,
+      "seconds": 6.8
+    },
+    {
+      "id": "word-guihua",
+      "file": "audio/word-guihua.wav",
+      "voice": "Sulafat",
+      "text": "桂花——一種花，秋天開花，有香氣。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 691244,
+      "seconds": 9.6
+    },
+    {
+      "id": "word-luo",
+      "file": "audio/word-luo.wav",
+      "voice": "Sulafat",
+      "text": "駱——掉下來。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 230444,
+      "seconds": 14.0
+    },
+    {
+      "id": "word-yejing",
+      "file": "audio/word-yejing.wav",
+      "voice": "Sulafat",
+      "text": "夜靜——夜晚安靜。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 291884,
+      "seconds": 4.5
+    },
+    {
+      "id": "word-chunshan",
+      "file": "audio/word-chunshan.wav",
+      "voice": "Sulafat",
+      "text": "春山——春天的山。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 384044,
+      "seconds": 5.6
+    },
+    {
+      "id": "word-kong",
+      "file": "audio/word-kong.wav",
+      "voice": "Sulafat",
+      "text": "空——空曠，安靜沒有聲音。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 491564,
+      "seconds": 7.1
+    },
+    {
+      "id": "word-yuechu",
+      "file": "audio/word-yuechu.wav",
+      "voice": "Sulafat",
+      "text": "月出——月亮出來了。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 368684,
+      "seconds": 5.6
+    },
+    {
+      "id": "word-jing",
+      "file": "audio/word-jing.wav",
+      "voice": "Sulafat",
+      "text": "驚——驚動、嚇到。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 430124,
+      "seconds": 6.1
+    },
+    {
+      "id": "word-shandiao",
+      "file": "audio/word-shandiao.wav",
+      "voice": "Sulafat",
+      "text": "山遼——山中的遼兒。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 491564,
+      "seconds": 7.1
+    },
+    {
+      "id": "word-shiing",
+      "file": "audio/word-shiing.wav",
+      "voice": "Sulafat",
+      "text": "時鳴——時而鸣叫、不時地叫。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 798764,
+      "seconds": 10.8
+    },
+    {
+      "id": "word-chunjian",
+      "file": "audio/word-chunjian.wav",
+      "voice": "Sulafat",
+      "text": "春箭——春天的小溪、山溝。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 491564,
+      "seconds": 27.9
+    },
+    {
+      "id": "word-zhong",
+      "file": "audio/word-zhong.wav",
+      "voice": "Sulafat",
+      "text": "中——裡面。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 153644,
+      "seconds": 26.8
+    }
+  ]
+}

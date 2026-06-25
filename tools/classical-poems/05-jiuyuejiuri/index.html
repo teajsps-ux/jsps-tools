@@ -1,0 +1,1745 @@
+﻿<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>九月九日憶山東兄弟 - 古詩互動 HTML 小樣</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bpmf+Iansui&family=Bpmf+Zihi+Kai+Std&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #25211d;
+      --paper: rgba(255, 253, 248, .86);
+      --soft: rgba(255, 253, 248, .72);
+      --line: rgba(55, 42, 26, .16);
+      --verb: #d85045;
+      --noun: #248067;
+      --person: #2f6fbd;
+      --time: #a36600;
+      --place: #6b58b8;
+      --feeling: #c04382;
+      --shadow: 0 20px 70px rgba(29, 24, 17, .2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow: auto;
+      color: var(--ink);
+      font-family: system-ui, "Microsoft JhengHei", sans-serif;
+      background: #f8f4ec;
+    }
+    body.font-iansui { font-family: "Bpmf Iansui", system-ui, sans-serif; }
+    body.font-kai { font-family: "Bpmf Zihi Kai Std", "Bpmf Iansui", serif; }
+    button {
+      border: 0;
+      border-radius: 999px;
+      min-height: 40px;
+      padding: 9px 15px;
+      font: inherit;
+      font-weight: 800;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .78);
+      box-shadow: 0 8px 24px rgba(38, 29, 18, .12);
+      cursor: pointer;
+    }
+    button:hover { background: #fff; }
+    button.primary { color: white; background: #315f53; }
+    button.ghost { background: rgba(255, 255, 255, .44); }
+    .deck, .slide {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: white;
+    }
+    .slide.active { display: block; }
+    .slide.active .art,
+    .slide.active .shade {
+      position: fixed;
+    }
+    .art {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .shade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.9), rgba(255,255,255,.62) 45%, rgba(255,255,255,.18)),
+        radial-gradient(circle at 72% 20%, rgba(255,255,255,.3), transparent 42%);
+      pointer-events: none;
+    }
+    body.clean-view .shade,
+    body.clean-view .stage,
+    body.clean-view .audio-note,
+    body.clean-view dialog {
+      display: none;
+    }
+    body.clean-view .tools button:not(.view-toggle) {
+      display: none;
+    }
+    .topbar {
+      position: fixed;
+      z-index: 30;
+      top: 14px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .tools, .pager {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px;
+      border: 1px solid rgba(44, 35, 24, .12);
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .72);
+      backdrop-filter: blur(14px);
+      pointer-events: auto;
+    }
+    .stage {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      padding: clamp(76px, 9vh, 104px) clamp(24px, 5vw, 70px) clamp(54px, 6vh, 80px);
+      display: grid;
+      align-items: center;
+    }
+    .home-copy {
+      width: min(860px, 92vw);
+      display: grid;
+      gap: 18px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 7vw, 94px);
+      line-height: 1.04;
+      letter-spacing: 0;
+      color: #2e3832;
+    }
+    .author {
+      font-size: clamp(22px, 2.7vw, 36px);
+      font-weight: 800;
+      color: #64574a;
+    }
+    .poem-vertical {
+      writing-mode: horizontal-tb;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: flex-start;
+      gap: clamp(14px, 2vw, 28px);
+      min-height: 420px;
+      font-size: clamp(32px, 4.5vw, 66px);
+      line-height: 1.62;
+      font-weight: 800;
+      color: #2c332e;
+    }
+    .poem-vertical span {
+      padding-left: 10px;
+      border-left: 2px solid rgba(49, 95, 83, .18);
+    }
+    .poem-vertical .home-line {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      min-height: 7.6em;
+      padding: .18em .12em;
+      border-radius: 10px;
+      transition: background .2s, box-shadow .2s, transform .2s;
+    }
+    .home-line.active-line,
+    .compare-row.active-line {
+      background: rgba(255, 236, 161, .76);
+      box-shadow: 0 0 0 5px rgba(255, 236, 161, .32);
+      transform: translateY(-2px);
+    }
+    .line-stage {
+      grid-template-columns: minmax(380px, 720px) minmax(320px, 520px);
+      gap: clamp(20px, 4vw, 54px);
+    }
+    .line-poem {
+      display: grid;
+      gap: 18px;
+      align-content: center;
+    }
+    .line-title {
+      font-size: clamp(23px, 2.6vw, 34px);
+      font-weight: 900;
+      color: #66594b;
+    }
+    .token-line {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      min-height: min(58vh, 520px);
+      gap: 12px;
+      font-size: clamp(38px, 5.4vw, 74px);
+      line-height: 1.38;
+      font-weight: 900;
+    }
+    .token {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      border-radius: 8px;
+      padding: .1em .08em;
+      background: rgba(255, 255, 255, .58);
+      box-shadow: 0 8px 24px rgba(42, 31, 19, .08);
+    }
+    .token[data-kind="verb"] { color: var(--verb); }
+    .token[data-kind="noun"] { color: var(--noun); }
+    .token[data-kind="person"] { color: var(--person); }
+    .token[data-kind="time"] { color: var(--time); }
+    .token[data-kind="place"] { color: var(--place); }
+    .token[data-kind="feeling"] { color: var(--feeling); }
+    .plain {
+      max-width: 720px;
+      padding: 20px 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      font-size: clamp(22px, 2.6vw, 34px);
+      line-height: 1.38;
+      font-weight: 800;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #53493f;
+    }
+    .legend span {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .68);
+    }
+    .compare {
+      width: min(1120px, 94vw);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .compare-grid {
+      width: min(1120px, 94vw);
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 12px 18px;
+      align-items: stretch;
+    }
+    .compare-head {
+      font-size: clamp(24px, 3vw, 38px);
+      font-weight: 900;
+      padding: 0 14px 4px;
+      justify-self: start;
+      background: rgba(255, 255, 255, .72);
+    }
+    .compare-row {
+      min-height: 84px;
+      display: grid;
+      align-items: center;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .08);
+      padding: 14px 18px;
+      font-size: clamp(21px, 2.4vw, 32px);
+      line-height: 1.36;
+      font-weight: 850;
+      transition: background .2s, box-shadow .2s, transform .2s;
+    }
+    .poem-row {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 84px;
+    }
+    .poem-row .token {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      background: transparent;
+      box-shadow: none;
+      padding: 0 .04em;
+      font-size: 1em;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 34px);
+    }
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: clamp(24px, 3vw, 38px);
+    }
+    .panel p {
+      margin: 0;
+      font-size: clamp(21px, 2.4vw, 31px);
+      line-height: 1.55;
+      font-weight: 750;
+    }
+    .game {
+      width: min(1060px, 94vw);
+      display: grid;
+      gap: 18px;
+    }
+    section[data-auto="game-guide"] .game {
+      width: min(1320px, 96vw);
+    }
+    section[data-auto="game-guide"] .plain {
+      white-space: nowrap;
+      width: max-content;
+      max-width: 100%;
+      padding-inline: clamp(24px, 4vw, 42px);
+    }
+    .game.wide {
+      width: min(1240px, 96vw);
+    }
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .choice {
+      border-radius: 8px;
+      padding: 18px;
+      min-height: 88px;
+      text-align: left;
+      font-size: clamp(22px, 2.5vw, 32px);
+      background: var(--paper);
+    }
+    .feedback {
+      min-height: 54px;
+      font-size: clamp(20px, 2.2vw, 28px);
+      font-weight: 900;
+      color: #315f53;
+    }
+    .word-bank, .drop-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .rebuild-board {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .rebuild-line {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      display: grid;
+      grid-template-columns: minmax(180px, 22%) 1fr;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .08);
+    }
+    .rebuild-line .drop-row {
+      min-height: 64px;
+      flex-direction: row;
+      flex-wrap: nowrap;
+    }
+    .line-number {
+      font-size: clamp(20px, 2vw, 28px);
+      font-weight: 900;
+      color: #315f53;
+    white-space: nowrap;
+      line-height: 1.15;
+    }
+    .drop {
+      display: inline-grid;
+      place-items: center;
+      min-width: 130px;
+      min-height: 62px;
+      border: 3px dashed rgba(49, 95, 83, .38);
+      border-radius: 8px;
+      background: rgba(255,255,255,.62);
+      font-size: clamp(22px, 2.4vw, 32px);
+      font-weight: 900;
+    }
+    .rebuild-line .drop {
+      min-width: 92px;
+      min-height: 54px;
+      font-size: clamp(19px, 2vw, 28px);
+    }
+    .rebuild-line .drop-row {
+      justify-content: center;
+    }
+    .wide .word-bank {
+      max-height: 26vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .drop.filled {
+      border-style: solid;
+      color: white;
+      background: #315f53;
+    }
+    .drag-card {
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: clamp(22px, 2.4vw, 32px);
+      background: var(--paper);
+      touch-action: none;
+      user-select: none;
+    }
+    .mini-poem {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      min-height: auto;
+      font-size: clamp(26px, 3vw, 42px);
+      line-height: 1.55;
+      font-weight: 900;
+      display: grid;
+      gap: 14px;
+    }
+    .mini-poem .poem-sentence {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: .12em;
+      margin-left: 0;
+    }
+    .confetti {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .confetti i {
+      position: absolute;
+      top: -20px;
+      width: 10px;
+      height: 18px;
+      background: var(--verb);
+      animation: fall 5s linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(108vh) rotate(720deg); opacity: .15; }
+    }
+    .game-timer {
+      font-size: 15px;
+      font-weight: 700;
+      color: #315f53;
+      text-align: center;
+      min-height: 22px;
+      line-height: 22px;
+    }
+    .correct-mark {
+      position: fixed;
+      inset: 0;
+      z-index: 82;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      font-family: Arial, sans-serif;
+      font-size: clamp(210px, 32vw, 420px);
+      font-weight: 900;
+      line-height: 1;
+      color: #23a45a;
+      text-shadow:
+        0 0 18px rgba(35, 164, 90, .9),
+        0 0 46px rgba(35, 164, 90, .65),
+        0 14px 34px rgba(35, 164, 90, .35);
+      animation: markPop .72s ease-out both;
+    }
+    @keyframes markPop {
+      0% { transform: scale(.55); opacity: 0; }
+      20% { transform: scale(1.08); opacity: 1; }
+      70% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(.92); opacity: 0; }
+    }
+    section[data-auto="game-order-guide"] .word-bank,
+    section[data-auto="game-blank-guide"] .word-bank {
+      display: none;
+    }
+    .shooting-target {
+      margin: 8px 0;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(49, 95, 83, .9);
+      border: 2px solid rgba(255, 253, 248, .72);
+      color: #315f53;
+      font-size: clamp(20px, 2.2vw, 30px);
+      font-weight: 900;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(29, 24, 17, .16);
+    }
+    .shooter-field {
+      position: relative;
+      min-height: clamp(170px, 25vh, 260px);
+      margin: 12px 0;
+      border-radius: 8px;
+      border: 2px solid rgba(49, 95, 83, .16);
+      background: rgba(255, 253, 248, .46);
+      overflow: hidden;
+    }
+    .shooter-card {
+      position: absolute;
+      min-width: 104px;
+      min-height: 58px;
+      padding: 10px 16px;
+      border: 2px solid rgba(49, 95, 83, .2);
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .94);
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .16);
+      color: #172d27;
+      font-size: clamp(21px, 2.4vw, 32px);
+      font-weight: 900;
+      cursor: crosshair;
+      touch-action: manipulation;
+      animation: floatTarget var(--fly-time, 7s) ease-in-out infinite alternate;
+    }
+    .shooter-card:active {
+      transform: scale(.95);
+    }
+    .shooter-card.hit {
+      opacity: 0;
+      transform: scale(1.35);
+      transition: opacity .22s ease, transform .22s ease;
+    }
+    @keyframes floatTarget {
+      from { translate: -18px -8px; }
+      to { translate: 22px 12px; }
+    }
+    .mountain-game .shooter-field,
+    .dogwood-game .shooter-field {
+      display: none;
+    }
+    .mountain-wrap {
+      position: relative;
+      min-height: clamp(105px, 15vh, 145px);
+      margin: 8px 0 4px;
+      border-radius: 8px;
+      border: 1px solid rgba(49, 95, 83, .18);
+      background:
+        linear-gradient(155deg, transparent 0 36%, rgba(49,95,83,.08) 36% 38%, transparent 38%),
+        linear-gradient(25deg, rgba(255,253,248,.62), rgba(255,253,248,.86));
+      overflow: hidden;
+    }
+    .mountain-side {
+      position: absolute;
+      inset: 16px 24px 10px;
+      clip-path: polygon(4% 78%, 52% 18%, 96% 78%, 96% 100%, 4% 100%);
+      background: linear-gradient(180deg, rgba(49,95,83,.18), rgba(49,95,83,.05));
+      border: 2px solid rgba(49,95,83,.16);
+    }
+    .step-dot {
+      position: absolute;
+      width: clamp(32px, 3.5vw, 46px);
+      height: clamp(32px, 3.5vw, 46px);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      border: 3px solid rgba(49,95,83,.24);
+      background: rgba(255,253,248,.88);
+      font-weight: 900;
+      color: #315f53;
+      transform: translate(-50%, -50%);
+    }
+    .step-dot.done {
+      background: #315f53;
+      color: white;
+      box-shadow: 0 0 26px rgba(49,95,83,.38);
+    }
+    .climber {
+      position: absolute;
+      width: clamp(40px, 4.5vw, 58px);
+      height: clamp(40px, 4.5vw, 58px);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 253, 248, .94);
+      border: 3px solid rgba(49,95,83,.28);
+      box-shadow: 0 12px 26px rgba(29,24,17,.18);
+      font-size: clamp(24px, 3vw, 36px);
+      transform: translate(-50%, -50%);
+      transition: left .35s ease, top .35s ease;
+      z-index: 2;
+    }
+    .mountain-options,
+    .dogwood-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(255, 253, 248, .68);
+      border: 1px solid rgba(49, 95, 83, .14);
+    }
+    .tap-word {
+      border-radius: 999px;
+      padding: 14px 22px;
+      min-width: 96px;
+      background: rgba(255,253,248,.92);
+      border: 2px solid rgba(49,95,83,.18);
+      box-shadow: 0 8px 18px rgba(29,24,17,.10);
+      font-size: clamp(22px, 2.4vw, 32px);
+      font-weight: 900;
+      color: #172d27;
+    }
+    .tap-word:disabled {
+      opacity: .35;
+    }
+    .dogwood-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
+      gap: 16px;
+      align-items: stretch;
+      margin: 8px 0;
+    }
+    .dogwood-basket {
+      min-height: 158px;
+      border-radius: 8px;
+      border: 2px solid rgba(163,102,0,.24);
+      background: rgba(255,244,218,.72);
+      display: grid;
+      align-content: end;
+      justify-items: center;
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .dogwood-basket::after {
+      content: "茱萸籃";
+      width: 86%;
+      min-height: 72px;
+      display: grid;
+      place-items: center;
+      border-radius: 0 0 42px 42px;
+      background: linear-gradient(180deg, #d8a35e, #a36600);
+      color: white;
+      font-weight: 900;
+      font-size: clamp(20px, 2vw, 28px);
+      box-shadow: inset 0 10px 18px rgba(255,255,255,.18);
+    }
+    .dogwood-leaf {
+      position: absolute;
+      top: 18px;
+      width: 34px;
+      height: 48px;
+      border-radius: 80% 0 80% 0;
+      background: #248067;
+      transform: rotate(32deg);
+      box-shadow: 0 5px 14px rgba(36,128,103,.28);
+    }
+    @media (max-width: 760px) {
+      .dogwood-wrap { grid-template-columns: 1fr; }
+      .dogwood-basket { min-height: 150px; }
+    }
+    .audio-note {
+      position: fixed;
+      z-index: 31;
+      left: 16px;
+      bottom: 14px;
+      max-width: min(46px, calc(100vw - 32px));
+      min-height: 32px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(163, 102, 0, .2);
+      background: rgba(255, 244, 218, .9);
+      color: #654400;
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
+      cursor: help;
+      opacity: .72;
+      transition: max-width .18s ease, opacity .18s ease, background .18s ease;
+    }
+    .audio-note::before {
+      content: "音";
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      margin-right: 8px;
+      border-radius: 999px;
+      background: #fff7df;
+      color: #654400;
+    }
+    .audio-note:hover,
+    .audio-note:focus {
+      max-width: min(920px, calc(100vw - 32px));
+      opacity: 1;
+      background: rgba(255, 244, 218, .96);
+    }
+    .fullscreen-toggle {
+      position: fixed;
+      z-index: 31;
+      left: 18px;
+      bottom: 64px;
+      width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(49, 95, 83, .18);
+      background: rgba(255, 253, 248, .9);
+      color: #315f53;
+      font-size: 21px;
+      font-weight: 900;
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .1);
+    }
+    .fullscreen-toggle:hover {
+      background: #fff;
+    }
+    dialog {
+      width: min(560px, 90vw);
+      border: 0;
+      border-radius: 10px;
+      padding: 0;
+      background: transparent;
+    }
+    dialog::backdrop { background: rgba(30, 24, 17, .28); }
+    .pop {
+      padding: 24px;
+      border: 1px solid rgba(44, 35, 24, .15);
+      border-radius: 10px;
+      background: rgba(255, 253, 248, .96);
+      box-shadow: var(--shadow);
+    }
+    .pop h3 {
+      margin: 0 0 8px;
+      font-size: 34px;
+    }
+    .pop p {
+      margin: 0 0 18px;
+      font-size: 24px;
+      line-height: 1.42;
+      font-weight: 760;
+    }
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .deck, .slide { min-height: 100vh; height: auto; }
+      .slide { position: relative; }
+      .line-stage, .compare { grid-template-columns: 1fr; }
+      .poem-vertical { writing-mode: horizontal-tb; min-height: auto; }
+      .choices { grid-template-columns: 1fr; }
+      .topbar { position: sticky; top: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="tools">
+      <button onclick="setFont('normal')">一般字體</button>
+      <button onclick="setFont('iansui')">Bpmf Iansui</button>
+      <button onclick="setFont('kai')">Bpmf Zihi Kai Std</button>
+      <button class="view-toggle" onclick="toggleCleanView()">只看底圖</button>
+    </div>
+    <div class="pager">
+      <button onclick="prevSlide()">←</button>
+      <button class="primary" onclick="nextSlide()">→</button>
+    </div>
+  </div>
+
+  <main class="deck">
+    <section class="slide active" data-auto="home-guide">
+      <img class="art" src="generated/poem-home_20260506_130722.png" alt="重陽思親首頁插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>九月九日<br>憶山東兄弟</h1>
+          <div class="author">唐・王維</div>
+          <div class="poem-vertical" id="homePoem">
+            <span class="home-line" data-line="0"><span class="token" data-kind="verb">獨在</span><span class="token" data-kind="place">異鄉</span><span class="token" data-kind="verb">為</span><span class="token" data-kind="person">異客</span></span>
+            <span class="home-line" data-line="1"><span class="token" data-kind="time">每逢</span><span class="token" data-kind="time">佳節</span><span class="token" data-kind="feeling">倍</span><span class="token" data-kind="feeling">思親</span></span>
+            <span class="home-line" data-line="2"><span class="token" data-kind="verb">遙知</span><span class="token" data-kind="person">兄弟</span><span class="token" data-kind="verb">登高</span><span class="token" data-kind="place">處</span></span>
+            <span class="home-line" data-line="3"><span class="token" data-kind="verb">遍插</span><span class="token" data-kind="noun">茱萸</span><span class="token" data-kind="feeling">少一人</span></span>
+          </div>
+          <div>
+            <button class="primary" onclick="playHomePoem()">帶讀整首詩</button>
+            <button onclick="nextSlide()">開始一句一句看</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line1-meaning">
+      <img class="art" src="generated/poem-line1_20260506_130754.png" alt="獨在異鄉為異客插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第一句</div>
+          <div class="token-line">
+            <button class="token" data-kind="verb" onclick="showWord(this,'獨在','一個人在。')">獨在</button>
+            <button class="token" data-kind="place" onclick="showWord(this,'異鄉','別人的地方，不是家鄉。')">異鄉</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'為','是。')">為</button>
+            <button class="token" data-kind="person" onclick="showWord(this,'異客','在外地的人。')">異客</button>
+          </div>
+          <div class="legend"><span style="color:var(--verb)">動作/狀態</span><span style="color:var(--place)">地方</span><span style="color:var(--person)">人物身分</span></div>
+        </div>
+        <div class="plain">我一個人在外地，不在自己的家鄉。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line2-meaning">
+      <img class="art" src="generated/poem-line2_20260506_130821.png" alt="每逢佳節倍思親插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第二句</div>
+          <div class="token-line">
+            <button class="token" data-kind="time" onclick="showWord(this,'每逢','每一次遇到。')">每逢</button>
+            <button class="token" data-kind="time" onclick="showWord(this,'佳節','重要的節日。')">佳節</button>
+            <button class="token" data-kind="feeling" onclick="showWord(this,'倍','更多。')">倍</button>
+            <button class="token" data-kind="feeling" onclick="showWord(this,'思親','想家人。')">思親</button>
+          </div>
+          <div class="legend"><span style="color:var(--time)">時間</span><span style="color:var(--feeling)">心情</span></div>
+        </div>
+        <div class="plain">每到節日，我更想念家人。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line3-meaning">
+      <img class="art" src="generated/poem-line3_20260506_130845.png" alt="遙知兄弟登高處插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第三句</div>
+          <div class="token-line">
+            <button class="token" data-kind="verb" onclick="showWord(this,'遙知','遠遠地想到。')">遙知</button>
+            <button class="token" data-kind="person" onclick="showWord(this,'兄弟','家裡的兄弟。')">兄弟</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'登高','走到高高的地方。')">登高</button>
+            <button class="token" data-kind="place" onclick="showWord(this,'處','地方。')">處</button>
+          </div>
+          <div class="legend"><span style="color:var(--verb)">動作/想像</span><span style="color:var(--person)">人物</span><span style="color:var(--place)">地方</span></div>
+        </div>
+        <div class="plain">我想到兄弟們正在登高。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line4-meaning">
+      <img class="art" src="generated/poem-line4_20260506_130908.png" alt="遍插茱萸少一人插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第四句</div>
+          <div class="token-line">
+            <button class="token" data-kind="verb" onclick="showWord(this,'遍插','大家都插著。')">遍插</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'茱萸','一種植物。重陽節會用到。')">茱萸</button>
+            <button class="token" data-kind="feeling" onclick="showWord(this,'少一人','少了我。')">少一人</button>
+          </div>
+          <div class="legend"><span style="color:var(--verb)">動作</span><span style="color:var(--noun)">物品</span><span style="color:var(--feeling)">心情</span></div>
+        </div>
+        <div class="plain">大家都插著茱萸，可是少了我。</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <img class="art" src="generated/poem-compare_20260506_131043.png" alt="全詩白話對照插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>全詩 / 白話</h1>
+          <div class="author">九月九日憶山東兄弟　唐・王維</div>
+          <div class="compare-grid">
+            <button class="compare-head" onclick="playOriginalOnly()">原詩</button>
+            <button class="compare-head" onclick="playPlainOnly()">白話</button>
+            <div class="compare-row poem-row" data-pair="0" onclick="playComparePair(0)"><span class="token" data-kind="verb">獨在</span><span class="token" data-kind="place">異鄉</span><span class="token" data-kind="verb">為</span><span class="token" data-kind="person">異客</span></div>
+            <div class="compare-row plain-row" data-pair="0" onclick="playComparePair(0)">我一個人在外地，不在自己的家鄉。</div>
+            <div class="compare-row poem-row" data-pair="1" onclick="playComparePair(1)"><span class="token" data-kind="time">每逢</span><span class="token" data-kind="time">佳節</span><span class="token" data-kind="feeling">倍</span><span class="token" data-kind="feeling">思親</span></div>
+            <div class="compare-row plain-row" data-pair="1" onclick="playComparePair(1)">每到節日，我更想念家人。</div>
+            <div class="compare-row poem-row" data-pair="2" onclick="playComparePair(2)"><span class="token" data-kind="verb">遙知</span><span class="token" data-kind="person">兄弟</span><span class="token" data-kind="verb">登高</span><span class="token" data-kind="place">處</span></div>
+            <div class="compare-row plain-row" data-pair="2" onclick="playComparePair(2)">我想到兄弟們正在登高。</div>
+            <div class="compare-row poem-row" data-pair="3" onclick="playComparePair(3)"><span class="token" data-kind="verb">遍插</span><span class="token" data-kind="noun">茱萸</span><span class="token" data-kind="feeling">少一人</span></div>
+            <div class="compare-row plain-row" data-pair="3" onclick="playComparePair(3)">大家都插著茱萸，可是少了我。</div>
+          </div>
+          <button class="primary" onclick="playCompare()">對照朗讀</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="heart-guide">
+      <img class="art" src="generated/poem-heart_20260506_133246.png" alt="作者心情與啟示插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>詩人的心情</h1>
+          <div class="author">離家過節，更想念家人</div>
+          <div class="compare">
+            <div class="panel">
+              <h2>當時的心情</h2>
+              <p>王維一個人在外地。重陽節到了，他想到家人正在一起過節，心裡很想家。</p>
+            </div>
+            <div class="panel">
+              <h2>我們學到</h2>
+              <p>節日讓人想到家人。平常也可以多關心家人，讓愛的人知道：我想你。</p>
+            </div>
+          </div>
+          <button class="primary" onclick="playSegment('heart-guide')">聽一聽</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-guide">
+      <img class="art" src="generated/poem-game_20260506_131109.png" alt="互動挑戰插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game">
+          <h1>互動挑戰</h1>
+          <div class="plain">哪一句最能表現「節日時更想念家人」？</div>
+          <div class="choices">
+            <button class="choice" onclick="answer(false)">獨在異鄉為異客</button>
+            <button class="choice" onclick="answer(true)">每逢佳節倍思親</button>
+            <button class="choice" onclick="answer(false)">遙知兄弟登高處</button>
+            <button class="choice" onclick="answer(false)">遍插茱萸少一人</button>
+          </div>
+          <div class="feedback" id="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-order-guide">
+      <img class="art" src="generated/poem-game_20260506_131109.png" alt="詩句重組遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <h1>句子重組</h1>
+          <div class="rebuild-board">
+            <div class="rebuild-line" data-line-text="獨在異鄉為異客。">
+              <div class="line-number">第一句</div>
+              <div class="drop-row">
+                <span class="drop" data-answer="獨在"></span>
+                <span class="drop" data-answer="異鄉"></span>
+                <span class="drop" data-answer="為"></span>
+                <span class="drop" data-answer="異客"></span>
+              </div>
+            </div>
+            <div class="rebuild-line" data-line-text="每逢佳節倍思親。">
+              <div class="line-number">第二句</div>
+              <div class="drop-row">
+                <span class="drop" data-answer="每逢"></span>
+                <span class="drop" data-answer="佳節"></span>
+                <span class="drop" data-answer="倍"></span>
+                <span class="drop" data-answer="思親"></span>
+              </div>
+            </div>
+            <div class="rebuild-line" data-line-text="遙知兄弟登高處。">
+              <div class="line-number">第三句</div>
+              <div class="drop-row">
+                <span class="drop" data-answer="遙知"></span>
+                <span class="drop" data-answer="兄弟"></span>
+                <span class="drop" data-answer="登高"></span>
+                <span class="drop" data-answer="處"></span>
+              </div>
+            </div>
+            <div class="rebuild-line" data-line-text="遍插茱萸少一人。">
+              <div class="line-number">第四句</div>
+              <div class="drop-row">
+                <span class="drop" data-answer="遍插"></span>
+                <span class="drop" data-answer="茱萸"></span>
+                <span class="drop" data-answer="少一人"></span>
+              </div>
+            </div>
+          </div>
+          <div class="word-bank">
+            <button class="drag-card" draggable="true" data-word="兄弟">兄弟</button>
+            <button class="drag-card" draggable="true" data-word="每逢">每逢</button>
+            <button class="drag-card" draggable="true" data-word="少一人">少一人</button>
+            <button class="drag-card" draggable="true" data-word="異客">異客</button>
+            <button class="drag-card" draggable="true" data-word="處">處</button>
+            <button class="drag-card" draggable="true" data-word="倍">倍</button>
+            <button class="drag-card" draggable="true" data-word="遍插">遍插</button>
+            <button class="drag-card" draggable="true" data-word="佳節">佳節</button>
+            <button class="drag-card" draggable="true" data-word="登高">登高</button>
+            <button class="drag-card" draggable="true" data-word="茱萸">茱萸</button>
+            <button class="drag-card" draggable="true" data-word="思親">思親</button>
+            <button class="drag-card" draggable="true" data-word="異鄉">異鄉</button>
+            <button class="drag-card" draggable="true" data-word="獨在">獨在</button>
+            <button class="drag-card" draggable="true" data-word="為">為</button>
+            <button class="drag-card" draggable="true" data-word="遙知">遙知</button>
+          </div>
+          <div class="game-timer" id="mountainTimer"></div>
+          <div class="feedback" id="orderFeedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-blank-guide">
+      <img class="art" src="generated/poem-game_20260506_131109.png" alt="缺字背誦遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game">
+          <h1>背一背</h1>
+          <div class="panel mini-poem">
+            <span class="poem-sentence" data-line-text="獨在異鄉為異客。"><span>獨在</span><span class="drop" data-answer="異鄉"></span><span>為異客</span></span>
+            <span class="poem-sentence" data-line-text="每逢佳節倍思親。"><span>每逢佳節</span><span class="drop" data-answer="倍思親"></span></span>
+            <span class="poem-sentence" data-line-text="遙知兄弟登高處。"><span>遙知</span><span class="drop" data-answer="兄弟"></span><span>登高處</span></span>
+            <span class="poem-sentence" data-line-text="遍插茱萸少一人。"><span>遍插</span><span class="drop" data-answer="茱萸"></span><span class="drop" data-answer="少一人"></span></span>
+          </div>
+          <div class="word-bank">
+            <button class="drag-card" draggable="true" data-word="少一人">少一人</button>
+            <button class="drag-card" draggable="true" data-word="倍思親">倍思親</button>
+            <button class="drag-card" draggable="true" data-word="登高處">登高處</button>
+            <button class="drag-card" draggable="true" data-word="異鄉">異鄉</button>
+            <button class="drag-card" draggable="true" data-word="兄弟">兄弟</button>
+            <button class="drag-card" draggable="true" data-word="茱萸">茱萸</button>
+            <button class="drag-card" draggable="true" data-word="佳節">佳節</button>
+          </div>
+          <div class="game-timer" id="dogwoodTimer"></div>
+          <div class="feedback" id="blankFeedback"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="wordDialog">
+    <div class="pop">
+      <h3 id="wordTitle"></h3>
+      <p id="wordText"></p>
+      <button class="primary" onclick="closeWord()">收起</button>
+    </div>
+  </dialog>
+
+  <button class="fullscreen-toggle" id="fullscreenToggle" onclick="toggleFullscreen()" title="切換全螢幕">⛶</button>
+  <div class="audio-note" id="audioNote">聲音策略：Gemini TTS 優先；不足時用 TTSMaker 或 deevid.ai 補音；目前展示用臨時朗讀。</div>
+
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    const audioText = {
+      'home-guide': '九月九日憶山東兄弟。唐，王維。請先聽整首詩，想一想：詩人在節日裡，為什麼特別想家？',
+      'poem-full': '九月九日憶山東兄弟。唐，王維。獨在異鄉為異客。每逢佳節倍思親。遙知兄弟登高處。遍插茱萸少一人。',
+      'line1-meaning': '獨在異鄉為異客。[pause]我一個人在外地，不在自己的家鄉。',
+      'line2-meaning': '每逢佳節倍思親。[pause]每到節日，我更想念家人。',
+      'line3-meaning': '遙知兄弟登高處。[pause]我想到兄弟們正在登高。',
+      'line4-meaning': '遍插茱萸少一人。[pause]大家都插著茱萸，可是少了我。',
+      'compare-guide': '獨在異鄉為異客。我一個人在外地，不在自己的家鄉。每逢佳節倍思親。每到節日，我更想念家人。遙知兄弟登高處。我想到兄弟們正在登高。遍插茱萸少一人。大家都插著茱萸，可是少了我。',
+      'heart-guide': '王維一個人在外地。重陽節到了，他想到家人正在一起過節，心裡很想家。這首詩提醒我們，平常也可以多關心家人。',
+      'game-guide': '請挑出最能表現節日時更想念家人的詩句。',
+      'game-order-guide': '請把四句詩的詞語重新排好。',
+      'game-blank-guide': '請把缺少的詞語放回詩句裡。',
+      'right': '答對了。每逢佳節倍思親，就是每到節日，更加想念親人。',
+      'wrong': '再想想。題目問的是節日時更想念家人。'
+    };
+    const manifest = [
+      {provider:'Gemini TTS', status:'failed', note:'API free quota or rate limit was insufficient in this demo.'},
+      {provider:'TTSMaker', status:'backup', note:'Use prepared text segments to manually generate downloadable audio.'},
+      {provider:'deevid.ai', status:'backup', note:'Use prepared text segments to manually generate downloadable audio when credits are available.'}
+    ];
+    let current = 0;
+    let currentAudio = null;
+    let browserVoices = [];
+    function refreshBrowserVoices() {
+      if (!('speechSynthesis' in window)) return [];
+      browserVoices = speechSynthesis.getVoices();
+      return browserVoices;
+    }
+    function getYatingVoice() {
+      const voices = browserVoices.length ? browserVoices : refreshBrowserVoices();
+      return voices.find(voice => /Yating|雅婷/i.test(voice.name))
+        || voices.find(voice => voice.lang === 'zh-TW' && /female|女/i.test(voice.name))
+        || voices.find(voice => voice.lang === 'zh-TW')
+        || voices.find(voice => voice.lang && voice.lang.startsWith('zh'));
+    }
+    if ('speechSynthesis' in window) {
+      refreshBrowserVoices();
+      speechSynthesis.onvoiceschanged = refreshBrowserVoices;
+      window.setTimeout(refreshBrowserVoices, 600);
+    }
+    const audioFiles = {
+      'home-guide': 'audio/home-guide-sadaltager.wav',
+      'poem-full': 'audio/poem-sulafat.wav',
+      'line1-meaning': 'audio/line1-meaning-sadaltager.wav',
+      'line2-meaning': 'audio/line2-meaning-sadaltager.wav',
+      'line3-meaning': 'audio/line3-meaning-sadaltager.wav',
+      'line4-meaning': 'audio/line4-meaning-sadaltager.wav',
+      'heart-guide': 'audio/heart-guide-sadaltager.wav',
+      'game-guide': 'audio/game-guide-sulafat.wav',
+      'game-order-guide': 'audio/game-order-guide-leda.wav',
+      'game-blank-guide': 'audio/game-blank-guide-ttsmaker.mp3',
+      'right': 'audio/right-puck.wav',
+      'wrong': 'audio/wrong-sulafat.wav',
+      'compare-poem-1': 'audio/compare-poem-1-sulafat.wav',
+      'compare-poem-2': 'audio/compare-poem-2-sulafat.wav',
+      'compare-poem-3': 'audio/compare-poem-3-sulafat.wav',
+      'compare-poem-4': 'audio/compare-poem-4-sulafat.wav',
+      'compare-plain-1': 'audio/compare-plain-1-sadaltager.wav',
+      'compare-plain-2': 'audio/compare-plain-2-sadaltager.wav',
+      'compare-plain-3': 'audio/compare-plain-3-sadaltager.wav',
+      'compare-plain-4': 'audio/compare-plain-4-sadaltager.wav'
+    };
+    const compareAudioIds = [
+      ['compare-poem-1', 'compare-plain-1'],
+      ['compare-poem-2', 'compare-plain-2'],
+      ['compare-poem-3', 'compare-plain-3'],
+      ['compare-poem-4', 'compare-plain-4']
+    ];
+    const lineAudioByText = {
+      '獨在異鄉為異客。': 'compare-poem-1',
+      '每逢佳節倍思親。': 'compare-poem-2',
+      '遙知兄弟登高處。': 'compare-poem-3',
+      '遍插茱萸少一人。': 'compare-poem-4'
+    };
+    const wordAudioFiles = {
+      '獨在': 'audio/word-sulafat-duzai.wav',
+      '異鄉': 'audio/word-sulafat-yixiang.wav',
+      '為': 'audio/word-sulafat-wei.wav',
+      '異客': 'audio/word-sulafat-yike.wav',
+      '每逢': 'audio/word-sulafat-meifeng.wav',
+      '佳節': 'audio/word-sulafat-jiajie.wav',
+      '倍': 'audio/word-sulafat-bei.wav',
+      '思親': 'audio/word-sulafat-siqin.wav',
+      '遙知': 'audio/word-sulafat-yaozhi.wav',
+      '兄弟': 'audio/word-sulafat-xiongdi.wav',
+      '登高': 'audio/word-sulafat-denggao.wav',
+      '處': 'audio/word-sulafat-chu.wav',
+      '遍插': 'audio/word-sulafat-biancha.wav',
+      '茱萸': 'audio/word-sulafat-zhuyu.wav',
+      '少一人': 'audio/word-sulafat-shaoyiren.wav'
+    };
+
+    function setFont(mode) {
+      document.body.classList.remove('font-iansui', 'font-kai');
+      if (mode === 'iansui') document.body.classList.add('font-iansui');
+      if (mode === 'kai') document.body.classList.add('font-kai');
+    }
+
+    // Timer utilities for games
+    const timers = {};
+    function startTimer(id) {
+      const el = document.getElementById(id + 'Timer');
+      if (!el) return;
+      stopTimer(id);
+      timers[id] = {
+        start: Date.now(),
+        el,
+        interval: setInterval(() => {
+          const s = Math.floor((Date.now() - timers[id].start) / 1000);
+          el.textContent = `⏱ ${s}秒`;
+        }, 200)
+      };
+      el.textContent = '⏱ 0秒';
+    }
+    function stopTimer(id) {
+      const t = timers[id];
+      if (!t) return;
+      clearInterval(t.interval);
+      const s = Math.floor((Date.now() - t.start) / 1000);
+      t.el.textContent = `⏱ ${s}秒 ✓`;
+      delete timers[id];
+    }
+    function resetTimer(id) {
+      const t = timers[id];
+      if (t) clearInterval(t.interval);
+      const el = document.getElementById(id + 'Timer');
+      if (el) el.textContent = '';
+      delete timers[id];
+    }
+
+    function showSlide(index) {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+      const id = slides[current].dataset.auto;
+      if (id === 'game-order-guide') {
+        resetTimer('mountain');
+        window.setTimeout(() => initMountainSlide(slides[current]), 120);
+      }
+      if (id === 'game-blank-guide') {
+        resetTimer('dogwood');
+        window.setTimeout(() => initDogwoodSlide(slides[current]), 120);
+      }
+      if (id) {
+        window.setTimeout(() => playSegment(id), 250);
+      }
+    }
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+    function playSegment(id) {
+      const text = audioText[id] || '';
+      const done = Object.keys(audioFiles).length;
+      document.getElementById('audioNote').textContent =
+        `正式音檔：已設定 ${done} 段；若檔案尚未放入，會暫用臨時朗讀。`;
+      playAudioOrSpeak(id, text);
+    }
+    function playAudioOrSpeak(id, text) {
+      speechSynthesis.cancel();
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      const src = audioFiles[id];
+      if (!src) {
+        return speakScript(text);
+      }
+      currentAudio = new Audio(src);
+      return new Promise(resolve => {
+        currentAudio.onended = resolve;
+        currentAudio.onerror = () => {
+          speakScript(text).then(resolve);
+        };
+        currentAudio.play().catch(() => speakScript(text).then(resolve));
+      });
+    }
+    function speakTemp(text) {
+      if (!text || !('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-TW';
+      utterance.rate = 0.72;
+      speechSynthesis.speak(utterance);
+    }
+    function delay(ms) {
+      return new Promise(resolve => window.setTimeout(resolve, ms));
+    }
+    function speakOnce(text, preferYating = false) {
+      return new Promise(resolve => {
+        if (!text || !('speechSynthesis' in window)) {
+          resolve();
+          return;
+        }
+        let settled = false;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-TW';
+        utterance.rate = 0.72;
+        if (preferYating) {
+          const voice = getYatingVoice();
+          if (voice) utterance.voice = voice;
+        }
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          resolve();
+        };
+        utterance.onend = finish;
+        utterance.onerror = finish;
+        window.setTimeout(finish, Math.max(2600, text.length * 230));
+        speechSynthesis.speak(utterance);
+      });
+    }
+    async function speakScript(text, options = {}) {
+      if (!text) return;
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      speechSynthesis.cancel();
+      const parts = text.split('[pause]');
+      for (let i = 0; i < parts.length; i += 1) {
+        const sentences = parts[i].trim().split(/(?<=[。！？])/).map(part => part.trim()).filter(Boolean);
+        for (const sentence of sentences) {
+          await speakOnce(sentence, options.preferYating === true);
+          await delay(180);
+        }
+        if (i < parts.length - 1) await delay(500);
+      }
+    }
+    function toggleCleanView() {
+      const clean = document.body.classList.toggle('clean-view');
+      document.querySelector('.view-toggle').textContent = clean ? '開啟文字' : '只看底圖';
+    }
+    function syncFullscreenButton() {
+      const button = document.getElementById('fullscreenToggle');
+      if (button) button.textContent = document.fullscreenElement ? '×' : '⛶';
+    }
+    async function toggleFullscreen() {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        } else {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch (error) {
+        console.warn('Fullscreen failed', error);
+      } finally {
+        syncFullscreenButton();
+      }
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenButton);
+    function showWord(source, word, meaning) {
+      document.getElementById('wordTitle').textContent = word;
+      document.getElementById('wordTitle').style.color = getComputedStyle(source).color;
+      document.getElementById('wordText').textContent = meaning;
+      document.getElementById('wordDialog').showModal();
+      const src = wordAudioFiles[word];
+      if (src) {
+        speechSynthesis.cancel();
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+        }
+        currentAudio = new Audio(src);
+        currentAudio.onerror = () => speakScript(`${word}。[pause]${meaning}`, { preferYating: true });
+        currentAudio.play().catch(() => speakScript(`${word}。[pause]${meaning}`, { preferYating: true }));
+      } else {
+        speakScript(`${word}。[pause]${meaning}`, { preferYating: true });
+      }
+    }
+    function playCompare() {
+      const pairs = [
+        ['獨在異鄉為異客。', '我一個人在外地，不在自己的家鄉。'],
+        ['每逢佳節倍思親。', '每到節日，我更想念家人。'],
+        ['遙知兄弟登高處。', '我想到兄弟們正在登高。'],
+        ['遍插茱萸少一人。', '大家都插著茱萸，可是少了我。']
+      ];
+      playHighlightedPairs(pairs, '.compare-row', 'pair');
+    }
+    function playComparePair(index) {
+      const pairs = [
+        ['獨在異鄉為異客。', '我一個人在外地，不在自己的家鄉。'],
+        ['每逢佳節倍思親。', '每到節日，我更想念家人。'],
+        ['遙知兄弟登高處。', '我想到兄弟們正在登高。'],
+        ['遍插茱萸少一人。', '大家都插著茱萸，可是少了我。']
+      ];
+      playHighlightedPairs([pairs[index]], '.compare-row', 'pair', index);
+    }
+    async function playOriginalOnly() {
+      const lines = [
+        '獨在異鄉為異客。',
+        '每逢佳節倍思親。',
+        '遙知兄弟登高處。',
+        '遍插茱萸少一人。'
+      ];
+      await playColumn(lines, '.poem-row');
+    }
+    async function playPlainOnly() {
+      const lines = [
+        '我一個人在外地，不在自己的家鄉。',
+        '每到節日，我更想念家人。',
+        '我想到兄弟們正在登高。',
+        '大家都插著茱萸，可是少了我。'
+      ];
+      await playColumn(lines, '.plain-row');
+    }
+    async function playColumn(lines, selector) {
+      speechSynthesis.cancel();
+      document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+      const rows = [...document.querySelectorAll(selector)];
+      for (let i = 0; i < lines.length; i += 1) {
+        rows.forEach(row => row.classList.remove('active-line'));
+        rows[i]?.classList.add('active-line');
+        const audioId = selector === '.poem-row'
+          ? compareAudioIds[i][0]
+          : compareAudioIds[i][1];
+        await playAudioOrSpeak(audioId, lines[i]);
+        await delay(450);
+      }
+      rows.forEach(row => row.classList.remove('active-line'));
+    }
+    async function playHomePoem() {
+      const lines = [
+        '獨在異鄉為異客。',
+        '每逢佳節倍思親。',
+        '遙知兄弟登高處。',
+        '遍插茱萸少一人。'
+      ];
+      speechSynthesis.cancel();
+      document.querySelectorAll('.home-line').forEach(line => line.classList.remove('active-line'));
+      for (let i = 0; i < lines.length; i += 1) {
+        document.querySelectorAll('.home-line').forEach(line => line.classList.remove('active-line'));
+        document.querySelector(`.home-line[data-line="${i}"]`)?.classList.add('active-line');
+        const audioId = lineAudioByText[lines[i]];
+        await playAudioOrSpeak(audioId, lines[i]);
+        await delay(450);
+      }
+      document.querySelectorAll('.home-line').forEach(line => line.classList.remove('active-line'));
+    }
+    async function playHighlightedPairs(pairs, selector, dataName, startIndex = 0) {
+      speechSynthesis.cancel();
+      document.querySelectorAll(selector).forEach(row => row.classList.remove('active-line'));
+      for (let i = 0; i < pairs.length; i += 1) {
+        const rows = document.querySelectorAll(`${selector}[data-${dataName}="${i + startIndex}"]`);
+        rows.forEach(row => row.classList.add('active-line'));
+        await playAudioOrSpeak(compareAudioIds[i + startIndex][0], pairs[i][0]);
+        await delay(1000);
+        await playAudioOrSpeak(compareAudioIds[i + startIndex][1], pairs[i][1]);
+        await delay(500);
+        rows.forEach(row => row.classList.remove('active-line'));
+      }
+    }
+    function closeWord() {
+      document.getElementById('wordDialog').close();
+      speechSynthesis.cancel();
+    }
+    function answer(ok) {
+      const feedback = document.getElementById('feedback');
+      feedback.textContent = ok ? '答對了：每逢佳節倍思親。' : '再想想：題目問「節日時更想念家人」。';
+      playSegment(ok ? 'right' : 'wrong');
+    }
+    function getSlideWords(slide) {
+      return [...new Set([...slide.querySelectorAll('.drop')].map(drop => drop.dataset.answer).filter(Boolean))];
+    }
+    function initMountainSlide(slide) {
+      if (!slide || slide.dataset.mountainReady === 'true') return;
+      slide.dataset.mountainReady = 'true';
+      slide.classList.add('mountain-game');
+      const game = slide.querySelector('.game');
+      const board = slide.querySelector('.rebuild-board');
+      const feedback = slide.querySelector('.feedback');
+      if (!game || !board || !feedback) return;
+      const target = document.createElement('div');
+      target.className = 'shooting-target';
+      target.textContent = '玩法：看提示，點下面的正確詞語。';
+      const mountain = document.createElement('div');
+      mountain.className = 'mountain-wrap';
+      mountain.innerHTML = '<div class="mountain-side"></div><div class="climber">人</div>';
+      const totalSteps = slide.querySelectorAll('.drop').length;
+      const points = buildMountainPoints(totalSteps + 1);
+      points.forEach((point, index) => {
+        const dot = document.createElement('div');
+        dot.className = 'step-dot';
+        dot.dataset.step = String(index);
+        dot.style.left = `${point[0]}%`;
+        dot.style.top = `${point[1]}%`;
+        dot.textContent = index;
+        mountain.appendChild(dot);
+      });
+      const options = document.createElement('div');
+      options.className = 'mountain-options';
+      game.insertBefore(target, feedback);
+      game.insertBefore(options, feedback);
+      game.insertBefore(mountain, feedback);
+      moveClimber(slide);
+      renderTapOptions(slide, options, 'mountain');
+      board.style.marginBottom = '4px';
+    }
+    function buildMountainPoints(count) {
+      const points = [];
+      for (let i = 0; i < count; i += 1) {
+        const ratio = count === 1 ? 1 : i / (count - 1);
+        const x = 10 + ratio * 76;
+        const y = 84 - ratio * 68 + Math.sin(ratio * Math.PI * 3) * 3;
+        points.push([x, y]);
+      }
+      return points;
+    }
+    function initDogwoodSlide(slide) {
+      if (!slide || slide.dataset.dogwoodReady === 'true') return;
+      slide.dataset.dogwoodReady = 'true';
+      slide.classList.add('dogwood-game');
+      const game = slide.querySelector('.game');
+      const poem = slide.querySelector('.mini-poem');
+      const feedback = slide.querySelector('.feedback');
+      if (!game || !poem || !feedback) return;
+      const target = document.createElement('div');
+      target.className = 'shooting-target';
+      target.textContent = '玩法：看缺字，點下面的正確詞語。';
+      const wrap = document.createElement('div');
+      wrap.className = 'dogwood-wrap';
+      const options = document.createElement('div');
+      options.className = 'dogwood-options';
+      const basket = document.createElement('div');
+      basket.className = 'dogwood-basket';
+      wrap.appendChild(options);
+      wrap.appendChild(basket);
+      game.insertBefore(target, feedback);
+      poem.after(wrap);
+      renderTapOptions(slide, options, 'dogwood');
+    }
+    function renderTapOptions(slide, box, mode) {
+      if (!box) return;
+      box.innerHTML = '';
+      const remaining = getRemainingDrops(slide);
+      if (!remaining.length) {
+        checkAllComplete(slide);
+        return;
+      }
+      const targetWord = remaining[0].dataset.answer;
+      const label = slide.querySelector('.shooting-target');
+      if (label) label.textContent = `下一個要點：${targetWord}`;
+      const words = shuffle([targetWord, ...shuffle(getSlideWords(slide).filter(word => word !== targetWord)).slice(0, 5)]);
+      words.forEach(word => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'tap-word';
+        button.textContent = word;
+        button.addEventListener('click', () => tapGameWord(slide, box, mode, word));
+        box.appendChild(button);
+      });
+    }
+    function tapGameWord(slide, box, mode, word) {
+      const targetDrop = getRemainingDrops(slide)[0];
+      const feedback = slide.querySelector('.feedback');
+      if (!targetDrop) return;
+      if (word !== targetDrop.dataset.answer) {
+        if (feedback) feedback.textContent = '再想想，換一個試試。';
+        speakScript('再想想，換一個試試。');
+        return;
+      }
+      targetDrop.textContent = word;
+      targetDrop.classList.add('filled');
+      targetDrop.dataset.filled = 'true';
+      showCorrectMark();
+      playDingDong();
+      // Start timer on first correct drop
+      const totalDrops = [...slide.querySelectorAll('.drop')].length;
+      const filledCount = [...slide.querySelectorAll('.drop')].filter(d => d.dataset.filled === 'true').length;
+      if (filledCount === 1) startTimer(mode === 'mountain' ? 'mountain' : 'dogwood');
+      if (mode === 'mountain') {
+        markStepDone(slide);
+        moveClimber(slide);
+      }
+      if (mode === 'dogwood') addDogwoodLeaf(slide);
+      const line = targetDrop.closest('.rebuild-line, .poem-sentence');
+      const lineComplete = line && isLineComplete(line);
+      if (lineComplete) {
+        const lineText = line.dataset.lineText || word;
+        window.setTimeout(() => playAudioOrSpeak(lineAudioByText[lineText] || 'right', lineText), 420);
+      }
+      window.setTimeout(() => {
+        checkAllComplete(slide);
+        if (slide.dataset.done !== 'true') renderTapOptions(slide, box, mode);
+      }, lineComplete ? 850 : 260);
+    }
+    function markStepDone(slide) {
+      const done = [...slide.querySelectorAll('.drop')].filter(drop => drop.dataset.filled === 'true').length;
+      slide.querySelectorAll('.step-dot').forEach((dot, index) => {
+        dot.classList.toggle('done', index < done);
+      });
+    }
+    function moveClimber(slide) {
+      const climber = slide.querySelector('.climber');
+      const done = [...slide.querySelectorAll('.drop')].filter(drop => drop.dataset.filled === 'true').length;
+      const dots = [...slide.querySelectorAll('.step-dot')];
+      const target = dots[Math.max(0, Math.min(done, dots.length - 1))];
+      if (!climber || !target) return;
+      climber.style.left = target.style.left;
+      climber.style.top = target.style.top;
+    }
+    function addDogwoodLeaf(slide) {
+      const basket = slide.querySelector('.dogwood-basket');
+      if (!basket) return;
+      const leaf = document.createElement('i');
+      leaf.className = 'dogwood-leaf';
+      leaf.style.left = `${18 + Math.random() * 64}%`;
+      leaf.style.top = `${12 + Math.random() * 72}px`;
+      leaf.style.transform = `rotate(${Math.random() * 90 - 30}deg)`;
+      basket.appendChild(leaf);
+    }
+    function initShootingSlide(slide) {
+      if (!slide || slide.dataset.shootingReady === 'true') {
+        if (slide) spawnShootingTargets(slide);
+        return;
+      }
+      slide.dataset.shootingReady = 'true';
+      const feedback = slide.querySelector('.feedback');
+      const game = slide.querySelector('.game');
+      if (!feedback || !game) return;
+      const target = document.createElement('div');
+      target.className = 'shooting-target';
+      target.textContent = '聽朗讀，射中下一個詞。';
+      const field = document.createElement('div');
+      field.className = 'shooter-field';
+      game.insertBefore(target, feedback);
+      game.insertBefore(field, feedback);
+      spawnShootingTargets(slide);
+    }
+    function getRemainingDrops(slide) {
+      return [...slide.querySelectorAll('.drop')].filter(drop => drop.dataset.filled !== 'true');
+    }
+    function shuffle(items) {
+      return [...items].sort(() => Math.random() - .5);
+    }
+    function spawnShootingTargets(slide) {
+      const field = slide.querySelector('.shooter-field');
+      const label = slide.querySelector('.shooting-target');
+      if (!field || !label) return;
+      field.innerHTML = '';
+      const remaining = getRemainingDrops(slide);
+      if (!remaining.length) {
+        label.textContent = '全部完成。';
+        checkAllComplete(slide);
+        return;
+      }
+      const targetDrop = remaining[0];
+      const targetWord = targetDrop.dataset.answer;
+      label.textContent = `請射中：${targetWord}`;
+      const allWords = [...new Set([...slide.querySelectorAll('.drop')].map(drop => drop.dataset.answer).filter(Boolean))];
+      const distractors = shuffle(allWords.filter(word => word !== targetWord)).slice(0, 5);
+      const words = shuffle([targetWord, ...distractors]);
+      words.forEach((word, index) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'shooter-card';
+        card.textContent = word;
+        card.dataset.word = word;
+        card.style.left = `${8 + Math.random() * 70}%`;
+        card.style.top = `${10 + Math.random() * 58}%`;
+        card.style.setProperty('--fly-time', `${5.8 + Math.random() * 2.4}s`);
+        card.style.animationDelay = `${index * -0.38}s`;
+        card.addEventListener('click', () => shootWord(slide, card, word, targetDrop));
+        field.appendChild(card);
+      });
+    }
+    function shootWord(slide, card, word, targetDrop) {
+      const feedback = slide.querySelector('.feedback');
+      if (!targetDrop || targetDrop.dataset.filled === 'true') {
+        spawnShootingTargets(slide);
+        return;
+      }
+      if (word !== targetDrop.dataset.answer) {
+        if (feedback) feedback.textContent = '再想想，換一個試試。';
+        speakScript('再想想，換一個試試。');
+        return;
+      }
+      card.classList.add('hit');
+      targetDrop.textContent = word;
+      targetDrop.classList.add('filled');
+      targetDrop.dataset.filled = 'true';
+      if (feedback) feedback.textContent = '答對了。';
+      showCorrectMark();
+      playDingDong();
+      const line = targetDrop.closest('.rebuild-line, .poem-sentence');
+      const lineComplete = line && isLineComplete(line);
+      if (lineComplete) {
+        const lineText = line.dataset.lineText || word;
+        window.setTimeout(() => playAudioOrSpeak(lineAudioByText[lineText] || 'right', lineText), 420);
+      }
+      window.setTimeout(() => {
+        checkAllComplete(slide);
+        if (slide.dataset.done !== 'true') spawnShootingTargets(slide);
+      }, lineComplete ? 850 : 300);
+    }
+    function playDingDong() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const now = ctx.currentTime;
+        [
+          { start: 0, freq: 880 },
+          { start: .16, freq: 1174.66 }
+        ].forEach(tone => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(tone.freq, now + tone.start);
+          gain.gain.setValueAtTime(0.0001, now + tone.start);
+          gain.gain.exponentialRampToValueAtTime(0.18, now + tone.start + .025);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + tone.start + .28);
+          osc.connect(gain).connect(ctx.destination);
+          osc.start(now + tone.start);
+          osc.stop(now + tone.start + .3);
+        });
+        window.setTimeout(() => ctx.close(), 700);
+      } catch (error) {}
+    }
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight') nextSlide();
+      if (event.key === 'ArrowLeft') prevSlide();
+    });
+    let draggedWord = '';
+    let draggedCard = null;
+    document.querySelectorAll('.drag-card').forEach(card => {
+      card.addEventListener('dragstart', event => {
+        draggedWord = card.dataset.word;
+        draggedCard = card;
+        event.dataTransfer.setData('text/plain', draggedWord);
+      });
+      card.addEventListener('click', () => {
+        draggedWord = card.dataset.word;
+        draggedCard = card;
+        document.getElementById('audioNote').textContent = `已選：${draggedWord}。再點空格。`;
+      });
+    });
+    document.querySelectorAll('.drop').forEach(drop => {
+      drop.addEventListener('dragover', event => event.preventDefault());
+      drop.addEventListener('drop', event => {
+        event.preventDefault();
+        checkDrop(drop, event.dataTransfer.getData('text/plain'));
+      });
+      drop.addEventListener('click', () => {
+        if (draggedWord) checkDrop(drop, draggedWord);
+      });
+    });
+    function checkDrop(drop, word) {
+      const ok = word === drop.dataset.answer;
+      const feedbackId = drop.closest('.slide').querySelector('.feedback')?.id;
+      const feedback = feedbackId ? document.getElementById(feedbackId) : null;
+      if (ok) {
+        drop.textContent = word;
+        drop.classList.add('filled');
+        drop.dataset.filled = 'true';
+        if (draggedCard && draggedCard.closest('.slide') === drop.closest('.slide')) draggedCard.remove();
+        if (feedback) feedback.textContent = '答對了。';
+        const line = drop.closest('.rebuild-line, .poem-sentence');
+        if (line && isLineComplete(line)) {
+          const lineText = line.dataset.lineText || '答對了。';
+          playAudioOrSpeak(lineAudioByText[lineText] || 'right', lineText);
+        } else {
+          showCorrectMark();
+        }
+        checkAllComplete(drop.closest('.slide'));
+      } else {
+        if (feedback) feedback.textContent = '再想想，換一個試試。';
+        speakScript('再想想，換一個試試。');
+      }
+      draggedWord = '';
+      draggedCard = null;
+    }
+    function showCorrectMark() {
+      document.querySelectorAll('.correct-mark').forEach(mark => mark.remove());
+      const mark = document.createElement('div');
+      mark.className = 'correct-mark';
+      mark.textContent = '○';
+      document.body.appendChild(mark);
+      window.setTimeout(() => mark.remove(), 760);
+    }
+    function isLineComplete(line) {
+      return [...line.querySelectorAll('.drop')].every(drop => drop.dataset.filled === 'true');
+    }
+    function checkAllComplete(slide) {
+      if (!slide) return;
+      const drops = [...slide.querySelectorAll('.drop')];
+      if (drops.length && drops.every(drop => drop.dataset.filled === 'true') && !slide.dataset.done) {
+        slide.dataset.done = 'true';
+        // Stop timer when all drops filled
+        if (slide.querySelector('.rebuild-board')) stopTimer('mountain');
+        else stopTimer('dogwood');
+        showConfetti();
+      }
+    }
+    function showConfetti() {
+      const box = document.createElement('div');
+      box.className = 'confetti';
+      const colors = ['#d85045', '#248067', '#2f6fbd', '#c04382', '#a36600'];
+      for (let i = 0; i < 90; i += 1) {
+        const piece = document.createElement('i');
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = `${Math.random() * .8}s`;
+        box.appendChild(piece);
+      }
+      document.body.appendChild(box);
+      window.setTimeout(() => box.remove(), 5000);
+    }
+    showSlide(0);
+  </script>
+</body>
+</html>
+
+
+
