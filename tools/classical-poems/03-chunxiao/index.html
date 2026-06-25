@@ -658,6 +658,14 @@
       font-size: clamp(22px, 2.6vw, 34px);
       font-weight: 900;
     }
+    .game-timer {
+      font-size: 15px;
+      font-weight: 700;
+      color: #315f53;
+      text-align: center;
+      min-height: 22px;
+      line-height: 22px;
+    }
     .correct-mark {
       position: fixed;
       inset: 0;
@@ -957,6 +965,7 @@
               <div class="fill-target" id="cloudTarget">下一個要點：春眠</div>
               <div id="cloudBuild"></div>
               <div class="progress-bar" id="cloudProgress"></div>
+              <div class="game-timer" id="cloudTimer"></div>
             </div>
             <div class="fill-arena" id="cloudArena">
               <div class="arena-title">天空區　點雲找字</div>
@@ -979,6 +988,7 @@
               <div class="fill-target" id="inkTarget">下一個要點：春眠</div>
               <div id="inkBuild"></div>
               <div class="progress-bar" id="inkProgress"></div>
+              <div class="game-timer" id="inkTimer"></div>
             </div>
             <div class="fill-arena" id="inkArena">
               <div class="arena-title">墨池區　點墨顯字</div>
@@ -1001,6 +1011,7 @@
               <div class="fill-target" id="flowerTarget">下一個要點：春眠</div>
               <div id="flowerBuild"></div>
               <div class="progress-bar" id="flowerProgress"></div>
+              <div class="game-timer" id="flowerTimer"></div>
             </div>
             <div class="fill-arena" id="flowerArena">
               <div class="arena-title">花園區　點花收字</div>
@@ -1103,15 +1114,47 @@
       return items;
     }, []);
 
+    // Timer utilities for games
+    const timers = {};
+    function startTimer(id) {
+      const el = document.getElementById(id + 'Timer');
+      if (!el) return;
+      stopTimer(id);
+      timers[id] = {
+        start: Date.now(),
+        el,
+        interval: setInterval(() => {
+          const s = Math.floor((Date.now() - timers[id].start) / 1000);
+          el.textContent = `⏱ ${s}秒`;
+        }, 200)
+      };
+      el.textContent = '⏱ 0秒';
+    }
+    function stopTimer(id) {
+      const t = timers[id];
+      if (!t) return;
+      clearInterval(t.interval);
+      const s = Math.floor((Date.now() - t.start) / 1000);
+      t.el.textContent = `⏱ ${s}秒 ✓`;
+      delete timers[id];
+    }
+    function resetTimer(id) {
+      const t = timers[id];
+      if (t) clearInterval(t.interval);
+      const el = document.getElementById(id + 'Timer');
+      if (el) el.textContent = '';
+      delete timers[id];
+    }
+
     function showSlide(index) {
       current = (index + slides.length) % slides.length;
       slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
       stopAudio();
       const id = slides[current].dataset.auto;
       updateAudioNote(id);
-      if (id === 'game-cloud-guide') window.setTimeout(initCloudGame, 120);
-      if (id === 'game-ink-guide') window.setTimeout(initInkGame, 120);
-      if (id === 'game-flower-guide') window.setTimeout(initFlowerGame, 120);
+      if (id === 'game-cloud-guide') { resetTimer('cloud'); window.setTimeout(initCloudGame, 120); }
+      if (id === 'game-ink-guide') { resetTimer('ink'); window.setTimeout(initInkGame, 120); }
+      if (id === 'game-flower-guide') { resetTimer('flower'); window.setTimeout(initFlowerGame, 120); }
       if (id) window.setTimeout(() => playSegment(id), 260);
     }
     function nextSlide() { showSlide(current + 1); }
@@ -1290,6 +1333,7 @@
     function initCloudGame() {
       if (document.getElementById('cloudBuild').children.length) return;
       cloudIndex = 0; cloudLocked = false;
+      resetTimer('cloud');
       let slotIndex = 0;
       document.getElementById('cloudBuild').innerHTML = fillLines.map((line, lineIndex) => {
         const slots = line.words.map(() => `<span class="fill-slot" data-cloud-slot="${slotIndex++}"></span>`).join('');
@@ -1363,6 +1407,8 @@
           const slot = document.querySelector(`#cloudBuild .fill-slot[data-cloud-slot="${cloudIndex}"]`);
           if (slot) { slot.textContent = word; slot.classList.add('filled'); }
           cloudIndex += 1;
+          if (cloudIndex === 1) startTimer('cloud');
+          if (cloudIndex === fillWords.length) stopTimer('cloud');
           renderProgress('cloudProgress', cloudIndex, fillWords.length);
           const completedLine = fillLineEnds.find(line => line.end === cloudIndex);
           if (completedLine) {
@@ -1383,6 +1429,7 @@
     function initInkGame() {
       if (document.getElementById('inkBuild').children.length) return;
       inkIndex = 0; inkLocked = false;
+      resetTimer('ink');
       let slotIndex = 0;
       document.getElementById('inkBuild').innerHTML = fillLines.map((line, lineIndex) => {
         const slots = line.words.map(() => `<span class="fill-slot" data-ink-slot="${slotIndex++}"></span>`).join('');
@@ -1445,6 +1492,8 @@
             const slot = document.querySelector(`#inkBuild .fill-slot[data-ink-slot="${inkIndex}"]`);
             if (slot) { slot.textContent = word; slot.classList.add('filled'); }
             inkIndex += 1;
+            if (inkIndex === 1) startTimer('ink');
+            if (inkIndex === fillWords.length) stopTimer('ink');
             renderProgress('inkProgress', inkIndex, fillWords.length);
             const completedLine = fillLineEnds.find(line => line.end === inkIndex);
             if (completedLine) {
@@ -1463,6 +1512,7 @@
     function initFlowerGame() {
       if (document.getElementById('flowerBuild').children.length) return;
       flowerIndex = 0; flowerWrongLock = false;
+      resetTimer('flower');
       let slotIndex = 0;
       document.getElementById('flowerBuild').innerHTML = fillLines.map((line, lineIndex) => {
         const slots = line.words.map(() => `<span class="fill-slot" data-flower-slot="${slotIndex++}"></span>`).join('');
@@ -1526,6 +1576,8 @@
         const slot = document.querySelector(`#flowerBuild .fill-slot[data-flower-slot="${flowerIndex}"]`);
         if (slot) { slot.textContent = word; slot.classList.add('filled'); }
         flowerIndex += 1;
+        if (flowerIndex === 1) startTimer('flower');
+        if (flowerIndex === fillWords.length) stopTimer('flower');
         renderProgress('flowerProgress', flowerIndex, fillWords.length);
         const completedLine = fillLineEnds.find(line => line.end === flowerIndex);
         if (completedLine) {
