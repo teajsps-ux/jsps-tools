@@ -256,7 +256,7 @@
     .external-tool-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
     .external-tool-btn { border:3px solid var(--ui-border); border-radius:10px; padding:9px 6px; background:#fff; color:var(--ui-border); cursor:pointer; font-weight:900; box-shadow:0 3px 0 var(--ui-border); min-height:42px; }
     .external-tool-btn:active { transform:translateY(3px); box-shadow:0 0 0 var(--ui-border); }
-    .toolbox-switcher { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+    .toolbox-switcher { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
     .toolbox-tool-btn { border: 3px solid var(--ui-border); border-radius: 10px; padding: 10px 6px; background: #fff; color: var(--ui-border); cursor: pointer; font-weight: 900; box-shadow: 0 3px 0 var(--ui-border); }
     .toolbox-tool-btn.active { background: #d1fae5; }
     .toolbox-panel { display: none; }
@@ -578,7 +578,6 @@
                     <button class="toolbox-tool-btn" onclick="switchToolboxPanel('drawTab', this)">🎲 抽籤</button>
                     <button class="toolbox-tool-btn" onclick="switchToolboxPanel('whiteboardTab', this)">📝 白板</button>
                     <button class="toolbox-tool-btn" onclick="switchToolboxPanel('toolboxStatusPanel', this)">📋 班級狀態</button>
-                    <button class="toolbox-tool-btn" onclick="switchToolboxPanel('breakthroughTab', this)">🏁 過關任務</button>
                 </div>
 
             <!-- 工具箱：白板公告 -->
@@ -696,22 +695,16 @@
                 </div>
             </div>
 
-            <!-- 工具箱：過關任務 -->
-            <div id="breakthroughTab" class="toolbox-panel">
-                <h3 class="section-title" style="margin-bottom:8px;">🏁 過關任務</h3>
-                <iframe src="./過關任務.html" style="width:100%; height:620px; border:3px solid var(--ui-border); border-radius:16px; background:#fff; box-shadow:3px 3px 0 var(--ui-border);"></iframe>
-            </div>
-
                 <div class="external-tools" style="margin-top:16px;">
                     <h3>🔗 外部教學工具</h3>
                     <div class="external-tool-grid">
+                        <button class="external-tool-btn" onclick="openExternalTool('./過關任務.html')">🏁 過關任務</button>
                         <button class="external-tool-btn" onclick="openExternalTool('https://crimson-wind-7a22.changsheng0612.workers.dev/?fbclid=IwdGRjcASRoNNjbGNrBJGgzmV4dG4DYWVtAjExAHNydGMGYXBwX2lkDDM1MDY4NTUzMTcyOAABHhGkvpi5dpD9aZSz1CJ05Y9NGLsSlB1_hLB0Xv18OE1XzwrCme2T0sslyvgj_aem_mD-9UzEGnz7k83M_wXzb_w')">🖤 方方の黑版</button>
                         <button class="external-tool-btn" onclick="openExternalTool('https://apaulliao.github.io/schooltool/?fbclid=IwdGRjcAQ-86pjbGNrBD7zn2V4dG4DYWVtAjExAHNydGMGYXBwX2lkDDM1MDY4NTUzMTcyOAABHha0OVB2rGwloZpXQlXl-fpLp9i6W18vgx-D7E6oVZ64vu0TSz-7FSFmZHIs_aem_m6mdlS2OOaFSeR2ENeTv6Q')">🖤 廖于權の黑版</button>
                         <button class="external-tool-btn" onclick="openExternalTool('https://littleyi22.github.io/SmartClass/')">🖤 蕭奕均の黑版</button>
                         <button class="external-tool-btn" onclick="openExternalTool('https://filedn.com/laMtL9jmKf7JrDEQG0A6OPy/html/firebase-%E7%8F%BE%E4%BB%A3%E9%A2%A8%E6%A0%BC%E5%8A%A0%E6%89%A3%E5%88%86%E7%B3%BB%E7%B5%B1/pokemon%E5%8A%A0%E6%89%A3%E5%88%86%E7%B3%BB%E7%B5%B1.html?mode=teacher')">🖤 丫剛の黑版</button>
                         <button class="external-tool-btn" onclick="openExternalTool('https://bouncyballs.org/')">🫧 管秩序泡泡</button>
                         <button class="external-tool-btn" onclick="openExternalTool('https://teajsps-ux.github.io/jsps-tools/tools/homework-matrix/')">📒 作業清點</button>
-                        <button class="external-tool-btn" onclick="openExternalTool('./過關任務.html')">🏁 過關任務</button>
                     </div>
                 </div>
             </div>
