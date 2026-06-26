@@ -1,0 +1,1957 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新嫁娘 - 古詩互動 HTML 簡報</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bpmf+Iansui&family=Bpmf+Zihi+Kai+Std&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #25211d;
+      --paper: rgba(255, 253, 248, .88);
+      --soft: rgba(255, 253, 248, .72);
+      --line: rgba(55, 42, 26, .16);
+      --verb: #d85045;
+      --noun: #248067;
+      --person: #2f6fbd;
+      --time: #a36600;
+      --place: #6b58b8;
+      --feeling: #c04382;
+      --spring: #e86a82;
+      --shadow: 0 20px 70px rgba(29, 24, 17, .2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow: auto;
+      color: var(--ink);
+      font-family: system-ui, "Microsoft JhengHei", sans-serif;
+      background: #f8f4ec;
+    }
+    body.font-iansui { font-family: "Bpmf Iansui", system-ui, sans-serif; }
+    body.font-kai { font-family: "Bpmf Zihi Kai Std", "Bpmf Iansui", serif; }
+    button, select {
+      border: 0;
+      border-radius: 999px;
+      min-height: 40px;
+      padding: 9px 15px;
+      font: inherit;
+      font-weight: 800;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .8);
+      box-shadow: 0 8px 24px rgba(38, 29, 18, .12);
+      cursor: pointer;
+    }
+    button:hover, select:hover { background: #fff; }
+    button.primary { color: white; background: #315f53; }
+    .deck, .slide {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: white;
+    }
+    .slide.active { display: block; }
+    .slide.active .art, .slide.active .shade { position: fixed; }
+    .art {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .shade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.9), rgba(255,255,255,.58) 48%, rgba(255,255,255,.16)),
+        radial-gradient(circle at 76% 22%, rgba(255,255,255,.24), transparent 42%);
+      pointer-events: none;
+    }
+    body.clean-view .shade,
+    body.clean-view .stage,
+    body.clean-view .audio-note,
+    body.clean-view dialog {
+      display: none;
+    }
+    body.clean-view .tools button:not(.view-toggle),
+    body.clean-view .tools select,
+    body.clean-view .pager {
+      display: none;
+    }
+    .topbar {
+      position: fixed;
+      z-index: 30;
+      pointer-events: none;
+    }
+    .tools, .pager {
+      position: fixed;
+      top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px;
+      border: 1px solid rgba(44, 35, 24, .12);
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .74);
+      backdrop-filter: blur(14px);
+      pointer-events: auto;
+      touch-action: none;
+      cursor: move;
+      user-select: none;
+    }
+    .tools { right: 16px; left: auto; }
+    .pager { right: 16px; top: auto; bottom: 16px; }
+    .tools button, .tools select, .pager button {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .drag-handle {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #315f53;
+      background: rgba(255, 255, 255, .62);
+      font-weight: 900;
+      cursor: move;
+    }
+    .stage {
+      position: relative;
+      z-index: 2;
+      min-height: 100%;
+      padding: clamp(78px, 9vh, 106px) clamp(24px, 5vw, 70px) clamp(56px, 7vh, 86px);
+      display: grid;
+      align-items: center;
+    }
+    .home-copy {
+      width: min(980px, 94vw);
+      display: grid;
+      gap: 18px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 7vw, 94px);
+      line-height: 1.04;
+      letter-spacing: 0;
+      color: #2e3832;
+    }
+    .author {
+      font-size: clamp(22px, 2.7vw, 36px);
+      font-weight: 800;
+      color: #64574a;
+    }
+    .prompt {
+      width: max-content;
+      max-width: min(1120px, 94vw);
+      padding: 18px 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      font-size: clamp(22px, 2.5vw, 34px);
+      line-height: 1.42;
+      font-weight: 850;
+    }
+    .poem-vertical {
+      writing-mode: horizontal-tb;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: flex-start;
+      gap: clamp(14px, 2vw, 28px);
+      min-height: 420px;
+      font-size: clamp(32px, 4.5vw, 66px);
+      line-height: 1.62;
+      font-weight: 850;
+      color: #2c332e;
+    }
+    .poem-vertical .home-line {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      min-height: 7.8em;
+      padding: .18em .12em;
+      border-radius: 10px;
+      transition: background .2s, box-shadow .2s, transform .2s;
+    }
+    .home-line.active-line,
+    .compare-row.active-line {
+      background: rgba(255, 236, 161, .78);
+      box-shadow: 0 0 0 5px rgba(255, 236, 161, .32);
+      transform: translateY(-2px);
+    }
+    .line-stage {
+      grid-template-columns: minmax(260px, .9fr) minmax(320px, 1.1fr);
+      gap: clamp(20px, 4vw, 62px);
+    }
+    .line-stage > * { min-width: 0; }
+    .line-poem {
+      display: grid;
+      gap: 18px;
+      align-content: center;
+    }
+    .line-title {
+      font-size: clamp(23px, 2.6vw, 34px);
+      font-weight: 900;
+      color: #66594b;
+    }
+    .token-line {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      min-height: min(58vh, 520px);
+      font-size: clamp(38px, 5.4vw, 74px);
+      line-height: 1.38;
+      font-weight: 900;
+    }
+    .token {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      display: inline-block;
+      border-radius: 8px;
+      padding: .1em .08em;
+      background: rgba(255, 255, 255, .58);
+      box-shadow: 0 8px 24px rgba(42, 31, 19, .08);
+    }
+    button.token {
+      min-height: 0;
+      border-radius: 8px;
+      font: inherit;
+      box-shadow: 0 8px 24px rgba(42, 31, 19, .08);
+    }
+    .token[data-kind="verb"] { color: var(--verb); }
+    .token[data-kind="noun"] { color: var(--noun); }
+    .token[data-kind="person"] { color: var(--person); }
+    .token[data-kind="time"] { color: var(--time); }
+    .token[data-kind="place"] { color: var(--place); }
+    .token[data-kind="feeling"] { color: var(--feeling); }
+    .plain {
+      width: min(760px, 100%);
+      max-width: min(760px, calc(100vw - 48px));
+      padding: 20px 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      font-size: clamp(22px, 2.6vw, 34px);
+      line-height: 1.45;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      white-space: normal;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #53493f;
+    }
+    .legend span {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .68);
+    }
+    .compare {
+      width: min(1180px, 96vw);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .compare-grid {
+      width: min(1220px, 96vw);
+      display: grid;
+      grid-template-columns: minmax(360px, .92fr) minmax(520px, 1.2fr);
+      gap: 12px 18px;
+      align-items: stretch;
+    }
+    .compare-head {
+      font-size: clamp(24px, 3vw, 38px);
+      font-weight: 900;
+      padding: 8px 18px;
+      justify-self: start;
+      background: rgba(255, 255, 255, .78);
+    }
+    .compare-row {
+      min-height: 84px;
+      display: grid;
+      align-items: center;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .08);
+      padding: 14px 18px;
+      font-size: clamp(21px, 2.4vw, 32px);
+      line-height: 1.36;
+      font-weight: 850;
+      transition: background .2s, box-shadow .2s, transform .2s;
+    }
+    .poem-row {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 84px;
+    }
+    .poem-row .token {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      background: transparent;
+      box-shadow: none;
+      padding: 0 .04em;
+      font-size: 1em;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 34px);
+    }
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: clamp(24px, 3vw, 38px);
+    }
+    .panel p {
+      margin: 0;
+      font-size: clamp(21px, 2.4vw, 31px);
+      line-height: 1.55;
+      font-weight: 750;
+    }
+    .scaffold {
+      color: #d85045;
+      border: 2px solid rgba(216, 80, 69, .7);
+      border-radius: 4px;
+      padding: 0 .08em;
+      background: rgba(255, 255, 255, .38);
+      white-space: nowrap;
+    }
+    .home-action-tray {
+      position: fixed;
+      z-index: 34;
+      left: 14px;
+      bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(44, 35, 24, .12);
+      background: rgba(255, 253, 248, .78);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 34px rgba(38, 29, 18, .12);
+    }
+    .home-action-tray.hidden { display: none; }
+    .home-tray-restore {
+      position: fixed;
+      z-index: 34;
+      left: 14px;
+      bottom: 14px;
+      display: none;
+      min-width: 54px;
+      height: 54px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .9);
+      color: #315f53;
+      box-shadow: 0 12px 34px rgba(38, 29, 18, .14);
+    }
+    .home-tray-restore.visible { display: inline-grid; place-items: center; }
+    .home-action-tray .round {
+      width: 42px;
+      min-width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+    }
+    .home-action-tray .primary {
+      padding-inline: clamp(16px, 2.2vw, 28px);
+    }
+    body.clean-view .home-action-tray { display: none; }
+    .game {
+      width: min(1240px, 96vw);
+      display: grid;
+      gap: 16px;
+    }
+    .game.wide { width: min(1320px, 96vw); }
+    .game-head {
+      width: max-content;
+      max-width: 100%;
+      padding: 16px 24px;
+      border-radius: 8px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      font-size: clamp(24px, 3vw, 42px);
+      line-height: 1.25;
+      font-weight: 900;
+    }
+    .game-rule {
+      width: fit-content;
+      max-width: 100%;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .84);
+      font-size: clamp(18px, 2vw, 28px);
+      font-weight: 850;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .fill-layout {
+      display: grid;
+      grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .fill-poem {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 253, 248, .78);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .fill-target {
+      width: max-content;
+      max-width: 100%;
+      justify-self: center;
+      padding: 14px 24px;
+      border-radius: 999px;
+      background: rgba(49, 95, 83, .92);
+      color: white;
+      font-size: clamp(22px, 2.6vw, 34px);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .fill-line {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border-radius: 8px;
+      transition: background .2s, box-shadow .2s, transform .2s;
+      font-size: clamp(26px, 3.4vw, 46px);
+      font-weight: 900;
+    }
+    .fill-line.active-line {
+      background: rgba(255, 236, 161, .82);
+      box-shadow: 0 0 0 5px rgba(255, 236, 161, .32);
+      transform: translateY(-2px);
+    }
+    .fill-slot {
+      min-width: 110px;
+      min-height: 62px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      border: 3px dashed rgba(49, 95, 83, .38);
+      background: rgba(255,255,255,.64);
+      padding: 6px 14px;
+    }
+    .fill-slot.filled {
+      border-style: solid;
+      color: white;
+      background: #315f53;
+    }
+    .fill-arena {
+      position: relative;
+      min-height: clamp(380px, 56vh, 620px);
+      border-radius: 8px;
+      border: 2px solid rgba(91, 127, 168, .22);
+      background: rgba(235, 244, 255, .42);
+      overflow: hidden;
+      container-type: inline-size;
+    }
+    .arena-title {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: rgba(49, 95, 83, .88);
+      color: white;
+      font-size: clamp(18px, 2vw, 26px);
+      font-weight: 900;
+      white-space: nowrap;
+      z-index: 2;
+    }
+    .progress-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+      padding: 8px;
+    }
+    .progress-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(91, 127, 168, .28);
+    }
+    .progress-dot.reached { background: #315f53; }
+    .game-timer {
+      font-size: 15px;
+      font-weight: 700;
+      color: #315f53;
+      text-align: center;
+      min-height: 22px;
+      line-height: 22px;
+    }
+    /* Game 1: Footprint path */
+    .footprint-card {
+      position: absolute;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+      cursor: pointer;
+      transition: transform .22s cubic-bezier(.34,1.4,.64,1);
+      width: 200px;
+      height: 170px;
+      animation: footprintBounce var(--speed, 5s) ease-in-out infinite alternate;
+    }
+    .footprint-card:hover { transform: scale(1.12); filter: drop-shadow(0 6px 18px rgba(0,0,0,.18)); }
+    .footprint-card svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+    .footprint-card .fp-body {
+      display: block;
+      width: 100%;
+      height: 100%;
+      transition: transform .4s ease, opacity .4s ease;
+    }
+    .footprint-card .fp-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(.5);
+      font-size: clamp(38px, 4.5vw, 56px);
+      font-weight: 900;
+      color: var(--ink);
+      text-shadow: 0 2px 6px rgba(255,255,255,.95), 0 0 16px rgba(255,255,255,.85);
+      pointer-events: none;
+      opacity: .45;
+      transition: opacity .4s ease .18s, transform .5s cubic-bezier(.34,1.4,.64,1) .18s;
+      z-index: 1;
+      white-space: nowrap;
+    }
+    .footprint-card.revealed .fp-body {
+      transform: scaleY(.08) translateY(12px);
+      opacity: .15;
+    }
+    .footprint-card.revealed .fp-label {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .footprint-card.revealed { cursor: default; }
+    .footprint-card.taken { pointer-events: none; opacity: 0; transform: scale(.3) translateY(40px); transition: all .45s cubic-bezier(.55,0,.85,.36); }
+    @keyframes footprintBounce {
+      0%   { translate: 0px var(--fy1, -4px); }
+      30%  { translate: var(--fx2, 6px) var(--fy2, 6px); }
+      60%  { translate: var(--fx3, -4px) var(--fy3, -6px); }
+      100% { translate: var(--fx4, 3px) var(--fy4, 4px); }
+    }
+    /* Game 2: Ingredient cards */
+    .ingredient-card {
+      position: absolute;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+      cursor: pointer;
+      transition: transform .22s cubic-bezier(.34,1.4,.64,1);
+      width: 190px;
+      height: 170px;
+      animation: ingredientBob var(--speed, 4s) ease-in-out infinite alternate;
+    }
+    .ingredient-card:hover { transform: scale(1.12); filter: drop-shadow(0 6px 18px rgba(0,0,0,.18)); }
+    .ingredient-card svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+    .ingredient-card .ig-body {
+      display: block;
+      width: 100%;
+      height: 100%;
+      transition: transform .4s ease, opacity .4s ease;
+    }
+    .ingredient-card .ig-label {
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%) scale(.5);
+      font-size: clamp(34px, 4vw, 50px);
+      font-weight: 900;
+      color: var(--ink);
+      text-shadow: 0 2px 6px rgba(255,255,255,.95);
+      pointer-events: none;
+      opacity: .45;
+      transition: opacity .4s ease .18s, transform .5s cubic-bezier(.34,1.4,.64,1) .18s;
+      white-space: nowrap;
+    }
+    .ingredient-card.revealed .ig-body {
+      transform: scale(.7) translateY(10px);
+      opacity: .2;
+    }
+    .ingredient-card.revealed { opacity: 1; cursor: default; }
+    .ingredient-card.revealed .ig-label { opacity: 1; transform: translateX(-50%) scale(1); }
+    .ingredient-card.taken { pointer-events: none; opacity: 0; transform: scale(.3) translateY(40px); transition: all .45s cubic-bezier(.55,0,.85,.36); }
+    @keyframes ingredientBob {
+      0%   { translate: 0px var(--fy1, -3px); }
+      50%  { translate: var(--fx2, 4px) var(--fy2, 5px); }
+      100% { translate: var(--fx3, -3px) var(--fy3, -4px); }
+    }
+    /* Game 3: Soup cooking pot */
+    .soup-card {
+      position: absolute;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+      cursor: pointer;
+      transition: transform .22s cubic-bezier(.34,1.4,.64,1);
+      width: 190px;
+      height: 170px;
+      animation: soupFloat var(--speed, 5s) ease-in-out infinite alternate;
+    }
+    .soup-card:hover { transform: scale(1.12); filter: drop-shadow(0 6px 18px rgba(0,0,0,.18)); }
+    .soup-card svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+    .soup-card .sp-body {
+      display: block;
+      width: 100%;
+      height: 100%;
+      transition: transform .4s ease, opacity .4s ease;
+    }
+    .soup-card .sp-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(.5);
+      font-size: clamp(34px, 4vw, 50px);
+      font-weight: 900;
+      color: var(--ink);
+      text-shadow: 0 2px 6px rgba(255,255,255,.95);
+      pointer-events: none;
+      opacity: .45;
+      transition: opacity .4s ease .18s, transform .5s cubic-bezier(.34,1.4,.64,1) .18s;
+      white-space: nowrap;
+    }
+    .soup-card.revealed .sp-body {
+      transform: scale(.8) translateY(10px);
+      opacity: .2;
+    }
+    .soup-card.revealed .sp-label { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .soup-card.revealed { cursor: default; }
+    .soup-card.taken { pointer-events: none; opacity: 0; transform: scale(.3) translateY(40px); transition: all .45s cubic-bezier(.55,0,.85,.36); }
+    @keyframes soupFloat {
+      0%   { translate: 0px var(--fy1, -5px); }
+      33%  { translate: var(--fx2, 5px) var(--fy2, 6px); }
+      66%  { translate: var(--fx3, -5px) var(--fy3, -7px); }
+      100% { translate: var(--fx4, 3px) var(--fy4, 5px); }
+    }
+    .feedback {
+      min-height: 56px;
+      padding: 4px 8px;
+      color: #315f53;
+      font-size: clamp(22px, 2.6vw, 34px);
+      font-weight: 900;
+    }
+    .correct-mark {
+      position: fixed;
+      inset: 0;
+      z-index: 82;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      font-size: clamp(210px, 32vw, 420px);
+      font-family: Arial, sans-serif;
+      font-weight: 900;
+      color: #23a45a;
+      text-shadow: 0 0 18px rgba(35, 164, 90, .9), 0 0 46px rgba(35, 164, 90, .65);
+      animation: markPop .72s ease-out both;
+    }
+    @keyframes markPop {
+      0% { transform: scale(.55); opacity: 0; }
+      20% { transform: scale(1.08); opacity: 1; }
+      70% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(.92); opacity: 0; }
+    }
+    .game-pop {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      pointer-events: none;
+      z-index: 5;
+      animation: popBurst .72s ease-out both;
+    }
+    .game-pop svg { width: 100%; height: 100%; }
+    @keyframes popBurst {
+      0% { transform: translate(-50%, -50%) scale(.3); opacity: 0; }
+      20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+      60% { transform: translate(-50%, -50%) scale(1); opacity: .8; }
+      100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+    }
+    .confetti {
+      position: fixed;
+      inset: 0;
+      z-index: 81;
+      pointer-events: none;
+    }
+    .confetti i {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      animation: fall 3s linear forwards;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-20px) rotate(0); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(540deg); opacity: .4; }
+    }
+    .audio-note {
+      position: fixed;
+      z-index: 31;
+      left: 16px;
+      bottom: 14px;
+      max-width: min(46px, calc(100vw - 32px));
+      min-height: 32px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(163, 102, 0, .2);
+      background: rgba(255, 244, 218, .9);
+      color: #654400;
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: help;
+      opacity: .72;
+      transition: max-width .18s ease, opacity .18s ease, background .18s ease;
+    }
+    .audio-note::before {
+      content: "音";
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      margin-right: 8px;
+      border-radius: 999px;
+      background: #fff7df;
+      color: #654400;
+    }
+    .audio-note:hover, .audio-note:focus {
+      max-width: min(920px, calc(100vw - 32px));
+      opacity: 1;
+      background: rgba(255, 244, 218, .96);
+    }
+    .fullscreen-toggle {
+      position: fixed;
+      z-index: 31;
+      left: 18px;
+      bottom: 64px;
+      width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(49, 95, 83, .18);
+      background: rgba(255, 253, 248, .9);
+      color: #315f53;
+      font-size: 21px;
+      font-weight: 900;
+      box-shadow: 0 10px 26px rgba(29, 24, 17, .1);
+    }
+    dialog {
+      width: min(560px, 90vw);
+      border: 0;
+      border-radius: 10px;
+      padding: 0;
+      background: transparent;
+    }
+    dialog::backdrop { background: rgba(30, 24, 17, .28); }
+    .pop {
+      padding: 24px;
+      border: 1px solid rgba(44, 35, 24, .15);
+      border-radius: 10px;
+      background: rgba(255, 253, 248, .96);
+      box-shadow: var(--shadow);
+    }
+    .pop h3 {
+      margin: 0 0 8px;
+      font-size: 34px;
+    }
+    .pop p {
+      margin: 0 0 18px;
+      font-size: 24px;
+      line-height: 1.42;
+      font-weight: 760;
+    }
+    @media (max-width: 980px) {
+      body { overflow: auto; }
+      .deck, .slide { min-height: 100vh; height: auto; }
+      .slide { position: relative; }
+      .line-stage, .compare, .compare-grid, .fill-layout { grid-template-columns: 1fr; }
+      .fill-line { flex-wrap: wrap; }
+      .stage { min-height: 100vh; }
+      .topbar { position: fixed; }
+      .prompt, .plain { width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="tools" data-draggable-control="tools">
+      <span class="drag-handle" title="拖曳移動">↕</span>
+      <select id="fontSelect" aria-label="字體">
+        <option value="normal">一般字體</option>
+        <option value="iansui">Bpmf Iansui</option>
+        <option value="kai">Bpmf Zihi Kai Std</option>
+      </select>
+      <button class="view-toggle" onclick="toggleCleanView()">只看底圖</button>
+    </div>
+    <div class="pager" data-draggable-control="pager">
+      <span class="drag-handle" title="拖曳移動">↕</span>
+      <button onclick="prevSlide()">←</button>
+      <button class="primary" onclick="nextSlide()">→</button>
+    </div>
+  </div>
+
+  <main class="deck">
+    <section class="slide active" data-auto="home-guide">
+      <img class="art" src="generated/xinniang-home.png" alt="新嫁娘首頁插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>新嫁娘</h1>
+          <div class="author">唐・王建</div>
+          <div class="prompt">新嫁娘第一天到婆婆家，要親手做飯菜。她會怎麼做呢？</div>
+          <div class="poem-vertical" id="homePoem">
+            <span class="home-line" data-line="0"><span class="token" data-kind="time">三日</span><span class="token" data-kind="place">入</span><span class="token" data-kind="place">廚下</span></span>
+            <span class="home-line" data-line="1"><span class="token" data-kind="verb">洗手</span><span class="token" data-kind="verb">作</span><span class="token" data-kind="noun">羹湯</span></span>
+            <span class="home-line" data-line="2"><span class="token" data-kind="verb">未</span><span class="token" data-kind="verb">諳</span><span class="token" data-kind="person">姑</span><span class="token" data-kind="noun">食性</span></span>
+            <span class="home-line" data-line="3"><span class="token" data-kind="verb">先遣</span><span class="token" data-kind="person">小姑</span><span class="token" data-kind="verb">嚐</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="home-action-tray" id="homeActionTray">
+        <button class="round" onclick="hideHomeTray()" title="收起">×</button>
+        <button class="round" onclick="playSegment('home-guide')" title="聽提問">音</button>
+        <button class="primary" onclick="playHomePoem()">帶讀整首詩</button>
+        <button onclick="nextSlide()">開始一句一句看</button>
+      </div>
+      <button class="home-tray-restore" id="homeTrayRestore" onclick="showHomeTray()">朗讀</button>
+    </section>
+
+    <section class="slide" data-auto="line1-meaning">
+      <img class="art" src="generated/xinniang-line1.png" alt="三日入廚下插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第一句</div>
+          <div class="token-line">
+            <button class="token" data-kind="time" onclick="showWord(this,'三日','新婚第三天。')">三日</button>
+            <button class="token" data-kind="place" onclick="showWord(this,'入','走進去。')">入</button>
+            <button class="token" data-kind="place" onclick="showWord(this,'廚下','廚房裡面。')">廚下</button>
+          </div>
+          <div class="legend"><span style="color:var(--time)">時間</span><span style="color:var(--place)">地方</span></div>
+        </div>
+        <div class="plain">新婚第三天，走進廚房。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line2-meaning">
+      <img class="art" src="generated/xinniang-line2.png" alt="洗手作羹湯插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第二句</div>
+          <div class="token-line">
+            <button class="token" data-kind="verb" onclick="showWord(this,'洗手','把手洗乾淨，準備做菜。')">洗手</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'作','做、製作。')">作</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'羹湯','煮好的湯。')">羹湯</button>
+          </div>
+          <div class="legend"><span style="color:var(--verb)">動作</span><span style="color:var(--noun)">食物</span></div>
+        </div>
+        <div class="plain">洗洗手，開始做羹湯。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line3-meaning">
+      <img class="art" src="generated/xinniang-line3.png" alt="未諳姑食性插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第三句</div>
+          <div class="token-line">
+            <button class="token" data-kind="verb" onclick="showWord(this,'未','還不。')">未</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'諳','熟悉、了解。')">諳</button>
+            <button class="token" data-kind="person" onclick="showWord(this,'姑','婆婆，丈夫的媽媽。')">姑</button>
+            <button class="token" data-kind="noun" onclick="showWord(this,'食性','喜歡吃什麼的口味。')">食性</button>
+          </div>
+          <div class="legend"><span style="color:var(--verb)">動作</span><span style="color:var(--person)">人物</span><span style="color:var(--noun)">事物</span></div>
+        </div>
+        <div class="plain">還不熟悉婆婆喜歡吃什麼。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line4-meaning">
+      <img class="art" src="generated/xinniang-line4.png" alt="先遣小姑嚐插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第四句</div>
+          <div class="token-line">
+            <button class="token" data-kind="verb" onclick="showWord(this,'先遣','先請、先讓。')">先遣</button>
+            <button class="token" data-kind="person" onclick="showWord(this,'小姑','丈夫的妹妹。')">小姑</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'嚐','吃吃看味道。')">嚐</button>
+          </div>
+          <div class="legend"><span style="color:var(--verb)">動作</span><span style="color:var(--person)">人物</span></div>
+        </div>
+        <div class="plain">先請小姑子吃吃看味道。</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <img class="art" src="generated/xinniang-compare.png" alt="新嫁娘全詩白話對照插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>原詩與白話對照</h1>
+          <div class="author">新嫁娘　唐・王建</div>
+          <div class="compare-grid">
+            <button class="compare-head" onclick="playOriginalOnly()">讀原詩</button>
+            <button class="compare-head" onclick="playPlainOnly()">讀白話</button>
+            <div class="compare-row poem-row" data-pair="0" onclick="playComparePair(0)"><span class="token" data-kind="time">三日</span><span class="token" data-kind="place">入</span><span class="token" data-kind="place">廚下</span></div>
+            <div class="compare-row plain-row" data-pair="0" onclick="playComparePair(0)">新婚第三天，走進廚房。</div>
+            <div class="compare-row poem-row" data-pair="1" onclick="playComparePair(1)"><span class="token" data-kind="verb">洗手</span><span class="token" data-kind="verb">作</span><span class="token" data-kind="noun">羹湯</span></div>
+            <div class="compare-row plain-row" data-pair="1" onclick="playComparePair(1)">洗洗手，開始做羹湯。</div>
+            <div class="compare-row poem-row" data-pair="2" onclick="playComparePair(2)"><span class="token" data-kind="verb">未</span><span class="token" data-kind="verb">諳</span><span class="token" data-kind="person">姑</span><span class="token" data-kind="noun">食性</span></div>
+            <div class="compare-row plain-row" data-pair="2" onclick="playComparePair(2)">還不熟悉婆婆喜歡吃什麼。</div>
+            <div class="compare-row poem-row" data-pair="3" onclick="playComparePair(3)"><span class="token" data-kind="verb">先遣</span><span class="token" data-kind="person">小姑</span><span class="token" data-kind="verb">嚐</span></div>
+            <div class="compare-row plain-row" data-pair="3" onclick="playComparePair(3)">先請小姑子吃吃看味道。</div>
+          </div>
+          <button class="primary" onclick="playCompare()">原詩白話一起讀</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="heart-guide">
+      <img class="art" src="generated/xinniang-mood.png" alt="新嫁娘詩人心情插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>詩人的心情</h1>
+          <div class="author">新嫁娘的貼心與聰明</div>
+          <div class="compare">
+            <div class="panel">
+              <h2>當時的心情</h2>
+              <p>新嫁娘第一天到婆婆家，不知道婆婆喜歡吃什麼口味。她很<span class="scaffold">聰明</span>，先請小姑子吃吃看，如果小姑覺得好吃，婆婆應該也會喜歡。</p>
+            </div>
+            <div class="panel">
+              <h2>我們學到</h2>
+              <p>遇到不熟悉的事情，可以先<span class="scaffold">問一問</span>、<span class="scaffold">試一試</span>，這樣會做得更好。貼心的人會想到別人的感受。</p>
+            </div>
+          </div>
+          <button class="primary" onclick="playSegment('heart-guide')">聽一聽</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-footprint-guide">
+      <img class="art" src="generated/xinniang-path.png" alt="回家路線遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <div class="game-head">回家路線</div>
+          <div class="game-rule">新嫁娘要沿著腳印走回廚房。點擊正確的腳印，讓它飛入詩句空格。</div>
+          <div class="fill-layout">
+            <div class="fill-poem">
+              <div class="fill-target" id="fpTarget">下一個要點：三日</div>
+              <div id="fpBuild"></div>
+              <div class="progress-bar" id="fpProgress"></div>
+              <div class="game-timer" id="fpTimer"></div>
+            </div>
+            <div class="fill-arena" id="fpArena">
+              <div class="arena-title">腳印區　點腳印收字</div>
+            </div>
+          </div>
+          <div class="feedback" id="fpFeedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-ingredient-guide">
+      <img class="art" src="generated/xinniang-game2.png" alt="食材收集遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <div class="game-head">食材收集</div>
+          <div class="game-rule">做羹湯需要各種食材！點擊正確的食材，讓它飛入詩句空格。</div>
+          <div class="fill-layout">
+            <div class="fill-poem">
+              <div class="fill-target" id="igTarget">下一個要點：三日</div>
+              <div id="igBuild"></div>
+              <div class="progress-bar" id="igProgress"></div>
+              <div class="game-timer" id="igTimer"></div>
+            </div>
+            <div class="fill-arena" id="igArena">
+              <div class="arena-title">食材區　點食材收字</div>
+            </div>
+          </div>
+          <div class="feedback" id="igFeedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-soup-guide">
+      <img class="art" src="generated/xinniang-game3.png" alt="羹湯烹飪遊戲插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <div class="game-head">羹湯烹飪</div>
+          <div class="game-rule">把食材放入鍋中煮湯！點擊正確的食材，讓它們進入鍋中，完成整首詩。</div>
+          <div class="fill-layout">
+            <div class="fill-poem">
+              <div class="fill-target" id="spTarget">下一個要點：三日</div>
+              <div id="spBuild"></div>
+              <div class="progress-bar" id="spProgress"></div>
+              <div class="game-timer" id="spTimer"></div>
+            </div>
+            <div class="fill-arena" id="spArena">
+              <div class="arena-title">烹飪區　點食材入鍋</div>
+            </div>
+          </div>
+          <div class="feedback" id="spFeedback"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="wordDialog">
+    <div class="pop">
+      <h3 id="wordTitle"></h3>
+      <p id="wordText"></p>
+      <button class="primary" onclick="closeWord()">收起</button>
+    </div>
+  </dialog>
+
+  <button class="fullscreen-toggle" id="fullscreenToggle" onclick="toggleFullscreen()" title="切換全螢幕">⛶</button>
+  <div class="audio-note" id="audioNote" tabindex="0">已接入本機 Sadaltager / Sulafat 配音。</div>
+
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    let current = 0;
+    let currentAudio = null;
+    const audioText = {
+      'home-guide': '新嫁娘。唐，王建。新嫁娘第一天到婆婆家，要親手做飯菜。她會怎麼做呢？',
+      'line1-meaning': '三日入廚下。新婚第三天，走進廚房。',
+      'line2-meaning': '洗手作羹湯。洗洗手，開始做羹湯。',
+      'line3-meaning': '未諳姑食性。還不熟悉婆婆喜歡吃什麼。',
+      'line4-meaning': '先遣小姑嚐。先請小姑子吃吃看味道。',
+      'heart-guide': '新嫁娘第一天到婆婆家，不知道婆婆喜歡吃什麼口味。她很聰明，先請小姑子吃吃看，如果小姑覺得好吃，婆婆應該也會喜歡。詩人想告訴我們：遇到不熟悉的事情，可以先問一問、試一試，這樣會做得更好。貼心的人會想到別人的感受。',
+      'game-footprint-guide': '回家路線。新嫁娘要沿著腳印走回廚房。請點擊正確的腳印，讓它飛入詩句空格。',
+      'game-ingredient-guide': '食材收集。做羹湯需要各種食材！請點擊正確的食材，讓它飛入詩句空格。',
+      'game-soup-guide': '羹湯烹飪。把食材放入鍋中煮湯！請點擊正確的食材，讓它們進入鍋中，完成整首詩。'
+    };
+    const audioFiles = {
+      'home-guide': 'audio/home-guide-sadaltager.wav',
+      'poem-full-sadaltager': 'audio/poem-sadaltager.wav',
+      'poem-full-sulafat': 'audio/poem-sulafat.wav',
+      'line1-poem-sadaltager': 'audio/line1-poem-sadaltager.wav',
+      'line1-poem-sulafat': 'audio/line1-poem-sulafat.wav',
+      'line1-plain-sadaltager': 'audio/line1-plain-sadaltager.wav',
+      'line1-plain-sulafat': 'audio/line1-plain-sulafat.wav',
+      'line2-poem-sadaltager': 'audio/line2-poem-sadaltager.wav',
+      'line2-poem-sulafat': 'audio/line2-poem-sulafat.wav',
+      'line2-plain-sadaltager': 'audio/line2-plain-sadaltager.wav',
+      'line2-plain-sulafat': 'audio/line2-plain-sulafat.wav',
+      'line3-poem-sadaltager': 'audio/line3-poem-sadaltager.wav',
+      'line3-poem-sulafat': 'audio/line3-poem-sulafat.wav',
+      'line3-plain-sadaltager': 'audio/line3-plain-sadaltager.wav',
+      'line3-plain-sulafat': 'audio/line3-plain-sulafat.wav',
+      'line4-poem-sadaltager': 'audio/line4-poem-sadaltager.wav',
+      'line4-poem-sulafat': 'audio/line4-poem-sulafat.wav',
+      'line4-plain-sadaltager': 'audio/line4-plain-sadaltager.wav',
+      'line4-plain-sulafat': 'audio/line4-plain-sulafat.wav',
+      'heart-guide': 'audio/heart-guide-sadaltager.wav',
+      'game-footprint-guide': 'audio/game-footprint-guide-sulafat.wav',
+      'game-ingredient-guide': 'audio/game-ingredient-guide-sulafat.wav',
+      'game-soup-guide': 'audio/game-soup-guide-sulafat.wav',
+      'word-sanri': 'audio/word-sanri.wav',
+      'word-ru': 'audio/word-ru.wav',
+      'word-chuxia': 'audio/word-chuxia.wav',
+      'word-xishou': 'audio/word-xishou.wav',
+      'word-zuo': 'audio/word-zuo.wav',
+      'word-gengtang': 'audio/word-gengtang.wav',
+      'word-wei': 'audio/word-wei.wav',
+      'word-an': 'audio/word-an.wav',
+      'word-gu': 'audio/word-gu.wav',
+      'word-shixing': 'audio/word-shixing.wav',
+      'word-xianqian': 'audio/word-xianqian.wav',
+      'word-xiaogu': 'audio/word-xiaogu.wav',
+      'word-chang': 'audio/word-chang.wav'
+    };
+    const poemAudioIds = ['line1-poem-sulafat', 'line2-poem-sulafat', 'line3-poem-sulafat', 'line4-poem-sulafat'];
+    const plainAudioIds = ['line1-plain-sadaltager', 'line2-plain-sadaltager', 'line3-plain-sadaltager', 'line4-plain-sadaltager'];
+    const wordAudioIds = {
+      '三日': 'word-sanri', '入': 'word-ru', '廚下': 'word-chuxia',
+      '洗手': 'word-xishou', '作': 'word-zuo', '羹湯': 'word-gengtang',
+      '未': 'word-wei', '諳': 'word-an', '姑': 'word-gu', '食性': 'word-shixing',
+      '先遣': 'word-xianqian', '小姑': 'word-xiaogu', '嚐': 'word-chang'
+    };
+    const poemLines = ['三日入廚下。', '洗手作羹湯。', '未諳姑食性。', '先遣小姑嚐。'];
+    const plainLines = [
+      '新婚第三天，走進廚房。',
+      '洗洗手，開始做羹湯。',
+      '還不熟悉婆婆喜歡吃什麼。',
+      '先請小姑子吃吃看味道。'
+    ];
+    const fillLines = [
+      { text: '三日入廚下。', words: ['三日', '入', '廚下'] },
+      { text: '洗手作羹湯。', words: ['洗手', '作', '羹湯'] },
+      { text: '未諳姑食性。', words: ['未', '諳', '姑', '食性'] },
+      { text: '先遣小姑嚐。', words: ['先遣', '小姑', '嚐'] }
+    ];
+    const fillWords = fillLines.flatMap(line => line.words);
+    const fillLineEnds = fillLines.reduce((items, line) => {
+      const previous = items.length ? items[items.length - 1].end : 0;
+      items.push({ end: previous + line.words.length, text: line.text });
+      return items;
+    }, []);
+
+    const timers = {};
+    function startTimer(id) {
+      const el = document.getElementById(id + 'Timer');
+      if (!el) return;
+      stopTimer(id);
+      timers[id] = {
+        start: Date.now(),
+        el,
+        interval: setInterval(() => {
+          const s = Math.floor((Date.now() - timers[id].start) / 1000);
+          el.textContent = `⏱ ${s}秒`;
+        }, 200)
+      };
+      el.textContent = '⏱ 0秒';
+    }
+    function stopTimer(id) {
+      const t = timers[id];
+      if (!t) return;
+      clearInterval(t.interval);
+      const s = Math.floor((Date.now() - t.start) / 1000);
+      t.el.textContent = `⏱ ${s}秒 ✓`;
+      delete timers[id];
+    }
+    function resetTimer(id) {
+      const t = timers[id];
+      if (t) clearInterval(t.interval);
+      const el = document.getElementById(id + 'Timer');
+      if (el) el.textContent = '';
+      delete timers[id];
+    }
+
+    function showSlide(index) {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+      stopAudio();
+      const id = slides[current].dataset.auto;
+      updateAudioNote(id);
+      if (id === 'game-footprint-guide') window.setTimeout(initFootprintGame, 120);
+      if (id === 'game-ingredient-guide') window.setTimeout(initIngredientGame, 120);
+      if (id === 'game-soup-guide') window.setTimeout(initSoupGame, 120);
+      if (id) window.setTimeout(() => playSegment(id), 260);
+    }
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+    function lineMeaningIndex(id) {
+      const match = /^line([1-4])-meaning$/.exec(id || '');
+      return match ? Number(match[1]) - 1 : -1;
+    }
+    function updateAudioNote(id) {
+      const note = document.getElementById('audioNote');
+      if (!id) { note.textContent = '此頁不自動朗讀；可點按鈕或文字互動。'; return; }
+      const lineIndex = lineMeaningIndex(id);
+      const hasLineAudio = lineIndex >= 0 && audioFiles[poemAudioIds[lineIndex]] && audioFiles[plainAudioIds[lineIndex]];
+      note.textContent = (audioFiles[id] || hasLineAudio)
+        ? '此頁播放本機正式配音（Sadaltager / Sulafat）。'
+        : '此頁正式音檔尚未完成，暫用瀏覽器朗讀。';
+    }
+    async function playSegment(id) {
+      const text = audioText[id] || '';
+      if (audioFiles[id]) return playAudioOrSpeak(id, text);
+      const lineIndex = lineMeaningIndex(id);
+      if (lineIndex >= 0) {
+        await playAudioOrSpeak(poemAudioIds[lineIndex], poemLines[lineIndex]);
+        await delay(520);
+        return playAudioOrSpeak(plainAudioIds[lineIndex], plainLines[lineIndex]);
+      }
+      if (!text) return Promise.resolve();
+      return playAudioOrSpeak(id, text);
+    }
+    function stopAudio() {
+      speechSynthesis.cancel();
+      if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; }
+    }
+    function playAudioOrSpeak(id, text) {
+      const src = audioFiles[id];
+      if (!src) return speakScript(text);
+      stopAudio();
+      return new Promise(resolve => {
+        const audio = new Audio();
+        let finished = false;
+        const finish = () => { if (finished) return; finished = true; if (currentAudio === audio) currentAudio = null; resolve(); };
+        audio.onended = () => { if (!finished) finish(); };
+        audio.onerror = () => {
+          finished = true;
+          speakScript(text).then(() => { finished = false; finish(); });
+        };
+        audio.src = src;
+        currentAudio = audio;
+        audio.play().catch(() => {});
+      });
+    }
+    function speakScript(text) {
+      stopAudio();
+      const parts = text.split('[pause]');
+      return parts.reduce((chain, part) => chain.then(() => speak(part.trim())).then(() => delay(360)), Promise.resolve());
+    }
+    function speak(text) {
+      if (!text) return Promise.resolve();
+      return new Promise(resolve => {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'zh-TW'; utter.rate = .9;
+        const voices = speechSynthesis.getVoices();
+        utter.voice = voices.find(v => /Yating|雅婷|Hanhan|Taiwan|Chinese|中文/.test(v.name)) || null;
+        utter.onend = resolve; utter.onerror = resolve;
+        speechSynthesis.speak(utter);
+      });
+    }
+    function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+    async function playHomePoem() {
+      stopAudio();
+      const lines = [...document.querySelectorAll('.home-line')];
+      for (let i = 0; i < poemLines.length; i += 1) {
+        lines.forEach(line => line.classList.remove('active-line'));
+        lines[i]?.classList.add('active-line');
+        await playAudioOrSpeak(poemAudioIds[i], poemLines[i]);
+        await delay(450);
+      }
+      lines.forEach(line => line.classList.remove('active-line'));
+    }
+    async function playCompare() {
+      for (let i = 0; i < poemLines.length; i += 1) { await playComparePair(i); await delay(350); }
+    }
+    async function playComparePair(index) {
+      stopAudio();
+      const rows = document.querySelectorAll(`.compare-row[data-pair="${index}"]`);
+      rows.forEach(row => row.classList.add('active-line'));
+      await playAudioOrSpeak(poemAudioIds[index], poemLines[index]);
+      await delay(700);
+      await playAudioOrSpeak(plainAudioIds[index], plainLines[index]);
+      await delay(250);
+      rows.forEach(row => row.classList.remove('active-line'));
+    }
+    async function playOriginalOnly() {
+      stopAudio();
+      for (let i = 0; i < poemLines.length; i += 1) {
+        document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+        document.querySelector(`.poem-row[data-pair="${i}"]`)?.classList.add('active-line');
+        await playAudioOrSpeak(poemAudioIds[i], poemLines[i]);
+        await delay(450);
+      }
+      document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+    }
+    async function playPlainOnly() {
+      stopAudio();
+      for (let i = 0; i < plainLines.length; i += 1) {
+        document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+        document.querySelector(`.plain-row[data-pair="${i}"]`)?.classList.add('active-line');
+        await playAudioOrSpeak(plainAudioIds[i], plainLines[i]);
+        await delay(450);
+      }
+      document.querySelectorAll('.compare-row').forEach(row => row.classList.remove('active-line'));
+    }
+    function showWord(source, word, meaning) {
+      const title = document.getElementById('wordTitle');
+      title.textContent = word;
+      title.style.color = getComputedStyle(source).color;
+      document.getElementById('wordText').textContent = meaning;
+      const dialog = document.getElementById('wordDialog');
+      dialog.showModal();
+      const id = wordAudioIds[word];
+      if (id && audioFiles[id]) {
+        playAudioFileOnly(id);
+      } else {
+        speak(word + '。[pause]' + meaning);
+      }
+    }
+    function playAudioFileOnly(id) {
+      const src = audioFiles[id];
+      if (!src) return Promise.resolve();
+      stopAudio();
+      return new Promise(resolve => {
+        const audio = new Audio(src);
+        currentAudio = audio;
+        audio.onended = () => { if (currentAudio === audio) currentAudio = null; resolve(); };
+        audio.onerror = () => { if (currentAudio === audio) currentAudio = null; resolve(); };
+        audio.play().catch(() => { if (currentAudio === audio) currentAudio = null; resolve(); });
+      });
+    }
+    function closeWord() { document.getElementById('wordDialog').close(); stopAudio(); }
+    (function() {
+      const dialog = document.getElementById('wordDialog');
+      dialog.addEventListener('click', function(e) { if (e.target === dialog) closeWord(); });
+    })();
+    function hideHomeTray() {
+      document.getElementById('homeActionTray')?.classList.add('hidden');
+      document.getElementById('homeTrayRestore')?.classList.add('visible');
+    }
+    function showHomeTray() {
+      document.getElementById('homeActionTray')?.classList.remove('hidden');
+      document.getElementById('homeTrayRestore')?.classList.remove('visible');
+    }
+    function toggleCleanView() {
+      document.body.classList.toggle('clean-view');
+      document.querySelector('.view-toggle').textContent = document.body.classList.contains('clean-view') ? '恢復文字' : '只看底圖';
+    }
+    function setFont(value) {
+      document.body.classList.remove('font-iansui', 'font-kai');
+      if (value === 'iansui') document.body.classList.add('font-iansui');
+      if (value === 'kai') document.body.classList.add('font-kai');
+    }
+    document.getElementById('fontSelect').addEventListener('change', event => setFont(event.target.value));
+    setupDraggableControls();
+    async function toggleFullscreen() {
+      try {
+        if (document.fullscreenElement) { await document.exitFullscreen(); }
+        else { await document.documentElement.requestFullscreen(); }
+      } catch (error) { console.warn('Fullscreen failed', error); }
+    }
+    window.addEventListener('keydown', event => {
+      if (event.key === 'ArrowRight') nextSlide();
+      if (event.key === 'ArrowLeft') prevSlide();
+    });
+
+    // Game 1: Footprint path (two-step: reveal first, then check)
+    let fpIndex = 0;
+    let fpLocked = false;
+    function initFootprintGame() {
+      if (document.getElementById('fpBuild').children.length) return;
+      fpIndex = 0; fpLocked = false;
+      resetTimer('fp');
+      let slotIndex = 0;
+      document.getElementById('fpBuild').innerHTML = fillLines.map((line, lineIndex) => {
+        const slots = line.words.map(() => `<span class="fill-slot" data-fp-slot="${slotIndex++}"></span>`).join('');
+        return `<div class="fill-line" data-line-index="${lineIndex}">${slots}</div>`;
+      }).join('');
+      renderProgress('fpProgress', 0, fillWords.length);
+      spawnFootprints();
+    }
+    function spawnFootprints() {
+      const arena = document.getElementById('fpArena');
+      if (!arena) return;
+      arena.innerHTML = '<div class="arena-title">腳印區　點腳印收字</div>';
+      if (fpIndex >= fillWords.length) {
+        document.getElementById('fpTarget').textContent = '整首詩完成';
+        document.getElementById('fpFeedback').textContent = '○ 全部完成！';
+        readAllFillLines('fpBuild');
+        launchConfetti();
+        return;
+      }
+      const target = fillWords[fpIndex];
+      document.getElementById('fpTarget').textContent = `下一個要點：${target}`;
+      const pool = shuffle([target, ...fillWords.filter(word => word !== target)].slice(0, 6));
+      const positions = generatePositions(6, 16);
+      pool.forEach((word, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'footprint-card';
+        btn.innerHTML = `<span class="fp-body">${footprintSvg()}</span><span class="fp-label">${word}</span>`;
+        const pos = positions[i % positions.length];
+        btn.style.left = `${pos.x}%`;
+        btn.style.top = `${pos.y}%`;
+        const speed = 4 + Math.random() * 4;
+        btn.style.setProperty('--speed', `${speed}s`);
+        btn.style.setProperty('--fx1', `${(Math.random() - .5) * 30}px`);
+        btn.style.setProperty('--fy1', `${-4 - Math.random() * 8}px`);
+        btn.style.setProperty('--fx2', `${6 + Math.random() * 14}px`);
+        btn.style.setProperty('--fy2', `${4 + Math.random() * 10}px`);
+        btn.style.setProperty('--fx3', `${-8 - Math.random() * 12}px`);
+        btn.style.setProperty('--fy3', `${-6 - Math.random() * 8}px`);
+        btn.style.setProperty('--fx4', `${4 + Math.random() * 10}px`);
+        btn.style.setProperty('--fy4', `${5 + Math.random() * 10}px`);
+        btn.style.setProperty('--fx5', `${(Math.random() - .5) * 24}px`);
+        btn.style.setProperty('--fy5', `${-4 - Math.random() * 6}px`);
+        btn.style.animationDelay = `${-Math.random() * speed * .6}s`;
+        btn.onclick = () => tryFpWord(word, btn);
+        arena.appendChild(btn);
+      });
+    }
+    function tryFpWord(word, fp) {
+      if (fpLocked || fp.classList.contains('taken')) return;
+      const wasRevealed = fp.classList.contains('revealed');
+      const target = fillWords[fpIndex];
+      const feedback = document.getElementById('fpFeedback');
+      if (!wasRevealed) {
+        fpLocked = true;
+        fp.classList.add('revealed');
+        fp.style.animationPlayState = 'paused';
+        const pop = document.createElement('span');
+        pop.className = 'game-pop';
+        pop.innerHTML = popSvg();
+        fp.appendChild(pop);
+        window.setTimeout(() => pop.remove(), 750);
+        window.setTimeout(() => { fpLocked = false; finishFpTry(word, fp, wasRevealed); }, 720);
+      } else {
+        finishFpTry(word, fp, wasRevealed);
+      }
+    }
+    function finishFpTry(word, fp, wasRevealed) {
+      const target = fillWords[fpIndex];
+      const feedback = document.getElementById('fpFeedback');
+      if (word === target) {
+        if (fpIndex === 0) startTimer('fp');
+        if (fpIndex === fillWords.length - 1) stopTimer('fp');
+        feedback.textContent = `○ 找到「${word}」了！`;
+        showCorrectMark();
+        window.setTimeout(() => {
+          fp.classList.add('taken');
+          const slot = document.querySelector(`#fpBuild .fill-slot[data-fp-slot="${fpIndex}"]`);
+          if (slot) { slot.textContent = word; slot.classList.add('filled'); }
+          fpIndex += 1;
+          renderProgress('fpProgress', fpIndex, fillWords.length);
+          const completedLine = fillLineEnds.find(line => line.end === fpIndex);
+          if (completedLine) {
+            window.setTimeout(async () => { await readCompletedFillLine(completedLine, 'fpBuild'); spawnFootprints(); }, 260);
+          } else { spawnFootprints(); }
+        }, wasRevealed ? 100 : 360);
+      } else {
+        feedback.textContent = `這是「${word}」，再找「${target}」。`;
+        if (!wasRevealed) {
+          fp.classList.remove('revealed');
+          fp.style.animationPlayState = 'running';
+        }
+      }
+    }
+
+    // Game 2: Ingredient collection (two-step: reveal first, then check)
+    let igIndex = 0;
+    let igLocked = false;
+    function initIngredientGame() {
+      if (document.getElementById('igBuild').children.length) return;
+      igIndex = 0; igLocked = false;
+      resetTimer('ig');
+      let slotIndex = 0;
+      document.getElementById('igBuild').innerHTML = fillLines.map((line, lineIndex) => {
+        const slots = line.words.map(() => `<span class="fill-slot" data-ig-slot="${slotIndex++}"></span>`).join('');
+        return `<div class="fill-line" data-line-index="${lineIndex}">${slots}</div>`;
+      }).join('');
+      renderProgress('igProgress', 0, fillWords.length);
+      spawnIngredients();
+    }
+    function spawnIngredients() {
+      const arena = document.getElementById('igArena');
+      if (!arena) return;
+      arena.innerHTML = '<div class="arena-title">食材區　點食材收字</div>';
+      if (igIndex >= fillWords.length) {
+        document.getElementById('igTarget').textContent = '整首詩完成';
+        document.getElementById('igFeedback').textContent = '○ 全部完成！';
+        readAllFillLines('igBuild');
+        launchConfetti();
+        return;
+      }
+      const target = fillWords[igIndex];
+      document.getElementById('igTarget').textContent = `下一個要點：${target}`;
+      const pool = shuffle([target, ...fillWords.filter(word => word !== target)].slice(0, 6));
+      const positions = generatePositions(6, 16);
+      pool.forEach((word, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'ingredient-card';
+        btn.innerHTML = `<span class="ig-body">${ingredientSvg(i)}</span><span class="ig-label">${word}</span>`;
+        const pos = positions[i % positions.length];
+        btn.style.left = `${pos.x}%`;
+        btn.style.top = `${pos.y}%`;
+        btn.onclick = () => tryIgWord(word, btn);
+        arena.appendChild(btn);
+      });
+    }
+    function tryIgWord(word, ig) {
+      if (igLocked || ig.classList.contains('taken')) return;
+      const wasRevealed = ig.classList.contains('revealed');
+      const target = fillWords[igIndex];
+      const feedback = document.getElementById('igFeedback');
+      if (!wasRevealed) {
+        igLocked = true;
+        ig.classList.add('revealed');
+        ig.style.animationPlayState = 'paused';
+        const pop = document.createElement('span');
+        pop.className = 'game-pop';
+        pop.innerHTML = popSvg();
+        ig.appendChild(pop);
+        window.setTimeout(() => pop.remove(), 750);
+        window.setTimeout(() => { igLocked = false; finishIgTry(word, ig, wasRevealed); }, 720);
+      } else {
+        finishIgTry(word, ig, wasRevealed);
+      }
+    }
+    function finishIgTry(word, ig, wasRevealed) {
+      const target = fillWords[igIndex];
+      const feedback = document.getElementById('igFeedback');
+      if (word === target) {
+        if (igIndex === 0) startTimer('ig');
+        if (igIndex === fillWords.length - 1) stopTimer('ig');
+        feedback.textContent = `○ 找到「${word}」了！`;
+        showCorrectMark();
+        window.setTimeout(() => {
+          ig.classList.add('taken');
+          const slot = document.querySelector(`#igBuild .fill-slot[data-ig-slot="${igIndex}"]`);
+          if (slot) { slot.textContent = word; slot.classList.add('filled'); }
+          igIndex += 1;
+          renderProgress('igProgress', igIndex, fillWords.length);
+          const completedLine = fillLineEnds.find(line => line.end === igIndex);
+          if (completedLine) {
+            window.setTimeout(async () => { await readCompletedFillLine(completedLine, 'igBuild'); spawnIngredients(); }, 260);
+          } else { spawnIngredients(); }
+        }, wasRevealed ? 100 : 360);
+      } else {
+        feedback.textContent = `這是「${word}」，再找「${target}」。`;
+        if (!wasRevealed) {
+          ig.classList.remove('revealed');
+          ig.style.animationPlayState = 'running';
+        }
+      }
+    }
+
+    // Game 3: Soup cooking (two-step: reveal first, then check)
+    let spIndex = 0;
+    let spLocked = false;
+    function initSoupGame() {
+      if (document.getElementById('spBuild').children.length) return;
+      spIndex = 0; spLocked = false;
+      resetTimer('sp');
+      let slotIndex = 0;
+      document.getElementById('spBuild').innerHTML = fillLines.map((line, lineIndex) => {
+        const slots = line.words.map(() => `<span class="fill-slot" data-sp-slot="${slotIndex++}"></span>`).join('');
+        return `<div class="fill-line" data-line-index="${lineIndex}">${slots}</div>`;
+      }).join('');
+      renderProgress('spProgress', 0, fillWords.length);
+      spawnSoupItems();
+    }
+    function spawnSoupItems() {
+      const arena = document.getElementById('spArena');
+      if (!arena) return;
+      arena.innerHTML = '<div class="arena-title">烹飪區　點食材入鍋</div>';
+      if (spIndex >= fillWords.length) {
+        document.getElementById('spTarget').textContent = '整首詩完成';
+        document.getElementById('spFeedback').textContent = '○ 全部完成！羹湯煮好囉！';
+        readAllFillLines('spBuild');
+        launchConfetti();
+        return;
+      }
+      const target = fillWords[spIndex];
+      document.getElementById('spTarget').textContent = `下一個要點：${target}`;
+      const pool = shuffle([target, ...fillWords.filter(word => word !== target)].slice(0, 6));
+      const positions = generatePositions(6, 16);
+      pool.forEach((word, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'soup-card';
+        btn.innerHTML = `<span class="sp-body">${soupItemSvg(i)}</span><span class="sp-label">${word}</span>`;
+        const pos = positions[i % positions.length];
+        btn.style.left = `${pos.x}%`;
+        btn.style.top = `${pos.y}%`;
+        btn.onclick = () => trySpWord(word, btn);
+        arena.appendChild(btn);
+      });
+    }
+    function trySpWord(word, sp) {
+      if (spLocked || sp.classList.contains('taken')) return;
+      const wasRevealed = sp.classList.contains('revealed');
+      const target = fillWords[spIndex];
+      const feedback = document.getElementById('spFeedback');
+      if (!wasRevealed) {
+        spLocked = true;
+        sp.classList.add('revealed');
+        sp.style.animationPlayState = 'paused';
+        const pop = document.createElement('span');
+        pop.className = 'game-pop';
+        pop.innerHTML = popSvg();
+        sp.appendChild(pop);
+        window.setTimeout(() => pop.remove(), 750);
+        window.setTimeout(() => { spLocked = false; finishSpTry(word, sp, wasRevealed); }, 720);
+      } else {
+        finishSpTry(word, sp, wasRevealed);
+      }
+    }
+    function finishSpTry(word, sp, wasRevealed) {
+      const target = fillWords[spIndex];
+      const feedback = document.getElementById('spFeedback');
+      if (word === target) {
+        if (spIndex === 0) startTimer('sp');
+        if (spIndex === fillWords.length - 1) stopTimer('sp');
+        feedback.textContent = `○ 找到「${word}」了！`;
+        showCorrectMark();
+        window.setTimeout(() => {
+          sp.classList.add('taken');
+          const slot = document.querySelector(`#spBuild .fill-slot[data-sp-slot="${spIndex}"]`);
+          if (slot) { slot.textContent = word; slot.classList.add('filled'); }
+          spIndex += 1;
+          renderProgress('spProgress', spIndex, fillWords.length);
+          const completedLine = fillLineEnds.find(line => line.end === spIndex);
+          if (completedLine) {
+            window.setTimeout(async () => { await readCompletedFillLine(completedLine, 'spBuild'); spawnSoupItems(); }, 260);
+          } else { spawnSoupItems(); }
+        }, wasRevealed ? 100 : 360);
+      } else {
+        feedback.textContent = `這是「${word}」，再找「${target}」。`;
+        if (!wasRevealed) {
+          sp.classList.remove('revealed');
+          sp.style.animationPlayState = 'running';
+        }
+      }
+    }
+
+    function renderProgress(id, current, total) {
+      const bar = document.getElementById(id);
+      if (!bar) return;
+      bar.innerHTML = '';
+      for (let i = 0; i <= total; i += 1) {
+        const dot = document.createElement('span');
+        dot.className = 'progress-dot' + (i <= current ? ' reached' : '');
+        bar.appendChild(dot);
+      }
+    }
+    async function readCompletedFillLine(completedLine, buildId) {
+      const lineIndex = fillLineEnds.indexOf(completedLine);
+      const row = document.querySelector(`#${buildId} .fill-line[data-line-index="${lineIndex}"]`);
+      document.querySelectorAll(`#${buildId} .fill-line`).forEach(line => line.classList.remove('active-line'));
+      row?.classList.add('active-line');
+      await playAudioOrSpeak(poemAudioIds[lineIndex], completedLine.text);
+      row?.classList.remove('active-line');
+    }
+    async function readAllFillLines(buildId) {
+      document.querySelectorAll(`#${buildId} .fill-line`).forEach(line => line.classList.remove('active-line'));
+      await delay(300);
+      for (let i = 0; i < fillLines.length; i += 1) {
+        const row = document.querySelector(`#${buildId} .fill-line[data-line-index="${i}"]`);
+        row?.classList.add('active-line');
+        await playAudioOrSpeak(poemAudioIds[i], fillLines[i].text);
+        await delay(350);
+        row?.classList.remove('active-line');
+      }
+    }
+    function popSvg() {
+      return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="28" fill="none" stroke="#e8a838" stroke-width="4" opacity=".6"/>
+        <circle cx="40" cy="40" r="18" fill="none" stroke="#e8a838" stroke-width="3" opacity=".4"/>
+        <circle cx="40" cy="40" r="8" fill="#e8a838" opacity=".5"/>
+      </svg>`;
+    }
+    function footprintSvg() {
+      const gid = 'fpg' + Math.random().toString(36).slice(2,7);
+      return `<svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="${gid}" cx="45%" cy="40%" r="55%">
+            <stop offset="0%" stop-color="#8B6244"/>
+            <stop offset="100%" stop-color="#5C3A1E"/>
+          </radialGradient>
+        </defs>
+        <g>
+          <!-- Left footprint -->
+          <g transform="translate(60,105) rotate(-12)">
+            <!-- Sole: bean/kidney shape -->
+            <path d="M0,-38 C-18,-36 -24,-18 -22,0 C-20,18 -14,32 0,38 C10,42 18,34 20,20 C22,6 18,-12 14,-24 C10,-34 4,-40 0,-38 Z" fill="url(#${gid})" stroke="#3E2210" stroke-width="1.5"/>
+            <!-- Arch indent -->
+            <path d="M-18,4 C-14,12 -6,18 4,16" stroke="#5C3A1E" stroke-width="1.2" fill="none" opacity=".4"/>
+            <!-- 5 toes (big to small) -->
+            <circle cx="-12" cy="-42" r="8" fill="url(#${gid})" stroke="#3E2210" stroke-width="1"/>
+            <circle cx="-2" cy="-48" r="6.5" fill="url(#${gid})" stroke="#3E2210" stroke-width="1"/>
+            <circle cx="8" cy="-46" r="5.5" fill="url(#${gid})" stroke="#3E2210" stroke-width="1"/>
+            <circle cx="16" cy="-40" r="4.5" fill="url(#${gid})" stroke="#3E2210" stroke-width="1"/>
+            <circle cx="22" cy="-32" r="3.8" fill="url(#${gid})" stroke="#3E2210" stroke-width="1"/>
+            <!-- Highlight -->
+            <ellipse cx="-4" cy="-10" rx="8" ry="12" fill="rgba(255,255,255,.1)"/>
+          </g>
+          <!-- Right footprint -->
+          <g transform="translate(140,60) rotate(12)">
+            <path d="M0,-34 C-16,-32 -22,-16 -20,0 C-18,16 -12,28 0,34 C10,38 16,30 18,18 C20,4 16,-10 12,-22 C8,-30 2,-36 0,-34 Z" fill="url(#${gid})" stroke="#3E2210" stroke-width="1.5"/>
+            <path d="M-16,2 C-12,10 -4,16 4,14" stroke="#5C3A1E" stroke-width="1.2" fill="none" opacity=".4"/>
+            <circle cx="-10" cy="-38" r="7" fill="url(#${gid})" stroke="#3E2210" stroke-width="1"/>
+            <circle cx="-1" cy="-43" r="5.8" fill="url(#${gid})" stroke="#3E2210" stroke-width="1"/>
+            <circle cx="7" cy="-41" r="5" fill="url(#${gid})" stroke="#3E2210" stroke-width="1"/>
+            <circle cx="14" cy="-36" r="4" fill="url(#${gid})" stroke="#3E2210" stroke-width="1"/>
+            <circle cx="19" cy="-28" r="3.4" fill="url(#${gid})" stroke="#3E2210" stroke-width="1"/>
+            <ellipse cx="-3" cy="-8" rx="7" ry="10" fill="rgba(255,255,255,.1)"/>
+          </g>
+          <!-- Path dots between footprints -->
+          <circle cx="95" cy="85" r="3" fill="#c4a06a" opacity=".3"/>
+          <circle cx="105" cy="78" r="2.5" fill="#c4a06a" opacity=".25"/>
+        </g>
+      </svg>`;
+    }
+    function ingredientSvg(index) {
+      const items = [
+        // Carrot
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="cg${index}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff8c00"/><stop offset="100%" stop-color="#e06000"/></linearGradient></defs>
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="65" rx="18" ry="6" fill="rgba(0,0,0,.08)"/>
+            <path d="M0,-55 Q-18,-30 -14,10 Q-10,40 0,60 Q10,40 14,10 Q18,-30 0,-55 Z" fill="url(#cg${index})" stroke="#c05000" stroke-width="1.5"/>
+            <path d="M-6,-50 Q-4,-35 -2,-15" stroke="#c05000" stroke-width="1" fill="none" opacity=".4"/>
+            <path d="M4,-48 Q5,-32 3,-10" stroke="#c05000" stroke-width="1" fill="none" opacity=".4"/>
+            <g transform="translate(0,-55)">
+              <path d="M0,0 Q-12,-18 -6,-30 Q-2,-36 0,-28 Q2,-36 6,-30 Q12,-18 0,0 Z" fill="#228b22"/>
+              <path d="M0,0 Q-8,-20 -3,-32 Q0,-36 0,-28 Q0,-36 3,-32 Q8,-20 0,0 Z" fill="#2ea82e" opacity=".7"/>
+              <path d="M0,0 Q6,-22 10,-28 Q12,-30 8,-24 Q4,-18 0,0 Z" fill="#32cd32" opacity=".5"/>
+            </g>
+          </g>
+        </svg>`,
+        // Tomato
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="tg${index}" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#c0392b"/></radialGradient></defs>
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="58" rx="42" ry="8" fill="rgba(0,0,0,.08)"/>
+            <circle cx="0" cy="0" r="52" fill="url(#tg${index})" stroke="#a93226" stroke-width="1.5"/>
+            <ellipse cx="-14" cy="-16" rx="14" ry="10" fill="rgba(255,255,255,.18)"/>
+            <g transform="translate(0,-52)">
+              <path d="M0,0 Q-8,-6 -16,-2 Q-20,0 -14,4 Q-8,6 0,2 Z" fill="#27ae60"/>
+              <path d="M0,0 Q8,-6 16,-2 Q20,0 14,4 Q8,6 0,2 Z" fill="#2ecc71"/>
+              <path d="M0,0 Q-2,-8 0,-14 Q2,-8 0,0 Z" fill="#229954"/>
+            </g>
+          </g>
+        </svg>`,
+        // Tofu cube
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="fg${index}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff8e7"/><stop offset="100%" stop-color="#f5e6c8"/></linearGradient></defs>
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="52" rx="38" ry="7" fill="rgba(0,0,0,.08)"/>
+            <rect x="-38" y="-40" width="76" height="80" rx="8" fill="url(#fg${index})" stroke="#d4c4a0" stroke-width="1.5"/>
+            <line x1="-38" y1="-5" x2="38" y2="-5" stroke="#e8d8b8" stroke-width="1" opacity=".5"/>
+            <line x1="-38" y1="15" x2="38" y2="15" stroke="#e8d8b8" stroke-width="1" opacity=".5"/>
+            <line x1="-12" y1="-40" x2="-12" y2="40" stroke="#e8d8b8" stroke-width="1" opacity=".5"/>
+            <line x1="14" y1="-40" x2="14" y2="40" stroke="#e8d8b8" stroke-width="1" opacity=".5"/>
+            <ellipse cx="-10" cy="-18" rx="16" ry="10" fill="rgba(255,255,255,.25)"/>
+          </g>
+        </svg>`,
+        // Mushroom
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="mg${index}" cx="45%" cy="35%" r="55%"><stop offset="0%" stop-color="#f5deb3"/><stop offset="100%" stop-color="#d2b48c"/></radialGradient></defs>
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="55" rx="24" ry="6" fill="rgba(0,0,0,.08)"/>
+            <rect x="-10" y="5" width="20" height="48" rx="6" fill="#f5f0e0" stroke="#d2b48c" stroke-width="1.2"/>
+            <ellipse cx="0" cy="0" rx="48" ry="35" fill="url(#mg${index})" stroke="#c4a06a" stroke-width="1.5"/>
+            <ellipse cx="-12" cy="-12" rx="12" ry="8" fill="rgba(255,255,255,.2)"/>
+            <circle cx="-20" cy="-8" r="4" fill="#fff" opacity=".15"/>
+            <circle cx="8" cy="-16" r="3" fill="#fff" opacity=".12"/>
+            <circle cx="22" cy="-4" r="3.5" fill="#fff" opacity=".1"/>
+          </g>
+        </svg>`,
+        // Ginger
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="gg${index}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f0d890"/><stop offset="100%" stop-color="#d4a840"/></linearGradient></defs>
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="50" rx="32" ry="6" fill="rgba(0,0,0,.08)"/>
+            <path d="M-30,10 Q-40,-10 -25,-25 Q-10,-35 5,-20 Q15,-10 25,-15 Q40,-20 45,-5 Q48,10 35,20 Q20,30 0,25 Q-15,22 -30,10 Z" fill="url(#gg${index})" stroke="#b8942a" stroke-width="1.5"/>
+            <path d="M-20,-5 Q-10,-15 5,-8" stroke="#b8942a" stroke-width="1" fill="none" opacity=".4"/>
+            <path d="M10,0 Q20,-8 30,-5" stroke="#b8942a" stroke-width="1" fill="none" opacity=".4"/>
+            <ellipse cx="-8" cy="-12" rx="10" ry="6" fill="rgba(255,255,255,.15)"/>
+          </g>
+        </svg>`,
+        // Scallion
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="58" rx="20" ry="5" fill="rgba(0,0,0,.08)"/>
+            <rect x="-6" y="20" width="12" height="35" rx="4" fill="#f5f5dc" stroke="#d2c8a0" stroke-width="1"/>
+            <path d="M0,20 Q-30,-20 -20,-55 Q-15,-65 0,-50 Q15,-65 20,-55 Q30,-20 0,20 Z" fill="#228b22" stroke="#1a6b1a" stroke-width="1"/>
+            <path d="M0,20 Q-15,-15 -10,-45 Q-5,-55 0,-45 Q5,-55 10,-45 Q15,-15 0,20 Z" fill="#2ea82e" opacity=".6"/>
+            <path d="M0,20 Q10,-20 8,-40" stroke="#1a6b1a" stroke-width=".8" fill="none" opacity=".3"/>
+          </g>
+        </svg>`
+      ];
+      return items[index % items.length];
+    }
+    function soupItemSvg(index) {
+      const items = [
+        // Tofu cube in soup
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="stg${index}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff8e7"/><stop offset="100%" stop-color="#f5e6c8"/></linearGradient></defs>
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="58" rx="40" ry="8" fill="rgba(0,0,0,.08)"/>
+            <rect x="-36" y="-36" width="72" height="72" rx="10" fill="url(#stg${index})" stroke="#d4c4a0" stroke-width="1.5"/>
+            <line x1="-36" y1="0" x2="36" y2="0" stroke="#e8d8b8" stroke-width="1" opacity=".4"/>
+            <line x1="0" y1="-36" x2="0" y2="36" stroke="#e8d8b8" stroke-width="1" opacity=".4"/>
+            <ellipse cx="-8" cy="-14" rx="12" ry="8" fill="rgba(255,255,255,.2)"/>
+            <!-- Steam wisps -->
+            <path d="M-10,-40 Q-14,-52 -8,-60" stroke="rgba(255,255,255,.4)" stroke-width="2" fill="none" stroke-linecap="round">
+              <animate attributeName="d" values="M-10,-40 Q-14,-52 -8,-60;M-10,-40 Q-6,-54 -12,-62;M-10,-40 Q-14,-52 -8,-60" dur="3s" repeatCount="indefinite"/>
+            </path>
+            <path d="M6,-42 Q10,-55 4,-64" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none" stroke-linecap="round">
+              <animate attributeName="d" values="M6,-42 Q10,-55 4,-64;M6,-42 Q2,-56 8,-66;M6,-42 Q10,-55 4,-64" dur="3.5s" repeatCount="indefinite"/>
+            </path>
+          </g>
+        </svg>`,
+        // Tomato in soup
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="stg2${index}" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#ff8a80"/><stop offset="100%" stop-color="#e53935"/></radialGradient></defs>
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="55" rx="42" ry="8" fill="rgba(0,0,0,.08)"/>
+            <circle cx="0" cy="0" r="45" fill="url(#stg2${index})" stroke="#c62828" stroke-width="1.5"/>
+            <ellipse cx="-10" cy="-12" rx="10" ry="7" fill="rgba(255,255,255,.18)"/>
+            <g transform="translate(0,-45)">
+              <path d="M0,0 Q-6,-5 -12,-1 Q-14,1 -10,3 Q-6,4 0,1 Z" fill="#43a047"/>
+              <path d="M0,0 Q6,-5 12,-1 Q14,1 10,3 Q6,4 0,1 Z" fill="#66bb6a"/>
+            </g>
+            <path d="M-6,-50 Q-10,-62 -4,-70" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none" stroke-linecap="round">
+              <animate attributeName="d" values="M-6,-50 Q-10,-62 -4,-70;M-6,-50 Q-2,-64 -8,-72;M-6,-50 Q-10,-62 -4,-70" dur="2.8s" repeatCount="indefinite"/>
+            </path>
+          </g>
+        </svg>`,
+        // Mushroom in soup
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="stg3${index}" cx="45%" cy="35%" r="55%"><stop offset="0%" stop-color="#f5deb3"/><stop offset="100%" stop-color="#d2b48c"/></radialGradient></defs>
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="55" rx="38" ry="7" fill="rgba(0,0,0,.08)"/>
+            <rect x="-8" y="10" width="16" height="40" rx="5" fill="#f5f0e0" stroke="#d2b48c" stroke-width="1.2"/>
+            <ellipse cx="0" cy="0" rx="44" ry="32" fill="url(#stg3${index})" stroke="#c4a06a" stroke-width="1.5"/>
+            <ellipse cx="-10" cy="-10" rx="10" ry="7" fill="rgba(255,255,255,.2)"/>
+            <circle cx="-18" cy="-6" r="3.5" fill="#fff" opacity=".12"/>
+            <circle cx="10" cy="-14" r="2.5" fill="#fff" opacity=".1"/>
+            <path d="M-4,-34 Q-8,-46 -2,-54" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none" stroke-linecap="round">
+              <animate attributeName="d" values="M-4,-34 Q-8,-46 -2,-54;M-4,-34 Q0,-48 -6,-56;M-4,-34 Q-8,-46 -2,-54" dur="3.2s" repeatCount="indefinite"/>
+            </path>
+          </g>
+        </svg>`,
+        // Carrot slice in soup
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="stg4${index}" cx="40%" cy="40%" r="55%"><stop offset="0%" stop-color="#ffb74d"/><stop offset="100%" stop-color="#e65100"/></radialGradient></defs>
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="50" rx="36" ry="7" fill="rgba(0,0,0,.08)"/>
+            <ellipse cx="0" cy="0" rx="40" ry="36" fill="url(#stg4${index})" stroke="#bf360c" stroke-width="1.5"/>
+            <ellipse cx="0" cy="0" rx="28" ry="24" fill="#ff8a50" opacity=".5"/>
+            <ellipse cx="0" cy="0" rx="16" ry="12" fill="#ffab40" opacity=".4"/>
+            <circle cx="0" cy="0" r="5" fill="#ffe0b2" opacity=".3"/>
+            <ellipse cx="-8" cy="-8" rx="8" ry="5" fill="rgba(255,255,255,.15)"/>
+            <path d="M-4,-40 Q-8,-52 -2,-60" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none" stroke-linecap="round">
+              <animate attributeName="d" values="M-4,-40 Q-8,-52 -2,-60;M-4,-40 Q0,-54 -6,-62;M-4,-40 Q-8,-52 -2,-60" dur="3s" repeatCount="indefinite"/>
+            </path>
+            <path d="M8,-38 Q12,-50 6,-58" stroke="rgba(255,255,255,.3)" stroke-width="2" fill="none" stroke-linecap="round">
+              <animate attributeName="d" values="M8,-38 Q12,-50 6,-58;M8,-38 Q4,-52 10,-60;M8,-38 Q12,-50 6,-58" dur="3.4s" repeatCount="indefinite"/>
+            </path>
+          </g>
+        </svg>`,
+        // Scallion in soup
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="55" rx="35" ry="6" fill="rgba(0,0,0,.08)"/>
+            <circle cx="0" cy="0" r="38" fill="#8bc34a" stroke="#558b2f" stroke-width="1.5"/>
+            <circle cx="0" cy="0" r="28" fill="#9ccc65" opacity=".6"/>
+            <circle cx="0" cy="0" r="16" fill="#aed581" opacity=".4"/>
+            <ellipse cx="-8" cy="-8" rx="8" ry="5" fill="rgba(255,255,255,.15)"/>
+            <path d="M-4,-42 Q-8,-54 -2,-62" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none" stroke-linecap="round">
+              <animate attributeName="d" values="M-4,-42 Q-8,-54 -2,-62;M-4,-42 Q0,-56 -6,-64;M-4,-42 Q-8,-54 -2,-62" dur="2.9s" repeatCount="indefinite"/>
+            </path>
+          </g>
+        </svg>`,
+        // Egg in soup
+        `<svg viewBox="0 0 190 170" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="stg6${index}" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#fff9c4"/><stop offset="100%" stop-color="#f9a825"/></radialGradient></defs>
+          <g transform="translate(95,85)">
+            <ellipse cx="0" cy="55" rx="40" ry="7" fill="rgba(0,0,0,.08)"/>
+            <ellipse cx="0" cy="0" rx="42" ry="38" fill="#fff8e1" stroke="#e0d0a0" stroke-width="1.5"/>
+            <ellipse cx="0" cy="2" rx="22" ry="20" fill="url(#stg6${index})"/>
+            <ellipse cx="-6" cy="-6" rx="8" ry="5" fill="rgba(255,255,255,.3)"/>
+            <path d="M-6,-42 Q-10,-54 -4,-62" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none" stroke-linecap="round">
+              <animate attributeName="d" values="M-6,-42 Q-10,-54 -4,-62;M-6,-42 Q-2,-56 -8,-64;M-6,-42 Q-10,-54 -4,-62" dur="3.1s" repeatCount="indefinite"/>
+            </path>
+            <path d="M6,-40 Q10,-52 4,-60" stroke="rgba(255,255,255,.3)" stroke-width="2" fill="none" stroke-linecap="round">
+              <animate attributeName="d" values="M6,-40 Q10,-52 4,-60;M6,-40 Q2,-54 8,-62;M6,-40 Q10,-52 4,-60" dur="3.6s" repeatCount="indefinite"/>
+            </path>
+          </g>
+        </svg>`
+      ];
+      return items[index % items.length];
+    }
+    function generatePositions(count, minDist) {
+      const positions = [];
+      for (let attempt = 0; attempt < 300 && positions.length < count; attempt++) {
+        const x = 2 + Math.random() * 60;
+        const y = 8 + Math.random() * 72;
+        const ok = positions.every(p => Math.hypot(p.x - x, p.y - y) >= minDist);
+        if (ok) positions.push({x, y});
+      }
+      while (positions.length < count) {
+        positions.push({x: 2 + Math.random() * 60, y: 8 + Math.random() * 72});
+      }
+      return shuffle(positions);
+    }
+    function shuffle(items) { return [...items].sort(() => Math.random() - .5); }
+    function showCorrectMark() {
+      document.querySelectorAll('.correct-mark').forEach(mark => mark.remove());
+      const mark = document.createElement('div');
+      mark.className = 'correct-mark';
+      mark.textContent = '○';
+      document.body.appendChild(mark);
+      window.setTimeout(() => mark.remove(), 750);
+    }
+    function launchConfetti() {
+      const box = document.createElement('div');
+      box.className = 'confetti';
+      const colors = ['#d85045', '#248067', '#2f6fbd', '#a36600', '#6b58b8', '#c04382', '#e86a82'];
+      for (let i = 0; i < 80; i += 1) {
+        const piece = document.createElement('i');
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = `${Math.random() * 1.5}s`;
+        piece.style.animationDuration = `${2.5 + Math.random() * 2}s`;
+        box.appendChild(piece);
+      }
+      document.body.appendChild(box);
+      window.setTimeout(() => box.remove(), 5500);
+    }
+    function setupDraggableControls() {
+      document.querySelectorAll('[data-draggable-control]').forEach(control => {
+        let dragging = false; let offsetX = 0; let offsetY = 0;
+        control.addEventListener('pointerdown', event => {
+          if (event.target.closest('button, select, option')) return;
+          dragging = true;
+          const rect = control.getBoundingClientRect();
+          offsetX = event.clientX - rect.left; offsetY = event.clientY - rect.top;
+          control.setPointerCapture(event.pointerId);
+        });
+        control.addEventListener('pointermove', event => {
+          if (!dragging) return;
+          const maxX = window.innerWidth - control.offsetWidth - 8;
+          const maxY = window.innerHeight - control.offsetHeight - 8;
+          const x = Math.max(8, Math.min(maxX, event.clientX - offsetX));
+          const y = Math.max(8, Math.min(maxY, event.clientY - offsetY));
+          control.style.left = `${x}px`; control.style.top = `${y}px`; control.style.right = 'auto';
+        });
+        control.addEventListener('pointerup', event => {
+          dragging = false;
+          try { control.releasePointerCapture(event.pointerId); } catch (error) {}
+        });
+      });
+    }
+    speechSynthesis.onvoiceschanged = () => {};
+    showSlide(0);
+  </script>
+</body>
+</html>
