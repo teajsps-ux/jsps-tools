@@ -702,6 +702,14 @@
       0% { transform: translateY(-20px) rotate(0); opacity: 1; }
       100% { transform: translateY(110vh) rotate(540deg); opacity: .4; }
     }
+    .game-timer {
+      font-size: 15px;
+      font-weight: 700;
+      color: #315f53;
+      text-align: center;
+      min-height: 22px;
+      line-height: 22px;
+    }
     .audio-note {
       position: fixed;
       z-index: 31;
@@ -965,6 +973,7 @@
             <button class="primary" id="guessModeImg" onclick="setGuessMode('img')">看圖選句</button>
             <button id="guessModeAudio" onclick="setGuessMode('audio')">聽句選圖</button>
             <span class="feedback" id="guessProgress" style="min-height:auto;padding:0 8px;">0 / 4</span>
+            <div class="game-timer" id="guessTimer"></div>
             <button onclick="resetGuess()">重新開始</button>
           </div>
           <div class="guess-layout" id="guessLayout">
@@ -994,6 +1003,7 @@
               <div class="fill-target" id="snowTarget">下一個要點：千山</div>
               <div id="snowBuild"></div>
               <div class="progress-bar" id="snowProgress"></div>
+              <div class="game-timer" id="snowTimer"></div>
             </div>
             <div class="fill-arena" id="snowArena">
               <div class="arena-title">雪堆區　輕點掃雪</div>
@@ -1016,6 +1026,7 @@
               <div class="fill-target" id="fishTarget">下一個要點：千山</div>
               <div id="fishBuild"></div>
               <div class="progress-bar" id="fishProgress"></div>
+              <div class="game-timer" id="fishTimer"></div>
             </div>
             <div class="fill-arena" id="fishArena">
               <div class="arena-title">寒江區　點魚釣字</div>
@@ -1138,15 +1149,47 @@
     let guessOrder = [0, 1, 2, 3];
     let guessRound = 0;
 
+    // Timer utilities for games
+    const timers = {};
+    function startTimer(id) {
+      const el = document.getElementById(id + 'Timer');
+      if (!el) return;
+      stopTimer(id);
+      timers[id] = {
+        start: Date.now(),
+        el,
+        interval: setInterval(() => {
+          const s = Math.floor((Date.now() - timers[id].start) / 1000);
+          el.textContent = `⏱ ${s}秒`;
+        }, 200)
+      };
+      el.textContent = '⏱ 0秒';
+    }
+    function stopTimer(id) {
+      const t = timers[id];
+      if (!t) return;
+      clearInterval(t.interval);
+      const s = Math.floor((Date.now() - t.start) / 1000);
+      t.el.textContent = `⏱ ${s}秒 ✓`;
+      delete timers[id];
+    }
+    function resetTimer(id) {
+      const t = timers[id];
+      if (t) clearInterval(t.interval);
+      const el = document.getElementById(id + 'Timer');
+      if (el) el.textContent = '';
+      delete timers[id];
+    }
+
     function showSlide(index) {
       current = (index + slides.length) % slides.length;
       slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
       stopAudio();
       const id = slides[current].dataset.auto;
       updateAudioNote(id);
-      if (id === 'game-snow-guide') window.setTimeout(initSnowGame, 120);
-      if (id === 'game-fish-guide') window.setTimeout(initFishGame, 120);
-      if (id === 'game-guess-guide') { window.setTimeout(() => { setGuessMode('img'); }, 120); }
+      if (id === 'game-snow-guide') { resetTimer('snow'); window.setTimeout(initSnowGame, 120); }
+      if (id === 'game-fish-guide') { resetTimer('fish'); window.setTimeout(initFishGame, 120); }
+      if (id === 'game-guess-guide') { guessDone = 0; resetTimer('guess'); window.setTimeout(() => { setGuessMode('img'); }, 120); }
       if (id) window.setTimeout(() => playSegment(id), 260);
     }
     function nextSlide() { showSlide(current + 1); }
@@ -1383,11 +1426,13 @@
     function answerGuess(answer) {
       const item = guessItems[guessIndex];
       if (answer === item.answer) {
+        guessDone += 1;
+        if (guessDone === 1) startTimer('guess');
+        if (guessDone === guessItems.length) stopTimer('guess');
         document.getElementById('guessFeedback').textContent = '○ 答對了，準備換下一題。';
         showCorrectMark();
         const spokenIndex = guessItems.indexOf(item);
         playAudioOrSpeak(poemAudioIds[spokenIndex], item.speak);
-        guessDone += 1;
         updateGuessProgress();
         window.setTimeout(nextGuess, 1500);
       } else {
@@ -1397,12 +1442,14 @@
     }
     function answerGuessImage(idx) {
       if (idx === guessIndex) {
+        guessDone += 1;
+        if (guessDone === 1) startTimer('guess');
+        if (guessDone === guessItems.length) stopTimer('guess');
         document.getElementById('guessImage').classList.add('selected');
         document.getElementById('guessFeedback').textContent = '○ 答對了，準備換下一題。';
         showCorrectMark();
         const spokenIndex = guessIndex;
         playAudioOrSpeak(poemAudioIds[spokenIndex], guessItems[guessIndex].speak);
-        guessDone += 1;
         updateGuessProgress();
         window.setTimeout(nextGuess, 1500);
       } else {
@@ -1425,6 +1472,7 @@
     function initSnowGame() {
       if (document.getElementById('snowBuild').children.length) return;
       snowIndex = 0;
+      resetTimer('snow');
       let slotIndex = 0;
       document.getElementById('snowBuild').innerHTML = fillLines.map((line, lineIndex) => {
         const slots = line.words.map(() => `<span class="fill-slot" data-snow-slot="${slotIndex++}"></span>`).join('');
@@ -1491,6 +1539,8 @@
               slot.classList.add('filled');
             }
             snowIndex += 1;
+            if (snowIndex === 1) startTimer('snow');
+            if (snowIndex === fillWords.length) stopTimer('snow');
             renderProgress('snowProgress', snowIndex, fillWords.length);
             const completedLine = fillLineEnds.find(line => line.end === snowIndex);
             if (completedLine) {
@@ -1522,6 +1572,7 @@
       if (document.getElementById('fishBuild').children.length) return;
       fishIndex = 0;
       fishWrongLock = false;
+      resetTimer('fish');
       let slotIndex = 0;
       document.getElementById('fishBuild').innerHTML = fillLines.map((line, lineIndex) => {
         const slots = line.words.map(() => `<span class="fill-slot" data-fish-slot="${slotIndex++}"></span>`).join('');
@@ -1588,6 +1639,8 @@
           slot.classList.add('filled');
         }
         fishIndex += 1;
+        if (fishIndex === 1) startTimer('fish');
+        if (fishIndex === fillWords.length) stopTimer('fish');
         renderProgress('fishProgress', fishIndex, fillWords.length);
         const completedLine = fillLineEnds.find(line => line.end === fishIndex);
         if (completedLine) {

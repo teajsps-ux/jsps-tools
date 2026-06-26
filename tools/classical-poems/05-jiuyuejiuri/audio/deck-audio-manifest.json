@@ -1,0 +1,190 @@
+﻿[
+    {
+        "id":  "home-guide",
+        "voice":  "Sadaltager",
+        "file":  "audio/home-guide-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  816044
+    },
+    {
+        "id":  "poem-full-sadaltager",
+        "voice":  "Sadaltager",
+        "file":  "audio/poem-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  1063724
+    },
+    {
+        "id":  "poem-full-sulafat",
+        "voice":  "Sulafat",
+        "file":  "audio/poem-sulafat.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  1167404
+    },
+    {
+        "id":  "line1-meaning",
+        "voice":  "Sadaltager",
+        "file":  "audio/line1-meaning-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  316844
+    },
+    {
+        "id":  "line2-meaning",
+        "voice":  "Sadaltager",
+        "file":  "audio/line2-meaning-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  318764
+    },
+    {
+        "id":  "line3-meaning",
+        "voice":  "Sadaltager",
+        "file":  "audio/line3-meaning-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  332204
+    },
+    {
+        "id":  "line4-meaning",
+        "voice":  "Sadaltager",
+        "file":  "audio/line4-meaning-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  322604
+    },
+    {
+        "id":  "heart-guide",
+        "voice":  "Sadaltager",
+        "file":  "audio/heart-guide-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  597164
+    },
+    {
+        "id":  "game-guide",
+        "voice":  "Sulafat",
+        "file":  "audio/game-guide-sulafat.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  217004
+    },
+    {
+        "id":  "game-order-guide",
+        "voice":  "Leda",
+        "file":  "audio/game-order-guide-leda.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  169004
+    },
+    {
+        "id":  "game-blank-guide",
+        "voice":  "TTSMaker",
+        "file":  "audio/game-blank-guide-ttsmaker.mp3",
+        "status":  "done",
+        "model":  "TTSMaker manual",
+        "provider":  "TTSMaker manual import"
+    },
+    {
+        "id":  "right",
+        "voice":  "Puck",
+        "file":  "audio/right-puck.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  55724
+    },
+    {
+        "id":  "wrong",
+        "voice":  "Sulafat",
+        "file":  "audio/wrong-sulafat.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  119084
+    },
+    {
+        "id":  "compare-poem-1",
+        "voice":  "Sulafat",
+        "file":  "audio/compare-poem-1-sulafat.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  167084
+    },
+    {
+        "id":  "compare-poem-2",
+        "voice":  "Sulafat",
+        "file":  "audio/compare-poem-2-sulafat.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  151724
+    },
+    {
+        "id":  "compare-poem-3",
+        "voice":  "Sulafat",
+        "file":  "audio/compare-poem-3-sulafat.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  136364
+    },
+    {
+        "id":  "compare-poem-4",
+        "voice":  "Sulafat",
+        "file":  "audio/compare-poem-4-sulafat.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  138284
+    },
+    {
+        "id":  "compare-plain-1",
+        "voice":  "Sadaltager",
+        "file":  "audio/compare-plain-1-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  144044
+    },
+    {
+        "id":  "compare-plain-2",
+        "voice":  "Sadaltager",
+        "file":  "audio/compare-plain-2-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  159404
+    },
+    {
+        "id":  "compare-plain-3",
+        "voice":  "Sadaltager",
+        "file":  "audio/compare-plain-3-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  151724
+    },
+    {
+        "id":  "compare-plain-4",
+        "voice":  "Sadaltager",
+        "file":  "audio/compare-plain-4-sadaltager.wav",
+        "status":  "done",
+        "error":  "",
+        "model":  "gemini-3.1-flash-tts-preview",
+        "bytes":  174764
+    }
+]
