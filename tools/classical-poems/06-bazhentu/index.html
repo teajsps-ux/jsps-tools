@@ -35,7 +35,7 @@
     .tools button,.tools select,.pager button{cursor:pointer;touch-action:manipulation}
     .drag-handle{width:30px;height:30px;display:grid;place-items:center;border-radius:999px;color:#315f53;background:rgba(255,255,255,.62);font-weight:900;cursor:move}
     .stage{position:relative;z-index:2;min-height:100%;padding:clamp(78px,9vh,106px) clamp(24px,5vw,70px) clamp(56px,7vh,86px);display:grid;align-items:center}
-    .home-copy{width:min(980px,94vw);display:grid;gap:18px}
+     .home-copy{width:100%;max-width:1200px;display:grid;gap:18px}
     h1{margin:0;font-size:clamp(42px,7vw,94px);line-height:1.04;letter-spacing:0;color:#2e3832}
     .author{font-size:clamp(22px,2.7vw,36px);font-weight:800;color:#64574a}
     .num-cover{position:absolute;top:18px;right:18px;width:56px;height:56px;border-radius:999px;background:rgba(49,95,83,.88);color:white;font-size:28px;font-weight:900;display:grid;place-items:center;z-index:10}
@@ -56,7 +56,8 @@
     .plain{width:min(760px,100%);max-width:min(760px,calc(100vw - 48px));padding:20px 28px;border:1px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:var(--shadow);font-size:clamp(22px,2.6vw,34px);line-height:1.45;font-weight:800;overflow-wrap:anywhere;word-break:normal;white-space:normal}
     .legend{display:flex;flex-wrap:wrap;gap:8px;font-size:16px;font-weight:800;color:#53493f}
     .legend span{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.68)}
-    .compare-grid{width:min(1220px,96vw);display:grid;grid-template-columns:minmax(360px,.92fr) minmax(520px,1.2fr);gap:12px 18px;align-items:stretch}
+     .compare-grid{width:100%;max-width:1220px;display:grid;grid-template-columns:minmax(360px,.92fr) minmax(520px,1.2fr);gap:12px 18px;align-items:stretch}
+     .compare{width:100%;max-width:1180px;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
     .compare-head{font-size:clamp(24px,3vw,38px);font-weight:900;padding:8px 18px;justify-self:start;background:rgba(255,255,255,.78)}
     .compare-row{min-height:84px;display:grid;align-items:center;cursor:pointer;border:1px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:0 10px 26px rgba(29,24,17,.08);padding:14px 18px;font-size:clamp(21px,2.4vw,32px);line-height:1.36;font-weight:850;transition:background .2s,box-shadow .2s,transform .2s}
     .poem-row{writing-mode:horizontal-tb;text-orientation:mixed;display:flex;flex-wrap:wrap;gap:8px;min-height:84px}
@@ -64,6 +65,9 @@
     .panel{border:1px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:var(--shadow);padding:clamp(18px,3vw,34px)}
     .panel h2{margin:0 0 14px;font-size:clamp(24px,3vw,38px)}
     .panel p{margin:0;font-size:clamp(21px,2.4vw,31px);line-height:1.55;font-weight:750}
+    .scaffold{color:#d85045;border:2px solid rgba(216,80,69,.7);border-radius:4px;padding:0 .08em;background:rgba(255,255,255,.38);white-space:nowrap}
+    .scaffold.green{color:#2d9d3a;border-color:rgba(45,157,58,.7);background:rgba(45,157,58,.1)}
+    .scaffold.blue{color:#2563eb;border-color:rgba(37,99,235,.7);background:rgba(37,99,235,.1)}
     .home-action-tray{position:fixed;z-index:34;left:14px;bottom:14px;display:flex;align-items:center;gap:8px;padding:8px;border-radius:999px;border:1px solid rgba(44,35,24,.12);background:rgba(255,253,248,.78);backdrop-filter:blur(14px);box-shadow:0 12px 34px rgba(38,29,18,.12)}
     .home-action-tray.hidden{display:none}
     .home-tray-restore{position:fixed;z-index:34;left:14px;bottom:14px;display:none;min-width:54px;height:54px;padding:0 14px;border-radius:999px;background:rgba(255,253,248,.9);color:#315f53;box-shadow:0 12px 34px rgba(38,29,18,.14)}
@@ -71,7 +75,7 @@
     .home-action-tray .round{width:42px;min-width:42px;height:42px;min-height:42px;padding:0;display:grid;place-items:center;font-size:22px}
     .home-action-tray .primary{padding-inline:clamp(16px,2.2vw,28px)}
     body.clean-view .home-action-tray{display:none}
-    .game{width:min(1240px,96vw);display:grid;gap:16px}
+     .game{width:100%;max-width:1240px;display:grid;gap:16px}
     .game-head{width:max-content;max-width:100%;padding:16px 24px;border-radius:8px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);font-size:clamp(24px,3vw,42px);line-height:1.25;font-weight:900}
     .game-rule{width:fit-content;max-width:100%;padding:12px 18px;border-radius:999px;background:rgba(255,253,248,.84);font-size:clamp(18px,2vw,28px);font-weight:850;white-space:normal;overflow-wrap:anywhere}
     .fill-layout{display:grid;grid-template-columns:minmax(360px,1fr) minmax(360px,1fr);gap:18px;align-items:stretch}
@@ -90,14 +94,33 @@
     .boat-card,.stone-card{position:absolute;border:0;background:transparent;box-shadow:none;padding:0;cursor:pointer;transition:transform .18s}
     .boat-card:hover,.stone-card:hover{transform:scale(1.06)}
     .boat-card svg,.stone-card svg{width:100%;height:100%;display:block;pointer-events:none}
-    .boat-card .boat-label,.stone-card .stone-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.6);font-size:clamp(26px,3.2vw,38px);font-weight:900;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.45),0 0 6px rgba(0,0,0,.3);pointer-events:none;opacity:0;transition:opacity .4s ease .18s,transform .5s cubic-bezier(.34,1.4,.64,1) .18s;z-index:1;white-space:nowrap}
+     .boat-card .boat-label,.stone-card .stone-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.6);font-size:clamp(32px,4vw,46px);font-weight:900;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.55),0 0 8px rgba(0,0,0,.35);pointer-events:none;opacity:0;transition:opacity .4s ease .18s,transform .5s cubic-bezier(.34,1.4,.64,1) .18s;z-index:1;white-space:nowrap}
     .boat-card.revealed .boat-label,.stone-card.revealed .stone-label{opacity:1;transform:translate(-50%,-50%) scale(1)}
     .boat-card.taken,.stone-card.taken{pointer-events:none;opacity:0}
-    .boat-card{width:150px;height:100px;animation:boatFloat var(--speed,6s) ease-in-out infinite alternate}
-    @keyframes boatFloat{0%{translate:var(--bx1,0px) var(--by1,-4px)}25%{translate:var(--bx2,8px) var(--by2,6px)}50%{translate:var(--bx3,-10px) var(--by3,-8px)}75%{translate:var(--bx4,6px) var(--by4,4px)}100%{translate:var(--bx5,-4px) var(--by5,-6px)}}
-    .stone-card{width:140px;height:110px;animation:stoneFloat var(--speed,5s) ease-in-out infinite alternate}
-    @keyframes stoneFloat{0%{translate:var(--sx1,0px) var(--sy1,-3px)}33%{translate:var(--sx2,5px) var(--sy2,3px)}66%{translate:var(--sx3,-3px) var(--sy3,-5px)}100%{translate:var(--sx4,4px) var(--sy4,2px)}}
-    .formation-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:18px;border:2px solid rgba(49,95,83,.3);border-radius:12px;background:rgba(255,253,248,.78)}
+     .boat-card{width:240px;height:160px;animation:boatFloat var(--speed,6s) ease-in-out infinite alternate}
+     @keyframes boatFloat{0%{translate:var(--bx1,0px) var(--by1,-6px)}25%{translate:var(--bx2,10px) var(--by2,8px)}50%{translate:var(--bx3,-12px) var(--by3,-10px)}75%{translate:var(--bx4,8px) var(--by4,6px)}100%{translate:var(--bx5,-6px) var(--by5,-8px)}}
+     .stone-card{width:140px;height:110px;animation:stoneFloat var(--speed,5s) ease-in-out infinite alternate}
+     @keyframes stoneFloat{0%{translate:var(--sx1,0px) var(--sy1,-3px)}33%{translate:var(--sx2,5px) var(--sy2,3px)}66%{translate:var(--sx3,-3px) var(--sy3,-5px)}100%{translate:var(--sx4,4px) var(--sy4,2px)}}
+     .bag-card{position:absolute;width:200px;height:160px;border:0;background:transparent;box-shadow:none;padding:0;cursor:pointer;transition:transform .18s;animation:bagFloat var(--speed,6s) ease-in-out infinite alternate}
+     .bag-card:hover{transform:scale(1.06)}
+     .bag-card svg{width:100%;height:100%;display:block;pointer-events:none}
+     .bag-card .bag-label{position:absolute;top:55%;left:50%;transform:translate(-50%,-50%) scale(.6);font-size:clamp(36px,4.5vw,52px);font-weight:900;color:#5a3d28;text-shadow:0 1px 3px rgba(255,255,255,.6);pointer-events:none;opacity:0;transition:opacity .4s ease .18s,transform .5s cubic-bezier(.34,1.4,.64,1) .18s;z-index:1;white-space:nowrap}
+     .bag-card.revealed .bag-label{opacity:1;transform:translate(-50%,-50%) scale(1)}
+     .bag-card.taken{pointer-events:none;opacity:0}
+     @keyframes bagFloat{0%{translate:var(--bx1,0px) var(--by1,-5px)}25%{translate:var(--bx2,8px) var(--by2,6px)}50%{translate:var(--bx3,-8px) var(--by3,-7px)}75%{translate:var(--bx4,6px) var(--by4,5px)}100%{translate:var(--bx5,-4px) var(--by5,-6px)}}
+    .formation-grid{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(4,auto);gap:10px;padding:20px;border:2px solid rgba(49,95,83,.3);border-radius:12px;background:rgba(255,253,248,.78);width:clamp(280px,50vw,420px)}
+    .formation-grid .formation-slot:nth-child(1){grid-column:2/3;grid-row:1/2}
+    .formation-grid .formation-slot:nth-child(2){grid-column:3/4;grid-row:1/2}
+    .formation-grid .formation-slot:nth-child(3){grid-column:4/5;grid-row:1/2}
+    .formation-grid .formation-slot:nth-child(4){grid-column:5/6;grid-row:1/2}
+    .formation-grid .formation-slot:nth-child(5){grid-column:1/2;grid-row:2/3}
+    .formation-grid .formation-slot:nth-child(6){grid-column:2/3;grid-row:2/3}
+    .formation-grid .formation-slot:nth-child(7){grid-column:3/4;grid-row:2/3}
+    .formation-grid .formation-slot:nth-child(8){grid-column:4/5;grid-row:2/3}
+    .formation-grid .formation-slot:nth-child(9){grid-column:5/6;grid-row:2/3}
+    .formation-grid .formation-slot:nth-child(10){grid-column:6/7;grid-row:2/3}
+    .formation-grid .formation-slot:nth-child(11){grid-column:3/4;grid-row:3/4}
+    .formation-grid .formation-slot:nth-child(12){grid-column:4/5;grid-row:3/4}
     .formation-slot{min-height:70px;display:grid;place-items:center;border:3px dashed rgba(49,95,83,.38);border-radius:8px;background:rgba(255,255,255,.64);font-size:clamp(26px,3.4vw,46px);font-weight:900;transition:all .2s}
     .formation-slot.filled{border-style:solid;color:white;background:#315f53}
     .formation-slot.active-target{border-color:#d85045;background:rgba(216,80,69,.15);box-shadow:0 0 0 3px rgba(216,80,69,.3)}
@@ -250,48 +273,58 @@
     </section>
 
     <!-- 對照頁 -->
-    <section class="slide" data-auto="compare-read">
-      <img class="art" src="generated/bazhentu-compare.png" alt="對照頁插圖">
+    <section class="slide">
+      <img class="art" src="generated/bazhentu-compare.png" alt="八陣圖全詩白話對照插圖">
       <div class="shade"></div>
       <div class="stage">
-        <div class="compare-grid">
-          <div class="compare-head">原詩</div>
-          <div class="compare-head">白話</div>
-          <div class="poem-row compare-row" data-pair="0" onclick="playComparePair(0)">
-            <span class="token" data-kind="verb">功蓋</span><span class="token" data-kind="time">三分</span><span class="token" data-kind="place">國</span>
+        <div class="home-copy">
+          <h1>原詩與白話對照</h1>
+          <div class="author">八陣圖　唐・杜甫</div>
+          <div class="compare-grid">
+            <button class="compare-head" onclick="playOriginalOnly()">讀原詩</button>
+            <button class="compare-head" onclick="playPlainOnly()">讀白話</button>
+            <div class="poem-row compare-row" data-pair="0" onclick="playComparePair(0)">
+              <span class="token" data-kind="verb">功蓋</span><span class="token" data-kind="time">三分</span><span class="token" data-kind="place">國</span>
+            </div>
+            <div class="compare-row plain-row" data-pair="0" onclick="playComparePair(0)">諸葛亮的功勞蓋過三國時期的所有人。</div>
+            <div class="poem-row compare-row" data-pair="1" onclick="playComparePair(1)">
+              <span class="token" data-kind="feeling">名成</span><span class="token" data-kind="noun">八陣</span><span class="token" data-kind="noun">圖</span>
+            </div>
+            <div class="compare-row plain-row" data-pair="1" onclick="playComparePair(1)">他因為設計八陣圖而聞名天下。</div>
+            <div class="poem-row compare-row" data-pair="2" onclick="playComparePair(2)">
+              <span class="token" data-kind="place">江流</span><span class="token" data-kind="noun">石</span><span class="token" data-kind="verb">不轉</span>
+            </div>
+            <div class="compare-row plain-row" data-pair="2" onclick="playComparePair(2)">江水日夜奔流，但八陣圖的石頭從來不動。</div>
+            <div class="poem-row compare-row" data-pair="3" onclick="playComparePair(3)">
+              <span class="token" data-kind="feeling">遺恨</span><span class="token" data-kind="verb">失</span><span class="token" data-kind="verb">吞吳</span>
+            </div>
+            <div class="compare-row plain-row" data-pair="3" onclick="playComparePair(3)">最遺憾的是沒能成功阻止先主去攻打吳國。</div>
           </div>
-          <div class="compare-row plain-row" data-pair="0" onclick="playComparePair(0)">諸葛亮的功勞蓋過三國時期的所有人。</div>
-          <div class="poem-row compare-row" data-pair="1" onclick="playComparePair(1)">
-            <span class="token" data-kind="feeling">名成</span><span class="token" data-kind="noun">八陣</span><span class="token" data-kind="noun">圖</span>
-          </div>
-          <div class="compare-row plain-row" data-pair="1" onclick="playComparePair(1)">他因為設計八陣圖而聞名天下。</div>
-          <div class="poem-row compare-row" data-pair="2" onclick="playComparePair(2)">
-            <span class="token" data-kind="place">江流</span><span class="token" data-kind="noun">石</span><span class="token" data-kind="verb">不轉</span>
-          </div>
-          <div class="compare-row plain-row" data-pair="2" onclick="playComparePair(2)">江水日夜奔流，但八陣圖的石頭從來不動。</div>
-          <div class="poem-row compare-row" data-pair="3" onclick="playComparePair(3)">
-            <span class="token" data-kind="feeling">遺恨</span><span class="token" data-kind="verb">失</span><span class="token" data-kind="verb">吞吳</span>
-          </div>
-          <div class="compare-row plain-row" data-pair="3" onclick="playComparePair(3)">最遺憾的是沒能成功阻止先主去攻打吳國。</div>
-        </div>
-        <div style="display:flex;gap:10px;margin-top:18px;justify-content:center;flex-wrap:wrap">
-          <button onclick="playPoemOnly()">原詩</button>
-          <button onclick="playPlainOnly()">白話</button>
-          <button class="primary" onclick="playCompareAll()">對照朗讀</button>
+          <button class="primary" onclick="playCompare()">原詩白話一起讀</button>
         </div>
       </div>
     </section>
 
     <!-- 背景啟示 -->
     <section class="slide" data-auto="heart-read">
-      <img class="art" src="generated/bazhentu-heart.png" alt="背景啟示插圖">
+      <img class="art" src="generated/bazhentu-heart.png" alt="八陣圖詩人心情插圖">
       <div class="shade"></div>
       <div class="stage">
-        <div class="panel" style="max-width:min(860px,92vw)">
-          <h2>詩人的感受</h2>
-          <p>諸葛亮是三國時代最有智慧的人。他發明的八陣圖非常厲害，連江水都沖不走。</p>
-          <p style="margin-top:14px">但是，他也有做不到的事——沒能阻止劉備去打吳國。</p>
-          <p style="margin-top:14px">這首詩告訴我們，再厲害的人也會有遺憾，所以我們要珍惜每個機會。</p>
+        <div class="home-copy">
+          <h1>詩人的感受</h1>
+          <div class="author">再厲害的人，也會有遺憾</div>
+          <div class="compare">
+            <div class="panel">
+              <h2>當時的心情</h2>
+              <p>諸葛亮是<span class="scaffold blue">最有智慧</span>的人。他發明的<span class="scaffold blue">八陣圖</span>非常厲害，連江水都沖不走。但是，他也有做不到的事——<span class="scaffold blue">沒能阻止</span>劉備去打吳國。杜甫覺得這是一件<span class="scaffold">很遺憾</span>的事。</p>
+              <button class="primary" onclick="playSegment('heart-left')" style="margin-top:14px">聽一聽</button>
+            </div>
+            <div class="panel">
+              <h2>我們學到</h2>
+              <p>再厲害的人也會有<span class="scaffold">遺憾</span>，所以我們要<span class="scaffold green">珍惜</span>每個機會，<span class="scaffold green">把握當下</span>，<span class="scaffold green">盡力而為</span>。</p>
+              <button class="primary" onclick="playSegment('heart-right')" style="margin-top:14px">聽一聽</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -342,20 +375,20 @@
       </div>
     </section>
 
-    <!-- 遊戲三：石壘守城版 -->
+    <!-- 遊戲三：錦囊妙計版 -->
     <section class="slide" data-auto="game3-guide">
-      <img class="art" src="generated/bazhentu-game3.png" alt="石壘守城版插圖">
+      <img class="art" src="generated/bazhentu-game3.png" alt="錦囊妙計版插圖">
       <div class="shade"></div>
       <div class="stage">
         <div class="game">
-          <div class="game-head">遊戲三：石壘守城</div>
-          <div class="game-rule">點擊石壘找出隱藏的字，補上城牆缺口！</div>
+          <div class="game-head">遊戲三：錦囊妙計</div>
+          <div class="game-rule">點擊錦囊打開，找出裡面藏的字！</div>
           <div class="fill-layout">
             <div class="fill-poem" id="wallBuild"></div>
             <div>
               <div class="fill-target" id="wallTarget">下一個要點：____</div>
               <div class="fill-arena" id="wallArena">
-                <div class="arena-title">石壘區　點石尋字</div>
+                <div class="arena-title">錦囊區　開囊取字</div>
               </div>
             </div>
           </div>
@@ -384,42 +417,86 @@
     /* ===== 幻燈片導航 ===== */
     const slides = document.querySelectorAll('.slide');
     let current = 0;
-    function showSlide(n) {
-      if (n < 0 || n >= slides.length) return;
-      slides[current].classList.remove('active');
-      current = n;
-      slides[current].classList.add('active');
-      const autoAction = slides[current].dataset.auto;
-      if (autoAction === 'line1-meaning') playSegment('line1-meaning');
-      else if (autoAction === 'line2-meaning') playSegment('line2-meaning');
-      else if (autoAction === 'line3-meaning') playSegment('line3-meaning');
-      else if (autoAction === 'line4-meaning') playSegment('line4-meaning');
-      else if (autoAction === 'game1-guide') { initFormationGame(); playSegment('game1-guide'); }
-      else if (autoAction === 'game2-guide') { initBoatGame(); playSegment('game2-guide'); }
-      else if (autoAction === 'game3-guide') { initWallGame(); playSegment('game3-guide'); }
-      else if (autoAction === 'compare-read') resetTimer('compare');
-      else if (autoAction === 'heart-read') playSegment('heart-read');
-      resetTimer('formation'); resetTimer('boat'); resetTimer('wall');
+    function showSlide(index) {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+      stopAudio();
+      const id = slides[current].dataset.auto;
+      updateAudioNote(id);
+      if (id === 'game1-guide') window.setTimeout(initFormationGame, 120);
+      else if (id === 'game2-guide') window.setTimeout(initBoatGame, 120);
+      else if (id === 'game3-guide') window.setTimeout(initWallGame, 120);
+      if (id) window.setTimeout(() => playSegment(id), 260);
     }
     function nextSlide() { showSlide(current + 1); }
     function prevSlide() { showSlide(current - 1); }
+    function lineMeaningIndex(id) {
+      const match = /^line([1-4])-meaning$/.exec(id || '');
+      return match ? Number(match[1]) - 1 : -1;
+    }
+    function updateAudioNote(id) {
+      const note = document.getElementById('audioNote');
+      if (!id) { note.textContent = '此頁不自動朗讀；可點按鈕或文字互動。'; return; }
+      const lineIndex = lineMeaningIndex(id);
+      const hasLineAudio = lineIndex >= 0 && audioFiles[poemAudioIds[lineIndex]] && audioFiles[plainAudioIds[lineIndex]];
+      note.textContent = (audioFiles[id] || hasLineAudio)
+        ? '此頁播放本機正式配音（Sadaltager / Sulafat）。'
+        : '此頁正式音檔尚未完成，暫用瀏覽器朗讀。';
+    }
 
     /* ===== 語音系統 ===== */
     let currentAudio = null;
     const poemLines = ['功蓋三分國','名成八陣圖','江流石不轉','遺恨失吞吳'];
     const plainLines = ['諸葛亮的功勞蓋過三國時期的所有人。','他因為設計八陣圖而聞名天下。','江水日夜奔流，但八陣圖的石頭從來不動。','最遺憾的是沒能成功阻止先主去攻打吳國。'];
-    const audioFiles = {};
-    const poemAudioIds = ['line1-poem','line2-poem','line3-poem','line4-poem'];
-    const plainAudioIds = ['line1-plain','line2-plain','line3-plain','line4-plain'];
-    const wordAudioIds = {};
+    const audioFiles = {
+      'home-guide': 'audio/home-guide-sadaltager.wav',
+      'line1-poem-sulafat': 'audio/line1-poem-sulafat.wav',
+      'line1-plain-sadaltager': 'audio/line1-plain-sadaltager.wav',
+      'line2-poem-sulafat': 'audio/line2-poem-sulafat.wav',
+      'line2-plain-sadaltager': 'audio/line2-plain-sadaltager.wav',
+      'line3-poem-sulafat': 'audio/line3-poem-sulafat.wav',
+      'line3-plain-sadaltager': 'audio/line3-plain-sadaltager.wav',
+      'line4-poem-sulafat': 'audio/line4-poem-sulafat.wav',
+      'line4-plain-sadaltager': 'audio/line4-plain-sadaltager.wav',
+      'heart-left': 'audio/heart-left-sadaltager.wav',
+      'heart-right': 'audio/heart-right-sulafat.wav',
+      'game1-guide': 'audio/game1-guide-sulafat.wav',
+      'game1-full': 'audio/game1-full-sulafat.wav',
+      'game1-line1': 'audio/game1-line1-sulafat.wav',
+      'game1-line2': 'audio/game1-line2-sulafat.wav',
+      'game1-line3': 'audio/game1-line3-sulafat.wav',
+      'game1-line4': 'audio/game1-line4-sulafat.wav',
+      'game2-guide': 'audio/game2-guide-sulafat.wav',
+      'game3-guide': 'audio/game3-guide-sulafat.wav',
+      'word-gonggai': 'audio/word-gonggai.wav',
+      'word-sanfen': 'audio/word-sanfen.wav',
+      'word-guo': 'audio/word-guo.wav',
+      'word-mingcheng': 'audio/word-mingcheng.wav',
+      'word-bazhen': 'audio/word-bazhen.wav',
+      'word-tu': 'audio/word-tu.wav',
+      'word-jiangliu': 'audio/word-jiangliu.wav',
+      'word-shi': 'audio/word-shi.wav',
+      'word-buzhuan': 'audio/word-buzhuan.wav',
+      'word-yihen': 'audio/word-yihen.wav',
+      'word-shi2': 'audio/word-shi2.wav',
+      'word-tunwu': 'audio/word-tunwu.wav',
+    };
+    const poemAudioIds = ['line1-poem-sulafat', 'line2-poem-sulafat', 'line3-poem-sulafat', 'line4-poem-sulafat'];
+    const plainAudioIds = ['line1-plain-sadaltager', 'line2-plain-sadaltager', 'line3-plain-sadaltager', 'line4-plain-sadaltager'];
+    const wordAudioIds = {
+      '功蓋': 'word-gonggai', '三分': 'word-sanfen', '國': 'word-guo',
+      '名成': 'word-mingcheng', '八陣': 'word-bazhen', '圖': 'word-tu',
+      '江流': 'word-jiangliu', '石': 'word-shi', '不轉': 'word-buzhuan',
+      '遺恨': 'word-yihen', '失': 'word-shi2', '吞吳': 'word-tunwu',
+    };
 
     function stopAudio() {
-      if (currentAudio) { try { currentAudio.pause(); } catch(e){} currentAudio = null; }
-      window.speechSynthesis && window.speechSynthesis.cancel();
+      speechSynthesis.cancel();
+      if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; }
     }
-    function speak(text) {
+    function speakScript(text) {
+      stopAudio();
       return new Promise(resolve => {
-        stopAudio();
         if (!window.speechSynthesis) { resolve(); return; }
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'zh-TW'; u.rate = 0.85;
@@ -430,36 +507,43 @@
         window.speechSynthesis.speak(u);
       });
     }
-    function playAudioFileOnly(id) {
+    function playAudioOrSpeak(id, text) {
       const src = audioFiles[id];
-      if (!src) return Promise.resolve();
+      if (!src) return speakScript(text);
       stopAudio();
       return new Promise(resolve => {
-        const audio = new Audio(src);
+        const audio = new Audio();
+        let finished = false;
+        const finish = () => { if (finished) return; finished = true; if (currentAudio === audio) currentAudio = null; resolve(); };
+        audio.onended = () => { if (!finished) finish(); };
+        audio.onerror = () => {
+          finished = true;
+          speakScript(text).then(() => { finished = false; finish(); });
+        };
+        audio.src = src;
         currentAudio = audio;
-        audio.onended = () => { if (currentAudio === audio) currentAudio = null; resolve(); };
-        audio.onerror = () => { if (currentAudio === audio) currentAudio = null; resolve(); };
-        audio.play().catch(() => { if (currentAudio === audio) currentAudio = null; resolve(); });
+        audio.play().catch(() => {});
       });
     }
-    async function playAudioOrSpeak(id, fallback) {
-      if (id && audioFiles[id]) return playAudioFileOnly(id);
-      return speak(fallback);
-    }
-    function playSegment(id) { speak(getSegmentText(id)); }
-    function getSegmentText(id) {
-      const map = {
-        'home-guide': '小朋友們，你們聽過諸葛亮嗎？他是三國時代最聰明的軍師！他設計了一個超厲害的陣法，叫做八陣圖。今天我們要來學杜甫寫的這首詩，看看諸葛亮有多厲害，也聽聽他有什麼遺憾。準備好了嗎？讓我們一起來聽！',
-        'line1-meaning': '功蓋三分國。諸葛亮的功勞蓋過三國時期的所有人。',
-        'line2-meaning': '名成八陣圖。他因為設計八陣圖而聞名天下。',
-        'line3-meaning': '江流石不轉。江水日夜奔流，但八陣圖的石頭從來不動。',
-        'line4-meaning': '遺恨失吞吳。最遺憾的是沒能成功阻止先主去攻打吳國。',
-        'heart-read': '諸葛亮是三國時代最有智慧的人。他發明的八陣圖非常厲害，連江水都沖不走。但是，他也有做不到的事。這首詩告訴我們，再厲害的人也會有遺憾，所以我們要珍惜每個機會。',
-        'game1-guide': '遊戲一：排兵布陣。把打亂的字排入正確位置，完成八陣圖！',
-        'game2-guide': '遊戲二：江水流字。小船在江上漂流，按順序點擊正確的字！',
-        'game3-guide': '遊戲三：石壘守城。點擊石壘找出隱藏的字，補上城牆缺口！',
-      };
-      return map[id] || '';
+    const audioText = {
+      'home-guide': '八陣圖。唐，杜甫。小朋友們，你們聽過諸葛亮嗎？他是三國時代最聰明的軍師！他設計了一個超厲害的陣法，叫做八陣圖。今天我們要來學杜甫寫的這首詩，看看諸葛亮有多厲害，也聽聽他有什麼遺憾。準備好了嗎？讓我們一起來聽！',
+      'heart-left': '諸葛亮是三國時代最有智慧的人。他發明的八陣圖非常厲害，連江水都沖不走。但是，他也有做不到的事——沒能阻止劉備去打吳國。杜甫覺得這是一件很遺憾的事。',
+      'heart-right': '再厲害的人也會有遺憾，所以我們要珍惜每個機會，把握當下，盡力而為。',
+      'game1-guide': '遊戲一：排兵布陣。把打亂的字排入正確位置，完成八陣圖！',
+      'game2-guide': '遊戲二：江水流字。小船在江上漂流，按順序點擊正確的字！',
+      'game3-guide': '遊戲三：錦囊妙計。點擊錦囊打開，找出裡面藏的字！',
+    };
+    async function playSegment(id) {
+      const text = audioText[id] || '';
+      if (audioFiles[id]) return playAudioOrSpeak(id, text);
+      const lineIndex = lineMeaningIndex(id);
+      if (lineIndex >= 0) {
+        await playAudioOrSpeak(poemAudioIds[lineIndex], poemLines[lineIndex]);
+        await delay(520);
+        return playAudioOrSpeak(plainAudioIds[lineIndex], plainLines[lineIndex]);
+      }
+      if (!text) return Promise.resolve();
+      return playAudioOrSpeak(id, text);
     }
     async function playHomePoem() {
       stopAudio();
@@ -481,8 +565,8 @@
       document.getElementById('wordText').textContent = meaning;
       document.getElementById('wordDialog').showModal();
       const id = wordAudioIds[word];
-      if (id && audioFiles[id]) playAudioFileOnly(id);
-      else speak(word + '。' + meaning);
+      if (id && audioFiles[id]) playAudioOrSpeak(id, word + '。' + meaning);
+      else speakScript(word + '。' + meaning);
     }
     function closeWord() { document.getElementById('wordDialog').close(); stopAudio(); }
     document.getElementById('wordDialog').addEventListener('click', function(e) { if (e.target === this) closeWord(); });
@@ -498,7 +582,10 @@
       await playAudioOrSpeak(plainAudioIds[i], plainLines[i]);
       document.querySelectorAll('.compare-row').forEach(r => r.classList.remove('active-line'));
     }
-    async function playPoemOnly() {
+    async function playCompare() {
+      for (let i = 0; i < poemLines.length; i++) { await playComparePair(i); await delay(350); }
+    }
+    async function playOriginalOnly() {
       stopAudio();
       for (let i = 0; i < poemLines.length; i++) {
         document.querySelectorAll('.compare-row').forEach(r => r.classList.remove('active-line'));
@@ -511,20 +598,6 @@
     async function playPlainOnly() {
       stopAudio();
       for (let i = 0; i < plainLines.length; i++) {
-        document.querySelectorAll('.compare-row').forEach(r => r.classList.remove('active-line'));
-        document.querySelector(`.plain-row[data-pair="${i}"]`)?.classList.add('active-line');
-        await playAudioOrSpeak(plainAudioIds[i], plainLines[i]);
-        await delay(450);
-      }
-      document.querySelectorAll('.compare-row').forEach(r => r.classList.remove('active-line'));
-    }
-    async function playCompareAll() {
-      stopAudio();
-      for (let i = 0; i < poemLines.length; i++) {
-        document.querySelectorAll('.compare-row').forEach(r => r.classList.remove('active-line'));
-        document.querySelector(`.poem-row[data-pair="${i}"]`)?.classList.add('active-line');
-        await playAudioOrSpeak(poemAudioIds[i], poemLines[i]);
-        await delay(450);
         document.querySelectorAll('.compare-row').forEach(r => r.classList.remove('active-line'));
         document.querySelector(`.plain-row[data-pair="${i}"]`)?.classList.add('active-line');
         await playAudioOrSpeak(plainAudioIds[i], plainLines[i]);
@@ -573,6 +646,7 @@
 
     /* ===== 遊戲一：排兵布陣版 ===== */
     const allWords = ['功蓋','三分','國','名成','八陣','圖','江流','石','不轉','遺恨','失','吞吳'];
+    const lineTexts = ['功蓋三分國。','名成八陣圖。','江流石不轉。','遺恨失吞吳。'];
     let formIndex = 0, formLocked = false;
     function initFormationGame() {
       if (document.getElementById('formationBuild').children.length) return;
@@ -598,6 +672,9 @@
       if (formIndex >= allWords.length) {
         document.getElementById('formationTarget').textContent = '整首詩完成';
         document.getElementById('formationFeedback').textContent = '○ 全部完成！';
+        // 整首詩朗讀
+        const fullPoem = lineTexts.join('');
+        window.setTimeout(() => playSegment('game1-full'), 600);
         launchConfetti(); return;
       }
       const target = allWords[formIndex];
@@ -621,7 +698,7 @@
       if (word !== target) {
         formLocked = true;
         fb.textContent = '再想想，換一個試試。';
-        speak('再想想，換一個試試。').then(() => { formLocked = false; });
+        speakScript('再想想，換一個試試。').then(() => { formLocked = false; });
         return;
       }
       formLocked = false;
@@ -633,7 +710,21 @@
       if (slot) { slot.textContent = word; slot.classList.add('filled'); slot.classList.remove('active-target'); }
       formIndex++;
       renderProgress('formationProgress', formIndex, allWords.length);
-      spawnFormationWords();
+      // 每完成一句就朗讀
+      const lineEnds = [2, 5, 8, 11];
+      if (lineEnds.includes(formIndex - 1)) {
+        const lineNum = lineEnds.indexOf(formIndex - 1);
+        document.getElementById('formationFeedback').textContent = `第${lineNum + 1}句完成！`;
+        formLocked = true;
+        window.setTimeout(() => {
+          playSegment(`game1-line${lineNum + 1}`).then(() => {
+            formLocked = false;
+            spawnFormationWords();
+          });
+        }, 300);
+      } else {
+        spawnFormationWords();
+      }
     }
 
     /* ===== 遊戲二：江水流字版 ===== */
@@ -666,14 +757,24 @@
       const target = allWords[boatIndex];
       document.getElementById('boatTarget').textContent = `下一個要點：${target}`;
       const pool = shuffle([target, ...allWords.filter(w => w !== target)].slice(0, 6));
-      const lanes = [8, 22, 36, 50, 64, 78];
-      const lanePool = shuffle([...lanes]);
+      // 紅框標示的位置（arena 內 %）
+      // 上排1隻、中排2隻分開、下排3隻散開，形成倒三角散佈
+      const positions = [
+        {x: 5,  y: 12},   // 上排偏左
+        {x: 32, y: 32},   // 中排左
+        {x: 58, y: 30},   // 中排右
+        {x: 8,  y: 62},   // 下排左
+        {x: 34, y: 64},   // 下排中
+        {x: 62, y: 60}    // 下排右
+      ];
       pool.forEach((word, i) => {
+        const pos = positions[i];
         const btn = document.createElement('button');
         btn.className = 'boat-card';
-        btn.innerHTML = boatSvg() + `<span class="boat-label">${word}</span>`;
-        btn.style.left = `${lanePool[i % lanes.length]}%`;
-        btn.style.top = '15%';
+        const showText = i < Math.ceil(pool.length / 2); // half the boats show text
+        btn.innerHTML = boatSvg() + `<span class="boat-label" style="${showText ? 'opacity:1;transform:translate(-50%,-50%) scale(1)' : ''}">${word}</span>`;
+        btn.style.left = `${pos.x}%`;
+        btn.style.top = `${pos.y}%`;
         const speed = 5 + Math.random() * 6;
         btn.style.setProperty('--speed', `${speed}s`);
         btn.style.setProperty('--bx1', `${(Math.random()-.5)*40}px`);
@@ -721,7 +822,7 @@
       }, 720);
     }
 
-    /* ===== 遊戲三：石壘守城版 ===== */
+    /* ===== 遊戲三：錦囊妙計版 ===== */
     let wallIndex = 0, wallLocked = false;
     function initWallGame() {
       if (document.getElementById('wallBuild').children.length) return;
@@ -738,12 +839,12 @@
         return `<div class="fill-line" data-line-index="${li}">${slots}</div>`;
       }).join('');
       renderProgress('wallProgress', 0, allWords.length);
-      spawnStones();
+      spawnBags();
     }
-    function spawnStones() {
+    function spawnBags() {
       const arena = document.getElementById('wallArena');
-      arena.innerHTML = '<div class="arena-title">石壘區　點石尋字</div>';
-      arena.style.background = 'linear-gradient(180deg, #2a2a2a 0%, #3a3a3a 40%, #4a4a4a 80%, #2a2a2a 100%)';
+      arena.innerHTML = '<div class="arena-title">錦囊區　開囊取字</div>';
+      arena.style.background = '';
       if (wallIndex >= allWords.length) {
         document.getElementById('wallTarget').textContent = '整首詩完成';
         document.getElementById('wallFeedback').textContent = '○ 全部完成！';
@@ -752,40 +853,47 @@
       const target = allWords[wallIndex];
       document.getElementById('wallTarget').textContent = `下一個要點：${target}`;
       const pool = shuffle([target, ...allWords.filter(w => w !== target)].slice(0, 6));
-      const positions = generatePositions(7, 18);
+      // 錦囊位置：像江水流字一樣散佈
+      const positions = [
+        {x: 5,  y: 10},
+        {x: 32, y: 28},
+        {x: 60, y: 12},
+        {x: 10, y: 55},
+        {x: 40, y: 52},
+        {x: 68, y: 48}
+      ];
       pool.forEach((word, i) => {
+        const pos = positions[i];
         const btn = document.createElement('button');
-        btn.className = 'stone-card';
+        btn.className = 'bag-card';
         btn.dataset.word = word;
-        btn.innerHTML = stoneSvg() + `<span class="stone-label">${word}</span>`;
-        const pos = positions[i % positions.length];
+        const showText = i < Math.ceil(pool.length / 2);
+        btn.innerHTML = bagSvg() + `<span class="bag-label" style="${showText ? 'opacity:1;transform:translate(-50%,-50%) scale(1)' : ''}">${word}</span>`;
         btn.style.left = `${pos.x}%`;
         btn.style.top = `${pos.y}%`;
-        const speed = 4 + Math.random() * 4;
+        const speed = 5 + Math.random() * 6;
         btn.style.setProperty('--speed', `${speed}s`);
-        btn.style.setProperty('--sx1', `${(Math.random()-.5)*16}px`);
-        btn.style.setProperty('--sy1', `${-3-Math.random()*6}px`);
-        btn.style.setProperty('--sx2', `${4+Math.random()*8}px`);
-        btn.style.setProperty('--sy2', `${3+Math.random()*6}px`);
-        btn.style.setProperty('--sx3', `${-3-Math.random()*6}px`);
-        btn.style.setProperty('--sy3', `${-4-Math.random()*5}px`);
-        btn.style.setProperty('--sx4', `${3+Math.random()*6}px`);
-        btn.style.setProperty('--sy4', `${2+Math.random()*5}px`);
-        btn.style.animationDelay = `${-Math.random()*speed*0.6}s`;
-        btn.onclick = () => tryWallWord(word, btn);
+        btn.style.setProperty('--bx1', `${(Math.random()-.5)*30}px`);
+        btn.style.setProperty('--by1', `${-4-Math.random()*8}px`);
+        btn.style.setProperty('--bx2', `${6+Math.random()*12}px`);
+        btn.style.setProperty('--by2', `${4+Math.random()*8}px`);
+        btn.style.setProperty('--bx3', `${-6-Math.random()*10}px`);
+        btn.style.setProperty('--by3', `${-5-Math.random()*6}px`);
+        btn.style.setProperty('--bx4', `${5+Math.random()*10}px`);
+        btn.style.setProperty('--by4', `${3+Math.random()*6}px`);
+        btn.style.setProperty('--bx5', `${(Math.random()-.5)*20}px`);
+        btn.style.setProperty('--by5', `${-3-Math.random()*5}px`);
+        btn.style.animationDelay = `${-Math.random()*speed*0.3}s`;
+        btn.onclick = () => tryBagWord(word, btn);
         arena.appendChild(btn);
       });
     }
-    function tryWallWord(word, stone) {
-      if (wallLocked || stone.classList.contains('revealed') || stone.classList.contains('taken')) return;
+    function tryBagWord(word, bag) {
+      if (wallLocked || bag.classList.contains('revealed') || bag.classList.contains('taken')) return;
       const target = allWords[wallIndex];
       const fb = document.getElementById('wallFeedback');
       wallLocked = true;
-      stone.classList.add('revealed');
-      const pop = document.createElement('span');
-      pop.className = 'stone-pop'; pop.innerHTML = stonePopSvg();
-      stone.appendChild(pop);
-      setTimeout(() => pop.remove(), 850);
+      bag.classList.add('revealed');
       setTimeout(() => {
         wallLocked = false;
         if (word === target) {
@@ -794,18 +902,18 @@
           fb.textContent = `○ 找到「${word}」了！`;
           showCorrectMark();
           setTimeout(() => {
-            stone.classList.add('taken');
+            bag.classList.add('taken');
             const slot = document.querySelector(`#wallBuild .fill-slot[data-wall-slot="${wallIndex}"]`);
             if (slot) { slot.textContent = word; slot.classList.add('filled'); }
             wallIndex++;
             renderProgress('wallProgress', wallIndex, allWords.length);
             const completedLine = wallLineEnds.find(l => l.end === wallIndex);
-            if (completedLine) setTimeout(async () => { await readCompletedFillLine(completedLine, 'wallBuild'); spawnStones(); }, 260);
-            else spawnStones();
+            if (completedLine) setTimeout(async () => { await readCompletedFillLine(completedLine, 'wallBuild'); spawnBags(); }, 260);
+            else spawnBags();
           }, 360);
         } else {
           fb.textContent = `這是「${word}」，再找「${target}」。`;
-          stone.classList.remove('revealed');
+          bag.classList.remove('revealed');
         }
       }, 820);
     }
@@ -833,7 +941,9 @@
       return shuffle(positions);
     }
     async function readCompletedFillLine(completedLine, buildId) {
-      const lineIndex = boatLineEnds.indexOf(completedLine);
+      const lineIndex = boatLineEnds.indexOf(completedLine) >= 0
+        ? boatLineEnds.indexOf(completedLine)
+        : wallLineEnds.indexOf(completedLine);
       const row = document.querySelector(`#${buildId} .fill-line[data-line-index="${lineIndex}"]`);
       document.querySelectorAll(`#${buildId} .fill-line`).forEach(l => l.classList.remove('active-line'));
       row?.classList.add('active-line');
@@ -868,24 +978,28 @@
         </g>
       </svg>`;
     }
-    function stoneSvg() {
-      const gid = 'st' + Math.random().toString(36).slice(2,7);
-      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
-        <defs><radialGradient id="${gid}" cx="50%" cy="40%" r="55%">
-          <stop offset="0%" stop-color="#e8e0d0"/><stop offset="50%" stop-color="#a09478"/><stop offset="100%" stop-color="#7a7058"/>
-        </radialGradient></defs>
-        <g transform="translate(70,55)">
-          <ellipse cx="0" cy="8" rx="36" ry="12" fill="rgba(0,0,0,.15)"/>
-          <path d="M-34,4 Q-36,-6 -20,-18 Q-4,-28 10,-24 Q28,-20 34,-6 Q36,6 28,14 Q16,22 2,20 Q-14,18 -28,14 Q-34,10 -34,4 Z" fill="url(#${gid})" stroke="#8a7e64" stroke-width="1"/>
-          <path d="M-18,-6 Q-8,-14 6,-12 Q16,-10 20,-2 Q16,-4 6,-6 Q-6,-8 -18,-6 Z" fill="rgba(255,255,255,.12)"/>
+    function bagSvg() {
+      const gid = 'bg' + Math.random().toString(36).slice(2,7);
+      return `<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="${gid}" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#c0392b"/><stop offset="50%" stop-color="#a93226"/><stop offset="100%" stop-color="#7b241c"/>
+          </linearGradient>
+          <radialGradient id="${gid}sh" cx="40%" cy="30%" r="60%">
+            <stop offset="0%" stop-color="rgba(255,255,255,.25)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+          </radialGradient>
+        </defs>
+        <g transform="translate(100,85)">
+          <ellipse cx="0" cy="50" rx="40" ry="10" fill="rgba(0,0,0,.12)"/>
+          <path d="M-42,-10 Q-44,10 -38,30 Q-30,48 0,52 Q30,48 38,30 Q44,10 42,-10 Q36,-20 20,-28 Q0,-34 -20,-28 Q-36,-20 -42,-10 Z" fill="url(#${gid})" stroke="#922b21" stroke-width="1.5"/>
+          <path d="M-42,-10 Q-44,10 -38,30 Q-30,48 0,52 Q30,48 38,30 Q44,10 42,-10 Q36,-20 20,-28 Q0,-34 -20,-28 Q-36,-20 -42,-10 Z" fill="url(#${gid}sh)"/>
+          <path d="M-20,-28 Q0,-36 20,-28" fill="none" stroke="#f5b7b1" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="-18" cy="-26" r="3" fill="#f7dc6f"/>
+          <circle cx="18" cy="-26" r="3" fill="#f7dc6f"/>
+          <path d="M-18,-26 Q0,-42 18,-26" fill="none" stroke="#d4a017" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M-18,-26 Q-8,-38 0,-42 Q8,-38 18,-26" fill="none" stroke="#d4a017" stroke-width="1.8" stroke-linecap="round"/>
+          <ellipse cx="0" cy="10" rx="18" ry="14" fill="rgba(255,255,255,.08)"/>
         </g>
-      </svg>`;
-    }
-    function stonePopSvg() {
-      return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="40" cy="40" r="28" fill="#d4e8ff" opacity=".4"/>
-        <circle cx="40" cy="40" r="18" fill="#c8dff0" opacity=".3"/>
-        <circle cx="40" cy="40" r="8" fill="#ffffff" opacity=".25"/>
       </svg>`;
     }
 

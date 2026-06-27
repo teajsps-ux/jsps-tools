@@ -3,14 +3,44 @@
   "voicesRoot": "C:\\2026_Antigravity_語音\\voices",
   "segments": [
     {
+      "id": "game3-guide",
+      "file": "audio/game3-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "遊戲三：錦囊妙計。點擊錦囊打開，找出裡面藏的字！",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1075244,
+      "seconds": 15.3
+    },
+    {
+      "id": "heart-left",
+      "file": "audio/heart-left-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "諸葛亮是三國時代最有智慧的人。他發明的八陣圖非常厲害，連江水都沖不走。但是，他也有做不到的事——沒能阻止劉備去打吳國。杜甫覺得這是一件很遺憾的事。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 2365484,
+      "seconds": 60.8
+    },
+    {
+      "id": "heart-right",
+      "file": "audio/heart-right-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "再厲害的人也會有遺憾，所以我們要珍惜每個機會，把握當下，盡力而為。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 998444,
+      "seconds": 24.7
+    },
+    {
       "id": "home-guide",
       "file": "audio/home-guide-sadaltager.wav",
       "voice": "Sadaltager",
-      "text": "小朋友們，你們聽過諸葛亮嗎？他是三國時代最聰明的軍師！他設計了一個超厲害的陣法，叫做八陣圖。今天我們要來學杜甫寫的這首詩，看看諸葛亮有多厲害，也聽聽他有什麼遺憾。準備好了嗎？讓我們一起來聽！",
+      "text": "八陣圖。唐，杜甫。小朋友們，你們聽過諸葛亮嗎？他是三國時代最聰明的軍師！他設計了一個超厲害的陣法，叫做八陣圖。今天我們要來學杜甫寫的這首詩，看看諸葛亮有多厲害，也聽聽他有什麼遺憾。準備好了嗎？讓我們一起來聽！",
       "status": "done",
       "source": "local VoxCPM2",
-      "bytes": 3102764,
-      "seconds": 45.3
+      "bytes": 3655724,
+      "seconds": 49.7
     },
     {
       "id": "line1-poem-sadaltager",
@@ -173,16 +203,6 @@
       "seconds": 16.5
     },
     {
-      "id": "heart-read",
-      "file": "audio/heart-guide-sadaltager.wav",
-      "voice": "Sadaltager",
-      "text": "諸葛亮是三國時代最有智慧的人。他發明的八陣圖非常厲害，連江水都沖不走。但是，他也有做不到的事。這首詩告訴我們，再厲害的人也會有遺憾，所以我們要珍惜每個機會。",
-      "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 2611244,
-      "seconds": 64.7
-    },
-    {
       "id": "game1-guide",
       "file": "audio/game1-guide-sulafat.wav",
       "voice": "Sulafat",
@@ -201,16 +221,6 @@
       "source": "local VoxCPM2",
       "bytes": 1121324,
       "seconds": 32.1
-    },
-    {
-      "id": "game3-guide",
-      "file": "audio/game3-guide-sulafat.wav",
-      "voice": "Sulafat",
-      "text": "石壘守城。點擊石壘找出隱藏的字，補上城牆缺口！",
-      "status": "done",
-      "source": "local VoxCPM2",
-      "bytes": 967724,
-      "seconds": 25.0
     },
     {
       "id": "word-gonggai",
@@ -331,6 +341,56 @@
       "source": "local VoxCPM2",
       "bytes": 368684,
       "seconds": 9.9
+    },
+    {
+      "id": "game1-full",
+      "file": "audio/game1-full-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "功蓋三分國，名成八陣圖，江流石不轉，遺恨失吞吳。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 890924,
+      "seconds": 13.8
+    },
+    {
+      "id": "game1-line1",
+      "file": "audio/game1-line1-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "功蓋三分國。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 261164,
+      "seconds": 6.5
+    },
+    {
+      "id": "game1-line2",
+      "file": "audio/game1-line2-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "名成八陣圖。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 276524,
+      "seconds": 4.0
+    },
+    {
+      "id": "game1-line3",
+      "file": "audio/game1-line3-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "江流石不轉。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 261164,
+      "seconds": 3.8
+    },
+    {
+      "id": "game1-line4",
+      "file": "audio/game1-line4-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "遺恨失吞吳。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 399404,
+      "seconds": 5.4
     }
   ]
 }
