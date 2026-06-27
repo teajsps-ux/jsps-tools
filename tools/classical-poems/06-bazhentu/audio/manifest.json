@@ -1,0 +1,336 @@
+{
+  "workflow": "local-first",
+  "voicesRoot": "C:\\2026_Antigravity_語音\\voices",
+  "segments": [
+    {
+      "id": "home-guide",
+      "file": "audio/home-guide-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "小朋友們，你們聽過諸葛亮嗎？他是三國時代最聰明的軍師！他設計了一個超厲害的陣法，叫做八陣圖。今天我們要來學杜甫寫的這首詩，看看諸葛亮有多厲害，也聽聽他有什麼遺憾。準備好了嗎？讓我們一起來聽！",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 3102764,
+      "seconds": 45.3
+    },
+    {
+      "id": "line1-poem-sadaltager",
+      "file": "audio/line1-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "功蓋三分國。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 291884,
+      "seconds": 8.8
+    },
+    {
+      "id": "line1-poem-sulafat",
+      "file": "audio/line1-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "功蓋三分國。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 261164,
+      "seconds": 7.6
+    },
+    {
+      "id": "line1-plain-sadaltager",
+      "file": "audio/line1-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "諸葛亮的功勞蓋過三國時期的所有人。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 568364,
+      "seconds": 15.2
+    },
+    {
+      "id": "line1-plain-sulafat",
+      "file": "audio/line1-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "諸葛亮的功勞蓋過三國時期的所有人。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1536044,
+      "seconds": 38.7
+    },
+    {
+      "id": "line2-poem-sadaltager",
+      "file": "audio/line2-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "名成八陣圖。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 199724,
+      "seconds": 5.8
+    },
+    {
+      "id": "line2-poem-sulafat",
+      "file": "audio/line2-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "名成八陣圖。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 245804,
+      "seconds": 6.7
+    },
+    {
+      "id": "line2-plain-sadaltager",
+      "file": "audio/line2-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "他因為設計八陣圖而聞名天下。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 491564,
+      "seconds": 12.5
+    },
+    {
+      "id": "line2-plain-sulafat",
+      "file": "audio/line2-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "他因為設計八陣圖而聞名天下。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 537644,
+      "seconds": 13.6
+    },
+    {
+      "id": "line3-poem-sadaltager",
+      "file": "audio/line3-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "江流石不轉。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 245804,
+      "seconds": 7.9
+    },
+    {
+      "id": "line3-poem-sulafat",
+      "file": "audio/line3-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "江流石不轉。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 245804,
+      "seconds": 6.6
+    },
+    {
+      "id": "line3-plain-sadaltager",
+      "file": "audio/line3-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "江水日夜奔流，但八陣圖的石頭從來不動。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 721964,
+      "seconds": 18.1
+    },
+    {
+      "id": "line3-plain-sulafat",
+      "file": "audio/line3-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "江水日夜奔流，但八陣圖的石頭從來不動。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 629804,
+      "seconds": 15.8
+    },
+    {
+      "id": "line4-poem-sadaltager",
+      "file": "audio/line4-poem-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "遺恨失吞吳。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 261164,
+      "seconds": 7.2
+    },
+    {
+      "id": "line4-poem-sulafat",
+      "file": "audio/line4-poem-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "遺恨失吞吳。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 291884,
+      "seconds": 8.0
+    },
+    {
+      "id": "line4-plain-sadaltager",
+      "file": "audio/line4-plain-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "最遺憾的是沒能成功阻止先主去攻打吳國。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 629804,
+      "seconds": 16.0
+    },
+    {
+      "id": "line4-plain-sulafat",
+      "file": "audio/line4-plain-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "最遺憾的是沒能成功阻止先主去攻打吳國。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 660524,
+      "seconds": 16.5
+    },
+    {
+      "id": "heart-read",
+      "file": "audio/heart-guide-sadaltager.wav",
+      "voice": "Sadaltager",
+      "text": "諸葛亮是三國時代最有智慧的人。他發明的八陣圖非常厲害，連江水都沖不走。但是，他也有做不到的事。這首詩告訴我們，再厲害的人也會有遺憾，所以我們要珍惜每個機會。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 2611244,
+      "seconds": 64.7
+    },
+    {
+      "id": "game1-guide",
+      "file": "audio/game1-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "排兵布陣。把打亂的字排入正確位置，完成八陣圖！",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 860204,
+      "seconds": 23.9
+    },
+    {
+      "id": "game2-guide",
+      "file": "audio/game2-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "江水流字。小船在江上漂流，按順序點擊正確的字！",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 1121324,
+      "seconds": 32.1
+    },
+    {
+      "id": "game3-guide",
+      "file": "audio/game3-guide-sulafat.wav",
+      "voice": "Sulafat",
+      "text": "石壘守城。點擊石壘找出隱藏的字，補上城牆缺口！",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 967724,
+      "seconds": 25.0
+    },
+    {
+      "id": "word-gonggai",
+      "file": "audio/word-gonggai.wav",
+      "voice": "Sulafat",
+      "text": "功蓋——功勞最大、最厲害。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 583724,
+      "seconds": 14.6
+    },
+    {
+      "id": "word-sanfen",
+      "file": "audio/word-sanfen.wav",
+      "voice": "Sulafat",
+      "text": "三分——三個國家。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 368684,
+      "seconds": 9.5
+    },
+    {
+      "id": "word-guo",
+      "file": "audio/word-guo.wav",
+      "voice": "Sulafat",
+      "text": "國——國家。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 276524,
+      "seconds": 7.4
+    },
+    {
+      "id": "word-mingcheng",
+      "file": "audio/word-mingcheng.wav",
+      "voice": "Sulafat",
+      "text": "名成——名聲最大、最有名。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 491564,
+      "seconds": 12.5
+    },
+    {
+      "id": "word-bazhen",
+      "file": "audio/word-bazhen.wav",
+      "voice": "Sulafat",
+      "text": "八陣——八種陣法。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 368684,
+      "seconds": 9.6
+    },
+    {
+      "id": "word-tu",
+      "file": "audio/word-tu.wav",
+      "voice": "Sulafat",
+      "text": "圖——陣法的圖形。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 337964,
+      "seconds": 9.4
+    },
+    {
+      "id": "word-jiangliu",
+      "file": "audio/word-jiangliu.wav",
+      "voice": "Sulafat",
+      "text": "江流——江水一直流。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 430124,
+      "seconds": 11.0
+    },
+    {
+      "id": "word-shi",
+      "file": "audio/word-shi.wav",
+      "voice": "Sulafat",
+      "text": "石——石頭。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 353324,
+      "seconds": 9.3
+    },
+    {
+      "id": "word-buzhuan",
+      "file": "audio/word-buzhuan.wav",
+      "voice": "Sulafat",
+      "text": "不轉——不動、不改變。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 445484,
+      "seconds": 11.3
+    },
+    {
+      "id": "word-yihen",
+      "file": "audio/word-yihen.wav",
+      "voice": "Sulafat",
+      "text": "遺恨——很可惜、很遺憾。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 476204,
+      "seconds": 12.0
+    },
+    {
+      "id": "word-shi2",
+      "file": "audio/word-shi2.wav",
+      "voice": "Sulafat",
+      "text": "失——失去、沒能成功。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 368684,
+      "seconds": 9.7
+    },
+    {
+      "id": "word-tunwu",
+      "file": "audio/word-tunwu.wav",
+      "voice": "Sulafat",
+      "text": "吞吳——打敗吳國。",
+      "status": "done",
+      "source": "local VoxCPM2",
+      "bytes": 368684,
+      "seconds": 9.9
+    }
+  ]
+}

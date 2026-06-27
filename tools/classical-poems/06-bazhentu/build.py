@@ -1,4 +1,8 @@
-<!doctype html>
+#!/usr/bin/env python3
+"""Generate index.html for 八陣圖 poem deck."""
+import os
+
+HTML = r'''<!doctype html>
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
@@ -918,4 +922,9 @@
     showSlide(0);
   </script>
 </body>
-</html>
+</html>'''
+
+out = r'G:\我的雲端硬碟\jsps-tools\tools\classical-poems\06-bazhentu\index.html'
+with open(out, 'w', encoding='utf-8') as f:
+    f.write(HTML)
+print(f'Written {len(HTML)} bytes to {out}')
