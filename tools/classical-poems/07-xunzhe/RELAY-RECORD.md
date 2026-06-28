@@ -1,37 +1,67 @@
-# 尋隱者不遇 HTML 簡報 - 接力紀錄
+# 尋隱者不遇 HTML 簡報 — 完工接力記錄
 
-## 已完成
+## 專案定位
+- 編號：#07（原文課本第 07 頁）
+- 唐詩：賈島〈尋隱者不遇〉
+- 互動式詩詞教學 HTML 簡報
+- 最終部署路徑：`tools/classical-poems/07-xunzhe/`
 
-1. 建立新 deck：`07-xunyinzhe/`
-2. 完成首頁、四句教學頁、對照頁、心情頁、三頁遊戲頁
-3. 已生成插圖：
-   - `generated/xunzhe-home_20260627_223011.png`
-   - `generated/xunzhe-line1_20260627_223006.png`
-   - `generated/xunzhe-line2_20260627_223006.png`
-   - `generated/xunzhe-line3_20260627_223006.png`
-   - `generated/xunzhe-line4_20260627_223042.png`
-   - `generated/xunzhe-compare_20260627_223044.png`
-   - `generated/xunzhe-heart_20260627_223045.png`
-   - `generated/xunzhe-gameA_20260627_223047.png`
-   - `generated/xunzhe-gameB_20260627_223120.png`
-   - `generated/xunzhe-gameC_20260627_223128.png`
-4. 已建立臨時音檔 manifest 與備援腳本
+## 最終檔案結構
 
-## 目前狀態
+```
+07-xunzhe/
+├── index.html          ← 主簡報（256KB，含所有 JS/CSS/互動）
+├── audio/
+│   ├── manifest.json   ← 31 個 WAV 對照表
+│   ├── generate_audio.py ← VoxCPM2 批次生成腳本（含同音字修正記錄）
+│   └── 31 *.wav        ← 16.7 MB（Sulafat 女聲 + Sadaltager 男聲）
+├── generated/
+│   └── 10 *.png        ← AI 生成場景插圖
+├── FIXES.md            ← 語音修正記錄（同音字替換策略）
+└── RELAY-RECORD.md     ← 本檔案
+```
 
-- HTML 目前以瀏覽器 TTS 做臨時朗讀
-- 尚未輸出正式 VoxCPM2 / Sulafat / Sadaltager WAV
-- 若要正式交付，下一步是補齊 `audio/*.wav` 並把 `audio/manifest.json` 改成正式狀態
+## 已完成里程碑
 
-## 下一台電腦要做
+1. **HTML 開發**：10 頁完整流程（首頁→4 句教學→對照→心情→3 遊戲→結束）
+2. **圖像生成**：10 張 AI 場景插圖（home, line1-4, compare, heart, gameA/B/C）
+3. **音檔生成**：31 個 WAV（VoxCPM2 Sulafat/Sadaltager，16.7 MB）
+4. **語音修正**
+   - 採藥竹簡版→彩要築撿板（`game-c-guide-sulafat.wav`）
+   - 樹→豎（`word-songxia.wav` / `line1-plain-sulafat.wav` / `heart-guide-sadaltager.wav`）
+   - 心區右側獨立音檔（`heart-right-sulafat.wav`）
+5. **播放機制改進**
+   - Slides 2-5 自動旁白使用既有 WAV 取代 TTS
+   - 三種遊戲完成統一播放全詩朗讀
+   - 首次點擊解鎖瀏覽器自動播放限制
+   - 防止方向鍵造成音檔重疊
+6. **Gallery 整合**
+   - `tools/classical-poems/index.html` 新增編號 07 卡片
+   - 封面圖 `assets/07-xunzhe-cover.png`
+7. **Git 部署**
+   - `jsps-tools` repo: commit d4bd6ef (deck) + 7991c94 (gallery)
+   - Push 至 GitHub `origin/main`
+8. **Firebase 部署**
+   - Hosting: https://jsps-tools-sync.web.app 上線
 
-1. 先開 `G:\我的雲端硬碟\slides\07-xunyinzhe\index.html` 檢查版面與互動。
-2. 若封面與插圖要微調，再用 draw 重新生成對應 PNG。
-3. 若要正式音檔，依 `audio/ttsmaker-script.md` 或本機 VoxCPM2 補檔。
-4. 若要同步到 GitHub，再把 `tools/classical-poems/index.html` 新增第 07 首詩卡片。
+## 已知同音字替換記錄
 
-## 備註
+| WAV 檔案 | 顯示文字 | TTS 輸入（同音字） |
+|---|---|---|
+| `game-c-guide-sulafat.wav` | 採藥竹簡版 | 彩要築撿板 |
+| `word-songxia.wav` | 松下 | 松豎 |
+| `line1-plain-sulafat.wav` | 松下 | 松豎 |
+| `heart-guide-sadaltager.wav` | 松下 | 松豎 |
 
-- 遊戲 A：松下對話版
-- 遊戲 B：山徑尋蹤版
-- 遊戲 C：採藥竹簡版
+## 技術債 / 可優化項目
+
+- [ ] `generate_audio.py` 若需全面重新生成，注意同音字修正部分需手動處理
+- [ ] VoxCPM2 環境：`C:\2026_Antigravity_語音\.venv\Scripts\python.exe`
+- [ ] 如果 TTS 模型更新，`game-c-guide` 的前五字（彩要築撿）可能需要調整注音輸入
+- [ ] `heart-right` 音檔文字：「有時候找不到人，不一定是壞事。可以學會耐心等待，也可以欣賞風景。」（不含「我們學到」前綴）
+
+## 移交說明
+
+- 簡報已在 `jsps-tools` GitHub + Firebase 上線
+- 若需修改內容，編輯 `index.html` 後重新 push + deploy 即可
+- 若需重製音檔，執行 `generate_audio.py` 後更新 `manifest.json`
