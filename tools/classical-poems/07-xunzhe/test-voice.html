@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>語音測試</title>
+</head>
+<body>
+  <h1>語音測試</h1>
+  <button id="testBtn">測試語音</button>
+  <script>
+    function setVoice(){
+      const names = speechSynthesis.getVoices();
+      console.log('Available voices:', names);
+      return names.find(v => /Yating|雅婷|zh-TW/i.test(v.name)) ||
+             names.find(v => /Chinese|Taiwan|zh/i.test(v.lang)) || null;
+    }
+
+    document.getElementById('testBtn').onclick = function(){
+      const voice = setVoice();
+      console.log('Selected voice:', voice);
+
+      if (!speechSynthesis) {
+        alert('瀏覽器不支援語音合成');
+        return;
+      }
+
+      const u = new SpeechSynthesisUtterance('測試語音');
+      u.lang = 'zh-TW';
+      u.rate = 0.96;
+      if(voice) u.voice = voice;
+
+      u.onend = function(){ alert('語音播放完成'); };
+      u.onerror = function(){ alert('語音播放錯誤'); };
+      u.onstart = function(){ alert('開始播放語音'); };
+
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,606 @@
+﻿<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>尋隱者不遇 - 古詩互動 HTML 簡報</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bpmf+Iansui&family=Bpmf+Zihi+Kai+Std&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:#25211d; --paper:rgba(255,253,248,.88); --soft:rgba(255,253,248,.72); --line:rgba(55,42,26,.16);
+      --verb:#d85045; --noun:#248067; --person:#2f6fbd; --time:#a36600; --place:#6b58b8; --feeling:#c04382;
+      --shadow:0 20px 70px rgba(29,24,17,.2);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;overflow:auto;color:var(--ink);font-family:system-ui,"Microsoft JhengHei",sans-serif;background:#f8f4ec}
+    body.font-iansui{font-family:"Bpmf Iansui",system-ui,sans-serif}
+    body.font-kai{font-family:"Bpmf Zihi Kai Std","Bpmf Iansui",serif}
+    button,select{border:0;border-radius:999px;min-height:40px;padding:9px 15px;font:inherit;font-weight:800;color:var(--ink);background:rgba(255,255,255,.8);box-shadow:0 8px 24px rgba(38,29,18,.12);cursor:pointer}
+    button:hover,select:hover{background:#fff}
+    button.primary{color:#fff;background:#315f53}
+    .deck,.slide{width:100vw;height:100vh;position:relative}
+    .slide{position:absolute;inset:0;display:none;overflow-x:hidden;overflow-y:auto;background:#fff}
+    .slide.active{display:block}
+    .slide.active .art,.slide.active .shade{position:fixed}
+    .art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(255,255,255,.58) 48%,rgba(255,255,255,.16)),radial-gradient(circle at 76% 22%,rgba(255,255,255,.24),transparent 42%);pointer-events:none}
+    body.clean-view .shade,body.clean-view .stage,body.clean-view .audio-note,body.clean-view dialog{display:none}
+    body.clean-view .tools button:not(.view-toggle),body.clean-view .tools select,body.clean-view .pager{display:none}
+    .topbar{position:fixed;z-index:30;pointer-events:none;cursor:grab}
+    .tools,.pager{position:fixed;top:14px;display:flex;align-items:center;gap:7px;padding:7px;border:1px solid rgba(44,35,24,.12);border-radius:999px;background:rgba(255,253,248,.74);backdrop-filter:blur(14px);pointer-events:auto;touch-action:none;cursor:move;user-select:none;z-index:31}
+    .tools{right:16px;left:auto}.pager{right:16px;top:auto;bottom:16px}
+    .tools button,.tools select,.pager button{cursor:pointer;touch-action:manipulation}
+    .drag-handle{width:30px;height:30px;display:grid;place-items:center;border-radius:999px;color:#315f53;background:rgba(255,255,255,.62);font-weight:900;cursor:move}
+    .stage{position:relative;z-index:2;min-height:100%;padding:clamp(78px,9vh,106px) clamp(24px,5vw,70px) clamp(56px,7vh,86px);display:grid;align-items:center}
+    .home-copy{width:min(980px,94vw);display:grid;gap:18px}
+    h1{margin:0;font-size:clamp(42px,7vw,94px);line-height:1.04;letter-spacing:0;color:#2e3832}
+    .author{font-size:clamp(22px,2.7vw,36px);font-weight:800;color:#64574a}
+    .prompt{width:max-content;max-width:min(1120px,94vw);padding:18px 24px;border:1px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:var(--shadow);font-size:clamp(22px,2.5vw,34px);line-height:1.42;font-weight:850}
+    .poem-vertical{writing-mode:horizontal-tb;display:flex;flex-direction:row-reverse;align-items:flex-start;gap:clamp(14px,2vw,28px);min-height:420px;font-size:clamp(32px,4.5vw,66px);line-height:1.62;font-weight:850;color:#2c332e}
+    .poem-vertical .home-line{writing-mode:vertical-rl;text-orientation:upright;display:inline-block;min-height:7.8em;padding:.18em .12em;border-radius:10px;transition:background .2s,box-shadow .2s,transform .2s}
+    .home-line.active-line,.compare-row.active-line{background:rgba(255,236,161,.78);box-shadow:0 0 0 5px rgba(255,236,161,.32);transform:translateY(-2px)}
+    .line-stage{grid-template-columns:minmax(260px,.9fr) minmax(320px,1.1fr);gap:clamp(20px,4vw,62px)}
+    .line-stage>*{min-width:0}
+    .line-poem{display:grid;gap:18px;align-content:center}
+    .line-title{font-size:clamp(23px,2.6vw,34px);font-weight:900;color:#66594b}
+    .token-line{writing-mode:vertical-rl;text-orientation:upright;display:inline-block;min-height:min(58vh,520px);font-size:clamp(38px,5.4vw,74px);line-height:1.38;font-weight:900}
+    .token{writing-mode:vertical-rl;text-orientation:upright;display:inline-block;border-radius:8px;padding:.1em .08em;background:rgba(255,255,255,.58);box-shadow:0 8px 24px rgba(42,31,19,.08)}
+    button.token{min-height:0;border-radius:8px;font:inherit;box-shadow:0 8px 24px rgba(42,31,19,.08)}
+    .token[data-kind="verb"]{color:var(--verb)} .token[data-kind="noun"]{color:var(--noun)} .token[data-kind="person"]{color:var(--person)} .token[data-kind="time"]{color:var(--time)} .token[data-kind="place"]{color:var(--place)} .token[data-kind="feeling"]{color:var(--feeling)}
+    .plain{width:min(760px,100%);max-width:min(760px,calc(100vw - 48px));padding:20px 28px;border:1px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:var(--shadow);font-size:clamp(22px,2.6vw,34px);line-height:1.45;font-weight:800;overflow-wrap:anywhere;word-break:normal;white-space:normal}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;font-size:16px;font-weight:800;color:#53493f}
+    .legend span{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.68)}
+    .compare-grid{width:min(1220px,96vw);display:grid;grid-template-columns:minmax(300px,.92fr) minmax(460px,1.2fr);gap:12px 18px;align-items:stretch}
+    .compare-head{font-size:clamp(24px,3vw,38px);font-weight:900;padding:8px 18px;justify-self:start;background:rgba(255,255,255,.78)}
+    .compare-row{min-height:84px;display:grid;align-items:center;cursor:pointer;border:1px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:0 10px 26px rgba(29,24,17,.08);padding:14px 18px;font-size:clamp(21px,2.4vw,32px);line-height:1.36;font-weight:850;transition:background .2s,box-shadow .2s,transform .2s}
+    .poem-row{writing-mode:horizontal-tb;text-orientation:mixed;display:flex;flex-wrap:wrap;gap:8px;min-height:84px}
+    .poem-row .token{writing-mode:horizontal-tb;text-orientation:mixed;background:transparent;box-shadow:none;padding:0 .04em;font-size:1em}
+    .panel{border:1px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:var(--shadow);padding:clamp(18px,3vw,34px)}
+    .panel h2{margin:0 0 14px;font-size:clamp(24px,3vw,38px)}
+    .panel p{margin:0;font-size:clamp(21px,2.4vw,31px);line-height:1.55;font-weight:750}
+    .scaffold{color:#d85045;border:2px solid rgba(216,80,69,.7);border-radius:4px;padding:0 .08em;background:rgba(255,255,255,.38);white-space:nowrap}
+    .home-action-tray{position:fixed;z-index:34;left:14px;bottom:14px;display:flex;align-items:center;gap:8px;padding:8px;border-radius:999px;border:1px solid rgba(44,35,24,.12);background:rgba(255,253,248,.78);backdrop-filter:blur(14px);box-shadow:0 12px 34px rgba(38,29,18,.12)}
+    .home-action-tray.hidden{display:none}.home-tray-restore{position:fixed;z-index:34;left:14px;bottom:14px;display:none;min-width:54px;height:54px;padding:0 14px;border-radius:999px;background:rgba(255,253,248,.9);color:#315f53;box-shadow:0 12px 34px rgba(38,29,18,.14)}
+    .home-tray-restore.visible{display:inline-grid;place-items:center}.home-action-tray .round{width:42px;min-width:42px;height:42px;min-height:42px;padding:0;display:grid;place-items:center;font-size:22px}.home-action-tray .primary{padding-inline:clamp(16px,2.2vw,28px)}
+    body.clean-view .home-action-tray{display:none}
+    .game{width:min(1240px,96vw);display:grid;gap:16px}.game.wide{width:min(1320px,96vw)}
+    .game-head{width:max-content;max-width:100%;padding:16px 24px;border-radius:8px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);font-size:clamp(24px,3vw,42px);line-height:1.25;font-weight:900}
+    .game-rule{width:fit-content;max-width:100%;padding:12px 18px;border-radius:999px;background:rgba(255,253,248,.84);font-size:clamp(18px,2vw,28px);font-weight:850;white-space:normal;overflow-wrap:anywhere}
+    .fill-layout{display:grid;grid-template-columns:minmax(360px,1fr) minmax(360px,1fr);gap:18px;align-items:stretch}
+    .fill-poem{border:1px solid var(--line);border-radius:8px;background:rgba(255,253,248,.78);padding:18px;display:grid;gap:14px;align-content:start}
+    .fill-target{width:max-content;max-width:100%;justify-self:center;padding:14px 24px;border-radius:999px;background:rgba(49,95,83,.92);color:#fff;font-size:clamp(22px,2.6vw,34px);font-weight:900;white-space:nowrap}
+    .fill-line{display:flex;flex-wrap:nowrap;gap:10px;align-items:center;justify-content:center;padding:10px;border-radius:8px;transition:background .2s,box-shadow .2s,transform .2s;font-size:clamp(26px,3.4vw,46px);font-weight:900}
+    .fill-line.active-line{background:rgba(255,236,161,.82);box-shadow:0 0 0 5px rgba(255,236,161,.32);transform:translateY(-2px)}
+    .fill-slot{min-width:110px;min-height:62px;display:inline-grid;place-items:center;border-radius:8px;border:3px dashed rgba(49,95,83,.38);background:rgba(255,255,255,.64);padding:6px 14px}
+    .fill-slot.filled{border-style:solid;color:#fff;background:#315f53}
+    .fill-arena{position:relative;min-height:clamp(320px,50vh,560px);border-radius:8px;border:2px solid rgba(91,127,168,.22);background:rgba(235,244,255,.42);overflow:visible;container-type:inline-size}
+    .arena-title{position:absolute;top:12px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:999px;background:rgba(49,95,83,.88);color:#fff;font-size:clamp(18px,2vw,26px);font-weight:900;white-space:nowrap;z-index:2}
+    .progress-bar{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:8px}
+    .progress-dot{width:14px;height:14px;border-radius:999px;background:rgba(91,127,168,.28)}
+    .progress-dot.reached{background:#315f53}
+    .game-timer{font-size:15px;font-weight:700;color:#315f53;text-align:center;min-height:22px;line-height:22px}
+    .choice-grid{display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:12px}
+    .choice-card{min-height:78px;border-radius:18px;border:2px solid rgba(49,95,83,.18);background:rgba(255,255,255,.88);font-size:clamp(20px,2.2vw,28px);font-weight:900;padding:14px 16px;text-align:center;box-shadow:0 10px 24px rgba(29,24,17,.08)}
+    .choice-card.correct{background:rgba(35,164,90,.14);border-color:rgba(35,164,90,.42)}
+    .choice-card.wrong{background:rgba(216,80,69,.08);border-color:rgba(216,80,69,.42)}
+    .route-board,.bamboo-board{display:grid;gap:14px}
+    .route-track{display:grid;gap:12px;grid-template-columns:1fr;align-content:stretch;padding:18px 18px 24px}
+    .route-node{min-height:74px;border-radius:999px;border:3px dashed rgba(49,95,83,.35);background:rgba(255,255,255,.68);display:grid;place-items:center;font-size:clamp(20px,2.4vw,30px);font-weight:900}
+    .route-node.filled{background:#315f53;color:#fff;border-style:solid}
+    .route-bank,.bamboo-bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:12px}
+    .bank-chip{min-width:110px;min-height:54px;padding:10px 14px;border-radius:999px;border:0;background:#fff;box-shadow:0 8px 20px rgba(29,24,17,.1);font-size:clamp(18px,2vw,24px);font-weight:900;cursor:pointer}
+    .bank-chip.taken{opacity:.18;pointer-events:none}
+    .bamboo-card{position:absolute;width:90px;height:160px;border:0;background:transparent;box-shadow:none;padding:0;cursor:pointer;transition:transform .22s ease,opacity .22s;animation:bambooFloat 4s ease-in-out infinite}
+    .bamboo-card:hover{transform:scale(1.1)}
+    .bamboo-card svg{width:100%;height:100%;display:block;pointer-events:none}
+    .bamboo-card .bamboo-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(0deg);writing-mode:vertical-rl;text-orientation:upright;font-size:clamp(18px,2.2vw,26px);font-weight:900;color:#2c3e2a;text-shadow:0 1px 2px rgba(255,255,255,.5);pointer-events:none;opacity:1;transition:opacity .3s;z-index:1;white-space:nowrap;letter-spacing:4px}
+    .bamboo-card.taken{pointer-events:none;opacity:0;transform:scale(.7)}
+    @keyframes bambooFloat{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-8px) rotate(1deg)}50%{transform:translateY(-3px) rotate(-0.5deg)}75%{transform:translateY(-10px) rotate(0.5deg)}}
+    .dialogue-stage{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
+    .dialogue-panels{display:grid;gap:12px}
+    .bubble{padding:16px 18px;border-radius:24px;background:rgba(255,255,255,.9);border:1px solid rgba(49,95,83,.18);box-shadow:0 10px 24px rgba(29,24,17,.08);font-size:clamp(20px,2.4vw,30px);font-weight:900;line-height:1.45}
+    .bubble.active{outline:4px solid rgba(255,236,161,.7)}
+    .dialogue-options{display:grid;gap:10px;align-content:start}
+    .dialogue-options .choice-card{min-height:66px}
+    .feedback{min-height:56px;padding:4px 8px;color:#315f53;font-size:clamp(20px,2.5vw,30px);font-weight:900}
+    .correct-mark{position:fixed;inset:0;z-index:82;display:grid;place-items:center;pointer-events:none;font-size:clamp(210px,32vw,420px);font-family:Arial,sans-serif;font-weight:900;color:#23a45a;text-shadow:0 0 18px rgba(35,164,90,.9),0 0 46px rgba(35,164,90,.65);animation:markPop .72s ease-out both}
+    @keyframes markPop{0%{transform:scale(.55);opacity:0}20%{transform:scale(1.08);opacity:1}70%{transform:scale(1);opacity:1}100%{transform:scale(.92);opacity:0}}
+    .confetti{position:fixed;inset:0;z-index:81;pointer-events:none}.confetti i{position:absolute;width:12px;height:12px;border-radius:2px;animation:fall 3s linear forwards}
+    @keyframes fall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(540deg);opacity:.4}}
+    .audio-note{position:fixed;z-index:31;left:16px;bottom:14px;max-width:min(46px,calc(100vw - 32px));min-height:32px;padding:8px 12px;border-radius:999px;border:1px solid rgba(163,102,0,.2);background:rgba(255,244,218,.9);color:#654400;font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;cursor:help;opacity:.72;transition:max-width .18s ease,opacity .18s ease,background .18s ease}
+    .audio-note::before{content:"音";display:inline-grid;place-items:center;width:22px;height:22px;margin-right:8px;border-radius:999px;background:#fff7df;color:#654400}.audio-note:hover,.audio-note:focus{max-width:min(920px,calc(100vw - 32px));opacity:1;background:rgba(255,244,218,.96)}
+    .fullscreen-toggle{position:fixed;z-index:31;left:18px;bottom:64px;width:42px;height:42px;min-height:42px;padding:0;display:grid;place-items:center;border-radius:999px;border:1px solid rgba(49,95,83,.18);background:rgba(255,253,248,.9);color:#315f53;font-size:21px;font-weight:900;box-shadow:0 10px 26px rgba(29,24,17,.1)}
+    dialog{width:min(560px,90vw);border:0;border-radius:10px;padding:0;background:transparent} dialog::backdrop{background:rgba(30,24,17,.28)}
+    .pop{padding:24px;border:1px solid rgba(44,35,24,.15);border-radius:10px;background:rgba(255,253,248,.96);box-shadow:var(--shadow)} .pop h3{margin:0 0 8px;font-size:34px} .pop p{margin:0 0 18px;font-size:24px;line-height:1.42;font-weight:760}
+    .scroll-card{position:absolute;width:160px;height:140px;border:0;background:transparent;box-shadow:none;padding:0;cursor:pointer;transition:transform .22s ease,opacity .22s;animation:scrollFloat var(--speed,5s) ease-in-out infinite alternate}
+    .scroll-card:hover{transform:scale(1.1)}
+    .scroll-card svg{width:100%;height:100%;display:block;pointer-events:none}
+    .scroll-card .scroll-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(28px,3.4vw,40px);font-weight:900;color:#4a3520;text-shadow:0 1px 3px rgba(255,255,255,.6);pointer-events:none;opacity:1;transition:opacity .3s;z-index:1;white-space:nowrap}
+    .scroll-card.taken{pointer-events:none;opacity:0;transform:scale(.7)}
+    @keyframes scrollFloat{0%{translate:var(--sx1,0px) var(--sy1,-5px)}25%{translate:var(--sx2,6px) var(--sy2,5px)}50%{translate:var(--sx3,-5px) var(--sy3,-7px)}75%{translate:var(--sx4,4px) var(--sy4,4px)}100%{translate:var(--sx5,-3px) var(--sy5,-6px)}}
+    .stone-card{position:absolute;width:140px;height:120px;border:0;background:transparent;box-shadow:none;padding:0;cursor:pointer;transition:transform .22s ease,opacity .22s;animation:stoneFloat var(--speed,5.5s) ease-in-out infinite alternate}
+    .stone-card:hover{transform:scale(1.1)}
+    .stone-card svg{width:100%;height:100%;display:block;pointer-events:none}
+    .stone-card .stone-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(28px,3.6vw,42px);font-weight:900;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5),0 0 10px rgba(0,0,0,.3);pointer-events:none;z-index:1;white-space:nowrap}
+    .stone-card.taken{pointer-events:none;opacity:0;transform:scale(.7)}
+    @keyframes stoneFloat{0%{translate:var(--tx1,0px) var(--ty1,-3px)}33%{translate:var(--tx2,4px) var(--ty2,3px)}66%{translate:var(--tx3,-3px) var(--ty3,-4px)}100%{translate:var(--tx4,3px) var(--ty4,2px)}}
+    .fill-poem .bubble{position:relative;padding:16px 20px;border-radius:16px;background:rgba(255,253,248,.96);border:2px solid rgba(138,110,71,.22);box-shadow:0 10px 24px rgba(29,24,17,.1);font-size:clamp(18px,2.2vw,28px);font-weight:900;line-height:1.5;color:#3d3226}
+    .fill-poem .bubble.active{outline:3px solid rgba(255,236,161,.8);background:rgba(255,252,238,.96)}
+    .fill-poem .bubble .hint{font-size:clamp(14px,1.6vw,20px);font-weight:750;color:#8a7a68;margin-top:6px}
+    .fill-poem .bubble .dialogue-q{font-size:clamp(22px,2.6vw,30px);font-weight:900;color:#3d3226;margin-bottom:6px}
+    .fill-poem .bubble .dialogue-line{font-size:clamp(18px,2.2vw,26px);font-weight:800;color:#5a7a6a;letter-spacing:2px}
+    .choice-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:14px;border-radius:8px;background:rgba(255,253,248,.78)}
+    .choice-grid button{min-width:80px;min-height:56px;font-size:clamp(20px,2.4vw,32px);font-weight:900;padding:10px 20px;border-radius:16px;border:2px solid rgba(138,110,71,.2);background:rgba(255,255,255,.92);cursor:pointer;transition:all .18s}
+    .choice-grid button:hover{transform:scale(1.04);border-color:var(--noun);background:#fff}
+    .choice-grid button.correct{background:#248067;color:#fff;border-color:#248067}
+    .choice-grid button.wrong{background:#d85045;color:#fff;border-color:#d85045}
+    @media (max-width:980px){body{overflow:auto}.deck,.slide{min-height:100vh;height:auto}.slide{position:relative}.line-stage,.compare-grid,.fill-layout{grid-template-columns:1fr}.fill-line{flex-wrap:wrap}.stage{min-height:100vh}.topbar{position:fixed}.prompt,.plain{width:auto}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="tools" data-draggable-control="tools">
+      <span class="drag-handle" title="拖曳移動">↕</span>
+      <select id="fontSelect" aria-label="字體">
+        <option value="normal">一般字體</option>
+        <option value="iansui">Bpmf Iansui</option>
+        <option value="kai">Bpmf Zihi Kai Std</option>
+      </select>
+      <button class="view-toggle" onclick="toggleCleanView()">只看底圖</button>
+    </div>
+    <div class="pager" data-draggable-control="pager">
+      <span class="drag-handle" title="拖曳移動">↕</span>
+      <button onclick="prevSlide()">←</button>
+      <button class="primary" onclick="nextSlide()">→</button>
+    </div>
+  </div>
+
+  <main class="deck">
+    <section class="slide active" data-auto="home-guide">
+      <img class="art" src="generated/xunzhe-home_20260627_223011.png" alt="尋隱者不遇首頁插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>尋隱者不遇</h1>
+          <div class="author">唐・賈島</div>
+          <div class="prompt">詩人去找隱居的人，為什麼沒有見到他呢？</div>
+          <div class="poem-vertical" id="homePoem">
+            <span class="home-line" data-line="0"><span class="token" data-kind="place">松下</span><span class="token" data-kind="verb">問</span><span class="token" data-kind="person">童子</span></span>
+            <span class="home-line" data-line="1"><span class="token" data-kind="verb">言</span><span class="token" data-kind="person">師</span><span class="token" data-kind="verb">採藥去</span></span>
+            <span class="home-line" data-line="2"><span class="token" data-kind="verb">只在</span><span class="token" data-kind="place">此山中</span></span>
+            <span class="home-line" data-line="3"><span class="token" data-kind="place">雲深</span><span class="token" data-kind="feeling">不知處</span></span>
+          </div>
+          <div class="legend">
+            <span style="color:var(--verb)">● 動作/狀態</span>
+            <span style="color:var(--noun)">● 名詞/事物</span>
+            <span style="color:var(--place)">● 地方</span>
+            <span style="color:var(--time)">● 時間/數字</span>
+            <span style="color:var(--feeling)">● 感受</span>
+          </div>
+        </div>
+      </div>
+      <div class="home-action-tray" id="homeActionTray">
+        <button class="round" onclick="hideHomeTray()" title="收起">×</button>
+        <button class="round" onclick="playSegment('home-guide')" title="聽提問">音</button>
+        <button class="primary" onclick="playHomePoem()">帶讀整首詩</button>
+        <button onclick="nextSlide()">開始一句一句看</button>
+      </div>
+      <button class="home-tray-restore" id="homeTrayRestore" onclick="showHomeTray()">朗讀</button>
+    </section>
+
+    <section class="slide" data-auto="line1-meaning">
+      <img class="art" src="generated/xunzhe-line1_20260627_223006.png" alt="松下問童子插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第一句</div>
+          <div class="token-line">
+            <button class="token" data-kind="place" onclick="showWord(this,'松下','松樹下面。')">松下</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'問','問。')">問</button>
+            <button class="token" data-kind="person" onclick="showWord(this,'童子','小孩子。')">童子</button>
+          </div>
+          <div class="legend"><span style="color:var(--place)">地方</span><span style="color:var(--verb)">動作</span><span style="color:var(--person)">人物</span></div>
+        </div>
+        <div class="plain">在松樹下問小童。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line2-meaning">
+      <img class="art" src="generated/xunzhe-line2_20260627_223006.png" alt="言師採藥去插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第二句</div>
+          <div class="token-line">
+            <button class="token" data-kind="verb" onclick="showWord(this,'言','說。')">言</button>
+            <button class="token" data-kind="person" onclick="showWord(this,'師','老師。')">師</button>
+            <button class="token" data-kind="verb" onclick="showWord(this,'採藥去','採藥去了。')">採藥去</button>
+          </div>
+          <div class="legend"><span style="color:var(--verb)">動作</span><span style="color:var(--person)">人物</span></div>
+        </div>
+        <div class="plain">童子說，老師採藥去了。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line3-meaning">
+      <img class="art" src="generated/xunzhe-line3_20260627_223006.png" alt="只在此山中插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第三句</div>
+          <div class="token-line">
+            <button class="token" data-kind="verb" onclick="showWord(this,'只在','就在。')">只在</button>
+            <button class="token" data-kind="place" onclick="showWord(this,'此山中','這座山裡。')">此山中</button>
+          </div>
+          <div class="legend"><span style="color:var(--verb)">動作</span><span style="color:var(--place)">地方</span></div>
+        </div>
+        <div class="plain">只知道他就在這座山裡。</div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="line4-meaning">
+      <img class="art" src="generated/xunzhe-line4_20260627_223042.png" alt="雲深不知處插圖">
+      <div class="shade"></div>
+      <div class="stage line-stage">
+        <div class="line-poem">
+          <div class="line-title">第四句</div>
+          <div class="token-line">
+            <button class="token" data-kind="place" onclick="showWord(this,'雲深','雲很深、很濃。')">雲深</button>
+            <button class="token" data-kind="feeling" onclick="showWord(this,'不知處','不知道在哪裡。')">不知處</button>
+          </div>
+          <div class="legend"><span style="color:var(--place)">地方</span><span style="color:var(--feeling)">感受</span></div>
+        </div>
+        <div class="plain">雲霧太深，不知道他在哪裡。</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <img class="art" src="generated/xunzhe-compare_20260627_223044.png" alt="尋隱者不遇全詩白話對照插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>原詩與白話對照</h1>
+          <div class="author">尋隱者不遇　唐・賈島</div>
+          <div class="compare-grid">
+            <button class="compare-head" onclick="playOriginalOnly()">讀原詩</button>
+            <button class="compare-head" onclick="playPlainOnly()">讀白話</button>
+            <div class="compare-row poem-row" data-pair="0" onclick="playComparePair(0)"><span class="token" data-kind="place">松下</span><span class="token" data-kind="verb">問</span><span class="token" data-kind="person">童子</span></div>
+            <div class="compare-row plain-row" data-pair="0" onclick="playComparePair(0)">在松樹下問小童。</div>
+            <div class="compare-row poem-row" data-pair="1" onclick="playComparePair(1)"><span class="token" data-kind="verb">言</span><span class="token" data-kind="person">師</span><span class="token" data-kind="verb">採藥去</span></div>
+            <div class="compare-row plain-row" data-pair="1" onclick="playComparePair(1)">童子說，老師採藥去了。</div>
+            <div class="compare-row poem-row" data-pair="2" onclick="playComparePair(2)"><span class="token" data-kind="verb">只在</span><span class="token" data-kind="place">此山中</span></div>
+            <div class="compare-row plain-row" data-pair="2" onclick="playComparePair(2)">只知道他就在這座山裡。</div>
+            <div class="compare-row poem-row" data-pair="3" onclick="playComparePair(3)"><span class="token" data-kind="place">雲深</span><span class="token" data-kind="feeling">不知處</span></div>
+            <div class="compare-row plain-row" data-pair="3" onclick="playComparePair(3)">雲霧太深，不知道他在哪裡。</div>
+          </div>
+          <button class="primary" onclick="playCompare()">原詩白話一起讀</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="heart-guide">
+      <img class="art" src="generated/xunzhe-heart_20260627_223045.png" alt="尋隱者不遇心情插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="home-copy">
+          <h1>詩人的心情</h1>
+          <div class="author">找人沒找到，卻看見山中安靜的美</div>
+          <div class="compare-grid">
+            <div class="panel">
+              <h2>當時的心情</h2>
+              <p>詩人來找隱居的人，卻只看到<span class="scaffold red">松樹</span>、<span class="scaffold red">山路</span>和<span class="scaffold red">雲霧</span>。他有點<span class="scaffold red">失望</span>，但也感受到山裡很<span class="scaffold red">安靜</span>、很<span class="scaffold red">美</span>。</p>
+              <button class="primary" onclick="playSegment('heart-left')" style="margin-top:14px">聽左邊</button>
+            </div>
+            <div class="panel">
+              <h2>我們學到</h2>
+              <p>有時候<span class="scaffold blue">找不到人</span>，不一定是<span class="scaffold blue">壞事</span>。可以學會<span class="scaffold green">耐心等待</span>，也可以<span class="scaffold green">欣賞風景</span>。</p>
+              <button class="primary" onclick="playSegment('heart-right')" style="margin-top:14px">聽右邊</button>
+            </div>
+            <div class="feedback" id="heartFeedback"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-a-guide">
+      <img class="art" src="generated/xunzhe-gameA_20260628_091822.png" alt="松下對話版插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game">
+          <div class="game-head">A. 松下對話</div>
+          <div class="game-rule">古松之下，詩人與童子的對話——點開卷軸找出答案。</div>
+          <div class="fill-layout">
+            <div class="fill-poem" id="dialogueBuild"></div>
+            <div>
+              <div class="fill-target" id="dialogueTarget">下一個要找：____</div>
+              <div class="fill-arena" id="dialogueArena"><div class="arena-title">卷軸區　點卷軸尋答案</div></div>
+            </div>
+          </div>
+          <div class="progress-bar" id="dialogueProgress"></div>
+          <div class="game-timer" id="dialogueTimer"></div>
+          <div class="feedback" id="dialogueFeedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-b-guide">
+      <img class="art" src="generated/xunzhe-gameB_20260628_091821.png" alt="山徑尋蹤版插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game">
+          <div class="game-head">B. 山徑尋蹤</div>
+          <div class="game-rule">沿著山路敲開石頭，找出藏在山中的詞語。</div>
+          <div class="fill-layout">
+            <div class="fill-poem">
+              <div class="fill-target" id="trailTarget">下一個要找：____</div>
+              <div id="trailBuild"></div>
+              <div class="progress-bar" id="trailProgress"></div>
+              <div class="game-timer" id="trailTimer"></div>
+            </div>
+            <div class="fill-arena" id="trailArena"><div class="arena-title">山石區　敲石尋字</div></div>
+          </div>
+          <div class="feedback" id="trailFeedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-auto="game-c-guide">
+      <img class="art" src="generated/xunzhe-gameC_20260627_223128.png" alt="採藥竹簡版插圖">
+      <div class="shade"></div>
+      <div class="stage">
+        <div class="game wide">
+          <div class="game-head">C. 採藥竹簡版</div>
+          <div class="game-rule">把竹簡詞卡放回正確位置，完成四句詩。</div>
+          <div class="fill-layout">
+            <div class="fill-poem">
+              <div class="fill-target" id="bambooTarget">下一個要點：松下</div>
+              <div id="bambooBuild"></div>
+              <div class="progress-bar" id="bambooProgress"></div>
+              <div class="game-timer" id="bambooTimer"></div>
+            </div>
+            <div class="fill-arena" id="bambooArena"><div class="arena-title">竹簡區　點竹簡入位</div></div>
+          </div>
+          <div class="feedback" id="bambooFeedback"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="wordDialog"><div class="pop"><h3 id="wordTitle"></h3><p id="wordText"></p><button class="primary" onclick="closeWord()">收起</button></div></dialog>
+  <button class="fullscreen-toggle" id="fullscreenToggle" onclick="toggleFullscreen()" title="切換全螢幕">⛶</button>
+  <div class="audio-note" id="audioNote" tabindex="0">臨時朗讀（正式 VoxCPM2 音檔待補）。</div>
+
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    let current = 0;
+    let currentAudio = null;
+    const audioFile = {
+      // ─── 首頁引導 (Sadaltager) ───
+      '尋隱者不遇。唐，賈島。詩人去找隱居的人，為什麼沒有見到他呢？': 'audio/home-guide-sadaltager.wav',
+      // ─── 完整詩朗讀 (both) ───
+      '松下問童子。言師採藥去。只在此山中。雲深不知處。': 'audio/poem-sadaltager.wav',
+      // ─── 詩人心情 (Sadaltager) ───
+      '詩人來找隱居的人，卻只看到松樹、山路和雲霧。他有點失望，但也感受到山裡很安靜、很美。': 'audio/heart-guide-sadaltager.wav',
+      '有時候找不到人，不一定是壞事。可以學會耐心等待，也可以欣賞風景。': 'audio/heart-right-sulafat.wav',
+      // ─── 遊戲引導 (Sulafat) ───
+      '松下對話。古松之下，詩人與童子的對話，點開卷軸找出答案。': 'audio/game-a-guide-sulafat.wav',
+      '山徑尋蹤。沿著山路敲開石頭，找出藏在山中的詞語。': 'audio/game-b-guide-sulafat.wav',
+      '採藥竹簡版。把竹簡詞卡放回正確位置，完成四句詩。': 'audio/game-c-guide-sulafat.wav',
+      // ─── 單句詩朗讀 (Sulafat) ───
+      '松下問童子。': 'audio/line1-poem-sulafat.wav',
+      '言師採藥去。': 'audio/line2-poem-sulafat.wav',
+      '只在此山中。': 'audio/line3-poem-sulafat.wav',
+      '雲深不知處。': 'audio/line4-poem-sulafat.wav',
+      // ─── 單句白話 (Sulafat) ───
+      '在松樹下問小童。': 'audio/line1-plain-sulafat.wav',
+      '童子說，老師採藥去了。': 'audio/line2-plain-sulafat.wav',
+      '只知道他就在這座山裡。': 'audio/line3-plain-sulafat.wav',
+      '雲霧太深，不知道他在哪裡。': 'audio/line4-plain-sulafat.wav',
+      // ─── 對話遊戲 enrich (Sulafat) ───
+      '松下。詩人走到古松之下，清風徐來。': 'audio/dialogue-songxia.wav',
+      '童子。松樹下站著一位小童，是師父的徒弟。': 'audio/dialogue-tongzi.wav',
+      '採藥去。童子說，師父上山採藥去了。': 'audio/dialogue-caiyaoqu.wav',
+      '此山中。童子說，師父就在這座山裡。': 'audio/dialogue-cishanzhong.wav',
+      '雲深不知處。因為雲霧太深，看不見他在哪裡。': 'audio/dialogue-yunshenbuzhichu.wav',
+      // ─── 字詞解釋 (Sulafat) ───
+      '松下，松樹下面。': 'audio/word-songxia.wav',
+      '問，問。': 'audio/word-wen.wav',
+      '童子，小孩子。': 'audio/word-tongzi.wav',
+      '言，說。': 'audio/word-yan.wav',
+      '師，老師。': 'audio/word-shi.wav',
+      '採藥去，採藥去了。': 'audio/word-caiyaoqu.wav',
+      '只在，就在。': 'audio/word-zhizai.wav',
+      '此山中，這座山裡。': 'audio/word-cishanzhong.wav',
+      '雲深，雲很深、很濃。': 'audio/word-yunshen.wav',
+      '不知處，不知道在哪裡。': 'audio/word-buzhichu.wav',
+    };
+    function playWav(src){
+      currentAudio = new Audio(src);
+      return new Promise(resolve=>{
+        currentAudio.onended=()=>{ currentAudio=null; resolve(); };
+        currentAudio.onerror=()=>{ currentAudio=null; resolve(); };
+        currentAudio.play().catch(()=>{ currentAudio=null; resolve(); });
+      });
+    }
+    const poem = [
+      { line: '松下問童子。', plain: '在松樹下問小童。', chunks: [['松下','place'],['問','verb'],['童子','person']] },
+      { line: '言師採藥去。', plain: '童子說，老師採藥去了。', chunks: [['言','verb'],['師','person'],['採藥去','verb']] },
+      { line: '只在此山中。', plain: '只知道他就在這座山裡。', chunks: [['只在','verb'],['此山中','place']] },
+      { line: '雲深不知處。', plain: '雲霧太深，不知道他在哪裡。', chunks: [['雲深','place'],['不知處','feeling']] }
+    ];
+    const wordHelp = {
+      '松下':'松樹下面。','問':'問。','童子':'小孩子。','言':'說。','師':'老師。','採藥去':'採藥去了。','只在':'就在。','此山中':'這座山裡。','雲深':'雲很深、很濃。','不知處':'不知道在哪裡。'
+    };
+    const audioText = {
+      'home-guide':'尋隱者不遇。唐，賈島。詩人去找隱居的人，為什麼沒有見到他呢？',
+      'line1-meaning':'松下問童子。在松樹下問小童。',
+      'line2-meaning':'言師採藥去。童子說，老師採藥去了。',
+      'line3-meaning':'只在此山中。只知道他就在這座山裡。',
+      'line4-meaning':'雲深不知處。雲霧太深，不知道他在哪裡。',
+      'heart-guide':'詩人來找隱居的人，卻只看到松樹、山路和雲霧。他有點失望，但也感受到山裡很安靜、很美。',
+      'game-a-guide':'松下對話。古松之下，詩人與童子的對話，點開卷軸找出答案。',
+      'game-b-guide':'山徑尋蹤。沿著山路敲開石頭，找出藏在山中的詞語。',
+      'game-c-guide':'採藥竹簡版。把竹簡詞卡放回正確位置，完成四句詩。',
+      'heart-right':'有時候找不到人，不一定是壞事。可以學會耐心等待，也可以欣賞風景。'
+    };
+    const routeWords = ['松下','問','童子','言','師','採藥去','只在','此山中','雲深','不知處'];
+    const routeLines = [
+      { text:'松下問童子。', words:['松下','問','童子'] },
+      { text:'言師採藥去。', words:['言','師','採藥去'] },
+      { text:'只在此山中。', words:['只在','此山中'] },
+      { text:'雲深不知處。', words:['雲深','不知處'] }
+    ];
+    const routeEnds = routeLines.reduce((acc,l)=>{ const prev=acc.length?acc[acc.length-1].end:0; acc.push({end:prev+l.words.length,text:l.text}); return acc; },[]);
+
+    const timers = {};
+    function startTimer(id){ const el=document.getElementById(id+'Timer'); if(!el)return; stopTimer(id); timers[id]={start:Date.now(),el,interval:setInterval(()=>{el.textContent=`⏱ ${Math.floor((Date.now()-timers[id].start)/1000)}秒`;},200)}; el.textContent='⏱ 0秒'; }
+    function stopTimer(id){ const t=timers[id]; if(!t)return; clearInterval(t.interval); t.el.textContent=`⏱ ${Math.floor((Date.now()-t.start)/1000)}秒 ✓`; delete timers[id]; }
+    function resetTimer(id){ const t=timers[id]; if(t) clearInterval(t.interval); const el=document.getElementById(id+'Timer'); if(el) el.textContent=''; delete timers[id]; }
+
+    function setVoice(){ const names=speechSynthesis.getVoices(); return names.find(v=>/Yating|雅婷|zh-TW/i.test(v.name)) || names.find(v=>/Chinese|Taiwan|zh/i.test(v.lang)) || null; }
+    function speak(text){
+      const trimmed = text.trim();
+      const src = audioFile[trimmed];
+      if(src){ return playWav(src); }
+      return new Promise(resolve=>{ if(!('speechSynthesis' in window)){ resolve(); return; } const u=new SpeechSynthesisUtterance(text); u.lang='zh-TW'; u.rate=0.96; const v=setVoice(); if(v) u.voice=v; u.onend=resolve; u.onerror=resolve; speechSynthesis.cancel(); speechSynthesis.speak(u); });
+    }
+    async function speakMany(items){ for(const t of items){ await speak(t); await new Promise(r=>setTimeout(r,220)); } }
+
+    function updateAudioNote(id){ const el=document.getElementById('audioNote'); el.textContent = id ? `臨時朗讀：${audioText[id] || '未定義'}` : '臨時朗讀（正式 VoxCPM2 音檔待補）。'; }
+    function stopAudio(){ if('speechSynthesis' in window) speechSynthesis.cancel(); if(currentAudio){ currentAudio.pause(); currentAudio = null; } }
+
+    function showSlide(index){ current = (index + slides.length) % slides.length; slides.forEach((slide,i)=>slide.classList.toggle('active', i===current)); stopAudio(); const id = slides[current].dataset.auto; updateAudioNote(id); if(id === 'game-a-guide'){ resetTimer('dialogue'); initDialogueGame(); } if(id === 'game-b-guide'){ resetTimer('trail'); initTrailGame(); } if(id === 'game-c-guide'){ resetTimer('bamboo'); initBambooGame(); } if(id) setTimeout(() => playSegment(id), 260); }
+    function nextSlide(){ showSlide(current + 1); }
+    function prevSlide(){ showSlide(current - 1); }
+
+    function applyTextStyle(el, kind){ el.dataset.kind = kind; }
+    function showWord(btn, title, text){
+      const d = document.getElementById('wordDialog');
+      document.getElementById('wordTitle').textContent = title;
+      document.getElementById('wordText').textContent = text;
+      if (btn?.dataset?.kind) document.getElementById('wordTitle').style.color = getComputedStyle(btn).color;
+      d.showModal();
+      speak(title + '，' + text);
+    }
+    function closeWord(){ const d=document.getElementById('wordDialog'); if(d.open) d.close(); }
+    document.getElementById('wordDialog').addEventListener('click', e => { if (e.target === e.currentTarget) closeWord(); });
+
+    function clearHighlights(){
+      document.querySelectorAll('.home-line, .poem-row, .plain-row, .bubble, .route-node, .fill-line').forEach(el => {
+        el.classList.remove('active', 'active-line');
+      });
+    }
+    function highlightLine(i, type='compare'){
+      clearHighlights();
+      const poemRows = [...document.querySelectorAll('.poem-row[data-pair="' + i + '"]')];
+      const plainRows = [...document.querySelectorAll('.plain-row[data-pair="' + i + '"]')];
+      if(type === 'poem'){
+        poemRows.forEach(r => r.classList.add('active-line'));
+      } else if(type === 'plain'){
+        plainRows.forEach(r => r.classList.add('active-line'));
+      } else {
+        poemRows.forEach(r => r.classList.add('active-line'));
+        plainRows.forEach(r => r.classList.add('active-line'));
+      }
+    }
+    function playSegment(id){
+      if(id==='line1-meaning') return speakMany([poem[0].line, poem[0].plain]);
+      if(id==='line2-meaning') return speakMany([poem[1].line, poem[1].plain]);
+      if(id==='line3-meaning') return speakMany([poem[2].line, poem[2].plain]);
+      if(id==='line4-meaning') return speakMany([poem[3].line, poem[3].plain]);
+      if(id==='heart-left'){ speak('當時的心情。詩人來找隱居的人，卻只看到松樹、山路和雲霧。他有點失望，但也感受到山裡很安靜、很美。'); return Promise.resolve(); }
+      const text = audioText[id];
+      if(text) return speak(text);
+    }
+    async function playHomePoem(){
+      for(let i=0;i<poem.length;i++){
+        document.querySelectorAll('#homePoem .home-line').forEach(line => line.classList.remove('active-line'));
+        document.querySelectorAll('#homePoem .home-line')[i]?.classList.add('active-line');
+        await speak(poem[i].line);
+        await new Promise(r => setTimeout(r, 500));
+      }
+      document.querySelectorAll('#homePoem .home-line').forEach(line => line.classList.remove('active-line'));
+    }
+    async function playComparePair(i){ highlightLine(i, 'compare'); await speakMany([poem[i].line, poem[i].plain]); }
+    async function playOriginalOnly(){ for(let i=0;i<poem.length;i++){ highlightLine(i, 'poem'); await speak(poem[i].line); await new Promise(r=>setTimeout(r,250)); } }
+    async function playPlainOnly(){ for(let i=0;i<poem.length;i++){ highlightLine(i, 'plain'); await speak(poem[i].plain); await new Promise(r=>setTimeout(r,250)); } }
+    async function playCompare(){ for(let i=0;i<poem.length;i++){ highlightLine(i, 'compare'); await speakMany([poem[i].line, poem[i].plain]); await new Promise(r=>setTimeout(r,250)); } }
+
+    function hideHomeTray(){ document.getElementById('homeActionTray').classList.add('hidden'); document.getElementById('homeTrayRestore').classList.add('visible'); }
+    function showHomeTray(){ document.getElementById('homeActionTray').classList.remove('hidden'); document.getElementById('homeTrayRestore').classList.remove('visible'); }
+    function toggleCleanView(){ document.body.classList.toggle('clean-view'); }
+    function toggleFullscreen(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+
+    function makeDots(containerId, total, current){ const el=document.getElementById(containerId); if(!el) return; el.innerHTML=''; for(let i=0;i<=total;i++){ const d=document.createElement('span'); d.className='progress-dot' + (i<=current?' reached':''); el.appendChild(d); } }
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+    // Game A: scroll-card dialogue (松下對話 — 點擊卷軸揭開答案)
+    const dialoguePoem = ['松下問童子','言師採藥去','只在此山中','雲深不知處'];
+    const dialogueSteps = [
+      { lineIdx:0, prompt:'詩人走到哪裡？', answer:'松下', enrich:'松下。詩人走到古松之下，清風徐來。' },
+      { lineIdx:0, prompt:'遇見了誰？', answer:'童子', enrich:'童子。松樹下站著一位小童，是師父的徒弟。' },
+      { lineIdx:1, prompt:'童子說師父去哪？', answer:'採藥去', enrich:'採藥去。童子說，師父上山採藥去了。' },
+      { lineIdx:2, prompt:'師父在哪座山？', answer:'此山中', enrich:'此山中。童子說，師父就在這座山裡。' },
+      { lineIdx:3, prompt:'為何找不到？', answer:'雲深不知處', enrich:'雲深不知處。因為雲霧太深，看不見他在哪裡。' }
+    ];
+    let dialogueIndex = 0;
+    let dialogueCompletedLines = new Set();
+    let _sg=0; function scrollSVG(label){ const i=++_sg; return `<svg viewBox="0 0 200 170"><defs><linearGradient id="sp${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f5ead4"/><stop offset="100%" stop-color="#efe0c0"/></linearGradient></defs><rect x="30" y="4" width="140" height="16" rx="8" fill="#8b6a44"/><rect x="30" y="150" width="140" height="16" rx="8" fill="#8b6a44"/><rect x="30" y="6" width="140" height="12" rx="6" fill="#a88255"/><rect x="30" y="152" width="140" height="12" rx="6" fill="#a88255"/><rect x="36" y="20" width="128" height="130" rx="8" fill="url(#sp${i})" stroke="#b8956a" stroke-width="2"/><line x1="42" y1="44" x2="158" y2="44" stroke="#d4c4a0" stroke-width="1.5" opacity=".5"/><line x1="42" y1="62" x2="158" y2="62" stroke="#d4c4a0" stroke-width="1.5" opacity=".5"/><line x1="42" y1="80" x2="158" y2="80" stroke="#d4c4a0" stroke-width="1.5" opacity=".5"/><line x1="42" y1="98" x2="120" y2="98" stroke="#d4c4a0" stroke-width="1.5" opacity=".5"/><circle cx="100" cy="130" r="8" fill="none" stroke="#b8956a" stroke-width="1.5" opacity=".4"/></svg>`; }
+    function initDialogueGame(){ dialogueIndex=0; dialogueCompletedLines=new Set(); resetTimer('dialogue'); const build=document.getElementById('dialogueBuild'); build.innerHTML=''; const arena=document.getElementById('dialogueArena'); arena.querySelectorAll('.scroll-card').forEach(el=>el.remove()); renderDialogueBuild(); spawnDialogueScrolls(); }
+    function renderDialogueBuild(){ const build=document.getElementById('dialogueBuild'); build.innerHTML=''; const s=dialogueSteps[dialogueIndex]; if(!s||dialogueIndex>=dialogueSteps.length){ const allLines=dialoguePoem.map((l,i)=>`<div class="dialogue-completed-line" style="color:#248067;font-weight:900;font-size:clamp(22px,2.6vw,32px);padding:8px 0;border-bottom:1px solid rgba(36,128,103,.15)">✓ ${l}</div>`).join(''); build.innerHTML=`<div class="bubble active">${allLines}<div style="margin-top:14px;font-size:clamp(20px,2.2vw,28px);color:#66594b">全部完成！</div></div>`; return; } const completed=new Set(); for(let i=0;i<dialogueIndex;i++){ completed.add(dialogueSteps[i].lineIdx); } if(completed.size>0){ const prev=document.createElement('div'); prev.className='bubble'; prev.innerHTML=[0,1,2,3].filter(i=>completed.has(i)).map(i=>`<div class="dialogue-completed-line" style="color:#248067;font-weight:900;font-size:clamp(22px,2.6vw,32px);padding:8px 0;border-bottom:1px solid rgba(36,128,103,.15)">✓ ${dialoguePoem[i]}</div>`).join(''); build.appendChild(prev); } const cur=document.createElement('div'); cur.className='bubble active'; cur.innerHTML=`<div class="dialogue-q">第 ${dialogueIndex+1} 題：${s.prompt}</div><div class="dialogue-line">${dialoguePoem[s.lineIdx]}</div>`; build.appendChild(cur); }
+    function spawnDialogueScrolls(){ const arena=document.getElementById('dialogueArena'); arena.querySelectorAll('.scroll-card').forEach(el=>el.remove()); const step=dialogueSteps[dialogueIndex]; if(!step||dialogueIndex>=dialogueSteps.length){ document.getElementById('dialogueTarget').textContent='全部完成！'; return; } document.getElementById('dialogueTarget').textContent=`第 ${dialogueIndex+1} 題：${step.prompt}`; const opts=dialogueSteps.map(s=>s.answer).sort(()=>Math.random()-0.5); const pos=[{l:5,t:12},{l:37,t:10},{l:69,t:12},{l:20,t:52},{l:52,t:50}]; opts.forEach((w,i)=>{ const p=pos[i]||{l:5+i*16,t:5+Math.floor(i/3)*28}; const c=document.createElement('button'); c.className='scroll-card'; c._word=w; c.innerHTML=scrollSVG(w); c.style.left=p.l+'%'; c.style.top=p.t+'%'; c.style.setProperty('--sx1',`${(Math.random()-.5)*6}px`); c.style.setProperty('--sy1',`${(Math.random()-.5)*5}px`); c.style.setProperty('--sx2',`${(Math.random()-.5)*8}px`); c.style.setProperty('--sy2',`${(Math.random()-.5)*6}px`); const lbl=document.createElement('span'); lbl.className='scroll-label'; lbl.textContent=w; c.appendChild(lbl); arena.appendChild(c); }); }
+    async function pickDialogue(word,btn){ const step=dialogueSteps[dialogueIndex]; const fb=document.getElementById('dialogueFeedback'); if(!step||btn.classList.contains('taken')) return; btn.querySelector('.scroll-label').style.opacity='1'; await new Promise(r=>setTimeout(r,450)); if(word===step.answer){ btn.classList.add('taken'); fb.textContent='○ 正確！'; if(dialogueIndex===0) startTimer('dialogue'); const prevLineIdx=step.lineIdx; dialogueIndex++; makeDots('dialogueProgress',dialogueSteps.length,dialogueIndex); await speak(step.enrich); if(!dialogueCompletedLines.has(prevLineIdx)){       dialogueCompletedLines.add(prevLineIdx); await speak(dialoguePoem[prevLineIdx] + '。'); } if(dialogueIndex>=dialogueSteps.length){       fb.textContent='全部完成！朗讀整首詩。'; stopTimer('dialogue'); launchConfetti(); renderDialogueBuild(); await playWav('audio/poem-sadaltager.wav'); } else { renderDialogueBuild(); spawnDialogueScrolls(); } } else { btn.classList.add('taken'); fb.textContent='再想想，換一個試試。'; await speak('再想想，換一個試試。'); } }
+    document.getElementById('dialogueArena').addEventListener('click',e=>{ const btn=e.target.closest('.scroll-card'); if(!btn||btn.classList.contains('taken')) return; pickDialogue(btn._word,btn); });
+    makeDots('dialogueProgress',0,0);
+
+    // Game B: stone-card trail (山徑尋蹤 — 單擊即答)
+    const trailItems = routeWords.slice(); let trailIndex = 0;
+    let _sn=0; function stoneSVG(label){ const i=++_sn; return `<svg viewBox="0 0 140 120"><defs><radialGradient id="st${i}" cx="38%" cy="32%"><stop offset="0%" stop-color="#d4c9b0"/><stop offset="100%" stop-color="#9a8b74"/></radialGradient></defs><path d="M20,40 Q10,60 18,90 Q24,108 50,112 Q80,116 96,108 Q118,98 126,80 Q134,58 122,38 Q110,18 88,14 Q60,8 36,20 Z" fill="url(#st${i})" stroke="#7a6e5a" stroke-width="2"/><path d="M38,22 Q32,36 36,50 Q40,64 50,72" stroke="rgba(255,255,255,.25)" stroke-width="4" fill="none" stroke-linecap="round"/><text x="70" y="72" text-anchor="middle" font-size="${label.length>2?26:34}" font-weight="900" fill="#fff" opacity=".3">${label}</text></svg>`; }
+    function initTrailGame(){ trailIndex=0; resetTimer('trail'); const build=document.getElementById('trailBuild'); build.innerHTML=routeLines.map((l,li)=>`<div class="fill-line" data-line="${li}">${l.words.map((_,si)=>`<span class="fill-slot" data-ts="${li}-${si}"></span>`).join('')}</div>`).join(''); const arena=document.getElementById('trailArena'); arena.querySelectorAll('.stone-card').forEach(el=>el.remove()); const shuffled=shuffle(trailItems.slice()); shuffled.forEach((w,i)=>{ const c=document.createElement('button'); c.className='stone-card'; c._word=w; c.innerHTML=stoneSVG(w); c.style.left=`${8+(i%4)*22}%`; c.style.top=`${16+Math.floor(i/4)*26}%`; c.style.setProperty('--tx1',`${(Math.random()-.5)*8}px`); c.style.setProperty('--ty1',`${(Math.random()-.5)*6}px`); const lbl=document.createElement('span'); lbl.className='stone-label'; lbl.textContent=w; c.appendChild(lbl); arena.appendChild(c); }); renderTrailTarget(); makeDots('trailProgress',trailItems.length,0); }
+    function renderTrailTarget(){ const t=trailItems[trailIndex]; document.getElementById('trailTarget').textContent=trailIndex<trailItems.length?`下一個：${t}`:'整首詩完成'; document.getElementById('trailFeedback').textContent=trailIndex<trailItems.length?'沿山徑，敲開正確的石頭。':'○ 全部完成！'; }
+    async function pickTrailStone(word,btn){ const target=trailItems[trailIndex]; const fb=document.getElementById('trailFeedback'); if(word===target){ btn.classList.add('taken'); if(trailIndex===0) startTimer('trail'); const slot=document.querySelectorAll('#trailBuild .fill-slot')[trailIndex]; if(slot){ slot.textContent=word; slot.classList.add('filled'); const lineEl=slot.closest('.fill-line'); if(lineEl) lineEl.classList.add('active-line'); } trailIndex++; makeDots('trailProgress',trailItems.length,trailIndex); fb.textContent='○ 正確！'; const end=routeEnds.find(r=>r.end===trailIndex); if(end) await speakMany([end.text]); if(trailIndex>=trailItems.length){ stopTimer('trail'); launchConfetti(); fb.textContent='全部完成！朗讀整首詩。'; await playWav('audio/poem-sadaltager.wav'); renderTrailTarget(); }else{ renderTrailTarget(); } }else{ btn.classList.add('taken'); fb.textContent='再想想，換一塊試試。'; await speak('再想想，換一塊試試。'); setTimeout(()=>btn.classList.remove('taken'),600); } }
+    document.getElementById('trailArena').addEventListener('click',e=>{ const btn=e.target.closest('.stone-card'); if(!btn||btn.classList.contains('taken')) return; pickTrailStone(btn._word,btn); });
+    makeDots('trailProgress',0,0);
+
+    // Game C: bamboo reconstruction
+    const bambooItems = routeLines.map(l=>l.words.slice()); let bambooIndex = 0; const bambooFlat = bambooItems.flat();
+    let _bm=0; function bambooSVG(label){ const i=++_bm; return `<svg viewBox="0 0 90 160"><defs><linearGradient id="bm${i}" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#7a9a5a"/><stop offset="30%" stop-color="#8fb86a"/><stop offset="70%" stop-color="#7a9a5a"/><stop offset="100%" stop-color="#6a8a4a"/></linearGradient></defs><rect x="8" y="0" width="74" height="160" rx="4" fill="url(#bm${i})" stroke="#5a7a3a" stroke-width="2"/><rect x="12" y="4" width="66" height="152" rx="2" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1"/><line x1="18" y1="0" x2="18" y2="160" stroke="rgba(90,122,58,.35)" stroke-width="1.5"/><line x1="72" y1="0" x2="72" y2="160" stroke="rgba(90,122,58,.35)" stroke-width="1.5"/><circle cx="45" cy="14" r="4" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/><circle cx="45" cy="146" r="4" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/></svg>`; }
+    function initBambooGame(){ const build=document.getElementById('bambooBuild'); bambooIndex = 0; resetTimer('bamboo'); build.innerHTML = routeLines.map((line,li)=>`<div class="fill-line" data-bamboo-line="${li}">${line.words.map((_,si)=>`<span class="fill-slot" data-bamboo-slot="${li}-${si}"></span>`).join('')}</div>`).join(''); const arena=document.getElementById('bambooArena'); arena.querySelectorAll('.bamboo-card').forEach(el=>el.remove()); const shuffled=bambooFlat.slice().sort(()=>Math.random()-0.5); const pos=[{l:5,t:3},{l:38,t:1},{l:70,t:4},{l:15,t:32},{l:50,t:30},{l:8,t:60},{l:42,t:58},{l:72,t:62},{l:25,t:88},{l:58,t:86}]; shuffled.forEach((word,i)=>{ const p=pos[i]||{l:10+(i%4)*22,t:10+Math.floor(i/4)*30}; const b=document.createElement('button'); b.className='bamboo-card'; b._word=word; b.innerHTML=bambooSVG(word)+`<span class="bamboo-label">${word}</span>`; b.style.left=p.l+'%'; b.style.top=p.t+'%'; b.style.animationDelay=`${(Math.random()*2).toFixed(1)}s`; arena.appendChild(b); }); renderBambooTarget(); makeDots('bambooProgress', bambooFlat.length, 0); }
+    function renderBambooTarget(){ const t=bambooFlat[bambooIndex]; document.getElementById('bambooTarget').textContent = bambooIndex < bambooFlat.length ? `下一個要點：${t}` : '整首詩完成'; document.getElementById('bambooFeedback').textContent = bambooIndex < bambooFlat.length ? '把竹簡放回正位。' : '○ 全部完成！'; }
+    async function pickBamboo(word, btn){ const target=bambooFlat[bambooIndex]; const fb=document.getElementById('bambooFeedback'); if(word===target){ if(bambooIndex===0) startTimer('bamboo'); btn.classList.add('taken'); const slot=document.querySelectorAll('#bambooBuild .fill-slot')[bambooIndex]; if(slot){ slot.textContent = word; slot.classList.add('filled'); const lineEl = slot.closest('.fill-line'); if(lineEl) lineEl.classList.add('active-line'); }
+      bambooIndex++; makeDots('bambooProgress', bambooFlat.length, bambooIndex); fb.textContent='○'; const completed=routeEnds.find(r=>r.end===bambooIndex); if(completed) await speak(completed.text); if(bambooIndex >= bambooFlat.length){ stopTimer('bamboo'); launchConfetti(); renderBambooTarget(); await speak('全部完成。朗讀整首詩。'); await playWav('audio/poem-sadaltager.wav'); } else { renderBambooTarget(); } } else { fb.textContent='再想想，換一個試試。'; await speak('再想想，換一個試試。'); } }
+    document.getElementById('bambooArena').addEventListener('click',e=>{ const btn=e.target.closest('.bamboo-card'); if(!btn||btn.classList.contains('taken')) return; pickBamboo(btn._word,btn); });
+
+    function launchConfetti(){ const old=document.querySelector('.confetti'); if(old) old.remove(); const wrap=document.createElement('div'); wrap.className='confetti'; const colors=['#315f53','#d85045','#a36600','#6b58b8','#2f6fbd']; for(let i=0;i<70;i++){ const s=document.createElement('i'); s.style.left=Math.random()*100+'vw'; s.style.top='-20px'; s.style.background=colors[i%colors.length]; s.style.animationDuration=(2.2+Math.random()*1.8)+'s'; s.style.transform=`rotate(${Math.random()*180}deg)`; wrap.appendChild(s); } document.body.appendChild(wrap); setTimeout(()=>wrap.remove(),5000); }
+
+    // draggable topbar + pager
+    (function(){ function makeDraggable(el){ let isDragging=false,startX=0,startY=0,initLeft=0,initTop=0; function onPointerDown(e){ if(e.target.closest('button,select')) return; isDragging=true; startX=e.clientX; startY=e.clientY; const rect=el.getBoundingClientRect(); initLeft=rect.left; initTop=rect.top; el.style.right='auto'; el.style.bottom='auto'; el.style.left=initLeft+'px'; el.style.top=initTop+'px'; el.style.cursor='grabbing'; e.preventDefault(); } function onPointerMove(e){ if(!isDragging) return; el.style.left=(initLeft+e.clientX-startX)+'px'; el.style.top=(initTop+e.clientY-startY)+'px'; } function onPointerUp(){ isDragging=false; el.style.cursor='grab'; } el.addEventListener('pointerdown',onPointerDown); window.addEventListener('pointermove',onPointerMove); window.addEventListener('pointerup',onPointerUp); } const tb=document.querySelector('.tools'); if(tb) makeDraggable(tb); const pg=document.querySelector('.pager'); if(pg) makeDraggable(pg); })();
+
+    document.getElementById('fontSelect').addEventListener('change', e => { document.body.classList.remove('font-iansui','font-kai'); if(e.target.value === 'iansui') document.body.classList.add('font-iansui'); if(e.target.value === 'kai') document.body.classList.add('font-kai'); });
+
+    // 添加鍵盤監聽器
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'ArrowRight' || event.key === '→') {
+        event.preventDefault();
+        nextSlide();
+      } else if (event.key === 'ArrowLeft' || event.key === '←') {
+        event.preventDefault();
+        prevSlide();
+      }
+    });
+
+    showSlide(0);
+
+    // 瀏覽器 autoplay 政策：首次 load/refresh 後的 Audio.play() 會被擋，
+    // 等使用者「第一次點擊」頁面時再重新觸發第 0 頁的朗讀。
+    document.addEventListener('click', function firstClick() {
+      if (current === 0 && slides[0].dataset.auto === 'home-guide') {
+        playSegment('home-guide');
+      }
+    }, { once: true });
+  </script>
+</body>
+</html>

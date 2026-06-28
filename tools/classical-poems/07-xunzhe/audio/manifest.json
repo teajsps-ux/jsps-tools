@@ -1,0 +1,316 @@
+﻿{
+    "voicesRoot":  "C:\\2026_Antigravity_語音\\voices",
+    "segments":  [
+                     {
+                         "id":  "dialogue-caiyaoqu",
+                         "seconds":  3.12,
+                         "file":  "audio/dialogue-caiyaoqu.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  599084
+                     },
+                     {
+                         "id":  "dialogue-cishanzhong",
+                         "seconds":  3.92,
+                         "file":  "audio/dialogue-cishanzhong.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  752684
+                     },
+                     {
+                         "id":  "dialogue-songxia",
+                         "seconds":  3.12,
+                         "file":  "audio/dialogue-songxia.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  599084
+                     },
+                     {
+                         "id":  "dialogue-tongzi",
+                         "seconds":  3.44,
+                         "file":  "audio/dialogue-tongzi.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  660524
+                     },
+                     {
+                         "id":  "dialogue-yunshenbuzhichu",
+                         "seconds":  4.08,
+                         "file":  "audio/dialogue-yunshenbuzhichu.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  783404
+                     },
+                     {
+                         "id":  "game-a-guide",
+                         "seconds":  9.6,
+                         "file":  "audio/game-a-guide-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  1843244
+                     },
+                     {
+                         "id":  "game-b-guide",
+                         "seconds":  7.68,
+                         "file":  "audio/game-b-guide-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  1474604
+                     },
+                     {
+                         "id":  "game-c-guide",
+                         "seconds":  8.37,
+                         "file":  "audio/game-c-guide-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  1607528
+                     },
+                     {
+                         "id":  "heart-guide",
+                         "seconds":  14.72,
+                         "file":  "audio/heart-guide-sadaltager.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sadaltager",
+                         "status":  "done",
+                         "bytes":  2826284
+                     },
+                     {
+                         "id":  "heart-right",
+                         "seconds":  4.88,
+                         "file":  "audio/heart-right-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  937004
+                     },
+                     {
+                         "id":  "home-guide",
+                         "seconds":  5.2,
+                         "file":  "audio/home-guide-sadaltager.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sadaltager",
+                         "status":  "done",
+                         "bytes":  998444
+                     },
+                     {
+                         "id":  "line1-plain",
+                         "seconds":  3.46,
+                         "file":  "audio/line1-plain-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  663984
+                     },
+                     {
+                         "id":  "line1-poem",
+                         "seconds":  1.44,
+                         "file":  "audio/line1-poem-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  276524
+                     },
+                     {
+                         "id":  "line2-plain",
+                         "seconds":  2.48,
+                         "file":  "audio/line2-plain-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  476204
+                     },
+                     {
+                         "id":  "line2-poem",
+                         "seconds":  1.68,
+                         "file":  "audio/line2-poem-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  322604
+                     },
+                     {
+                         "id":  "line3-plain",
+                         "seconds":  2.24,
+                         "file":  "audio/line3-plain-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  430124
+                     },
+                     {
+                         "id":  "line3-poem",
+                         "seconds":  1.44,
+                         "file":  "audio/line3-poem-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  276524
+                     },
+                     {
+                         "id":  "line4-plain",
+                         "seconds":  2.96,
+                         "file":  "audio/line4-plain-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  568364
+                     },
+                     {
+                         "id":  "line4-poem",
+                         "seconds":  1.68,
+                         "file":  "audio/line4-poem-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  322604
+                     },
+                     {
+                         "id":  "poem",
+                         "seconds":  4.72,
+                         "file":  "audio/poem-sadaltager.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sadaltager",
+                         "status":  "done",
+                         "bytes":  906284
+                     },
+                     {
+                         "id":  "poem",
+                         "seconds":  4.96,
+                         "file":  "audio/poem-sulafat.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "Sulafat",
+                         "status":  "done",
+                         "bytes":  952364
+                     },
+                     {
+                         "id":  "word-buzhichu",
+                         "seconds":  2.56,
+                         "file":  "audio/word-buzhichu.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  491564
+                     },
+                     {
+                         "id":  "word-caiyaoqu",
+                         "seconds":  2.4,
+                         "file":  "audio/word-caiyaoqu.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  460844
+                     },
+                     {
+                         "id":  "word-cishanzhong",
+                         "seconds":  2.16,
+                         "file":  "audio/word-cishanzhong.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  414764
+                     },
+                     {
+                         "id":  "word-shi",
+                         "seconds":  1.2,
+                         "file":  "audio/word-shi.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  230444
+                     },
+                     {
+                         "id":  "word-songxia",
+                         "seconds":  4,
+                         "file":  "audio/word-songxia.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  768044
+                     },
+                     {
+                         "id":  "word-tongzi",
+                         "seconds":  1.04,
+                         "file":  "audio/word-tongzi.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  199724
+                     },
+                     {
+                         "id":  "word-wen",
+                         "seconds":  0.96,
+                         "file":  "audio/word-wen.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  184364
+                     },
+                     {
+                         "id":  "word-yan",
+                         "seconds":  1.44,
+                         "file":  "audio/word-yan.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  276524
+                     },
+                     {
+                         "id":  "word-yunshen",
+                         "seconds":  2.32,
+                         "file":  "audio/word-yunshen.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  445484
+                     },
+                     {
+                         "id":  "word-zhizai",
+                         "seconds":  1.6,
+                         "file":  "audio/word-zhizai.wav",
+                         "text":  "",
+                         "source":  "local VoxCPM2",
+                         "voice":  "unknown",
+                         "status":  "done",
+                         "bytes":  307244
+                     }
+                 ],
+    "workflow":  "local-first"
+}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>亮燈測試</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .compare-grid { display: grid; gap: 10px; margin-top: 10px; }
+    .compare-row { padding: 10px; border: 2px solid #ccc; cursor: pointer; margin: 5px 0; }
+    .poem-row { background: #f0f0f0; color: #000; }
+    .plain-row { background: #fff; color: #000; }
+    .active-line { background: rgba(255, 236, 161, 0.78) !important; box-shadow: 0 0 0 5px rgba(255, 236, 161, 0.32) !important; transform: translateY(-2px) !important; }
+    .compare-head { padding: 10px; border: 2px solid #333; cursor: pointer; background: #333; color: white; }
+    button { margin: 5px; padding: 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>原詩與白話對照亮燈測試</h1>
+
+  <div class="compare-grid">
+    <button onclick="testOriginalOnly()">讀原詩</button>
+    <button onclick="testPlainOnly()">讀白話</button>
+    <div class="compare-row poem-row" data-pair="0" onclick="testComparePair(0)">
+      <span>松下問童子。</span>
+    </div>
+    <div class="compare-row plain-row" data-pair="0" onclick="testComparePair(0)">
+      在松樹下問小童。
+    </div>
+    <div class="compare-row poem-row" data-pair="1" onclick="testComparePair(1)">
+      <span>言師採藥去。</span>
+    </div>
+    <div class="compare-row plain-row" data-pair="1" onclick="testComparePair(1)">
+      童子說，老師採藥去了。
+    </div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <h3>測試結果:</h3>
+    <p id="log"></p>
+  </div>
+
+  <script>
+    // 測試 clearHighlights
+    function clearHighlights(mode) {
+      const log = document.getElementById('log');
+      log.textContent += '清空亮燈...\n';
+      document.querySelectorAll('.compare-row').forEach(r => {
+        r.classList.remove('active', 'active-line');
+      });
+    }
+
+    // 測試 highlightLine
+    function highlightLine(i, type='compare') {
+      const log = document.getElementById('log');
+      log.textContent += `測試第 ${i+1} 行: ${type}模式\n`;
+
+      // 先清除所有亮燈
+      clearHighlights();
+
+      // 獲取當前行
+      const poemRows = [...document.querySelectorAll('.poem-row[data-pair="' + i + '"]')];
+      const plainRows = [...document.querySelectorAll('.plain-row[data-pair="' + i + '"]')];
+
+      if(type==='poem'){
+        // 只亮原詫
+        log.textContent += '→ 只亮原詩\n';
+        document.querySelectorAll('.plain-row').forEach(r => r.classList.remove('active'));
+        const currentPoems = [...document.querySelectorAll('.poem-row[data-pair="' + i + '"]')];
+        currentPoems.forEach(r => r.classList.add('active-line'));
+      } else if(type==='plain'){
+        // 只亮白話
+        log.textContent += '→ 只亮白話\n';
+        document.querySelectorAll('.poem-row').forEach(r => r.classList.remove('active'));
+        plainRows.forEach(r => r.classList.add('active-line'));
+      } else {
+        // 兩個都亮
+        log.textContent += '→ 兩個都亮\n';
+        const currentPoems = [...document.querySelectorAll('.poem-row[data-pair="' + i + '"]')];
+        const currentPlains = [...document.querySelectorAll('.plain-row[data-pair="' + i + '"]')];
+        currentPoems.forEach(r => r.classList.add('active-line'));
+        currentPlains.forEach(r => r.classList.add('active-line'));
+      }
+
+      setTimeout(() => {
+        const poemActive = poemRows.length > 0 && [...document.querySelectorAll('.poem-row[data-pair="' + i + '"]')].every(r => r.classList.contains('active-line'));
+        const plainActive = plainRows.length > 0 && [...document.querySelectorAll('.plain-row[data-pair="' + i + '"]')].every(r => r.classList.contains('active-line'));
+
+        if(type==='poem' && !poemActive) log.textContent += '✗ 錯誤：原詩沒亮燈\n';
+        if(type==='plain' && !plainActive) log.textContent += '✗ 錯誤：白話沒亮燈\n';
+        if(type==='compare' && !(poemActive && plainActive)) log.textContent += '✗ 錯誤：沒有同時亮燈\n';
+      }, 100);
+    }
+
+    function testOriginalOnly() {
+      highlightLine(0, 'poem');
+    }
+
+    function testPlainOnly() {
+      highlightLine(0, 'plain');
+    }
+
+    function testComparePair(i) {
+      highlightLine(i, 'compare');
+    }
+
+    alert('點擊按鈕測試亮燈功能，然後查看下方的測試結果！');
+    console.log('請查看瀏覽器控制台獲取更詳細的測試日誌。');
+  </script>
+</body>
+</html>
