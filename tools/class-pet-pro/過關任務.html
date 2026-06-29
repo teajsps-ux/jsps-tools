@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>過關任務</title>
     <script src="./過關任務_files/saved_resource"></script>
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bpmf+Iansui&display=swap');
         body {
@@ -84,7 +88,18 @@
 <style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.mx-auto{margin-left:auto;margin-right:auto}.mb-4{margin-bottom:1rem}.mb-8{margin-bottom:2rem}.ml-2{margin-left:0.5rem}.mr-2{margin-right:0.5rem}.mt-10{margin-top:2.5rem}.mt-8{margin-top:2rem}.flex{display:flex}.h-6{height:1.5rem}.h-12{height:3rem}.min-h-\[400px\]{min-height:400px}.w-6{width:1.5rem}.w-full{width:100%}.w-12{width:3rem}.flex-1{flex:1 1 0%}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.content-start{align-content:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.gap-2{gap:0.5rem}.gap-4{gap:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.border-t-4{border-top-width:4px}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.border-green-500{--tw-border-opacity:1;border-color:rgb(34 197 94 / var(--tw-border-opacity, 1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68 / var(--tw-border-opacity, 1))}.border-yellow-500{--tw-border-opacity:1;border-color:rgb(234 179 8 / var(--tw-border-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-indigo-100{--tw-bg-opacity:1;background-color:rgb(224 231 255 / var(--tw-bg-opacity, 1))}.bg-opacity-20{--tw-bg-opacity:0.2}.p-2{padding:0.5rem}.p-4{padding:1rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-8{padding-top:2rem;padding-bottom:2rem}.text-center{text-align:center}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-yellow-300{--tw-text-opacity:1;color:rgb(253 224 71 / var(--tw-text-opacity, 1))}.text-indigo-800{--tw-text-opacity:1;color:rgb(55 48 163 / var(--tw-text-opacity, 1))}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:bg-indigo-700:hover{--tw-bg-opacity:1;background-color:rgb(67 56 202 / var(--tw-bg-opacity, 1))}@media (min-width: 768px){.md\:flex-row{flex-direction:row}}</style><style id="_goober"> .go1475592160{height:0;}.go1671063245{height:auto;}.go1888806478{display:flex;flex-wrap:wrap;flex-grow:1;}@media (min-width:600px){.go1888806478{flex-grow:initial;min-width:288px;}}.go167266335{background-color:#313131;font-size:0.875rem;line-height:1.43;letter-spacing:0.01071em;color:#fff;align-items:center;padding:6px 16px;border-radius:4px;box-shadow:0px 3px 5px -1px rgba(0,0,0,0.2),0px 6px 10px 0px rgba(0,0,0,0.14),0px 1px 18px 0px rgba(0,0,0,0.12);}.go3162094071{padding-left:20px;}.go3844575157{background-color:#313131;}.go1725278324{background-color:#43a047;}.go3651055292{background-color:#d32f2f;}.go4215275574{background-color:#ff9800;}.go1930647212{background-color:#2196f3;}.go946087465{display:flex;align-items:center;padding:8px 0;}.go703367398{display:flex;align-items:center;margin-left:auto;padding-left:16px;margin-right:-8px;}.go3963613292{width:100%;position:relative;transform:translateX(0);top:0;right:0;bottom:0;left:0;min-width:288px;}.go1141946668{box-sizing:border-box;display:flex;max-height:100%;position:fixed;z-index:1400;height:auto;width:auto;transition:top 300ms ease 0ms,right 300ms ease 0ms,bottom 300ms ease 0ms,left 300ms ease 0ms,max-width 300ms ease 0ms;pointer-events:none;max-width:calc(100% - 40px);}.go1141946668 .notistack-CollapseWrapper{padding:6px 0px;transition:padding 300ms ease 0ms;}@media (max-width:599.95px){.go1141946668{width:100%;max-width:calc(100% - 32px);}}.go3868796639 .notistack-CollapseWrapper{padding:2px 0px;}.go3118922589{top:14px;flex-direction:column;}.go1453831412{bottom:14px;flex-direction:column-reverse;}.go4027089540{left:20px;}@media (min-width:600px){.go4027089540{align-items:flex-start;}}@media (max-width:599.95px){.go4027089540{left:16px;}}.go2989568495{right:20px;}@media (min-width:600px){.go2989568495{align-items:flex-end;}}@media (max-width:599.95px){.go2989568495{right:16px;}}.go4034260886{left:50%;transform:translateX(-50%);}@media (min-width:600px){.go4034260886{align-items:center;}}</style></head>
 <body data-gptw="">
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-center mb-8 text-indigo-700">過關任務</h1>
+        <h1 class="text-3xl font-bold text-center mb-4 text-indigo-700">過關任務</h1>
+        
+        <!-- Firebase Sync Control Panel -->
+        <div id="sync-bar" class="mb-6 max-w-2xl mx-auto bg-slate-100 rounded-lg p-3 flex items-center justify-between border border-slate-200 text-sm shadow-sm">
+            <div class="flex items-center gap-2">
+                <span id="sync-status-dot" class="w-3.5 h-3.5 rounded-full bg-gray-400"></span>
+                <span id="sync-status-text" class="font-semibold text-slate-700">離線/本機模式</span>
+            </div>
+            <div>
+                <button id="sync-login-btn" onclick="handleSyncLogin()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded text-xs transition-colors flex items-center gap-1 shadow-sm">🔓 登入 Google 同步</button>
+            </div>
+        </div>
         
         <div class="flex flex-col md:flex-row gap-4">
             <!-- 四個欄位，由右至左排列 -->
@@ -165,6 +180,263 @@
     </footer>
 
     <script>
+        const safeStorage = {
+            getItem(key) {
+                try {
+                    return localStorage.getItem(key);
+                } catch (e) {
+                    console.warn('localStorage read blocked:', e);
+                    return null;
+                }
+            },
+            setItem(key, value) {
+                try {
+                    localStorage.setItem(key, value);
+                } catch (e) {
+                    console.warn('localStorage write blocked:', e);
+                }
+            }
+        };
+
+        let activeSeats = Array(28).fill(true);
+        try {
+            const stored = safeStorage.getItem('active_seats');
+            if (stored) {
+                activeSeats = JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error("Failed to parse active_seats JSON:", e);
+        }
+        if (!activeSeats || activeSeats.length !== 28) {
+            activeSeats = Array(28).fill(true);
+        }
+
+        const seatElements = {};
+        const deviceId = Math.random().toString(36).substring(2, 10);
+        let isIncomingCloudUpdate = false;
+
+        let auth = null;
+        let db = null;
+        let provider = null;
+        let currentUser = null;
+        let firestoreUnsubscribe = null;
+        let cloudWriteTimer = null;
+
+        function serializeBoardState() {
+            const seatPositions = {};
+            for (let i = 1; i <= 28; i++) {
+                const el = seatElements[i];
+                if (el && el.parentElement) {
+                    const areaId = el.parentElement.id;
+                    if (areaId && areaId.startsWith('drop-area')) {
+                        seatPositions[i] = parseInt(areaId.replace('drop-area', ''));
+                    }
+                }
+            }
+
+            const taskNames = [];
+            for (let colNum = 4; colNum >= 1; colNum--) {
+                const input = document.querySelector(`#column${colNum} .task-input`);
+                taskNames.push(input ? input.value : '');
+            }
+
+            const zhuyinMode = document.body.classList.contains('zhuyin-mode');
+
+            return {
+                seatPositions,
+                taskNames,
+                activeSeats,
+                zhuyinMode
+            };
+        }
+
+        function applyBoardState(state) {
+            if (!state) return;
+            isIncomingCloudUpdate = true;
+            try {
+                // 1. Apply zhuyin mode
+                const body = document.body;
+                const btn = document.getElementById('zhuyin-btn');
+                if (state.zhuyinMode !== body.classList.contains('zhuyin-mode')) {
+                    if (state.zhuyinMode) {
+                        body.classList.add('zhuyin-mode');
+                        if (btn) btn.textContent = '🍬 注音模式 (開)';
+                    } else {
+                        body.classList.remove('zhuyin-mode');
+                        if (btn) btn.textContent = '🍬 注音模式 (關)';
+                    }
+                }
+
+                // 2. Apply task names
+                if (state.taskNames && Array.isArray(state.taskNames)) {
+                    state.taskNames.forEach((name, idx) => {
+                        const colNum = 4 - idx;
+                        const input = document.querySelector(`#column${colNum} .task-input`);
+                        if (input && input.value !== name) {
+                            input.value = name;
+                        }
+                    });
+                }
+
+                // 3. Apply attendance (activeSeats)
+                if (state.activeSeats && Array.isArray(state.activeSeats)) {
+                    state.activeSeats.forEach((checked, idx) => {
+                        activeSeats[idx] = checked;
+                        const seatNum = idx + 1;
+                        const seatEl = seatElements[seatNum];
+                        if (seatEl) {
+                            seatEl.style.display = checked ? 'flex' : 'none';
+                        }
+                        const cb = document.querySelector(`input[data-seat-index="${idx}"]`);
+                        if (cb) cb.checked = checked;
+                    });
+                }
+
+                // 4. Apply seat positions
+                if (state.seatPositions) {
+                    for (let seatNum = 1; seatNum <= 28; seatNum++) {
+                        const targetCol = state.seatPositions[seatNum];
+                        const seatEl = seatElements[seatNum];
+                        if (targetCol && seatEl) {
+                            const targetArea = document.getElementById('drop-area' + targetCol);
+                            if (targetArea && seatEl.parentElement !== targetArea) {
+                                targetArea.appendChild(seatEl);
+                                seatEl.classList.add('scale-110');
+                                setTimeout(() => {
+                                    seatEl.classList.remove('scale-110');
+                                }, 300);
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Error applying cloud state:', e);
+            } finally {
+                isIncomingCloudUpdate = false;
+            }
+        }
+
+        function triggerCloudSave() {
+            safeStorage.setItem('active_seats', JSON.stringify(activeSeats));
+            const zhuyinActive = document.body.classList.contains('zhuyin-mode');
+            safeStorage.setItem('zhuyin_mode', zhuyinActive);
+
+            const state = serializeBoardState();
+            safeStorage.setItem('breakthrough_tasks', JSON.stringify(state.taskNames));
+            safeStorage.setItem('breakthrough_seats', JSON.stringify(state.seatPositions));
+
+            if (auth && currentUser && db && !isIncomingCloudUpdate) {
+                if (cloudWriteTimer) clearTimeout(cloudWriteTimer);
+                setCloudSyncText('同步中...', 'bg-yellow-500');
+                cloudWriteTimer = setTimeout(async () => {
+                    try {
+                        const payload = {
+                            ...state,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                            lastUpdatedBy: deviceId
+                        };
+                        await db.collection('class-pet-pro-users').doc(currentUser.uid).collection('tools').doc('breakthrough').set(payload, { merge: true });
+                        setCloudSyncText(`雲端已同步：${new Date().toLocaleTimeString('zh-TW')}`, 'bg-green-500');
+                    } catch (e) {
+                        console.error('Firestore save failed:', e);
+                        setCloudSyncText('⚠️ 同步失敗', 'bg-red-500');
+                    }
+                }, 500);
+            }
+        }
+
+        function startFirestoreListener(uid) {
+            stopFirestoreListener();
+            firestoreUnsubscribe = db.collection('class-pet-pro-users').doc(uid).collection('tools').doc('breakthrough')
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        if (data.lastUpdatedBy === deviceId) {
+                            return;
+                        }
+                        applyBoardState(data);
+                    } else {
+                        triggerCloudSave();
+                    }
+                }, (error) => {
+                    console.error('Firestore listener error:', error);
+                    setCloudSyncText('⚠️ 雲端連線失敗，請檢查權限', 'bg-red-500');
+                });
+        }
+
+        function stopFirestoreListener() {
+            if (firestoreUnsubscribe) {
+                firestoreUnsubscribe();
+                firestoreUnsubscribe = null;
+            }
+        }
+
+        function handleSyncLogin() {
+            if (auth && provider) {
+                setCloudSyncText('嘗試登入中...', 'bg-yellow-500');
+                auth.signInWithPopup(provider).catch((error) => {
+                    console.error('Google login failed:', error);
+                    setCloudSyncText('⚠️ 登入失敗', 'bg-red-500');
+                });
+            }
+        }
+
+        function handleSyncLogout() {
+            if (auth) {
+                auth.signOut().catch(console.error);
+            }
+        }
+
+        function setCloudSyncText(text, bgClass) {
+            const statusDot = document.getElementById('sync-status-dot');
+            const statusText = document.getElementById('sync-status-text');
+            if (statusDot && statusText) {
+                statusDot.className = `w-3.5 h-3.5 rounded-full ${bgClass}`;
+                statusText.textContent = text;
+            }
+        }
+
+        function initFirebaseSync() {
+            if (typeof firebase !== 'undefined' && firebase.apps) {
+                try {
+                    const firebaseConfig = { apiKey: 'AIzaSyA0lSykngwrK5exy1rxD4TZ96RqeVD4x9U', authDomain: 'jsps-tools-sync.firebaseapp.com', projectId: 'jsps-tools-sync', storageBucket: 'jsps-tools-sync.firebasestorage.app', messagingSenderId: '435781850232', appId: '1:435781850232:web:bedbf1e1cd942e972b898d' };
+                    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                    auth = firebase.auth();
+                    db = firebase.firestore();
+                    provider = new firebase.auth.GoogleAuthProvider();
+                    provider.setCustomParameters({ prompt: 'select_account' });
+
+                    auth.onAuthStateChanged((user) => {
+                        const loginBtn = document.getElementById('sync-login-btn');
+                        if (user) {
+                            currentUser = user;
+                            setCloudSyncText(`雲端已同步：${user.displayName || user.email}`, 'bg-green-500');
+                            if (loginBtn) {
+                                loginBtn.textContent = '👤 登出';
+                                loginBtn.onclick = handleSyncLogout;
+                            }
+                            startFirestoreListener(user.uid);
+                        } else {
+                            currentUser = null;
+                            setCloudSyncText('離線/本機模式', 'bg-gray-400');
+                            if (loginBtn) {
+                                loginBtn.textContent = '🔓 登入 Google 同步';
+                                loginBtn.onclick = handleSyncLogin;
+                            }
+                            stopFirestoreListener();
+                        }
+                    });
+                } catch (e) {
+                    console.warn('Firebase init failed:', e);
+                    setCloudSyncText('⚠️ Firebase 初始化失敗', 'bg-red-500');
+                }
+            } else {
+                setCloudSyncText('離線/本機模式 (Firebase 未載入)', 'bg-gray-400');
+                const loginBtn = document.getElementById('sync-login-btn');
+                if (loginBtn) loginBtn.style.display = 'none';
+            }
+        }
+
         // 全域切換函數，確保 inline onclick 100% 正常運作
         function toggleSettingsPanel() {
             const panel = document.getElementById('att-panel');
@@ -192,11 +464,7 @@
                 if (btn) btn.textContent = '🍬 注音模式 (關)';
             }
             
-            try {
-                localStorage.setItem('zhuyin_mode', active);
-            } catch (e) {
-                console.warn('localStorage write blocked:', e);
-            }
+            triggerCloudSave();
         }
 
         function moveAllSeats(fromCol, toCol) {
@@ -212,6 +480,7 @@
                         seat.classList.remove('scale-110');
                     }, 300);
                 });
+                triggerCloudSave();
             }
         }
 
@@ -275,25 +544,6 @@
             let draggedItem = null;
             let touchItem = null;
             
-            // --- 安全的 localStorage 存取包裝 ---
-            const safeStorage = {
-                getItem(key) {
-                    try {
-                        return localStorage.getItem(key);
-                    } catch (e) {
-                        console.warn('localStorage read blocked:', e);
-                        return null;
-                    }
-                },
-                setItem(key, value) {
-                    try {
-                        localStorage.setItem(key, value);
-                    } catch (e) {
-                        console.warn('localStorage write blocked:', e);
-                    }
-                }
-            };
-            
             // --- 一鍵切換注音初始化 ---
             if (zhuyinBtn) {
                 let isZhuyinMode = safeStorage.getItem('zhuyin_mode') === 'true';
@@ -306,25 +556,32 @@
                 }
             }
 
-            // --- 學生出缺席與空號設定 (方案 A) ---
-            let activeSeats = null;
+            // --- 還原任務名稱 ---
             try {
-                const stored = safeStorage.getItem('active_seats');
-                if (stored) {
-                    activeSeats = JSON.parse(stored);
+                const storedTasks = safeStorage.getItem('breakthrough_tasks');
+                if (storedTasks) {
+                    const taskNames = JSON.parse(storedTasks);
+                    taskNames.forEach((name, idx) => {
+                        const colNum = 4 - idx;
+                        const input = document.querySelector(`#column${colNum} .task-input`);
+                        if (input) input.value = name;
+                    });
                 }
             } catch (e) {
-                console.error("Failed to parse active_seats JSON:", e);
+                console.error("Failed to restore task names:", e);
             }
-            
-            if (!activeSeats || activeSeats.length !== 28) {
-                activeSeats = Array(28).fill(true);
-            }
-            
-            const seatElements = {};
 
             // 創建28個座號
             if (dropArea4) {
+                // 讀取本地儲存的座號位置
+                let storedSeats = null;
+                try {
+                    const raw = safeStorage.getItem('breakthrough_seats');
+                    if (raw) storedSeats = JSON.parse(raw);
+                } catch (e) {
+                    console.error("Failed to parse breakthrough_seats:", e);
+                }
+
                 for (let i = 1; i <= 28; i++) {
                     const seatNumber = document.createElement('div');
                     seatNumber.className = 'seat-number w-full aspect-square bg-indigo-100 rounded-lg flex items-center justify-center font-black text-indigo-800 shadow-md';
@@ -357,7 +614,14 @@
                     seatNumber.addEventListener('touchmove', handleTouchMove, { passive: false });
                     seatNumber.addEventListener('touchend', handleTouchEnd, { passive: false });
                     
-                    dropArea4.appendChild(seatNumber);
+                    // 決定放置的欄位
+                    let targetArea = dropArea4;
+                    if (storedSeats && storedSeats[i]) {
+                        const storedCol = storedSeats[i];
+                        const area = document.getElementById('drop-area' + storedCol);
+                        if (area) targetArea = area;
+                    }
+                    targetArea.appendChild(seatNumber);
                 }
             }
 
@@ -421,6 +685,7 @@
                     setTimeout(() => {
                         touchItem.classList.remove('scale-110');
                     }, 300);
+                    triggerCloudSave();
                 }
                 
                 touchItem = null;
@@ -447,12 +712,11 @@
                     checkbox.addEventListener('change', function() {
                         const idx = parseInt(this.dataset.seatIndex);
                         activeSeats[idx] = this.checked;
-                        safeStorage.setItem('active_seats', JSON.stringify(activeSeats));
-                        
                         const seatEl = seatElements[idx + 1];
                         if (seatEl) {
                             seatEl.style.display = this.checked ? 'flex' : 'none';
                         }
+                        triggerCloudSave();
                     });
                 }
             }
@@ -470,7 +734,7 @@
                         const seatEl = seatElements[idx + 1];
                         if (seatEl) seatEl.style.display = 'flex';
                     });
-                    safeStorage.setItem('active_seats', JSON.stringify(activeSeats));
+                    triggerCloudSave();
                 });
             }
 
@@ -485,7 +749,7 @@
                         const seatEl = seatElements[idx + 1];
                         if (seatEl) seatEl.style.display = 'none';
                     });
-                    safeStorage.setItem('active_seats', JSON.stringify(activeSeats));
+                    triggerCloudSave();
                 });
             }
             
@@ -496,6 +760,7 @@
                     allSeatNumbers.forEach(seat => {
                         dropArea4.appendChild(seat);
                     });
+                    triggerCloudSave();
                 });
             }
             
@@ -520,6 +785,7 @@
                         setTimeout(() => {
                             draggedItem.classList.remove('scale-110');
                         }, 300);
+                        triggerCloudSave();
                     }
                 });
             });
@@ -532,7 +798,13 @@
                         input.blur();
                     }
                 });
+                input.addEventListener('blur', function() {
+                    triggerCloudSave();
+                });
             });
+
+            // 初始化 Firebase 同步
+            initFirebaseSync();
         }
     </script>
 
