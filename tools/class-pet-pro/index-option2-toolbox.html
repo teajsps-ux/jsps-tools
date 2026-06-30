@@ -2393,9 +2393,9 @@
             auth2.onAuthStateChanged(async (user) => {
                 const btn = document.getElementById('loginBtn');
                 const statusEl = document.getElementById('syncStatus');
-                if (user) {
+                if (user && !user.isAnonymous) {
                     userProfile = user; syncMode = 'cloud';
-                    if (btn) btn.innerHTML = '👤 ' + (user.displayName || user.email);
+                    if (btn) btn.innerHTML = '👤 ' + (user.displayName || user.email || 'Google 使用者');
                     if (statusEl) { statusEl.innerHTML = '☁️ 已同步'; statusEl.className = 'status-dot on'; }
                     try {
                         const docSnap = await db.collection('class-pet-pro-users').doc(userProfile.uid).get();

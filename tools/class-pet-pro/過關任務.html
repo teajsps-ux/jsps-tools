@@ -414,9 +414,9 @@
 
                     auth.onAuthStateChanged((user) => {
                         const loginBtn = document.getElementById('sync-login-btn');
-                        if (user) {
+                        if (user && !user.isAnonymous) {
                             currentUser = user;
-                            setCloudSyncText(`雲端已同步：${user.displayName || user.email}`, 'bg-green-500');
+                            setCloudSyncText(`雲端已同步：${user.displayName || user.email || 'Google 使用者'}`, 'bg-green-500');
                             if (loginBtn) {
                                 loginBtn.textContent = '👤 登出';
                                 loginBtn.onclick = handleSyncLogout;
