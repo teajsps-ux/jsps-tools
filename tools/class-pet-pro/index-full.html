@@ -959,9 +959,29 @@
             renderClassManagerList(); closeModal('confirmDeleteClassModal'); classToDelete = null;
         }
 
-        const apiKey = "AIzaSyBqY_8YYOsjLL0EdnsstRhYkWI1FWEmJZ4";
+        const GEMINI_API_KEY_STORAGE_KEY = 'classPetPro_GeminiApiKey_v1';
+        function getStoredGeminiApiKey() { return (localStorage.getItem(GEMINI_API_KEY_STORAGE_KEY) || '').trim(); }
+        function openAiKeySettings() {
+            const hasKey = !!getStoredGeminiApiKey();
+            showModal("🔐 AI Key 設定", "", `<div style="text-align:left; line-height:1.7; font-size:1rem; margin-bottom:14px;">Gemini API Key 只會存在這台裝置的瀏覽器，不會同步、不會上傳到 GitHub。${hasKey ? '<br><b style="color:var(--success);">目前這台裝置已設定。</b>' : '<br><b style="color:var(--danger);">這台裝置尚未設定，所以 AI 功能不能使用。</b>'}</div><input id="geminiApiKeyInput" type="password" placeholder="貼上 Gemini API Key" style="width:100%; padding:12px; border:3px solid var(--ui-border); border-radius:10px; font-size:1rem; margin-bottom:12px;"><div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"><button class="modal-btn" style="background:var(--success)" onclick="saveGeminiApiKeyFromModal()">💾 儲存到本機</button><button class="modal-btn" style="background:var(--danger)" onclick="clearGeminiApiKey()">🗑️ 清除本機 Key</button></div>`);
+        }
+        function saveGeminiApiKeyFromModal() {
+            const input = document.getElementById('geminiApiKeyInput');
+            const key = (input?.value || '').trim();
+            if (key.length < 20 || /\s/.test(key)) return showModal("❌ Key 格式不正確", "請貼上完整的 Gemini API Key，不要包含空白或換行。");
+            localStorage.setItem(GEMINI_API_KEY_STORAGE_KEY, key);
+            showModal("✅ 已儲存", "AI Key 已儲存在這台裝置的瀏覽器。");
+        }
+        function clearGeminiApiKey() { localStorage.removeItem(GEMINI_API_KEY_STORAGE_KEY); showModal("✅ 已清除", "這台裝置的 AI Key 已清除。"); }
+        function requireGeminiApiKey() {
+            const key = getStoredGeminiApiKey();
+            if (key) return key;
+            openAiKeySettings();
+            throw new Error('MISSING_GEMINI_API_KEY');
+        }
         async function callGemini(prompt, retries = 3) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const apiKey = requireGeminiApiKey();
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(apiKey)}`;
             let delay = 1000;
             for (let i = 0; i < retries; i++) {
                 try {
@@ -978,7 +998,7 @@
                 const res = await callGemini("你是一個活潑的班級寵物。想一個適合國中/小在座位旁進行的「1分鐘提神小活動」。回傳活動內容與引導語，語氣充滿活力，約50字。繁體中文。");
                 const text = res.candidates?.[0]?.content?.parts?.[0]?.text || "讓我們一起站起來，伸個大大的懶腰，深呼吸三次！";
                 showModal("✨ AI 活力充能活動", "", `<div style="font-size:1.2rem; line-height:1.6; text-align:left; background:#fff0f2; padding:15px; border-radius:12px; border:2px dashed #ff6b81; margin-bottom:15px;">${text.replace(/\n/g, '<br>')}</div><button class="modal-btn" style="background:var(--success)" onclick="completeAiEnergy()">✅ 我們全班做完了！(活力+30)</button>`);
-            } catch (e) { showModal("❌ 發生錯誤", "AI 活力充能連線失敗！請稍後再試。"); }
+            } catch (e) { if (e.message === 'MISSING_GEMINI_API_KEY') return; showModal("❌ 發生錯誤", "AI 活力充能連線失敗！請稍後再試。"); }
         }
         function completeAiEnergy() { closeModal('msgModal'); state.petStats[state.currentPetId].energy = Math.min(100, state.petStats[state.currentPetId].energy + 30); givePoints(5, 5, "✨ 成功完成 AI 活力充能"); updateUI(); petJump(); }
 
@@ -988,19 +1008,19 @@
             try {
                 const text = (await callGemini(`你是一隻叫「${state.petStats[state.currentPetId]?.name}」的寵物。根據歷史紀錄寫約100字日記，大力讚美學生，有扣分也溫柔鼓勵。結尾打氣。繁體中文。\n\n【紀錄】\n${state.history.map(h => h.time + " " + h.event).join("\n")}`)).candidates?.[0]?.content?.parts?.[0]?.text || "今天大家都很棒！";
                 showModal("📖 寵物的 AI 專屬日記", "", `<div style="font-size:1.1rem; line-height:1.8; text-align:left; background:#fffaf0; padding:20px; border-radius:12px; border:3px solid #feca57; margin-bottom:15px; color:var(--text-dark);">${text.replace(/\n/g, '<br>')}</div>`);
-            } catch (e) { showModal("❌ 發生錯誤", "寵物寫日記連線失敗！請稍後再試。"); }
+            } catch (e) { if (e.message === 'MISSING_GEMINI_API_KEY') return; showModal("❌ 發生錯誤", "寵物寫日記連線失敗！請稍後再試。"); }
         }
 
         async function generateAiQuote() {
             playClick(); const q = document.getElementById('quoteDisplay'); const o = q.innerText; q.innerText = "「✨ 寵物思考中...」";
             try { q.innerText = (await callGemini(`你叫「${state.petStats[state.currentPetId].name}」。心情${state.petStats[state.currentPetId].mood}/100，飽食${state.petStats[state.currentPetId].hunger}/100。對全班說句超可愛的問候語，加「」引號，20字內。繁中。`)).candidates[0].content.parts[0].text.trim(); }
-            catch (e) { q.innerText = o; showModal("❌ 發生錯誤", "AI 寵物連線失敗！請稍後再試。"); }
+            catch (e) { q.innerText = o; if (e.message === 'MISSING_GEMINI_API_KEY') return; showModal("❌ 發生錯誤", "AI 寵物連線失敗！請稍後再試。"); }
         }
 
         async function generateAiTask() {
             playClick(); const i = document.getElementById('newTaskName'); i.value = "✨ AI 正在想任務...";
             try { i.value = (await callGemini("想一個教室內1分鐘趣味小任務(如:對老師笑一個)。只回傳名稱，15字內，無引號。繁中。")).candidates[0].content.parts[0].text.trim().replace(/["'「」]/g, ''); }
-            catch (e) { i.value = ""; showModal("❌ 發生錯誤", "AI 靈感連線失敗！請稍後再試。"); }
+            catch (e) { i.value = ""; if (e.message === 'MISSING_GEMINI_API_KEY') return; showModal("❌ 發生錯誤", "AI 靈感連線失敗！請稍後再試。"); }
         }
 
         async function generateStudentPraise(name, pts) {
@@ -1008,7 +1028,7 @@
             try {
                 const text = (await callGemini(`你叫「${state.petStats[state.currentPetId].name}」。寫段溫暖鼓勵給${pts}分的學生「${name}」(約30字)。含Emoji。繁中。`)).candidates[0].content.parts[0].text.trim();
                 showModal(`✨ 給 ${name} 的鼓勵`, "", `<div style="font-size:1.2rem; line-height:1.6; text-align:left; background:#fff0f2; padding:15px; border-radius:12px; border:2px dashed #ff6b81; margin-bottom:15px;">${text.replace(/\n/g, '<br>')}</div>`);
-            } catch (e) { showModal("❌ 發生錯誤", "AI 鼓勵連線失敗！請稍後再試。"); }
+            } catch (e) { if (e.message === 'MISSING_GEMINI_API_KEY') return; showModal("❌ 發生錯誤", "AI 鼓勵連線失敗！請稍後再試。"); }
         }
 
         function loadData() {
@@ -2678,7 +2698,8 @@
             });
         }
         async function stGenerateAiImage(text, variant = '') {
-            const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
+            const apiKey = requireGeminiApiKey();
+            const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${encodeURIComponent(apiKey)}`;
             const styleHint=variant ? `風格方向：${variant}。` : '';
             const prompt=`請為小學教室的班級秩序狀態「${text}」製作一張美麗、溫暖、活潑的單一插圖。${styleHint}畫面只放一個清楚易懂的主體，置中，適合兒童，柔和 3D 貼圖風格，乾淨純色或透明感背景，不要文字，不要數字，不要邊框，不要浮水印，不要複雜場景。`;
             const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}})});

@@ -7,6 +7,8 @@ desktop.ini
 .env
 *.key
 credentials.*
+tools/class-pet-pro/班級寵物養成系統Key.txt
+tools/class-pet-pro/backup-*/
 
 # Claude Code 本地設定(含 permissions、可能記錄 token,絕不上雲)
 .claude/
