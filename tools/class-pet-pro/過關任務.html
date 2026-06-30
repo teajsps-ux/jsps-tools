@@ -253,6 +253,7 @@
         function applyBoardState(state) {
             if (!state) return;
             isIncomingCloudUpdate = true;
+            console.log('Applying cloud state to UI:', state);
             try {
                 // 1. Apply zhuyin mode
                 const body = document.body;
@@ -335,6 +336,7 @@
                             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                             lastUpdatedBy: deviceId
                         };
+                        console.log('Writing state to cloud:', payload);
                         await db.collection('class-pet-pro-users').doc(currentUser.uid).collection('tools').doc('breakthrough').set(payload, { merge: true });
                         setCloudSyncText(`雲端已同步：${new Date().toLocaleTimeString('zh-TW')}`, 'bg-green-500');
                     } catch (e) {
@@ -347,15 +349,19 @@
 
         function startFirestoreListener(uid) {
             stopFirestoreListener();
+            console.log('Starting Firestore listener for user:', uid, 'with deviceId:', deviceId);
             firestoreUnsubscribe = db.collection('class-pet-pro-users').doc(uid).collection('tools').doc('breakthrough')
                 .onSnapshot((doc) => {
                     if (doc.exists) {
                         const data = doc.data();
+                        console.log('Received cloud update:', data);
                         if (data.lastUpdatedBy === deviceId) {
+                            console.log('Ignored update from self');
                             return;
                         }
                         applyBoardState(data);
                     } else {
+                        console.log('No cloud doc found, initializing cloud state.');
                         triggerCloudSave();
                     }
                 }, (error) => {
