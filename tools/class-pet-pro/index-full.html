@@ -2246,7 +2246,7 @@
         window.addEventListener('beforeunload', () => saveData());
 
         // ===== Firebase Integration (graceful fallback for file://) =====
-        let auth2 = null, db = null, provider2 = null, syncMode = 'local', cloudTimer = null, userProfile = null;
+        let auth2 = null, db = null, provider2 = null, syncMode = 'local', cloudTimer = null, userProfile = null, cloudUnsubscribe = null, isApplyingCloudPayload = false;
         const CLOUD_TOOL_KEYS = ['chen_whiteboard','chen_wb_zhuyin','chen_status_emoji','chen_status_text','chen_status_card_id','chen_st_mode','chen_st_card1','chen_st_card2','chen_custom_cards','chen_preset_card_text','chen_preset_card_visuals','chen_result_font_size'];
         if (typeof firebase !== 'undefined' && firebase.apps) {
             try {
@@ -2275,18 +2275,24 @@
         }
         function applyCloudPayload(payload) {
             if (!payload) return;
-            if (payload.appConfig && payload.classData) {
-                appConfig = payload.appConfig;
-                saveAppConfig();
-                Object.keys(payload.classData).forEach(id => localStorage.setItem(`classPetData_${id}`, JSON.stringify(payload.classData[id])));
-            } else if (payload.data) {
-                Object.keys(payload.data).forEach(k => state[k] = payload.data[k]);
-                saveData();
+            isApplyingCloudPayload = true;
+            try {
+                if (payload.appConfig && payload.classData) {
+                    appConfig = payload.appConfig;
+                    saveAppConfig();
+                    Object.keys(payload.classData).forEach(id => localStorage.setItem(`classPetData_${id}`, JSON.stringify(payload.classData[id])));
+                } else if (payload.data) {
+                    Object.keys(payload.data).forEach(k => state[k] = payload.data[k]);
+                    saveData();
+                }
+                if (payload.tools) CLOUD_TOOL_KEYS.forEach(key => {
+                    if (Object.prototype.hasOwnProperty.call(payload.tools, key)) localStorage.setItem(key, payload.tools[key]);
+                });
+                renderClassSelect(); loadData(); refreshChenCloudTools();
+                updateUI(); renderActions(); renderGroups(); renderTasks(); renderStudents(); renderGifts(); renderHistory(); renderPokedex();
+            } finally {
+                isApplyingCloudPayload = false;
             }
-            if (payload.tools) CLOUD_TOOL_KEYS.forEach(key => {
-                if (Object.prototype.hasOwnProperty.call(payload.tools, key)) localStorage.setItem(key, payload.tools[key]);
-            });
-            renderClassSelect(); loadData(); refreshChenCloudTools();
         }
         function refreshChenCloudTools() {
             const wb = document.getElementById('wbEditor'), saved = localStorage.getItem('chen_whiteboard');
@@ -2328,6 +2334,7 @@
             } catch (err) { console.warn('Firebase restore failed:', err); alert('還原失敗，請確認 Firebase 規則已發布'); }
         }
         function scheduleCloudSync() {
+            if (isApplyingCloudPayload) return;
             if (!auth2 || !userProfile) return;
             if (cloudTimer) clearTimeout(cloudTimer);
             cloudTimer = setTimeout(async () => {
@@ -2342,6 +2349,26 @@
                 catch (err) { console.warn('Firebase sync failed:', err); }
             }, 2000);
         }
+        function stopCloudRealtimeListener() {
+            if (cloudUnsubscribe) {
+                try { cloudUnsubscribe(); } catch (err) { console.warn('Firebase listener stop failed:', err); }
+                cloudUnsubscribe = null;
+            }
+        }
+        function startCloudRealtimeListener() {
+            if (!db || !userProfile) return;
+            stopCloudRealtimeListener();
+            const userRef = db.collection('class-pet-pro-users').doc(userProfile.uid);
+            cloudUnsubscribe = userRef.onSnapshot({ includeMetadataChanges: true }, docSnap => {
+                if (!docSnap.exists || docSnap.metadata.hasPendingWrites) return;
+                applyCloudPayload(docSnap.data());
+                setCloudSyncStatus(`☁️ 已接收同步：${new Date().toLocaleString('zh-TW')}`);
+                refreshCloudBackups();
+            }, err => {
+                console.warn('Firebase realtime sync failed:', err);
+                setCloudSyncStatus('⚠️ 即時同步連線中斷，請重新整理');
+            });
+        }
 
         if (auth2) {
             auth2.onAuthStateChanged(async (user) => {
@@ -2351,14 +2378,11 @@
                     userProfile = user; syncMode = 'cloud';
                     if (btn) btn.innerHTML = '👤 ' + (user.displayName || user.email);
                     if (statusEl) { statusEl.innerHTML = '☁️ 已同步'; statusEl.className = 'status-dot on'; }
-                    try {
-                        const docSnap = await db.collection('class-pet-pro-users').doc(userProfile.uid).get();
-                        if (docSnap.exists) applyCloudPayload(docSnap.data());
-                    } catch (err) { console.warn('Firebase load failed:', err); }
-                    updateUI(); renderActions(); renderGroups(); renderTasks(); renderStudents(); renderGifts(); renderHistory(); renderPokedex();
-                    setCloudSyncStatus('☁️ 已登入，等待同步');
+                    startCloudRealtimeListener();
+                    setCloudSyncStatus('☁️ 已登入，即時同步中');
                     refreshCloudBackups();
                 } else {
+                    stopCloudRealtimeListener();
                     userProfile = null; if (syncMode === 'cloud') syncMode = 'local';
                     if (btn) btn.innerHTML = '🔓 登入同步';
                     if (statusEl) { statusEl.innerHTML = '📁 本機模式'; statusEl.className = 'status-dot off'; }
