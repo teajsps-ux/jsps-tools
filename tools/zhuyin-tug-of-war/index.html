@@ -219,6 +219,15 @@
             .key-btn { min-height: 66px; }
         }
         .key-btn:active { transform: scale(0.92); background: #e2e8f0; }
+        .fullscreen-active {
+            border-radius: 0 !important;
+            max-width: none !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+        }
+        body:has(.fullscreen-active) {
+            padding: 0 !important;
+        }
         /* 隱藏捲軸但可滾動 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -287,7 +296,8 @@
                     </div>
                 </div>
 
-                <div class="text-center mt-10 pt-6 border-t-2 border-indigo-200">
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 pt-6 border-t-2 border-indigo-200">
+                    <button id="fullscreenSetupBtn" type="button" class="bg-slate-800 text-white px-8 py-4 rounded-full font-black text-xl hover:bg-slate-900 shadow-lg transform hover:-translate-y-1 transition duration-200">⛶ 一鍵全螢幕</button>
                     <button id="startBtn" class="bg-indigo-600 text-white px-12 py-5 rounded-full font-black text-2xl hover:bg-indigo-700 shadow-xl transform hover:-translate-y-1 hover:scale-105 transition duration-200">⚔️ 開始遊戲</button>
                 </div>
             </div>
@@ -299,6 +309,9 @@
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                 <button onclick="abortGame()" class="bg-red-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-600 shadow-md transition transform hover:scale-105">
                     🛑 結束遊戲 (回設定)
+                </button>
+                <button id="fullscreenGameBtn" type="button" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-black hover:bg-slate-900 shadow-md transition transform hover:scale-105">
+                    ⛶ 一鍵全螢幕
                 </button>
                 <div class="bg-gray-800 text-white text-4xl font-mono font-black px-8 py-3 rounded-2xl shadow-inner flex items-center tracking-wider transition-colors duration-300" id="timerBox">
                     ⏱ <span id="timerDisplay" class="ml-3">03:00</span>
@@ -458,6 +471,49 @@
 
         // --- 介面與設定邏輯 ---
         document.getElementById('wordBank').value = defaultWordList;
+
+        const appShell = document.querySelector('.app-shell');
+        const fullscreenButtons = [
+            document.getElementById('fullscreenSetupBtn'),
+            document.getElementById('fullscreenGameBtn')
+        ].filter(Boolean);
+
+        function isFullscreenNow() {
+            return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+        }
+
+        function updateFullscreenButtons() {
+            const active = isFullscreenNow();
+            appShell.classList.toggle('fullscreen-active', active);
+            fullscreenButtons.forEach(button => {
+                button.textContent = active ? '⛶ 退出全螢幕' : '⛶ 一鍵全螢幕';
+            });
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (isFullscreenNow()) {
+                    if (document.exitFullscreen) await document.exitFullscreen();
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                    else if (document.msExitFullscreen) document.msExitFullscreen();
+                    return;
+                }
+
+                const target = appShell || document.documentElement;
+                if (target.requestFullscreen) await target.requestFullscreen();
+                else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+                else if (target.msRequestFullscreen) target.msRequestFullscreen();
+            } catch (error) {
+                alert('這個瀏覽器暫時無法切換全螢幕，請改用鍵盤 F11。');
+            } finally {
+                setTimeout(updateFullscreenButtons, 120);
+            }
+        }
+
+        fullscreenButtons.forEach(button => button.addEventListener('click', toggleFullscreen));
+        document.addEventListener('fullscreenchange', updateFullscreenButtons);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButtons);
+        document.addEventListener('msfullscreenchange', updateFullscreenButtons);
 
         const bgmToggle = document.getElementById('bgmToggle');
         const bgmDot = document.getElementById('bgmDot');
