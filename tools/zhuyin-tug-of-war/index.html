@@ -218,6 +218,21 @@
         @media (min-width: 1024px) {
             .key-btn { min-height: 66px; }
         }
+        .utility-key {
+            min-height: 48px !important;
+            height: 48px !important;
+            padding-top: 0.35rem !important;
+            padding-bottom: 0.35rem !important;
+            font-size: 20px !important;
+            line-height: 1.1 !important;
+        }
+        @media (min-width: 1024px) {
+            .utility-key {
+                min-height: 54px !important;
+                height: 54px !important;
+                font-size: 22px !important;
+            }
+        }
         .key-btn:active { transform: scale(0.92); background: #e2e8f0; }
         .fullscreen-active {
             border-radius: 0 !important;
@@ -607,7 +622,7 @@
                 'ㄧ','ㄨ','ㄩ','ㄚ','ㄛ','ㄜ','ㄝ',
                 'ㄞ','ㄟ','ㄠ','ㄡ','ㄢ','ㄣ','ㄤ',
                 'ㄥ','ㄦ','˙','ˊ','ˇ','ˋ','⌫',
-                ' ', '清空' 
+                '聽題', ' ', '清空' 
             ];
             
             zhuyinKeys.forEach(char => {
@@ -617,12 +632,26 @@
                 if (char === '⌫') {
                     btn.classList.add('bg-red-100', 'text-red-600', 'hover:bg-red-200');
                     btn.onclick = () => handleInput(team, 'backspace');
+                } else if (char === '聽題') {
+                    btn.classList.add(
+                        team === 'red' ? 'bg-red-600' : 'bg-blue-600',
+                        team === 'red' ? 'hover:bg-red-700' : 'hover:bg-blue-700',
+                        'text-white',
+                        'text-lg',
+                        'md:text-xl',
+                        'col-span-2',
+                        'utility-key',
+                        'shadow-md'
+                    );
+                    btn.textContent = '🔊 聽';
+                    btn.onclick = () => speakWord(team);
                 } else if (char === '清空') {
-                    btn.classList.add('bg-gray-200', 'text-2xl', 'md:text-3xl', 'text-gray-700', 'col-span-2', 'hover:bg-gray-300');
+                    btn.classList.add('bg-gray-200', 'text-xl', 'md:text-2xl', 'text-gray-700', 'col-span-2', 'utility-key', 'hover:bg-gray-300');
+                    btn.textContent = '清空';
                     btn.onclick = () => handleInput(team, 'clear');
                 } else if (char === ' ') {
-                    btn.classList.add('bg-gray-100', 'text-2xl', 'col-span-5', 'hover:bg-gray-200');
-                    btn.textContent = '空白(字詞分隔)';
+                    btn.classList.add('bg-gray-100', 'text-xl', 'md:text-2xl', 'col-span-3', 'utility-key', 'hover:bg-gray-200');
+                    btn.textContent = '空白';
                     btn.onclick = () => handleInput(team, ' ');
                 } else if (['˙','ˊ','ˇ','ˋ'].includes(char)) {
                     btn.classList.add('bg-indigo-100', 'text-indigo-800', 'hover:bg-indigo-200');
@@ -631,7 +660,7 @@
                     btn.onclick = () => handleInput(team, char);
                 }
                 
-                if (char !== ' ' && char !== '清空') {
+                if (char !== ' ' && char !== '清空' && char !== '聽題') {
                     btn.textContent = char;
                 }
                 
