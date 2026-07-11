@@ -251,6 +251,12 @@
                         </div>
                         <div class="mt-4 p-4 rounded-xl border border-sky-100 bg-sky-50">
                             <label class="block text-sky-900 font-bold mb-2">雲端題庫代號</label>
+                            <div class="flex flex-col sm:flex-row gap-3 mb-3">
+                                <select id="cloudBankSelect" class="flex-1 px-4 py-3 rounded-lg border-2 border-sky-100 bg-white focus:border-sky-400 focus:ring-4 focus:ring-sky-100 outline-none font-bold" aria-label="選擇已儲存的雲端題庫">
+                                    <option value="">正在準備雲端題庫清單...</option>
+                                </select>
+                                <button id="refreshCloudBanksBtn" type="button" class="bg-white hover:bg-sky-100 text-sky-800 px-5 py-3 rounded-lg font-black border-2 border-sky-100 shadow-sm transition">重新整理</button>
+                            </div>
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <input id="cloudBankId" value="default" maxlength="48" class="flex-1 px-4 py-3 rounded-lg border-2 border-sky-100 focus:border-sky-400 focus:ring-4 focus:ring-sky-100 outline-none font-bold" aria-label="雲端題庫代號">
                                 <button id="loadCloudBankBtn" type="button" class="bg-sky-600 hover:bg-sky-700 text-white px-5 py-3 rounded-lg font-black shadow-sm transition">載入雲端</button>
@@ -923,7 +929,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, getDocs, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA0lSykngwrK5exy1rxD4TZ96RqeVD4x9U",
@@ -938,6 +944,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const statusEl = document.getElementById('cloudBankStatus');
+        const cloudBankSelect = document.getElementById('cloudBankSelect');
 
         function setCloudStatus(message, tone = 'info') {
             if (!statusEl) return;
@@ -968,6 +975,68 @@
             return doc(db, 'zhuyin-tug-banks', id);
         }
 
+        function getLocalBankIds() {
+            try {
+                return JSON.parse(localStorage.getItem('zhuyinTugBankIds') || '[]')
+                    .filter(id => typeof id === 'string' && id.trim())
+                    .slice(0, 80);
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function rememberBankId(bankId) {
+            const id = cleanBankId(bankId);
+            const ids = getLocalBankIds().filter(item => item !== id);
+            ids.unshift(id);
+            localStorage.setItem('zhuyinTugBankIds', JSON.stringify(ids.slice(0, 80)));
+        }
+
+        function setSelectOptions(items, selectedId = '') {
+            cloudBankSelect.innerHTML = '';
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = items.length ? '請選擇已儲存的題庫' : '目前沒有雲端題庫';
+            cloudBankSelect.appendChild(placeholder);
+
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.title && item.title !== item.id ? `${item.title} (${item.id})` : item.id;
+                cloudBankSelect.appendChild(option);
+            });
+
+            if (selectedId) cloudBankSelect.value = selectedId;
+        }
+
+        async function refreshCloudBankList(selectedId = '') {
+            await authReady;
+            const refreshBtn = document.getElementById('refreshCloudBanksBtn');
+            refreshBtn.disabled = true;
+            cloudBankSelect.disabled = true;
+            cloudBankSelect.innerHTML = '<option value="">正在讀取題庫清單...</option>';
+
+            try {
+                const snap = await getDocs(collection(db, 'zhuyin-tug-banks'));
+                const items = [];
+                snap.forEach(docSnap => {
+                    const data = docSnap.data() || {};
+                    items.push({ id: docSnap.id, title: data.title || docSnap.id });
+                });
+                items.sort((a, b) => a.id.localeCompare(b.id, 'zh-Hant'));
+                setSelectOptions(items, selectedId);
+                setCloudStatus(items.length ? `已讀取 ${items.length} 份雲端題庫。` : '目前還沒有雲端題庫，可先輸入代號後儲存。', 'ok');
+            } catch (error) {
+                console.error(error);
+                const localItems = getLocalBankIds().map(id => ({ id, title: id }));
+                setSelectOptions(localItems, selectedId);
+                setCloudStatus(localItems.length ? '目前只能顯示這台電腦用過的題庫代號；也可手動輸入其他代號。' : '請先手動輸入題庫代號；載入或儲存後，這台電腦會記住代號。', 'info');
+            } finally {
+                refreshBtn.disabled = false;
+                cloudBankSelect.disabled = false;
+            }
+        }
+
         async function loadCloudBank() {
             await authReady;
             const loadBtn = document.getElementById('loadCloudBankBtn');
@@ -988,6 +1057,8 @@
 
                 const data = snap.data();
                 document.getElementById('wordBank').value = data.text || '';
+                rememberBankId(bankId);
+                await refreshCloudBankList(bankId);
                 setCloudStatus(`已載入雲端題庫「${bankId}」。`, 'ok');
             } finally {
                 loadBtn.disabled = false;
@@ -1019,12 +1090,26 @@
                     ownerUid: auth.currentUser ? auth.currentUser.uid : null,
                     updatedAt: serverTimestamp()
                 }, { merge: true });
+                rememberBankId(bankId);
                 setCloudStatus(`已儲存雲端題庫「${bankId}」。`, 'ok');
+                await refreshCloudBankList(bankId);
             } finally {
                 loadBtn.disabled = false;
                 saveBtn.disabled = false;
             }
         }
+
+        cloudBankSelect.addEventListener('change', () => {
+            if (!cloudBankSelect.value) return;
+            document.getElementById('cloudBankId').value = cloudBankSelect.value;
+        });
+
+        document.getElementById('refreshCloudBanksBtn').addEventListener('click', () => {
+            refreshCloudBankList(document.getElementById('cloudBankId').value).catch(error => {
+                console.error(error);
+                setCloudStatus('題庫清單讀取失敗，仍可手動輸入代號。', 'error');
+            });
+        });
 
         document.getElementById('loadCloudBankBtn').addEventListener('click', () => {
             loadCloudBank().catch(error => {
@@ -1040,7 +1125,12 @@
             });
         });
 
-        window.zhuyinTugCloudBank = { loadCloudBank, saveCloudBank };
+        authReady.then(() => refreshCloudBankList()).catch(error => {
+            console.error(error);
+            setCloudStatus('雲端題庫清單無法自動載入，仍可手動輸入代號。', 'error');
+        });
+
+        window.zhuyinTugCloudBank = { loadCloudBank, saveCloudBank, refreshCloudBankList };
     </script>
 </body>
 </html>
