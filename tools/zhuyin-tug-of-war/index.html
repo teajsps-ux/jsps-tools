@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拔河注音對戰 (專業版)</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --red-team: #dc2626;
+            --blue-team: #0284c7;
+            --field: #f9fafb;
+            --ink: #111827;
+        }
+        body {
+            background:
+                linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(220, 38, 38, 0.08)),
+                #edf2f7;
+        }
+        .app-shell {
+            min-height: calc(100vh - 2rem);
+        }
+        .battle-layout {
+            align-items: stretch;
+        }
+        .team-card {
+            min-width: 0;
+            border-radius: 22px;
+            overflow: hidden;
+        }
+        .team-header {
+            margin: -1rem -1rem 1rem;
+            padding: 0.9rem 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        @media (min-width: 768px) {
+            .team-header {
+                margin: -1.5rem -1.5rem 1rem;
+                padding: 1rem 1.25rem;
+            }
+        }
+        .red-header { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .blue-header { background: linear-gradient(135deg, #0ea5e9, #0369a1); }
+        .team-score-pill {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: white;
+            color: var(--ink);
+            font-size: 1.45rem;
+            font-weight: 900;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+        }
+        .arena-card {
+            position: relative;
+            min-height: 420px;
+            border: 14px solid white;
+            border-radius: 24px;
+            background:
+                linear-gradient(90deg, rgba(14, 165, 233, 0.08), transparent 36%, transparent 64%, rgba(239, 68, 68, 0.08)),
+                linear-gradient(#ffffff, #f8fafc);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
+            overflow: hidden;
+        }
+        .arena-scoreboard {
+            min-height: 5.5rem;
+            border-radius: 14px;
+            background: linear-gradient(#f3f4f6, #e5e7eb);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1.4rem;
+            color: #111827;
+        }
+        .arena-scoreboard strong {
+            display: block;
+            font-size: 1.55rem;
+            line-height: 1.1;
+            color: #0284c7;
+        }
+        .arena-scoreboard .score-red strong { color: #dc2626; }
+        .arena-time {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #0284c7;
+            white-space: nowrap;
+        }
+        .pull-field {
+            position: relative;
+            min-height: 300px;
+            margin-top: 1rem;
+            border-radius: 18px;
+            background:
+                linear-gradient(90deg, transparent calc(50% - 1px), rgba(31, 41, 55, 0.45) calc(50% - 1px), rgba(31, 41, 55, 0.45) calc(50% + 1px), transparent calc(50% + 1px)),
+                linear-gradient(#ffffff, #f9fafb);
+        }
+        .center-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            border-left: 3px dashed rgba(17, 24, 39, 0.45);
+            transform: translateX(-50%);
+        }
+        .rope-container {
+            position: absolute;
+            left: 9%;
+            right: 9%;
+            top: 52%;
+            height: 18px;
+            background: repeating-linear-gradient(90deg, #3f2f22 0 12px, #6b4b2f 12px 24px);
+            border-radius: 999px;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.18);
+            overflow: visible;
+            transform: translateY(-50%);
+        }
+        .rope-marker {
+            position: absolute;
+            top: 50%;
+            width: 34px;
+            height: 52px;
+            background: #ef4444;
+            clip-path: polygon(50% 0, 100% 100%, 50% 78%, 0 100%);
+            transform: translate(-50%, -12%);
+            transition: left 0.45s cubic-bezier(.2,.9,.2,1.1);
+            z-index: 12;
+            filter: drop-shadow(0 3px 2px rgba(0,0,0,0.2));
+        }
+        .rope-team {
+            position: absolute;
+            top: 49%;
+            width: min(34%, 220px);
+            height: 150px;
+            transform: translateY(-50%);
+            transition: transform 0.45s cubic-bezier(.2,.9,.2,1.1);
+        }
+        .rope-team-left { left: 10%; }
+        .rope-team-right { right: 10%; }
+        .puller {
+            position: absolute;
+            bottom: 0;
+            width: 72px;
+            height: 118px;
+            transform: skewX(-9deg);
+        }
+        .rope-team-right .puller { transform: scaleX(-1) skewX(-9deg); }
+        .puller::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 19px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #f8c27a;
+            box-shadow: 0 -9px 0 #111827 inset;
+        }
+        .puller::after {
+            content: "";
+            position: absolute;
+            top: 35px;
+            left: 12px;
+            width: 50px;
+            height: 48px;
+            border-radius: 12px 12px 8px 8px;
+            background: var(--team-color);
+            box-shadow: inset 0 -12px 0 rgba(255,255,255,0.18);
+        }
+        .puller .leg {
+            position: absolute;
+            bottom: 6px;
+            width: 18px;
+            height: 42px;
+            border-radius: 99px;
+            background: #111827;
+        }
+        .puller .leg.one { left: 14px; transform: rotate(18deg); }
+        .puller .leg.two { left: 41px; transform: rotate(-26deg); }
+        .puller .shoe {
+            position: absolute;
+            bottom: 0;
+            width: 30px;
+            height: 12px;
+            border-radius: 999px;
+            background: var(--team-color);
+        }
+        .puller .shoe.one { left: 2px; }
+        .puller .shoe.two { left: 42px; }
+        .puller.one { left: 8%; }
+        .puller.two { left: 42%; }
+        .rope-team-left { --team-color: #0284c7; }
+        .rope-team-right { --team-color: #dc2626; }
+        .arena-ground {
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            bottom: 66px;
+            height: 2px;
+            background: rgba(15, 23, 42, 0.1);
+        }
+        .key-btn {
+            cursor: pointer;
+            transition: background 0.1s, transform 0.1s, box-shadow 0.1s;
+            user-select: none;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            text-align: center;
+            background: white;
+            min-height: 58px;
+        }
+        @media (min-width: 1024px) {
+            .key-btn { min-height: 66px; }
+        }
+        .key-btn:active { transform: scale(0.92); background: #e2e8f0; }
+        /* 隱藏捲軸但可滾動 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="p-2 md:p-4 min-h-screen font-sans flex flex-col justify-center">
+
+    <div class="app-shell w-[98%] max-w-[1920px] mx-auto bg-white p-4 md:p-6 rounded-3xl shadow-xl flex-grow">
+        <h1 class="text-4xl font-black text-center mb-4 text-gray-800 tracking-wide">拔河注音對戰</h1>
+        
+        <!-- ================= 設定區塊 ================= -->
+        <div id="setupArea" class="space-y-6">
+            <div class="bg-indigo-50 p-6 md:p-8 rounded-2xl border-2 border-indigo-100">
+                <h2 class="text-2xl font-bold text-indigo-800 mb-6 flex items-center">
+                    <svg class="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    教師題庫與遊戲設定
+                </h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- 題庫設定 -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                        <label class="block text-gray-800 font-bold mb-2 text-lg">自訂題庫 (格式：國字/詞語,注音)</label>
+                        <p class="text-sm text-gray-500 mb-3">一行一題，可用逗號(,)或Tab隔開。學生作答時會自動忽略空白。</p>
+                        <textarea id="wordBank" class="w-full h-48 p-4 border-2 border-gray-300 rounded-lg no-scrollbar focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 text-lg transition-all" placeholder="狗,ㄍㄡˇ&#10;蘋果,ㄆㄧㄥˊ ㄍㄨㄛˇ"></textarea>
+                        
+                        <div class="flex flex-wrap gap-3 mt-4">
+                            <input type="file" id="importFile" accept=".txt" class="hidden">
+                            <button onclick="document.getElementById('importFile').click()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-3 rounded-lg font-bold transition border border-gray-300">📥 匯入 TXT</button>
+                            <button id="exportBtn" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-3 rounded-lg font-bold transition border border-gray-300">📤 匯出 TXT</button>
+                        </div>
+                        <div class="mt-4 p-4 rounded-xl border border-sky-100 bg-sky-50">
+                            <label class="block text-sky-900 font-bold mb-2">雲端題庫代號</label>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input id="cloudBankId" value="default" maxlength="48" class="flex-1 px-4 py-3 rounded-lg border-2 border-sky-100 focus:border-sky-400 focus:ring-4 focus:ring-sky-100 outline-none font-bold" aria-label="雲端題庫代號">
+                                <button id="loadCloudBankBtn" type="button" class="bg-sky-600 hover:bg-sky-700 text-white px-5 py-3 rounded-lg font-black shadow-sm transition">載入雲端</button>
+                                <button id="saveCloudBankBtn" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-lg font-black shadow-sm transition">儲存雲端</button>
+                            </div>
+                            <p id="cloudBankStatus" class="mt-2 text-sm text-sky-800">也可以先用本機 TXT；雲端功能需要 Firebase 規則部署後才會生效。</p>
+                        </div>
+                    </div>
+
+                    <!-- 遊戲設定 -->
+                    <div class="space-y-6">
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                            <label class="block text-gray-800 font-bold mb-3 text-lg">⏱️ 遊戲時間 (分鐘)</label>
+                            <input type="number" id="timeLimit" value="3" min="1" max="60" class="w-full p-4 border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 text-2xl font-bold text-center transition-all">
+                        </div>
+                        
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                            <label class="block text-gray-800 font-bold mb-3 text-lg">🎵 背景音效與語音</label>
+                            <label class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition">
+                                <div class="relative">
+                                    <input type="checkbox" id="bgmToggle" class="sr-only" checked>
+                                    <div class="block bg-gray-300 w-16 h-9 rounded-full transition duration-300 ease-in-out" id="bgmTrack"></div>
+                                    <div class="dot absolute left-1 top-1 bg-white w-7 h-7 rounded-full transition duration-300 ease-in-out transform translate-x-7 bg-indigo-500 shadow-md" id="bgmDot"></div>
+                                </div>
+                                <span class="ml-4 text-gray-700 font-bold text-lg" id="bgmText">歡樂合成音樂：開啟</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-10 pt-6 border-t-2 border-indigo-200">
+                    <button id="startBtn" class="bg-indigo-600 text-white px-12 py-5 rounded-full font-black text-2xl hover:bg-indigo-700 shadow-xl transform hover:-translate-y-1 hover:scale-105 transition duration-200">⚔️ 開始遊戲</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 遊戲區塊 ================= -->
+        <div id="gameArea" class="hidden">
+            
+            <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                <button onclick="abortGame()" class="bg-red-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-600 shadow-md transition transform hover:scale-105">
+                    🛑 結束遊戲 (回設定)
+                </button>
+                <div class="bg-gray-800 text-white text-4xl font-mono font-black px-8 py-3 rounded-2xl shadow-inner flex items-center tracking-wider transition-colors duration-300" id="timerBox">
+                    ⏱ <span id="timerDisplay" class="ml-3">03:00</span>
+                </div>
+                <div class="hidden md:block w-[180px]"></div>
+            </div>
+
+            <div class="battle-layout grid grid-cols-1 xl:grid-cols-[minmax(360px,0.95fr)_minmax(440px,1.15fr)_minmax(360px,0.95fr)] gap-4 lg:gap-6 mt-4">
+                
+                <!-- 🟥 紅隊區 -->
+                <div id="redTeam" class="team-card p-4 md:p-6 border-4 border-red-300 bg-red-50 relative shadow-md xl:order-1">
+                    <div class="team-header red-header">
+                        <h2 class="font-black text-2xl lg:text-3xl">第一隊</h2>
+                        <div id="scoreRed" class="team-score-pill">0</div>
+                    </div>
+                    
+                    <div class="flex flex-col items-center justify-center my-3 h-24 lg:h-28 relative bg-white rounded-2xl border-2 border-red-100 shadow-sm overflow-hidden">
+                        <div id="wordRed" class="text-5xl md:text-6xl font-black text-gray-800 tracking-widest text-center px-12 z-0">---</div>
+                        
+                        <button onclick="speakWord('red')" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-red-100 border-2 border-red-200 text-red-600 p-2 lg:p-3 rounded-full hover:bg-red-200 hover:scale-110 active:scale-95 transition shadow-sm z-10" title="聽發音">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd"></path></svg>
+                        </button>
+
+                        <!-- 答對動畫疊加層 -->
+                        <div id="correctOverlayRed" class="absolute inset-0 z-20 hidden items-center justify-center bg-white bg-opacity-90">
+                            <div class="w-20 h-20 lg:w-24 lg:h-24 bg-[#2ecc71] rounded-full flex items-center justify-center shadow-xl transform scale-0 transition-transform duration-200 ease-out" id="correctIconRed">
+                                <svg class="w-12 h-12 lg:w-16 lg:h-16 text-white" fill="none" stroke="currentColor" stroke-width="5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                        </div>
+
+                        <!-- 答錯動畫疊加層 -->
+                        <div id="wrongOverlayRed" class="absolute inset-0 z-20 hidden items-center justify-center bg-white bg-opacity-90">
+                            <div class="relative w-20 h-20 lg:w-24 lg:h-24 flex items-center justify-center transform scale-0 transition-transform duration-200 ease-out" id="wrongIconRed">
+                                <div class="absolute w-20 lg:w-24 h-4 lg:h-5 bg-[#ff4d4d] rounded-full rotate-45 shadow-md"></div>
+                                <div class="absolute w-20 lg:w-24 h-4 lg:h-5 bg-[#ff4d4d] rounded-full -rotate-45 shadow-md"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="text" id="inputRed" readonly class="w-full text-center text-4xl font-bold p-3 border-2 border-red-200 rounded-2xl bg-white text-red-600 shadow-inner mb-3 focus:outline-none" placeholder="輸入注音">
+                    <!-- 鍵盤區：保留大字級注音按鈕，低年級學生看得清楚 -->
+                    <div id="keysRed" class="grid grid-cols-7 gap-1 lg:gap-2"></div>
+                </div>
+
+                <!-- 中央拔河舞台 -->
+                <section class="arena-card p-3 md:p-4 xl:order-2" aria-label="拔河舞台">
+                    <div class="arena-scoreboard">
+                        <div>
+                            <span class="font-black text-sm md:text-base">第一隊</span>
+                            <strong id="arenaScoreRed">0</strong>
+                        </div>
+                        <div class="arena-time">⏱ <span id="arenaTimerDisplay">03:00</span></div>
+                        <div class="score-red text-right">
+                            <span class="font-black text-sm md:text-base">第二隊</span>
+                            <strong id="arenaScoreBlue">0</strong>
+                        </div>
+                    </div>
+                    <div class="pull-field">
+                        <div class="center-line" aria-hidden="true"></div>
+                        <div class="arena-ground" aria-hidden="true"></div>
+                        <div id="leftPullers" class="rope-team rope-team-left" aria-hidden="true">
+                            <div class="puller one"><span class="leg one"></span><span class="leg two"></span><span class="shoe one"></span><span class="shoe two"></span></div>
+                            <div class="puller two"><span class="leg one"></span><span class="leg two"></span><span class="shoe one"></span><span class="shoe two"></span></div>
+                        </div>
+                        <div id="rightPullers" class="rope-team rope-team-right" aria-hidden="true">
+                            <div class="puller one"><span class="leg one"></span><span class="leg two"></span><span class="shoe one"></span><span class="shoe two"></span></div>
+                            <div class="puller two"><span class="leg one"></span><span class="leg two"></span><span class="shoe one"></span><span class="shoe two"></span></div>
+                        </div>
+                        <div class="rope-container" aria-hidden="true">
+                            <div id="ropeMarker" class="rope-marker" style="left: 50%;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 🟦 藍隊區 -->
+                <div id="blueTeam" class="team-card p-4 md:p-6 border-4 border-blue-300 bg-blue-50 relative shadow-md xl:order-3">
+                    <div class="team-header blue-header">
+                        <h2 class="font-black text-2xl lg:text-3xl">第二隊</h2>
+                        <div id="scoreBlue" class="team-score-pill">0</div>
+                    </div>
+                    
+                    <div class="flex flex-col items-center justify-center my-3 h-24 lg:h-28 relative bg-white rounded-2xl border-2 border-blue-100 shadow-sm overflow-hidden">
+                        <div id="wordBlue" class="text-5xl md:text-6xl font-black text-gray-800 tracking-widest text-center px-12 z-0">---</div>
+                        
+                        <button onclick="speakWord('blue')" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-blue-100 border-2 border-blue-200 text-blue-600 p-2 lg:p-3 rounded-full hover:bg-blue-200 hover:scale-110 active:scale-95 transition shadow-sm z-10" title="聽發音">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd"></path></svg>
+                        </button>
+
+                        <!-- 答對動畫疊加層 -->
+                        <div id="correctOverlayBlue" class="absolute inset-0 z-20 hidden items-center justify-center bg-white bg-opacity-90">
+                            <div class="w-20 h-20 lg:w-24 lg:h-24 bg-[#2ecc71] rounded-full flex items-center justify-center shadow-xl transform scale-0 transition-transform duration-200 ease-out" id="correctIconBlue">
+                                <svg class="w-12 h-12 lg:w-16 lg:h-16 text-white" fill="none" stroke="currentColor" stroke-width="5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                        </div>
+
+                        <!-- 答錯動畫疊加層 -->
+                        <div id="wrongOverlayBlue" class="absolute inset-0 z-20 hidden items-center justify-center bg-white bg-opacity-90">
+                            <div class="relative w-20 h-20 lg:w-24 lg:h-24 flex items-center justify-center transform scale-0 transition-transform duration-200 ease-out" id="wrongIconBlue">
+                                <div class="absolute w-20 lg:w-24 h-4 lg:h-5 bg-[#ff4d4d] rounded-full rotate-45 shadow-md"></div>
+                                <div class="absolute w-20 lg:w-24 h-4 lg:h-5 bg-[#ff4d4d] rounded-full -rotate-45 shadow-md"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="text" id="inputBlue" readonly class="w-full text-center text-4xl font-bold p-3 border-2 border-blue-200 rounded-2xl bg-white text-blue-600 shadow-inner mb-3 focus:outline-none" placeholder="輸入注音">
+                    <!-- 鍵盤區：保留大字級注音按鈕，低年級學生看得清楚 -->
+                    <div id="keysBlue" class="grid grid-cols-7 gap-1 lg:gap-2"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 結算畫面 Modal -->
+    <div id="winnerModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white p-10 rounded-3xl text-center shadow-2xl transform transition-all scale-100 max-w-md w-full border-8 border-yellow-400 relative overflow-hidden">
+            <div class="absolute -top-10 -left-10 w-40 h-40 bg-yellow-200 rounded-full mix-blend-multiply filter blur-2xl opacity-70 animate-blob"></div>
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-pink-200 rounded-full mix-blend-multiply filter blur-2xl opacity-70 animate-blob animation-delay-2000"></div>
+            
+            <h2 id="winnerText" class="text-6xl font-black mb-6 text-gray-800 relative z-10"></h2>
+            <p id="winnerReason" class="text-2xl text-gray-600 mb-10 font-bold relative z-10"></p>
+            <button onclick="location.reload()" class="bg-indigo-600 text-white px-8 py-5 rounded-full font-black text-2xl hover:bg-indigo-700 relative z-10 shadow-lg transform hover:scale-105 transition w-full">🔄 返回設定 / 再玩一次</button>
+        </div>
+    </div>
+
+    <script>
+        let defaultWordList = "狗,ㄍㄡˇ\n貓,ㄇㄠ\n豬,ㄓㄨ\n牛,ㄋㄧㄡˊ\n羊,ㄧㄤˊ\n大象,ㄉㄚˋ ㄒㄧㄤˋ\n長頸鹿,ㄔㄤˊ ㄐㄧㄥˇ ㄌㄨˋ\n蘋果,ㄆㄧㄥˊ ㄍㄨㄛˇ\n香蕉,ㄒㄧㄤ ㄐㄧㄠ\n快樂,ㄎㄨㄞˋ ㄌㄜˋ\n太陽,ㄊㄞˋ ㄧㄤˊ\n月亮,ㄩㄝˋ ㄌㄧㄤˋ\n星星,ㄒㄧㄥ ㄒㄧㄥ\n好朋友,ㄏㄠˇ ㄆㄥˊ ㄧㄡˇ\n學校,ㄒㄩㄝˊ ㄒㄧㄠˋ";
+        
+        let zhuyinList = [];
+        // 用於雙方亂序出題的佇列
+        let teamQueues = { red: [], blue: [] };
+        let teamIndices = { red: 0, blue: 0 };
+
+        let state = { ropePos: 50, scores: { red: 0, blue: 0 }, words: { red: null, blue: null }, inputs: { red: '', blue: '' } };
+        let timerInterval;
+        let timeLeft = 0;
+        let preferredVoice = null;
+
+        function syncArenaUI() {
+            const redScore = state.scores.red || 0;
+            const blueScore = state.scores.blue || 0;
+            ['scoreRed', 'arenaScoreRed'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = redScore;
+            });
+            ['scoreBlue', 'arenaScoreBlue'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = blueScore;
+            });
+
+            const offset = (state.ropePos - 50) * 0.42;
+            const leftPullers = document.getElementById('leftPullers');
+            const rightPullers = document.getElementById('rightPullers');
+            if (leftPullers) leftPullers.style.transform = `translate(${offset}%, -50%)`;
+            if (rightPullers) rightPullers.style.transform = `translate(${offset}%, -50%)`;
+        }
+
+        // --- 介面與設定邏輯 ---
+        document.getElementById('wordBank').value = defaultWordList;
+
+        const bgmToggle = document.getElementById('bgmToggle');
+        const bgmDot = document.getElementById('bgmDot');
+        const bgmTrack = document.getElementById('bgmTrack');
+        const bgmText = document.getElementById('bgmText');
+
+        bgmToggle.addEventListener('change', () => {
+            if (bgmToggle.checked) {
+                bgmDot.classList.add('translate-x-7', 'bg-indigo-500');
+                bgmDot.classList.remove('translate-x-1', 'bg-gray-400');
+                bgmTrack.classList.add('bg-indigo-200');
+                bgmTrack.classList.remove('bg-gray-300');
+                bgmText.textContent = "歡樂配樂：開啟";
+                if(document.getElementById('gameArea').classList.contains('hidden') === false) {
+                    startBGM();
+                }
+            } else {
+                bgmDot.classList.remove('translate-x-7', 'bg-indigo-500');
+                bgmDot.classList.add('translate-x-1', 'bg-gray-400');
+                bgmTrack.classList.remove('bg-indigo-200');
+                bgmTrack.classList.add('bg-gray-300');
+                bgmText.textContent = "歡樂配樂：關閉";
+                stopBGM();
+            }
+        });
+        bgmToggle.dispatchEvent(new Event('change'));
+
+        // --- 題庫匯入匯出 ---
+        document.getElementById('exportBtn').onclick = () => {
+            const text = document.getElementById('wordBank').value;
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '拔河注音題庫.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        document.getElementById('importFile').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                document.getElementById('wordBank').value = event.target.result;
+            };
+            reader.readAsText(file);
+        };
+
+        function parseWordBank() {
+            const text = document.getElementById('wordBank').value;
+            const lines = text.split('\n');
+            zhuyinList = [];
+            lines.forEach(line => {
+                const parts = line.split(/[,	]/);
+                if (parts.length >= 2) {
+                    const char = parts[0].trim();
+                    const zhuyin = parts[1].trim();
+                    if (char && zhuyin) {
+                        zhuyinList.push({ char, zhuyin });
+                    }
+                }
+            });
+            if (zhuyinList.length === 0) {
+                alert("題庫解析失敗或空白，請確認格式是否為「題目,注音」");
+                return false;
+            }
+            return true;
+        }
+
+        // 打亂陣列順序 (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // --- 鍵盤與遊戲邏輯 ---
+        function createKeyboard(team) {
+            const container = document.getElementById(`keys${team.charAt(0).toUpperCase() + team.slice(1)}`);
+            container.innerHTML = ''; 
+
+            const zhuyinKeys = [
+                'ㄅ','ㄆ','ㄇ','ㄈ','ㄉ','ㄊ','ㄋ',
+                'ㄌ','ㄍ','ㄎ','ㄏ','ㄐ','ㄑ','ㄒ',
+                'ㄓ','ㄔ','ㄕ','ㄖ','ㄗ','ㄘ','ㄙ',
+                'ㄧ','ㄨ','ㄩ','ㄚ','ㄛ','ㄜ','ㄝ',
+                'ㄞ','ㄟ','ㄠ','ㄡ','ㄢ','ㄣ','ㄤ',
+                'ㄥ','ㄦ','˙','ˊ','ˇ','ˋ','⌫',
+                ' ', '清空' 
+            ];
+            
+            zhuyinKeys.forEach(char => {
+                const btn = document.createElement('div');
+                btn.className = "key-btn text-4xl md:text-5xl font-black py-2 lg:py-3 flex items-center justify-center text-gray-800 shadow-sm";
+                
+                if (char === '⌫') {
+                    btn.classList.add('bg-red-100', 'text-red-600', 'hover:bg-red-200');
+                    btn.onclick = () => handleInput(team, 'backspace');
+                } else if (char === '清空') {
+                    btn.classList.add('bg-gray-200', 'text-2xl', 'md:text-3xl', 'text-gray-700', 'col-span-2', 'hover:bg-gray-300');
+                    btn.onclick = () => handleInput(team, 'clear');
+                } else if (char === ' ') {
+                    btn.classList.add('bg-gray-100', 'text-2xl', 'col-span-5', 'hover:bg-gray-200');
+                    btn.textContent = '空白(字詞分隔)';
+                    btn.onclick = () => handleInput(team, ' ');
+                } else if (['˙','ˊ','ˇ','ˋ'].includes(char)) {
+                    btn.classList.add('bg-indigo-100', 'text-indigo-800', 'hover:bg-indigo-200');
+                    btn.onclick = () => handleInput(team, char);
+                } else {
+                    btn.onclick = () => handleInput(team, char);
+                }
+                
+                if (char !== ' ' && char !== '清空') {
+                    btn.textContent = char;
+                }
+                
+                container.appendChild(btn);
+            });
+        }
+
+        function handleInput(team, char) {
+            if (char === 'backspace') {
+                state.inputs[team] = state.inputs[team].slice(0, -1);
+            } else if (char === 'clear') {
+                state.inputs[team] = '';
+            } else {
+                state.inputs[team] += char;
+            }
+            document.getElementById(`input${team.charAt(0).toUpperCase() + team.slice(1)}`).value = state.inputs[team];
+            playBeep(team === 'red' ? 400 : 600, 'sine'); 
+            checkAnswer(team);
+        }
+
+        function showFeedbackUI(team, isCorrect) {
+            const teamCap = team.charAt(0).toUpperCase() + team.slice(1);
+            const overlayId = isCorrect ? `correctOverlay${teamCap}` : `wrongOverlay${teamCap}`;
+            const iconId = isCorrect ? `correctIcon${teamCap}` : `wrongIcon${teamCap}`;
+
+            const overlay = document.getElementById(overlayId);
+            const icon = document.getElementById(iconId);
+
+            // 顯示遮罩
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            // 強制重繪以觸發縮放動畫
+            void icon.offsetWidth;
+            icon.classList.remove('scale-0');
+            icon.classList.add('scale-100');
+
+            // 動畫停留與收回
+            setTimeout(() => {
+                icon.classList.remove('scale-100');
+                icon.classList.add('scale-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('flex');
+                }, 200); // 縮回的時間
+            }, 300); // 畫面停留時間
+        }
+
+        function checkAnswer(team) {
+            if (!state.words[team]) return; 
+            
+            const inputClean = state.inputs[team].replace(/\s+/g, '');
+            const targetClean = state.words[team].zhuyin.replace(/\s+/g, '');
+
+            if (inputClean === targetClean) {
+                // 完全正確
+                showFeedbackUI(team, true);
+                
+                // 答對音效
+                playBeep(800, 'square', 0.1);
+                setTimeout(() => playBeep(1200, 'square', 0.15), 100);
+
+                // 拉繩子
+                const pullAmount = 10;
+                state.ropePos += (team === 'red' ? -pullAmount : pullAmount);
+                state.scores[team] = (state.scores[team] || 0) + 1;
+                document.getElementById('ropeMarker').style.left = `${state.ropePos}%`;
+                syncArenaUI();
+                
+                state.inputs[team] = '';
+                nextWord(team);
+
+                // 檢查是否獲勝
+                if (state.ropePos <= 0 || state.ropePos >= 100) {
+                    endGame(state.ropePos <= 0 ? "🟥 紅隊" : "🟦 藍隊", "力量壓制，將對手拉過線了！");
+                }
+
+            } else if (inputClean.length >= targetClean.length) {
+                // 字數已達到但內容不對 -> 判定為答錯
+                showFeedbackUI(team, false);
+                playBeep(250, 'sawtooth', 0.2); // 錯誤音效
+
+                // 答錯自動清空，讓學生重試
+                state.inputs[team] = '';
+                document.getElementById(`input${team.charAt(0).toUpperCase() + team.slice(1)}`).value = '';
+            }
+        }
+
+        function nextWord(team) {
+            // 如果該隊伍的題庫抽完了，重新洗牌
+            if (teamIndices[team] >= teamQueues[team].length) {
+                teamQueues[team] = shuffleArray([...zhuyinList]);
+                teamIndices[team] = 0;
+            }
+
+            // 依序取出亂序後的題目
+            const nextObj = teamQueues[team][teamIndices[team]];
+            teamIndices[team]++;
+
+            state.words[team] = nextObj;
+            const wordElement = document.getElementById(`word${team.charAt(0).toUpperCase() + team.slice(1)}`);
+            wordElement.textContent = nextObj.char;
+            document.getElementById(`input${team.charAt(0).toUpperCase() + team.slice(1)}`).value = '';
+        }
+
+        // --- 語音合成 (發音) ---
+        function refreshPreferredVoice() {
+            if (!('speechSynthesis' in window)) return;
+            const voices = window.speechSynthesis.getVoices();
+            const zhVoices = voices.filter(voice => /zh|Chinese|Taiwan|Mandarin|Han/i.test(`${voice.lang} ${voice.name}`));
+            preferredVoice =
+                zhVoices.find(voice => /zh-TW|Taiwan|Microsoft HsiaoChen|Microsoft HanHan|Google 國語|Google 普通話/i.test(`${voice.lang} ${voice.name}`)) ||
+                zhVoices.find(voice => /Microsoft|Google|Natural|Online/i.test(voice.name)) ||
+                zhVoices[0] ||
+                null;
+        }
+
+        refreshPreferredVoice();
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = refreshPreferredVoice;
+        }
+
+        function speakWord(team) {
+            if (!state.words[team]) return;
+            const text = state.words[team].char;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-TW';
+                refreshPreferredVoice();
+                if (preferredVoice) utterance.voice = preferredVoice;
+                utterance.rate = 0.78; 
+                utterance.pitch = 1.03; 
+                utterance.volume = 1;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("您的瀏覽器不支援語音發音功能");
+            }
+        }
+
+        // --- 電子合成音樂 (Web Audio API) ---
+        let audioCtx;
+        let bgmInterval;
+        let isPlayingBGM = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playBeep(freq, type = 'sine', duration = 0.05) {
+            if (!audioCtx || !document.getElementById('bgmToggle').checked) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function startBGM() {
+            if (!document.getElementById('bgmToggle').checked) return;
+            initAudio();
+            if (isPlayingBGM) return;
+            isPlayingBGM = true;
+
+            const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 392.00, 329.63, 293.66];
+            let step = 0;
+            let speed = 800; 
+
+            function playNextNote() {
+                if (!isPlayingBGM) return;
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                let currentSpeed = speed;
+                if (timeLeft < 30) currentSpeed = 500;
+
+                let freq = notes[step % notes.length];
+
+                osc.type = 'sine'; 
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                gain.gain.setValueAtTime(0.008, audioCtx.currentTime); 
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (currentSpeed / 1000));
+                osc.stop(audioCtx.currentTime + (currentSpeed / 1000));
+                
+                step++;
+                bgmInterval = setTimeout(playNextNote, currentSpeed);
+            }
+            playNextNote();
+        }
+
+        function stopBGM() {
+            isPlayingBGM = false;
+            clearTimeout(bgmInterval);
+        }
+
+        // --- 計時與流程 ---
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+            const arenaTimer = document.getElementById('arenaTimerDisplay');
+            if (arenaTimer) arenaTimer.textContent = `${m}:${s}`;
+            
+            const timerBox = document.getElementById('timerBox');
+            if (timeLeft <= 10 && timeLeft > 0) {
+                timerBox.classList.remove('bg-gray-800');
+                timerBox.classList.add('bg-red-600', 'animate-pulse');
+            } else {
+                timerBox.classList.add('bg-gray-800');
+                timerBox.classList.remove('bg-red-600', 'animate-pulse');
+            }
+        }
+
+        function startGameTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    
+                    let winner, reason;
+                    if (state.ropePos < 50) {
+                        winner = "🟥 紅隊";
+                        reason = "時間到！紅隊將繩索拉得比較近！";
+                    } else if (state.ropePos > 50) {
+                        winner = "🟦 藍隊";
+                        reason = "時間到！藍隊將繩索拉得比較近！";
+                    } else {
+                        winner = "⚖️ 平手";
+                        reason = "時間到！雙方勢均力敵！";
+                    }
+                    endGame(winner, reason);
+                }
+            }, 1000);
+        }
+
+        function endGame(winner, reason) {
+            clearInterval(timerInterval);
+            stopBGM();
+            
+            if (document.getElementById('bgmToggle').checked) {
+                playBeep(440, 'square', 0.2);
+                setTimeout(() => playBeep(554, 'square', 0.2), 200);
+                setTimeout(() => playBeep(659, 'square', 0.6), 400);
+            }
+
+            document.getElementById('winnerText').textContent = winner + " 獲勝！";
+            document.getElementById('winnerReason').textContent = reason;
+            document.getElementById('winnerModal').classList.remove('hidden');
+            document.getElementById('winnerModal').classList.add('flex');
+        }
+
+        function abortGame() {
+            clearInterval(timerInterval);
+            stopBGM();
+            document.getElementById('gameArea').classList.add('hidden');
+            document.getElementById('setupArea').style.display = 'block';
+        }
+
+        // --- 啟動遊戲 ---
+        document.getElementById('startBtn').onclick = () => {
+            if (!parseWordBank()) return;
+
+            const mins = parseInt(document.getElementById('timeLimit').value, 10);
+            if (isNaN(mins) || mins < 1) {
+                alert("請輸入有效的遊戲分鐘數！");
+                return;
+            }
+            timeLeft = mins * 60;
+
+            initAudio();
+
+            // 為雙方準備獨立的亂序題庫
+            teamQueues.red = shuffleArray([...zhuyinList]);
+            teamQueues.blue = shuffleArray([...zhuyinList]);
+            teamIndices.red = 0;
+            teamIndices.blue = 0;
+
+            state.ropePos = 50;
+            state.scores = { red: 0, blue: 0 };
+            document.getElementById('ropeMarker').style.left = '50%';
+            state.inputs = { red: '', blue: '' };
+            syncArenaUI();
+
+            document.getElementById('setupArea').style.display = 'none'; 
+            document.getElementById('gameArea').classList.remove('hidden');
+
+            createKeyboard('red');
+            createKeyboard('blue');
+            
+            // 各自抽出亂序後的第一題
+            nextWord('red'); 
+            nextWord('blue');
+            
+            startGameTimer();
+            startBGM();
+        };
+
+    </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0lSykngwrK5exy1rxD4TZ96RqeVD4x9U",
+            authDomain: "jsps-tools-sync.firebaseapp.com",
+            projectId: "jsps-tools-sync",
+            storageBucket: "jsps-tools-sync.firebasestorage.app",
+            messagingSenderId: "435781850232",
+            appId: "1:435781850232:web:bedbf1e1cd942e972b898d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const statusEl = document.getElementById('cloudBankStatus');
+
+        function setCloudStatus(message, tone = 'info') {
+            if (!statusEl) return;
+            statusEl.textContent = message;
+            statusEl.className = 'mt-2 text-sm ' + (
+                tone === 'error' ? 'text-red-700' :
+                tone === 'ok' ? 'text-emerald-700' :
+                'text-sky-800'
+            );
+        }
+
+        function cleanBankId(raw) {
+            return (raw || 'default').trim().replace(/[^\w-]/g, '-').slice(0, 48) || 'default';
+        }
+
+        const authReady = new Promise(resolve => {
+            onAuthStateChanged(auth, user => {
+                if (user) resolve(user);
+            });
+        });
+
+        signInAnonymously(auth).catch(error => {
+            console.error('匿名登入失敗', error);
+            setCloudStatus('雲端登入失敗，仍可使用本機 TXT 題庫。', 'error');
+        });
+
+        function bankRef(id) {
+            return doc(db, 'zhuyin-tug-banks', id);
+        }
+
+        async function loadCloudBank() {
+            await authReady;
+            const loadBtn = document.getElementById('loadCloudBankBtn');
+            const saveBtn = document.getElementById('saveCloudBankBtn');
+            const input = document.getElementById('cloudBankId');
+            const bankId = cleanBankId(input.value);
+            input.value = bankId;
+            setCloudStatus('正在載入雲端題庫...');
+            loadBtn.disabled = true;
+            saveBtn.disabled = true;
+
+            try {
+                const snap = await getDoc(bankRef(bankId));
+                if (!snap.exists()) {
+                    setCloudStatus(`找不到雲端題庫「${bankId}」，可以先按「儲存雲端」建立。`, 'error');
+                    return;
+                }
+
+                const data = snap.data();
+                document.getElementById('wordBank').value = data.text || '';
+                setCloudStatus(`已載入雲端題庫「${bankId}」。`, 'ok');
+            } finally {
+                loadBtn.disabled = false;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function saveCloudBank() {
+            await authReady;
+            const loadBtn = document.getElementById('loadCloudBankBtn');
+            const saveBtn = document.getElementById('saveCloudBankBtn');
+            const input = document.getElementById('cloudBankId');
+            const bankId = cleanBankId(input.value);
+            input.value = bankId;
+            const text = document.getElementById('wordBank').value || '';
+
+            if (!text.trim()) {
+                setCloudStatus('題庫是空白的，沒有儲存。', 'error');
+                return;
+            }
+
+            setCloudStatus('正在儲存雲端題庫...');
+            loadBtn.disabled = true;
+            saveBtn.disabled = true;
+            try {
+                await setDoc(bankRef(bankId), {
+                    title: bankId,
+                    text,
+                    ownerUid: auth.currentUser ? auth.currentUser.uid : null,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+                setCloudStatus(`已儲存雲端題庫「${bankId}」。`, 'ok');
+            } finally {
+                loadBtn.disabled = false;
+                saveBtn.disabled = false;
+            }
+        }
+
+        document.getElementById('loadCloudBankBtn').addEventListener('click', () => {
+            loadCloudBank().catch(error => {
+                console.error(error);
+                setCloudStatus('載入失敗：請確認網路、Firebase 規則或題庫代號。', 'error');
+            });
+        });
+
+        document.getElementById('saveCloudBankBtn').addEventListener('click', () => {
+            saveCloudBank().catch(error => {
+                console.error(error);
+                setCloudStatus('儲存失敗：請確認 Firebase 規則已部署。', 'error');
+            });
+        });
+
+        window.zhuyinTugCloudBank = { loadCloudBank, saveCloudBank };
+    </script>
+</body>
+</html>

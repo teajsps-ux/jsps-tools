@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>對戰遊戲入口 · jsps-tools</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1f2937;
+    --muted: #5b6575;
+    --paper: #fffaf0;
+    --panel: #ffffff;
+    --gold: #f4b942;
+    --blue: #2563eb;
+    --green: #16a34a;
+  }
+  html, body {
+    min-height: 100%;
+    font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  body {
+    min-height: 100vh;
+  }
+  .topbar {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 18px clamp(18px, 4vw, 32px) 0;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: #274060;
+    background: rgba(255,255,255,0.72);
+    text-decoration: none;
+    font-weight: 800;
+    box-shadow: 0 4px 16px rgba(39,64,96,0.08);
+  }
+  .hero {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(30px, 6vw, 70px) clamp(18px, 4vw, 32px) clamp(26px, 5vw, 46px);
+  }
+  .hero h1 {
+    font-size: clamp(32px, 7vw, 64px);
+    line-height: 1.08;
+    letter-spacing: 0;
+    margin-bottom: 14px;
+  }
+  .hero p {
+    max-width: 720px;
+    color: var(--muted);
+    font-size: clamp(16px, 2.4vw, 21px);
+    line-height: 1.75;
+    font-weight: 600;
+  }
+  .game-grid {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 clamp(18px, 4vw, 32px) clamp(42px, 7vw, 80px);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(18px, 3vw, 28px);
+  }
+  .game-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    overflow: hidden;
+    color: var(--ink);
+    background: var(--panel);
+    border: 1px solid rgba(31,41,55,0.08);
+    border-radius: 8px;
+    box-shadow: 0 16px 36px rgba(39,64,96,0.12);
+    text-decoration: none;
+    transition: transform .16s ease, box-shadow .16s ease;
+  }
+  .game-card:hover,
+  .game-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 48px rgba(39,64,96,0.18);
+    outline: 3px solid rgba(244,185,66,0.45);
+    outline-offset: 4px;
+  }
+  .art {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: #e5e7eb;
+  }
+  .art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .badge {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.88);
+    color: #1f2937;
+    font-size: 13px;
+    font-weight: 900;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: clamp(18px, 3vw, 26px);
+  }
+  .game-card h2 {
+    font-size: clamp(24px, 3.6vw, 34px);
+    line-height: 1.18;
+    letter-spacing: 0;
+    margin-bottom: 10px;
+  }
+  .game-card p {
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.7;
+    font-weight: 600;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #3730a3;
+    font-size: 13px;
+    font-weight: 900;
+  }
+  .pill.green {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .open-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 22px;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--blue);
+  }
+  .game-card.tug .open-row {
+    color: var(--green);
+  }
+  .arrow {
+    display: inline-grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    color: white;
+    background: var(--blue);
+    flex: 0 0 auto;
+  }
+  .game-card.tug .arrow {
+    background: var(--green);
+  }
+  @media (max-width: 760px) {
+    .game-grid {
+      grid-template-columns: 1fr;
+    }
+    .topbar {
+      padding-top: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+  <nav class="topbar">
+    <a class="back-link" href="../../">← 回工具箱</a>
+  </nav>
+
+  <header class="hero">
+    <h1>對戰遊戲入口</h1>
+    <p>這裡集中放「兩隊互相競賽」類型的遊戲。國語競賽可以用知識王，小一新生注音練習可以用拔河對戰。</p>
+  </header>
+
+  <main class="game-grid" aria-label="對戰遊戲清單">
+    <a class="game-card" href="../knowledge-king-pk/">
+      <div class="art">
+        <img src="images/knowledge-king-card.png" alt="兩隊學生在教室答題競賽的插畫">
+        <span class="badge">國語競賽</span>
+      </div>
+      <div class="card-body">
+        <h2>知識王 PK 賽</h2>
+        <p>適合國語競賽、閱讀理解、課文複習。雙隊答題、題目朗讀、CSV 題庫與本機 AI 出題小幫手都保留在原本工具裡。</p>
+        <div class="meta">
+          <span class="pill">雙隊 PK</span>
+          <span class="pill">CSV 題庫</span>
+          <span class="pill">AI 出題</span>
+        </div>
+        <div class="open-row">
+          <span>進入知識王</span>
+          <span class="arrow">→</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="game-card tug" href="../zhuyin-tug-of-war/">
+      <div class="art">
+        <img src="images/zhuyin-tug-card.png" alt="小一學生進行安全拔河注音對戰的插畫">
+        <span class="badge">小一新生</span>
+      </div>
+      <div class="card-body">
+        <h2>拔河注音對戰</h2>
+        <p>適合小一新生練習注音認讀。用拔河情境降低緊張感，讓孩子在分隊合作裡反覆聽、看、念注音。</p>
+        <div class="meta">
+          <span class="pill green">注音認讀</span>
+          <span class="pill green">小一友善</span>
+          <span class="pill green">分隊合作</span>
+        </div>
+        <div class="open-row">
+          <span>進入拔河對戰</span>
+          <span class="arrow">→</span>
+        </div>
+      </div>
+    </a>
+  </main>
+</body>
+</html>
