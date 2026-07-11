@@ -713,6 +713,7 @@
         // --- 電子合成音樂 (Web Audio API) ---
         let audioCtx;
         let bgmInterval;
+        let bgmTimers = [];
         let isPlayingBGM = false;
 
         function initAudio() {
@@ -740,47 +741,78 @@
             } catch (e) {}
         }
 
+        function playTone(freq, startOffset, duration, type = 'square', volume = 0.04) {
+            if (!audioCtx || !isPlayingBGM) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const startAt = audioCtx.currentTime + startOffset;
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, startAt);
+            gain.gain.setValueAtTime(0.0001, startAt);
+            gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.012);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(startAt);
+            osc.stop(startAt + duration + 0.02);
+        }
+
+        function playKick(startOffset, volume = 0.12) {
+            if (!audioCtx || !isPlayingBGM) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const startAt = audioCtx.currentTime + startOffset;
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(120, startAt);
+            osc.frequency.exponentialRampToValueAtTime(45, startAt + 0.16);
+            gain.gain.setValueAtTime(volume, startAt);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.18);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(startAt);
+            osc.stop(startAt + 0.2);
+        }
+
+        function scheduleBgmTimer(callback, delay) {
+            const timer = setTimeout(callback, delay);
+            bgmTimers.push(timer);
+            return timer;
+        }
+
         function startBGM() {
             if (!document.getElementById('bgmToggle').checked) return;
             initAudio();
             if (isPlayingBGM) return;
             isPlayingBGM = true;
 
-            const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 392.00, 329.63, 293.66];
+            const notes = [392, 440, 493.88, 440, 392, 329.63, 349.23, 392];
             let step = 0;
-            let speed = 800; 
+            playTone(392, 0, 0.09, 'triangle', 0.035);
+            playTone(523.25, 0.14, 0.12, 'triangle', 0.035);
 
-            function playNextNote() {
+            function playGroove() {
                 if (!isPlayingBGM) return;
-                
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                let currentSpeed = speed;
-                if (timeLeft < 30) currentSpeed = 500;
 
-                let freq = notes[step % notes.length];
+                const urgent = timeLeft > 0 && timeLeft <= 30;
+                const beatMs = urgent ? 360 : 460;
+                const beat = beatMs / 1000;
+                const melodyVolume = urgent ? 0.035 : 0.026;
 
-                osc.type = 'sine'; 
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start();
-                gain.gain.setValueAtTime(0.008, audioCtx.currentTime); 
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (currentSpeed / 1000));
-                osc.stop(audioCtx.currentTime + (currentSpeed / 1000));
-                
+                playKick(0, urgent ? 0.07 : 0.052);
+                playTone(notes[step % notes.length], beat * 0.12, beat * 0.42, 'triangle', melodyVolume);
+                if (step % 4 === 3) playTone(notes[(step + 1) % notes.length] * 1.25, beat * 0.55, beat * 0.2, 'sine', urgent ? 0.026 : 0.018);
+
                 step++;
-                bgmInterval = setTimeout(playNextNote, currentSpeed);
+                bgmInterval = scheduleBgmTimer(playGroove, beatMs);
             }
-            playNextNote();
+            scheduleBgmTimer(playGroove, 420);
         }
 
         function stopBGM() {
             isPlayingBGM = false;
             clearTimeout(bgmInterval);
+            bgmTimers.forEach(timer => clearTimeout(timer));
+            bgmTimers = [];
         }
 
         // --- 計時與流程 ---
