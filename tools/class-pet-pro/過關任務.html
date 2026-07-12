@@ -61,7 +61,25 @@
             align-content: start !important;
         }
         .column {
+            min-width: 280px;
+            max-width: 320px;
+            flex: 0 0 auto;
             min-height: 500px;
+        }
+        /* 自訂滾動條 */
+        #columns-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        #columns-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        #columns-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        #columns-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
         .task-input {
             border-bottom: 2px solid #4a5568;
@@ -101,40 +119,15 @@
             </div>
         </div>
         
-        <div class="flex flex-col md:flex-row gap-4">
-            <!-- 四個欄位，由右至左排列 -->
-            <div id="column4" class="column bg-white rounded-lg shadow-md p-4 flex-1 border-t-4 border-green-500">
-                <div class="flex items-center justify-between mb-4">
-                    <input type="text" class="task-input flex-1 p-2 text-lg font-semibold bg-transparent" placeholder="輸入任務名稱...">
-                    <button onclick="moveAllSeats(4, 3)" class="ml-2 bg-green-50 hover:bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded border border-green-200 transition-colors whitespace-nowrap" title="將此區所有學生移至下一關">➡️ 全移</button>
-                </div>
-                <div id="drop-area4" class="min-h-[400px] drop-zone">
-                    <!-- 座號圖將在這裡 -->
-                </div>
-            </div>
-            
-            <div id="column3" class="column bg-white rounded-lg shadow-md p-4 flex-1 border-t-4 border-blue-500">
-                <div class="flex items-center justify-between mb-4">
-                    <input type="text" class="task-input flex-1 p-2 text-lg font-semibold bg-transparent" placeholder="輸入任務名稱...">
-                    <button onclick="moveAllSeats(3, 2)" class="ml-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded border border-blue-200 transition-colors whitespace-nowrap" title="將此區所有學生移至下一關">➡️ 全移</button>
-                </div>
-                <div id="drop-area3" class="min-h-[400px] drop-zone"></div>
-            </div>
-            
-            <div id="column2" class="column bg-white rounded-lg shadow-md p-4 flex-1 border-t-4 border-yellow-500">
-                <div class="flex items-center justify-between mb-4">
-                    <input type="text" class="task-input flex-1 p-2 text-lg font-semibold bg-transparent" placeholder="輸入任務名稱...">
-                    <button onclick="moveAllSeats(2, 1)" class="ml-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded border border-yellow-200 transition-colors whitespace-nowrap" title="將此區所有學生移至下一關">➡️ 全移</button>
-                </div>
-                <div id="drop-area2" class="min-h-[400px] drop-zone"></div>
-            </div>
-            
-            <div id="column1" class="column bg-white rounded-lg shadow-md p-4 flex-1 border-t-4 border-red-500">
-                <div class="flex items-center justify-between mb-4">
-                    <input type="text" class="task-input flex-1 p-2 text-lg font-semibold bg-transparent" placeholder="輸入任務名稱...">
-                    <div class="w-12 h-6 ml-2"></div>
-                </div>
-                <div id="drop-area1" class="min-h-[400px] drop-zone"></div>
+        <!-- Horizontal Scroll Controls & Columns Container Wrapper -->
+        <div class="relative w-full mb-6">
+            <!-- Left/Right Scroll Buttons for Desktop/Big Screen -->
+            <button id="scroll-left-btn" class="absolute -left-6 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-slate-100 text-indigo-700 w-10 h-10 rounded-full shadow-md flex items-center justify-center border border-indigo-200 transition-all font-black text-lg select-none hover:scale-105 active:scale-95" onclick="scrollColumns(-1)">◀</button>
+            <button id="scroll-right-btn" class="absolute -right-6 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-slate-100 text-indigo-700 w-10 h-10 rounded-full shadow-md flex items-center justify-center border border-indigo-200 transition-all font-black text-lg select-none hover:scale-105 active:scale-95" onclick="scrollColumns(1)">▶</button>
+
+            <!-- Columns Container -->
+            <div id="columns-container" class="flex flex-row overflow-x-auto gap-4 pb-4 scroll-smooth min-h-[480px] px-1">
+                <!-- Columns will be rendered dynamically here -->
             </div>
         </div>
         
@@ -142,8 +135,9 @@
             <p class="text-gray-600 mb-4">完成任務後，將座號拖曳至對應欄位</p>
             <div class="flex flex-wrap justify-center gap-4">
                 <button id="zhuyin-btn" onclick="toggleZhuyinMode()" class="bg-teal-600 text-white px-6 py-2 rounded-md hover:bg-teal-700 transition-colors font-semibold">🍬 注音模式 (關)</button>
-                <button id="att-btn" onclick="toggleSettingsPanel()" class="bg-slate-600 text-white px-6 py-2 rounded-md hover:bg-slate-700 transition-colors font-semibold">⚙️ 設定學生名單/請假</button>
+                <button id="att-btn" onclick="toggleSettingsPanel()" class="bg-slate-600 text-white px-6 py-2 rounded-md hover:bg-slate-700 transition-colors font-semibold">⚙️ 設定與範本管理</button>
                 <button id="reset-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors font-semibold">重置座號位置</button>
+                <button id="fullscreen-btn" onclick="toggleFullscreen()" class="bg-violet-600 text-white px-6 py-2 rounded-md hover:bg-violet-700 transition-colors font-semibold">🖥️ 全螢幕</button>
             </div>
         </div>
         
@@ -157,7 +151,22 @@
             <div class="mt-4 flex justify-end gap-2">
                 <button id="select-all-btn" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded transition-colors">全選</button>
                 <button id="clear-all-btn" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded transition-colors">全不選</button>
-                <button id="close-att-btn" onclick="toggleSettingsPanel()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1 rounded transition-colors">關閉設定</button>
+            </div>
+
+            <hr class="my-6 border-gray-200">
+            
+            <h3 class="text-lg font-bold text-gray-800 mb-2">任務流程範本管理</h3>
+            <p class="text-sm text-gray-500 mb-4">您可以將當前的任務名稱清單儲存為範本，方便日後一鍵載入微調。</p>
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <input type="text" id="template-name-input" class="border border-gray-300 rounded px-3 py-1.5 text-sm flex-1 max-w-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="輸入新範本名稱 (例如：週一流程)">
+                <button onclick="saveCurrentAsTemplate()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-1.5 rounded text-sm transition-colors shadow-sm">💾 儲存目前為新範本</button>
+            </div>
+            <div id="templates-list-container" class="flex flex-wrap gap-2">
+                <!-- 範本按鈕將在這裡動態生成 -->
+            </div>
+            
+            <div class="mt-6 flex justify-end">
+                <button id="close-att-btn" onclick="toggleSettingsPanel()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded font-semibold transition-colors">關閉設定</button>
             </div>
         </div>
     </div>
@@ -222,31 +231,47 @@
         let firestoreUnsubscribe = null;
         let cloudWriteTimer = null;
 
+        let columnsData = ["聯絡簿", "第一本訂正", "背書", "打掃"]; // 預設任務
+        let seatPositions = {}; // 鍵：座號，值：關卡索引
+
         function serializeBoardState() {
-            const seatPositions = {};
+            // 從 DOM 讀取最新的座號位置
             for (let i = 1; i <= 28; i++) {
                 const el = seatElements[i];
                 if (el && el.parentElement) {
                     const areaId = el.parentElement.id;
-                    if (areaId && areaId.startsWith('drop-area')) {
-                        seatPositions[i] = parseInt(areaId.replace('drop-area', ''));
+                    if (areaId && areaId.startsWith('drop-area-')) {
+                        seatPositions[i] = parseInt(areaId.replace('drop-area-', ''));
+                    } else {
+                        seatPositions[i] = 0; // 預設在起點
                     }
                 }
             }
 
-            const taskNames = [];
-            for (let colNum = 4; colNum >= 1; colNum--) {
-                const input = document.querySelector(`#column${colNum} .task-input`);
-                taskNames.push(input ? input.value : '');
-            }
+            // 從 DOM 讀取最新的任務名稱
+            columnsData = [];
+            const inputs = document.querySelectorAll('.task-input');
+            inputs.forEach((input, idx) => {
+                columnsData.push(input.value.trim() || `任務 ${idx + 1}`);
+            });
 
             const zhuyinMode = document.body.classList.contains('zhuyin-mode');
 
+            // 讀取範本以供雲端同步
+            let templates = {};
+            try {
+                const stored = safeStorage.getItem('breakthrough_templates');
+                if (stored) templates = JSON.parse(stored);
+            } catch (e) {
+                console.error(e);
+            }
+
             return {
                 seatPositions,
-                taskNames,
+                taskNames: columnsData,
                 activeSeats,
-                zhuyinMode
+                zhuyinMode,
+                templates
             };
         }
 
@@ -255,7 +280,7 @@
             isIncomingCloudUpdate = true;
             console.log('Applying cloud state to UI:', state);
             try {
-                // 1. Apply zhuyin mode
+                // 1. 套用注音模式
                 const body = document.body;
                 const btn = document.getElementById('zhuyin-btn');
                 if (state.zhuyinMode !== body.classList.contains('zhuyin-mode')) {
@@ -268,18 +293,18 @@
                     }
                 }
 
-                // 2. Apply task names
-                if (state.taskNames && Array.isArray(state.taskNames)) {
-                    state.taskNames.forEach((name, idx) => {
-                        const colNum = 4 - idx;
-                        const input = document.querySelector(`#column${colNum} .task-input`);
-                        if (input && input.value !== name) {
-                            input.value = name;
-                        }
-                    });
+                // 2. 套用範本資料
+                if (state.templates) {
+                    safeStorage.setItem('breakthrough_templates', JSON.stringify(state.templates));
+                    renderTemplatesList();
                 }
 
-                // 3. Apply attendance (activeSeats)
+                // 3. 套用任務名稱 (columnsData)
+                if (state.taskNames && Array.isArray(state.taskNames)) {
+                    columnsData = [...state.taskNames];
+                }
+
+                // 4. 套用學生出缺席 (activeSeats)
                 if (state.activeSeats && Array.isArray(state.activeSeats)) {
                     state.activeSeats.forEach((checked, idx) => {
                         activeSeats[idx] = checked;
@@ -293,23 +318,36 @@
                     });
                 }
 
-                // 4. Apply seat positions
+                // 5. 套用座號位置
                 if (state.seatPositions) {
+                    // 相容舊版以 1-4 表示位置的資料 (自動轉為 0-3)
+                    let isOldFormat = false;
+                    for (let seatNum in state.seatPositions) {
+                        if (state.seatPositions[seatNum] === 4) {
+                            isOldFormat = true;
+                            break;
+                        }
+                    }
+
                     for (let seatNum = 1; seatNum <= 28; seatNum++) {
-                        const targetCol = state.seatPositions[seatNum];
-                        const seatEl = seatElements[seatNum];
-                        if (targetCol && seatEl) {
-                            const targetArea = document.getElementById('drop-area' + targetCol);
-                            if (targetArea && seatEl.parentElement !== targetArea) {
-                                targetArea.appendChild(seatEl);
-                                seatEl.classList.add('scale-110');
-                                setTimeout(() => {
-                                    seatEl.classList.remove('scale-110');
-                                }, 300);
+                        let targetCol = state.seatPositions[seatNum];
+                        if (targetCol !== undefined) {
+                            if (isOldFormat) {
+                                targetCol = 4 - targetCol; // 4->0, 3->1, 2->2, 1->3
                             }
+                            // 限制在有效欄位範圍內
+                            if (targetCol < 0) targetCol = 0;
+                            if (targetCol >= columnsData.length) targetCol = columnsData.length - 1;
+                            
+                            seatPositions[seatNum] = targetCol;
+                        } else {
+                            seatPositions[seatNum] = 0;
                         }
                     }
                 }
+
+                // 重新動態生成關卡與擺放卡牌
+                renderColumns();
             } catch (e) {
                 console.error('Error applying cloud state:', e);
             } finally {
@@ -474,13 +512,14 @@
         }
 
         function moveAllSeats(fromCol, toCol) {
-            const fromArea = document.getElementById('drop-area' + fromCol);
-            const toArea = document.getElementById('drop-area' + toCol);
+            const fromArea = document.getElementById('drop-area-' + fromCol);
+            const toArea = document.getElementById('drop-area-' + toCol);
             if (fromArea && toArea) {
                 const seats = fromArea.querySelectorAll('.seat-number');
                 seats.forEach(seat => {
                     toArea.appendChild(seat);
-                    // 加上微動畫效果
+                    const seatNum = parseInt(seat.dataset.seatNumber);
+                    seatPositions[seatNum] = toCol;
                     seat.classList.add('scale-110');
                     setTimeout(() => {
                         seat.classList.remove('scale-110');
@@ -490,9 +529,345 @@
             }
         }
 
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const btn = document.getElementById('fullscreen-btn');
+            if (btn) {
+                if (document.fullscreenElement) {
+                    btn.textContent = '🚪 退出全螢幕';
+                } else {
+                    btn.textContent = '🖥️ 全螢幕';
+                }
+            }
+        });
+
+        function scrollColumns(direction) {
+            const container = document.getElementById('columns-container');
+            if (container) {
+                const colWidth = 320; // column width + gap
+                container.scrollBy({ left: direction * colWidth, behavior: 'smooth' });
+            }
+        }
+
+        // --- 任務關卡增刪與渲染邏輯 ---
+        function addColumn() {
+            if (columnsData.length >= 10) {
+                alert('任務關卡最多支援 10 個！');
+                return;
+            }
+            const newName = `任務 ${columnsData.length + 1}`;
+            columnsData.push(newName);
+            renderColumns();
+            triggerCloudSave();
+            
+            // 捲動至最右端顯示新關卡
+            setTimeout(() => {
+                const container = document.getElementById('columns-container');
+                if (container) {
+                    container.scrollLeft = container.scrollWidth;
+                }
+            }, 100);
+        }
+
+        function deleteColumn(idx) {
+            if (columnsData.length <= 2) {
+                alert('最少必須保留 2 個關卡！');
+                return;
+            }
+            
+            const seatsInCol = [];
+            for (let seatNum = 1; seatNum <= 28; seatNum++) {
+                if (seatPositions[seatNum] === idx) {
+                    seatsInCol.push(seatNum);
+                }
+            }
+            
+            const name = columnsData[idx];
+            if (seatsInCol.length > 0) {
+                if (!confirm(`關卡「${name}」中還有學生座號（${seatsInCol.join(', ')} 號）。\n刪除後，這些學生會自動退回第一關起點。\n\n確定要刪除嗎？`)) {
+                    return;
+                }
+            }
+            
+            // 自 columnsData 刪除
+            columnsData.splice(idx, 1);
+            
+            // 調整 seatPositions
+            for (let seatNum = 1; seatNum <= 28; seatNum++) {
+                const col = seatPositions[seatNum];
+                if (col === idx) {
+                    seatPositions[seatNum] = 0;
+                } else if (col > idx) {
+                    seatPositions[seatNum] = col - 1;
+                }
+            }
+            
+            renderColumns();
+            triggerCloudSave();
+        }
+
+        function renderColumns() {
+            const container = document.getElementById('columns-container');
+            if (!container) return;
+
+            const existingCols = container.querySelectorAll('.column-wrapper');
+            const needsRebuild = existingCols.length !== columnsData.length;
+
+            const activeElementId = document.activeElement ? document.activeElement.id : null;
+            const activeSelectionStart = document.activeElement ? document.activeElement.selectionStart : null;
+            const activeSelectionEnd = document.activeElement ? document.activeElement.selectionEnd : null;
+
+            if (needsRebuild) {
+                container.innerHTML = '';
+                const colors = ['border-green-500', 'border-blue-500', 'border-yellow-500', 'border-red-500', 'border-purple-500', 'border-pink-500', 'border-teal-500'];
+                
+                columnsData.forEach((name, i) => {
+                    const borderClass = colors[i % colors.length];
+                    const colWrapper = document.createElement('div');
+                    colWrapper.className = 'column-wrapper column bg-white rounded-lg shadow-md p-4 flex-1 border-t-4 ' + borderClass;
+                    colWrapper.id = 'column-wrapper-' + i;
+                    
+                    const header = document.createElement('div');
+                    header.className = 'flex items-center justify-between mb-4 gap-2';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = 'task-input-' + i;
+                    input.dataset.colIndex = i;
+                    input.className = 'task-input flex-1 p-2 text-lg font-semibold bg-transparent';
+                    input.value = name;
+                    input.placeholder = `輸入第 ${i + 1} 關任務名稱...`;
+                    
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') input.blur();
+                    });
+                    input.addEventListener('blur', function() {
+                        columnsData[i] = input.value.trim() || `任務 ${i + 1}`;
+                        triggerCloudSave();
+                    });
+                    header.appendChild(input);
+                    
+                    if (i < columnsData.length - 1) {
+                        const moveBtn = document.createElement('button');
+                        moveBtn.className = 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded border border-indigo-200 transition-colors whitespace-nowrap';
+                        moveBtn.textContent = '➡️ 全移';
+                        moveBtn.title = '將此區所有學生移至下一關';
+                        moveBtn.onclick = () => moveAllSeats(i, i + 1);
+                        header.appendChild(moveBtn);
+                    } else {
+                        const spacer = document.createElement('div');
+                        spacer.className = 'w-12 h-6';
+                        header.appendChild(spacer);
+                    }
+                    
+                    if (columnsData.length > 2) {
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'text-gray-400 hover:text-red-600 font-bold px-1 text-sm transition-colors';
+                        delBtn.innerHTML = '&#x2715;';
+                        delBtn.title = '刪除此任務';
+                        delBtn.onclick = () => deleteColumn(i);
+                        header.appendChild(delBtn);
+                    }
+                    
+                    colWrapper.appendChild(header);
+                    
+                    const dropZone = document.createElement('div');
+                    dropZone.id = 'drop-area-' + i;
+                    dropZone.className = 'min-h-[400px] drop-zone';
+                    
+                    dropZone.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        dropZone.classList.add('bg-gray-100');
+                    });
+                    dropZone.addEventListener('dragleave', () => {
+                        dropZone.classList.remove('bg-gray-100');
+                    });
+                    dropZone.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        dropZone.classList.remove('bg-gray-100');
+                        if (draggedItem) {
+                            dropZone.appendChild(draggedItem);
+                            const seatNum = parseInt(draggedItem.dataset.seatNumber);
+                            seatPositions[seatNum] = i;
+                            draggedItem.classList.add('scale-110');
+                            setTimeout(() => { draggedItem.classList.remove('scale-110'); }, 300);
+                            triggerCloudSave();
+                        }
+                    });
+                    
+                    colWrapper.appendChild(dropZone);
+                    container.appendChild(colWrapper);
+                });
+                
+                // ➕ 新增關卡虛線按鈕
+                const addWrapper = document.createElement('div');
+                addWrapper.className = 'column bg-slate-50 rounded-lg border-2 border-dashed border-slate-300 p-4 flex flex-col items-center justify-center min-h-[500px] cursor-pointer hover:bg-slate-100 hover:border-indigo-400 transition-all group';
+                addWrapper.onclick = addColumn;
+                
+                const addIcon = document.createElement('div');
+                addIcon.className = 'text-4xl text-slate-400 group-hover:text-indigo-600 transition-colors font-bold mb-2';
+                addIcon.innerHTML = '&#x2b;';
+                
+                const addText = document.createElement('div');
+                addText.className = 'text-sm font-semibold text-slate-500 group-hover:text-indigo-700 transition-colors';
+                addText.textContent = '新增任務關卡';
+                
+                addWrapper.appendChild(addIcon);
+                addWrapper.appendChild(addText);
+                container.appendChild(addWrapper);
+            } else {
+                columnsData.forEach((name, i) => {
+                    const input = document.getElementById('task-input-' + i);
+                    if (input && input.value !== name) {
+                        input.value = name;
+                    }
+                });
+            }
+
+            // 重新放置卡牌
+            for (let seatNum = 1; seatNum <= 28; seatNum++) {
+                const seatEl = seatElements[seatNum];
+                if (seatEl) {
+                    const targetCol = seatPositions[seatNum] !== undefined ? seatPositions[seatNum] : 0;
+                    const zone = document.getElementById('drop-area-' + targetCol);
+                    if (zone && seatEl.parentElement !== zone) {
+                        zone.appendChild(seatEl);
+                    }
+                }
+            }
+
+            if (activeElementId) {
+                const el = document.getElementById(activeElementId);
+                if (el) {
+                    el.focus();
+                    if (activeSelectionStart !== null) {
+                        try {
+                            el.setSelectionRange(activeSelectionStart, activeSelectionEnd);
+                        } catch(e) {}
+                    }
+                }
+            }
+        }
+
+        // --- 任務範本管理邏輯 ---
+        function saveCurrentAsTemplate() {
+            const nameInput = document.getElementById('template-name-input');
+            const name = nameInput ? nameInput.value.trim() : '';
+            if (!name) {
+                alert('請輸入範本名稱！');
+                return;
+            }
+            
+            let templates = {};
+            try {
+                const stored = safeStorage.getItem('breakthrough_templates');
+                if (stored) templates = JSON.parse(stored);
+            } catch (e) {
+                console.error(e);
+            }
+            
+            templates[name] = [...columnsData];
+            safeStorage.setItem('breakthrough_templates', JSON.stringify(templates));
+            if (nameInput) nameInput.value = '';
+            
+            renderTemplatesList();
+            alert(`已成功儲存範本：「${name}」！`);
+            triggerCloudSave();
+        }
+
+        function loadTemplate(name) {
+            let templates = {};
+            try {
+                const stored = safeStorage.getItem('breakthrough_templates');
+                if (stored) templates = JSON.parse(stored);
+            } catch (e) {
+                console.error(e);
+            }
+            
+            const taskNames = templates[name];
+            if (taskNames && Array.isArray(taskNames)) {
+                if (confirm(`是否載入範本「${name}」？這將會覆蓋當前任務名稱。`)) {
+                    columnsData = [...taskNames];
+                    
+                    const maxColIdx = columnsData.length - 1;
+                    for (let seatNum = 1; seatNum <= 28; seatNum++) {
+                        if (seatPositions[seatNum] > maxColIdx) {
+                            seatPositions[seatNum] = 0; // 超出範圍則退回起點
+                        }
+                    }
+                    
+                    renderColumns();
+                    triggerCloudSave();
+                }
+            }
+        }
+
+        function deleteTemplate(name, event) {
+            event.stopPropagation();
+            if (confirm(`確定要刪除範本「${name}」嗎？`)) {
+                let templates = {};
+                try {
+                    const stored = safeStorage.getItem('breakthrough_templates');
+                    if (stored) templates = JSON.parse(stored);
+                } catch (e) {
+                    console.error(e);
+                }
+                
+                delete templates[name];
+                safeStorage.setItem('breakthrough_templates', JSON.stringify(templates));
+                renderTemplatesList();
+                triggerCloudSave();
+            }
+        }
+
+        function renderTemplatesList() {
+            const container = document.getElementById('templates-list-container');
+            if (!container) return;
+            
+            let templates = {};
+            try {
+                const stored = safeStorage.getItem('breakthrough_templates');
+                if (stored) templates = JSON.parse(stored);
+            } catch (e) {
+                console.error(e);
+            }
+            
+            if (Object.keys(templates).length === 0) {
+                templates["預設四關卡流程"] = ["聯絡簿", "第一本訂正", "背書", "打掃"];
+            }
+            
+            container.innerHTML = '';
+            for (let name in templates) {
+                const btnGroup = document.createElement('div');
+                btnGroup.className = 'inline-flex items-center rounded border border-gray-300 shadow-sm overflow-hidden bg-gray-50 hover:bg-gray-100 transition-colors mr-2 mb-2 text-sm';
+                
+                const loadBtn = document.createElement('button');
+                loadBtn.className = 'px-3 py-1.5 font-semibold text-gray-700';
+                loadBtn.textContent = `📋 ${name}`;
+                loadBtn.onclick = () => loadTemplate(name);
+                
+                const delBtn = document.createElement('button');
+                delBtn.className = 'px-2 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border-l border-gray-300 font-bold';
+                delBtn.textContent = '✕';
+                delBtn.title = '刪除此範本';
+                delBtn.onclick = (e) => deleteTemplate(name, e);
+                
+                btnGroup.appendChild(loadBtn);
+                btnGroup.appendChild(delBtn);
+                container.appendChild(btnGroup);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', runInit);
-        
-        // 如果 DOMContentLoaded 已經觸發過，立刻執行
         if (document.readyState !== 'loading') {
             runInit();
         }
@@ -501,7 +876,6 @@
         function runInit() {
             if (hasInitRun) return;
             hasInitRun = true;
-
             try {
                 initApp();
             } catch (error) {
@@ -524,293 +898,12 @@
             errorDiv.style.color = '#991b1b';
             errorDiv.style.fontFamily = 'sans-serif';
             errorDiv.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)';
-            
             errorDiv.innerHTML = `
-                <h4 style="margin: 0 0 8px 0; font-weight: bold; font-size: 16px;">⚠️ 網頁初始化錯誤 (請截圖提供給開發人員)</h4>
+                <h4 style="margin: 0 0 8px 0; font-weight: bold; font-size: 16px;">⚠️ 網頁初始化錯誤</h4>
                 <pre style="margin: 0; white-space: pre-wrap; font-size: 12px; font-family: monospace;">${error.stack || error.message}</pre>
                 <button onclick="this.parentElement.remove()" style="margin-top: 12px; background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">關閉提示</button>
             `;
             document.body.appendChild(errorDiv);
-        }
-
-        function initApp() {
-            const dropArea4 = document.getElementById('drop-area4');
-            const dropArea3 = document.getElementById('drop-area3');
-            const dropArea2 = document.getElementById('drop-area2');
-            const dropArea1 = document.getElementById('drop-area1');
-            const resetBtn = document.getElementById('reset-btn');
-            const dropZones = document.querySelectorAll('.drop-zone');
-            
-            // 新增功能按鈕與面板 DOM 參照
-            const zhuyinBtn = document.getElementById('zhuyin-btn');
-            const selectAllBtn = document.getElementById('select-all-btn');
-            const clearAllBtn = document.getElementById('clear-all-btn');
-            const checkboxContainer = document.getElementById('checkbox-container');
-            
-            let draggedItem = null;
-            let touchItem = null;
-            
-            // --- 一鍵切換注音初始化 ---
-            if (zhuyinBtn) {
-                let isZhuyinMode = safeStorage.getItem('zhuyin_mode') === 'true';
-                if (isZhuyinMode) {
-                    document.body.classList.add('zhuyin-mode');
-                    zhuyinBtn.textContent = '🍬 注音模式 (開)';
-                } else {
-                    document.body.classList.remove('zhuyin-mode');
-                    zhuyinBtn.textContent = '🍬 注音模式 (關)';
-                }
-            }
-
-            // --- 還原任務名稱 ---
-            try {
-                const storedTasks = safeStorage.getItem('breakthrough_tasks');
-                if (storedTasks) {
-                    const taskNames = JSON.parse(storedTasks);
-                    taskNames.forEach((name, idx) => {
-                        const colNum = 4 - idx;
-                        const input = document.querySelector(`#column${colNum} .task-input`);
-                        if (input) input.value = name;
-                    });
-                }
-            } catch (e) {
-                console.error("Failed to restore task names:", e);
-            }
-
-            // 創建28個座號
-            if (dropArea4) {
-                // 讀取本地儲存的座號位置
-                let storedSeats = null;
-                try {
-                    const raw = safeStorage.getItem('breakthrough_seats');
-                    if (raw) storedSeats = JSON.parse(raw);
-                } catch (e) {
-                    console.error("Failed to parse breakthrough_seats:", e);
-                }
-
-                for (let i = 1; i <= 28; i++) {
-                    const seatNumber = document.createElement('div');
-                    seatNumber.className = 'seat-number w-full aspect-square bg-indigo-100 rounded-lg flex items-center justify-center font-black text-indigo-800 shadow-md';
-                    seatNumber.textContent = i;
-                    seatNumber.draggable = true;
-                    seatNumber.dataset.seatNumber = i;
-                    
-                    seatElements[i] = seatNumber;
-                    
-                    // 根據出席狀態決定初始顯示
-                    if (!activeSeats[i - 1]) {
-                        seatNumber.style.display = 'none';
-                    }
-                    
-                    // 滑鼠拖曳事件
-                    seatNumber.addEventListener('dragstart', function(e) {
-                        draggedItem = seatNumber;
-                        setTimeout(() => {
-                            seatNumber.classList.add('opacity-50');
-                        }, 0);
-                    });
-                    
-                    seatNumber.addEventListener('dragend', function() {
-                        seatNumber.classList.remove('opacity-50');
-                        draggedItem = null;
-                    });
-                    
-                    // 觸控事件處理
-                    seatNumber.addEventListener('touchstart', handleTouchStart, { passive: false });
-                    seatNumber.addEventListener('touchmove', handleTouchMove, { passive: false });
-                    seatNumber.addEventListener('touchend', handleTouchEnd, { passive: false });
-                    
-                    // 決定放置的欄位
-                    let targetArea = dropArea4;
-                    if (storedSeats && storedSeats[i]) {
-                        const storedCol = storedSeats[i];
-                        const area = document.getElementById('drop-area' + storedCol);
-                        if (area) targetArea = area;
-                    }
-                    targetArea.appendChild(seatNumber);
-                }
-            }
-
-            // 觸控事件函數 (使用 function 聲明確保正確 hoisted)
-            function handleTouchStart(e) {
-                e.preventDefault();
-                touchItem = this;
-                this.classList.add('dragging');
-                
-                const touch = e.touches[0];
-                this.initialX = touch.clientX;
-                this.initialY = touch.clientY;
-                
-                const rect = this.getBoundingClientRect();
-                this.offsetX = this.initialX - rect.left;
-                this.offsetY = this.initialY - rect.top;
-                
-                this.style.position = 'fixed';
-                this.style.zIndex = 1000;
-                this.style.top = `${rect.top}px`;
-                this.style.left = `${rect.left}px`;
-            }
-            
-            function handleTouchMove(e) {
-                e.preventDefault();
-                if (!touchItem) return;
-                
-                const touch = e.touches[0];
-                const x = touch.clientX - this.offsetX;
-                const y = touch.clientY - this.offsetY;
-                
-                touchItem.style.left = `${x}px`;
-                touchItem.style.top = `${y}px`;
-            }
-            
-            function handleTouchEnd(e) {
-                e.preventDefault();
-                if (!touchItem) return;
-                
-                const touch = e.changedTouches[0];
-                const x = touch.clientX;
-                const y = touch.clientY;
-                let targetZone = null;
-                
-                dropZones.forEach(zone => {
-                    const rect = zone.getBoundingClientRect();
-                    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-                        targetZone = zone;
-                    }
-                });
-                
-                touchItem.style.position = '';
-                touchItem.style.zIndex = '';
-                touchItem.style.top = '';
-                touchItem.style.left = '';
-                touchItem.classList.remove('dragging');
-                
-                if (targetZone) {
-                    targetZone.appendChild(touchItem);
-                    touchItem.classList.add('scale-110');
-                    setTimeout(() => {
-                        touchItem.classList.remove('scale-110');
-                    }, 300);
-                    triggerCloudSave();
-                }
-                
-                touchItem = null;
-            }
-
-            // 動態生成出缺席核取方塊
-            if (checkboxContainer) {
-                for (let i = 1; i <= 28; i++) {
-                    const label = document.createElement('label');
-                    label.className = 'flex items-center gap-1 p-1 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer text-sm font-semibold select-none';
-                    
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.className = 'w-4 h-4 text-indigo-600 rounded';
-                    checkbox.checked = activeSeats[i - 1];
-                    checkbox.dataset.seatIndex = i - 1;
-                    
-                    const text = document.createTextNode(i + '號');
-                    
-                    label.appendChild(checkbox);
-                    label.appendChild(text);
-                    checkboxContainer.appendChild(label);
-                    
-                    checkbox.addEventListener('change', function() {
-                        const idx = parseInt(this.dataset.seatIndex);
-                        activeSeats[idx] = this.checked;
-                        const seatEl = seatElements[idx + 1];
-                        if (seatEl) {
-                            seatEl.style.display = this.checked ? 'flex' : 'none';
-                        }
-                        triggerCloudSave();
-                    });
-                }
-            }
-
-            // 面板開關功能已由 inline onclick (toggleSettingsPanel) 處理，避免事件重疊衝突
-
-            // 全選
-            if (selectAllBtn && checkboxContainer) {
-                selectAllBtn.addEventListener('click', function() {
-                    const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
-                    checkboxes.forEach(cb => {
-                        cb.checked = true;
-                        const idx = parseInt(cb.dataset.seatIndex);
-                        activeSeats[idx] = true;
-                        const seatEl = seatElements[idx + 1];
-                        if (seatEl) seatEl.style.display = 'flex';
-                    });
-                    triggerCloudSave();
-                });
-            }
-
-            // 全不選
-            if (clearAllBtn && checkboxContainer) {
-                clearAllBtn.addEventListener('click', function() {
-                    const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
-                    checkboxes.forEach(cb => {
-                        cb.checked = false;
-                        const idx = parseInt(cb.dataset.seatIndex);
-                        activeSeats[idx] = false;
-                        const seatEl = seatElements[idx + 1];
-                        if (seatEl) seatEl.style.display = 'none';
-                    });
-                    triggerCloudSave();
-                });
-            }
-            
-            // 重置按鈕功能
-            if (resetBtn && dropArea4) {
-                resetBtn.addEventListener('click', function() {
-                    const allSeatNumbers = document.querySelectorAll('.seat-number');
-                    allSeatNumbers.forEach(seat => {
-                        dropArea4.appendChild(seat);
-                    });
-                    triggerCloudSave();
-                });
-            }
-            
-            // 設置拖放區域 (滑鼠)
-            dropZones.forEach(zone => {
-                zone.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    zone.classList.add('bg-gray-100');
-                });
-                
-                zone.addEventListener('dragleave', function() {
-                    zone.classList.remove('bg-gray-100');
-                });
-                
-                zone.addEventListener('drop', function(e) {
-                    e.preventDefault();
-                    zone.classList.remove('bg-gray-100');
-                    
-                    if (draggedItem) {
-                        zone.appendChild(draggedItem);
-                        draggedItem.classList.add('scale-110');
-                        setTimeout(() => {
-                            draggedItem.classList.remove('scale-110');
-                        }, 300);
-                        triggerCloudSave();
-                    }
-                });
-            });
-            
-            // 讓輸入框可以保存任務名稱
-            const taskInputs = document.querySelectorAll('.task-input');
-            taskInputs.forEach(input => {
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        input.blur();
-                    }
-                });
-                input.addEventListener('blur', function() {
-                    triggerCloudSave();
-                });
-            });
-
-            // 初始化 Firebase 同步
-            initFirebaseSync();
         }
     </script>
 
