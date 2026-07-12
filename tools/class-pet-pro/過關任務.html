@@ -61,10 +61,11 @@
             align-content: start !important;
         }
         .column {
-            min-width: 280px;
-            max-width: 320px;
-            flex: 0 0 auto;
+            flex: 1 1 240px;
+            min-width: 250px;
+            max-width: 340px;
             min-height: 500px;
+            transition: all 0.3s ease;
         }
         /* 自訂滾動條 */
         #columns-container::-webkit-scrollbar {
@@ -84,6 +85,8 @@
         .task-input {
             border-bottom: 2px solid #4a5568;
             transition: all 0.3s ease;
+            min-width: 0;
+            width: 100%;
         }
         .task-input:focus {
             border-bottom: 2px solid #3182ce;
@@ -137,6 +140,7 @@
                 <button id="zhuyin-btn" onclick="toggleZhuyinMode()" class="bg-teal-600 text-white px-6 py-2 rounded-md hover:bg-teal-700 transition-colors font-semibold">🍬 注音模式 (關)</button>
                 <button id="att-btn" onclick="toggleSettingsPanel()" class="bg-slate-600 text-white px-6 py-2 rounded-md hover:bg-slate-700 transition-colors font-semibold">⚙️ 設定與範本管理</button>
                 <button id="reset-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors font-semibold">重置座號位置</button>
+                <button id="add-column-btn" onclick="addColumn()" class="bg-emerald-600 text-white px-6 py-2 rounded-md hover:bg-emerald-700 transition-colors font-semibold">➕ 新增任務關卡</button>
                 <button id="fullscreen-btn" onclick="toggleFullscreen()" class="bg-violet-600 text-white px-6 py-2 rounded-md hover:bg-violet-700 transition-colors font-semibold">🖥️ 全螢幕</button>
             </div>
         </div>
@@ -633,7 +637,7 @@
                 columnsData.forEach((name, i) => {
                     const borderClass = colors[i % colors.length];
                     const colWrapper = document.createElement('div');
-                    colWrapper.className = 'column-wrapper column bg-white rounded-lg shadow-md p-4 flex-1 border-t-4 ' + borderClass;
+                    colWrapper.className = 'column-wrapper column bg-white rounded-lg shadow-md p-4 border-t-4 ' + borderClass;
                     colWrapper.id = 'column-wrapper-' + i;
                     
                     const header = document.createElement('div');
@@ -707,23 +711,6 @@
                     colWrapper.appendChild(dropZone);
                     container.appendChild(colWrapper);
                 });
-                
-                // ➕ 新增關卡虛線按鈕
-                const addWrapper = document.createElement('div');
-                addWrapper.className = 'column bg-slate-50 rounded-lg border-2 border-dashed border-slate-300 p-4 flex flex-col items-center justify-center min-h-[500px] cursor-pointer hover:bg-slate-100 hover:border-indigo-400 transition-all group';
-                addWrapper.onclick = addColumn;
-                
-                const addIcon = document.createElement('div');
-                addIcon.className = 'text-4xl text-slate-400 group-hover:text-indigo-600 transition-colors font-bold mb-2';
-                addIcon.innerHTML = '&#x2b;';
-                
-                const addText = document.createElement('div');
-                addText.className = 'text-sm font-semibold text-slate-500 group-hover:text-indigo-700 transition-colors';
-                addText.textContent = '新增任務關卡';
-                
-                addWrapper.appendChild(addIcon);
-                addWrapper.appendChild(addText);
-                container.appendChild(addWrapper);
             } else {
                 columnsData.forEach((name, i) => {
                     const input = document.getElementById('task-input-' + i);
@@ -745,6 +732,9 @@
                 }
             }
 
+            // 更新捲動按鈕可見度與對齊
+            updateScrollButtonsVisibility();
+
             if (activeElementId) {
                 const el = document.getElementById(activeElementId);
                 if (el) {
@@ -757,6 +747,28 @@
                 }
             }
         }
+
+        function updateScrollButtonsVisibility() {
+            setTimeout(() => {
+                const container = document.getElementById('columns-container');
+                const leftBtn = document.getElementById('scroll-left-btn');
+                const rightBtn = document.getElementById('scroll-right-btn');
+                if (container && leftBtn && rightBtn) {
+                    const hasOverflow = container.scrollWidth > container.clientWidth;
+                    if (hasOverflow) {
+                        leftBtn.style.display = 'flex';
+                        rightBtn.style.display = 'flex';
+                        container.style.justifyContent = 'flex-start';
+                    } else {
+                        leftBtn.style.display = 'none';
+                        rightBtn.style.display = 'none';
+                        container.style.justifyContent = 'center';
+                    }
+                }
+            }, 50);
+        }
+        
+        window.addEventListener('resize', updateScrollButtonsVisibility);
 
         // --- 任務範本管理邏輯 ---
         function saveCurrentAsTemplate() {
