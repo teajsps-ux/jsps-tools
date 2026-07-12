@@ -867,6 +867,246 @@
             }
         }
 
+        function initApp() {
+            const resetBtn = document.getElementById('reset-btn');
+            const selectAllBtn = document.getElementById('select-all-btn');
+            const clearAllBtn = document.getElementById('clear-all-btn');
+            const checkboxContainer = document.getElementById('checkbox-container');
+            const zhuyinBtn = document.getElementById('zhuyin-btn');
+
+            let draggedItem = null;
+            let touchItem = null;
+
+            // --- 一鍵切換注音初始化 ---
+            if (zhuyinBtn) {
+                let isZhuyinMode = safeStorage.getItem('zhuyin_mode') === 'true';
+                if (isZhuyinMode) {
+                    document.body.classList.add('zhuyin-mode');
+                    zhuyinBtn.textContent = '🍬 注音模式 (開)';
+                } else {
+                    document.body.classList.remove('zhuyin-mode');
+                    zhuyinBtn.textContent = '🍬 注音模式 (關)';
+                }
+            }
+
+            // --- 還原任務名稱 & 關卡數 ---
+            try {
+                const storedTasks = safeStorage.getItem('breakthrough_tasks');
+                if (storedTasks) {
+                    columnsData = JSON.parse(storedTasks);
+                }
+            } catch (e) {
+                console.error("Failed to restore task names:", e);
+            }
+
+            // --- 還原座號位置 ---
+            try {
+                const raw = safeStorage.getItem('breakthrough_seats');
+                if (raw) {
+                    seatPositions = JSON.parse(raw);
+                }
+            } catch (e) {
+                console.error("Failed to parse breakthrough_seats:", e);
+            }
+
+            // 確保所有座號都有預設位置（第 0 關）
+            for (let i = 1; i <= 28; i++) {
+                if (seatPositions[i] === undefined) {
+                    seatPositions[i] = 0;
+                }
+            }
+
+            // --- 創建 28 個座號卡牌 ---
+            for (let i = 1; i <= 28; i++) {
+                const seatNumber = document.createElement('div');
+                seatNumber.className = 'seat-number w-full aspect-square bg-indigo-100 rounded-lg flex items-center justify-center font-black text-indigo-800 shadow-md';
+                seatNumber.textContent = i;
+                seatNumber.draggable = true;
+                seatNumber.dataset.seatNumber = i;
+                
+                seatElements[i] = seatNumber;
+                
+                // 根據出席狀態決定初始顯示
+                if (!activeSeats[i - 1]) {
+                    seatNumber.style.display = 'none';
+                }
+                
+                // 滑鼠拖曳事件
+                seatNumber.addEventListener('dragstart', function(e) {
+                    draggedItem = seatNumber;
+                    setTimeout(() => {
+                        seatNumber.classList.add('opacity-50');
+                    }, 0);
+                });
+                
+                seatNumber.addEventListener('dragend', function() {
+                    seatNumber.classList.remove('opacity-50');
+                    draggedItem = null;
+                });
+                
+                // 觸控事件處理
+                seatNumber.addEventListener('touchstart', handleTouchStart, { passive: false });
+                seatNumber.addEventListener('touchmove', handleTouchMove, { passive: false });
+                seatNumber.addEventListener('touchend', handleTouchEnd, { passive: false });
+            }
+
+            // --- 動態渲染任務關卡 ---
+            renderColumns();
+
+            // --- 渲染範本列表 ---
+            renderTemplatesList();
+
+            // 觸控事件函數 (使用 function 聲明確保正確 hoisted)
+            function handleTouchStart(e) {
+                e.preventDefault();
+                touchItem = this;
+                this.classList.add('dragging');
+                
+                const touch = e.touches[0];
+                this.initialX = touch.clientX;
+                this.initialY = touch.clientY;
+                
+                const rect = this.getBoundingClientRect();
+                this.offsetX = this.initialX - rect.left;
+                this.offsetY = this.initialY - rect.top;
+                
+                this.style.position = 'fixed';
+                this.style.zIndex = 1000;
+                this.style.top = `${rect.top}px`;
+                this.style.left = `${rect.left}px`;
+            }
+            
+            function handleTouchMove(e) {
+                e.preventDefault();
+                if (!touchItem) return;
+                
+                const touch = e.touches[0];
+                const x = touch.clientX - this.offsetX;
+                const y = touch.clientY - this.offsetY;
+                
+                touchItem.style.left = `${x}px`;
+                touchItem.style.top = `${y}px`;
+            }
+            
+            function handleTouchEnd(e) {
+                e.preventDefault();
+                if (!touchItem) return;
+                
+                const touch = e.changedTouches[0];
+                const x = touch.clientX;
+                const y = touch.clientY;
+                let targetZone = null;
+                let targetColIdx = -1;
+                
+                // 尋找接觸到的 Drop Zone
+                columnsData.forEach((_, i) => {
+                    const zone = document.getElementById('drop-area-' + i);
+                    if (zone) {
+                        const rect = zone.getBoundingClientRect();
+                        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                            targetZone = zone;
+                            targetColIdx = i;
+                        }
+                    }
+                });
+                
+                touchItem.style.position = '';
+                touchItem.style.zIndex = '';
+                touchItem.style.top = '';
+                touchItem.style.left = '';
+                touchItem.classList.remove('dragging');
+                
+                if (targetZone && targetColIdx !== -1) {
+                    targetZone.appendChild(touchItem);
+                    const seatNum = parseInt(touchItem.dataset.seatNumber);
+                    seatPositions[seatNum] = targetColIdx;
+                    touchItem.classList.add('scale-110');
+                    setTimeout(() => {
+                        touchItem.classList.remove('scale-110');
+                    }, 300);
+                    triggerCloudSave();
+                }
+                
+                touchItem = null;
+            }
+
+            // 動態生成出缺席核取方塊
+            if (checkboxContainer) {
+                for (let i = 1; i <= 28; i++) {
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center gap-1 p-1 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer text-sm font-semibold select-none';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'w-4 h-4 text-indigo-600 rounded';
+                    checkbox.checked = activeSeats[i - 1];
+                    checkbox.dataset.seatIndex = i - 1;
+                    
+                    const text = document.createTextNode(i + '號');
+                    
+                    label.appendChild(checkbox);
+                    label.appendChild(text);
+                    checkboxContainer.appendChild(label);
+                    
+                    checkbox.addEventListener('change', function() {
+                        const idx = parseInt(this.dataset.seatIndex);
+                        activeSeats[idx] = this.checked;
+                        const seatEl = seatElements[idx + 1];
+                        if (seatEl) {
+                            seatEl.style.display = this.checked ? 'flex' : 'none';
+                        }
+                        triggerCloudSave();
+                    });
+                }
+            }
+
+            // 全選
+            if (selectAllBtn && checkboxContainer) {
+                selectAllBtn.addEventListener('click', function() {
+                    const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(cb => {
+                        cb.checked = true;
+                        const idx = parseInt(cb.dataset.seatIndex);
+                        activeSeats[idx] = true;
+                        const seatEl = seatElements[idx + 1];
+                        if (seatEl) seatEl.style.display = 'flex';
+                    });
+                    triggerCloudSave();
+                });
+            }
+
+            // 全不選
+            if (clearAllBtn && checkboxContainer) {
+                clearAllBtn.addEventListener('click', function() {
+                    const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(cb => {
+                        cb.checked = false;
+                        const idx = parseInt(cb.dataset.seatIndex);
+                        activeSeats[idx] = false;
+                        const seatEl = seatElements[idx + 1];
+                        if (seatEl) seatEl.style.display = 'none';
+                    });
+                    triggerCloudSave();
+                });
+            }
+            
+            // 重置按鈕功能
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    if (confirm('確定要將所有座號位置重置回第一關起點嗎？')) {
+                        for (let seatNum = 1; seatNum <= 28; seatNum++) {
+                            seatPositions[seatNum] = 0;
+                        }
+                        renderColumns();
+                        triggerCloudSave();
+                    }
+                });
+            }
+
+            // 初始化 Firebase 同步
+            initFirebaseSync();
+        }
+
         document.addEventListener('DOMContentLoaded', runInit);
         if (document.readyState !== 'loading') {
             runInit();
