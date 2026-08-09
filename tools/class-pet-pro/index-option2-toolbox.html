@@ -952,7 +952,7 @@
             playClick();
             if(type === 'pos') { isPosEditMode = !isPosEditMode; document.getElementById('positiveGrid').classList.toggle('edit-mode'); }
             else if(type === 'neg') { isNegEditMode = !isNegEditMode; document.getElementById('negativeGrid').classList.toggle('edit-mode'); }
-            else if(type === 'grp') { isGrpEditMode = !isGrpEditMode; document.getElementById('groupGrid').classList.toggle('edit-mode'); }
+            else if(type === 'grp') { isGrpEditMode = !isGrpEditMode; document.getElementById('groupGrid').classList.toggle('edit-mode'); renderGroups(); }
             else if(type === 'gift') { isGiftEditMode = !isGiftEditMode; document.getElementById('giftGrid').classList.toggle('edit-mode'); }
             else if(type === 'stu') { isStuEditMode = !isStuEditMode; document.getElementById('studentList').classList.toggle('edit-mode'); }
             else if(type === 'task') { isTaskEditMode = !isTaskEditMode; document.getElementById('taskList').classList.toggle('edit-mode'); }
@@ -2232,6 +2232,50 @@
         function endGroupDrag(e) {
             e.currentTarget.classList.remove('group-dragging');
             draggedGroupId = null;
+        }
+        function addGroup() {
+            const i = document.getElementById('newGroupName');
+            const n = i.value.trim();
+            if (!n) return showModal("⚠️ 尚未輸入組別名稱", "請先輸入新組別名稱。");
+            if (state.groups.some(g => g.name === n)) return showModal("⚠️ 已有這個組別", "請換一個組別名稱。");
+            state.groups.push({ id: 'grp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), name: n });
+            i.value = '';
+            playClick();
+            renderGroups();
+            renderStudents();
+            renderRanking();
+            saveData();
+        }
+        function renameGroup(id, e) {
+            if(e) e.stopPropagation();
+            const group = state.groups.find(g => g.id === id);
+            if(!group) return;
+            const n = prompt('請輸入新的組別名稱：', group.name);
+            if(n === null) return;
+            const clean = n.trim();
+            if(!clean) return showModal("⚠️ 名稱不可空白", "請輸入組別名稱。");
+            if(state.groups.some(g => g.id !== id && g.name === clean)) return showModal("⚠️ 已有這個組別", "請換一個組別名稱。");
+            group.name = clean;
+            playClick();
+            renderGroups();
+            renderStudents();
+            renderRanking();
+            saveData();
+        }
+        function deleteGroup(id, e) {
+            if(e) e.stopPropagation();
+            const group = state.groups.find(g => g.id === id);
+            if(!group) return;
+            const count = state.students.filter(s => s.groupId === id).length;
+            if(count && !confirm(`「${group.name}」目前有 ${count} 位學生。刪除組別後，這些學生會改為未分組，確定要刪除嗎？`)) return;
+            if(!count && !confirm(`確定要刪除「${group.name}」嗎？`)) return;
+            state.groups = state.groups.filter(g => g.id !== id);
+            state.students.forEach(s => { if(s.groupId === id) s.groupId = null; });
+            playClick();
+            renderGroups();
+            renderStudents();
+            renderRanking();
+            saveData();
         }
         function scoreGroup(id) { const g = state.groups.find(x => x.id === id); const p = parseInt(document.getElementById('groupPtsInput').value) || 0; if(!g || p===0) return; const stu = state.students.filter(s => s.groupId === id); if(stu.length === 0) return showModal("⚠️ 小組沒人喔", "請先分配學生！"); stu.forEach(s => s.pts += p); givePoints(p, p>0?5:-5, p>0?'小組優良':'小組提醒', g.name); renderStudents(); saveData(); }
         function openClassScoreModal(t) { playClick(); currentClassScoreType = t; const ti = document.getElementById('classScoreTitle'); const b = document.getElementById('classScoreConfirmBtn'); const i = document.getElementById('classScoreInput'); i.value = '1'; if (t === 'add') { ti.innerText = `🌟 為全班加分`; ti.style.color = 'var(--success)'; b.style.background = 'var(--success)'; b.innerText = '確定加分'; } else { ti.innerText = `⚠️ 為全班扣分`; ti.style.color = 'var(--danger)'; b.style.background = 'var(--danger)'; b.innerText = '確定扣分'; } document.getElementById('classScoreModal').classList.add('active'); setTimeout(() => { i.focus(); i.select(); }, 100); }
