@@ -105,6 +105,9 @@
         .rank-name { flex: 1; font-size: 1.2rem; word-break: break-word; }
         .rank-pts { font-size: 1.4rem; color: #1e3799; text-shadow: 1px 1px 0px white; }
         .action-btn-wrapper { position: relative; }
+        .action-btn-wrapper.group-draggable { cursor: grab; }
+        .action-btn-wrapper.group-draggable:active { cursor: grabbing; }
+        .action-btn-wrapper.group-dragging { opacity: 0.55; transform: scale(0.96); }
         .del-action-btn { display: none; position: absolute; top: -8px; right: -8px; background: var(--danger); color: white; border: 3px solid var(--ui-border); border-radius: 50%; width: 28px; height: 28px; font-size: 14px; font-weight: bold; cursor: pointer; justify-content: center; align-items: center; box-shadow: 0 3px 0 var(--ui-border); z-index: 10; }
         .rename-action-btn { display: none; position: absolute; top: -8px; left: -8px; background: var(--warning); color: var(--ui-border); border: 3px solid var(--ui-border); border-radius: 50%; width: 28px; height: 28px; font-size: 14px; font-weight: bold; cursor: pointer; justify-content: center; align-items: center; box-shadow: 0 3px 0 var(--ui-border); z-index: 10; }
         .action-grid.edit-mode .rename-action-btn { display: flex; }
@@ -2183,11 +2186,51 @@
             }
             return group;
         }
-        function renderGroups() { const g = document.getElementById('groupGrid'); if(!g) return; g.innerHTML = ''; const p = parseInt(document.getElementById('groupPtsInput').value) || 0; if(!state.groups.length){ g.innerHTML='<div style="color:#888; font-weight:bold; padding:10px;">尚未建立小組，可從 Excel 組別欄匯入，或手動新增組別。</div>'; return; } state.groups.forEach(grp => { g.innerHTML += `<div class="action-btn-wrapper"><button class="rename-action-btn" onclick="renameGroup('${grp.id}', event)">✏️</button><button class="del-action-btn" onclick="deleteGroup('${grp.id}', event)">✖</button><div class="btn btn-blue selectable-text" style="width: 100%; height: 100%;" onclick="if(!window.getSelection().toString().trim()) scoreGroup('${grp.id}')"><span>🎯</span>${grp.name} <small>${p > 0 ? '+'+p : p}分</small></div></div>`; }); }
-        function addGroup() { const i = document.getElementById('newGroupName'); const n = i.value.trim(); if (!n) return; if (state.groups.some(g => g.name === n)) return showModal("⚠️ 已有這個組別", "請換一個組別名稱。"); state.groups.push({ id: 'grp_' + Date.now(), name: n }); i.value = ''; playClick(); renderGroups(); renderStudents(); renderRanking(); saveData(); }
-        function renameGroup(id, e) { e.stopPropagation(); const group = state.groups.find(g => g.id === id); if(!group) return; const n = prompt('請輸入新的組別名稱：', group.name); if(n === null) return; const clean = n.trim(); if(!clean) return; if(state.groups.some(g => g.id !== id && g.name === clean)) return showModal("⚠️ 已有這個組別", "請換一個組別名稱。"); group.name = clean; playClick(); renderGroups(); renderStudents(); renderRanking(); saveData(); }
-        function deleteGroup(id, e) { e.stopPropagation(); const group = state.groups.find(g => g.id === id); if(!group) return; const count = state.students.filter(s => s.groupId === id).length; if(count && !confirm(`「${group.name}」目前有 ${count} 位學生。刪除組別後，這些學生會改為未分組，確定要刪除嗎？`)) return; state.groups = state.groups.filter(g => g.id !== id); state.students.forEach(s => { if(s.groupId === id) s.groupId = null; }); playClick(); renderGroups(); renderStudents(); renderRanking(); saveData(); }
-        function updateStudentGroup(id, gid) { const s = state.students.find(x => x.id === id); if (s) { s.groupId = gid || null; saveData(); playClick(); renderStudents(); renderRanking(); } }
+        let draggedGroupId = null;
+        function renderGroups() {
+            const g = document.getElementById('groupGrid');
+            if(!g) return;
+            g.innerHTML = '';
+            const p = parseInt(document.getElementById('groupPtsInput').value) || 0;
+            if(!state.groups.length){
+                g.innerHTML='<div style="color:#888; font-weight:bold; padding:10px;">尚未建立小組，可從 Excel 組別欄匯入，或手動新增組別。</div>';
+                return;
+            }
+            state.groups.forEach(grp => {
+                g.innerHTML += `<div class="action-btn-wrapper group-draggable" draggable="true" ondragstart="startGroupDrag(event, '${grp.id}')" ondragover="allowGroupDrop(event, '${grp.id}')" ondrop="dropGroup(event, '${grp.id}')" ondragend="endGroupDrag(event)" title="拖曳可調整小組順序"><button class="rename-action-btn" onclick="renameGroup('${grp.id}', event)">✏️</button><button class="del-action-btn" onclick="deleteGroup('${grp.id}', event)">✖</button><div class="btn btn-blue selectable-text" style="width: 100%; height: 100%;" onclick="if(!window.getSelection().toString().trim()) scoreGroup('${grp.id}')"><span>🎯</span>${grp.name} <small>${p > 0 ? '+'+p : p}分</small></div></div>`;
+            });
+        }
+        function startGroupDrag(e, id) {
+            draggedGroupId = id;
+            e.currentTarget.classList.add('group-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', id);
+        }
+        function allowGroupDrop(e, targetId) {
+            if(!draggedGroupId || draggedGroupId === targetId) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+        function dropGroup(e, targetId) {
+            e.preventDefault();
+            const sourceId = e.dataTransfer.getData('text/plain') || draggedGroupId;
+            if(!sourceId || sourceId === targetId) return;
+            const from = state.groups.findIndex(g => g.id === sourceId);
+            const to = state.groups.findIndex(g => g.id === targetId);
+            if(from < 0 || to < 0) return;
+            const [moved] = state.groups.splice(from, 1);
+            state.groups.splice(to, 0, moved);
+            draggedGroupId = null;
+            playClick();
+            renderGroups();
+            renderStudents();
+            renderRanking();
+            saveData();
+        }
+        function endGroupDrag(e) {
+            e.currentTarget.classList.remove('group-dragging');
+            draggedGroupId = null;
+        }
         function scoreGroup(id) { const g = state.groups.find(x => x.id === id); const p = parseInt(document.getElementById('groupPtsInput').value) || 0; if(!g || p===0) return; const stu = state.students.filter(s => s.groupId === id); if(stu.length === 0) return showModal("⚠️ 小組沒人喔", "請先分配學生！"); stu.forEach(s => s.pts += p); givePoints(p, p>0?5:-5, p>0?'小組優良':'小組提醒', g.name); renderStudents(); saveData(); }
         function openClassScoreModal(t) { playClick(); currentClassScoreType = t; const ti = document.getElementById('classScoreTitle'); const b = document.getElementById('classScoreConfirmBtn'); const i = document.getElementById('classScoreInput'); i.value = '1'; if (t === 'add') { ti.innerText = `🌟 為全班加分`; ti.style.color = 'var(--success)'; b.style.background = 'var(--success)'; b.innerText = '確定加分'; } else { ti.innerText = `⚠️ 為全班扣分`; ti.style.color = 'var(--danger)'; b.style.background = 'var(--danger)'; b.innerText = '確定扣分'; } document.getElementById('classScoreModal').classList.add('active'); setTimeout(() => { i.focus(); i.select(); }, 100); }
         function confirmClassScore() { const v = parseInt(document.getElementById('classScoreInput').value); if (isNaN(v) || v <= 0) return showModal("⚠️ 錯誤", "請輸入>0數字！"); if(state.students.length === 0) { closeModal('classScoreModal'); setTimeout(() => showModal("⚠️ 沒人", "請先新增學生！"), 300); return; } const c = currentClassScoreType === 'add' ? v : -v; state.students.forEach(s => s.pts += c); givePoints(c, c>0 ? Math.min(v,5) : Math.max(-v,-5), c>0?'全班優良':'全班提醒'); renderStudents(); saveData(); closeModal('classScoreModal'); }
