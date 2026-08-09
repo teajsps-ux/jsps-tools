@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -106,6 +106,8 @@
         .rank-pts { font-size: 1.4rem; color: #1e3799; text-shadow: 1px 1px 0px white; }
         .action-btn-wrapper { position: relative; }
         .del-action-btn { display: none; position: absolute; top: -8px; right: -8px; background: var(--danger); color: white; border: 3px solid var(--ui-border); border-radius: 50%; width: 28px; height: 28px; font-size: 14px; font-weight: bold; cursor: pointer; justify-content: center; align-items: center; box-shadow: 0 3px 0 var(--ui-border); z-index: 10; }
+        .rename-action-btn { display: none; position: absolute; top: -8px; left: -8px; background: var(--warning); color: var(--ui-border); border: 3px solid var(--ui-border); border-radius: 50%; width: 28px; height: 28px; font-size: 14px; font-weight: bold; cursor: pointer; justify-content: center; align-items: center; box-shadow: 0 3px 0 var(--ui-border); z-index: 10; }
+        .action-grid.edit-mode .rename-action-btn { display: flex; }
         .student-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
         .student-item { display: flex; justify-content: space-between; align-items: center; background: #e6d4b8; padding: 8px 10px; border-radius: 10px; border: 3px solid var(--ui-border); font-weight: bold; color: var(--ui-border);}
         .student-pts { font-weight: bold; color: #1e3799; font-size: 1.05rem; text-shadow: 1px 1px 0px white;}
@@ -924,7 +926,7 @@
                 lastDate: new Date().toLocaleDateString('zh-TW'),
                 currentPetId: 1, unlockedMaxId: 1,
                 petStats: { 1: { level: 1, exp: 0, mood: 50, hunger: 50, energy: 100, name: PET_DEX[0].name } },
-                groups: [{ id: 'grp_1', name: '第一組' }, { id: 'grp_2', name: '第二組' }, { id: 'grp_3', name: '第三組' }, { id: 'grp_4', name: '第四組' }, { id: 'grp_5', name: '第五組' }, { id: 'grp_6', name: '第六組' }],
+                groups: [],
                 studentQuickScore: 1,
                 students: Array.from({length: 35}, (_, i) => ({ id: i + 1, name: `${i + 1}號`, pts: 0, groupId: null })),
                 positiveActions: JSON.parse(JSON.stringify(defaultPositiveActions)),
@@ -1078,7 +1080,8 @@
             if(!state.petStats[state.currentPetId]) state.petStats[state.currentPetId] = { level: 1, exp: 0, mood: 50, hunger: 50, energy: 100, name: PET_DEX.find(p => p.id === state.currentPetId).name };
             if (state.lastDate !== new Date().toLocaleDateString('zh-TW')) { state.tasks.forEach(t => t.done = false); state.lastDate = new Date().toLocaleDateString('zh-TW'); saveData(); }
             if (!state.gifts) { state.gifts = JSON.parse(JSON.stringify(defaultGifts)); saveData(); }
-            if (!state.groups) { state.groups = [{ id: 'grp_1', name: '第一組' }, { id: 'grp_2', name: '第二組' }, { id: 'grp_3', name: '第三組' }, { id: 'grp_4', name: '第四組' }, { id: 'grp_5', name: '第五組' }, { id: 'grp_6', name: '第六組' }]; saveData(); }
+            if (!Array.isArray(state.groups)) { state.groups = []; saveData(); }
+            normalizeDefaultGroups();
             if (!Number.isInteger(state.studentQuickScore) || state.studentQuickScore < 1 || state.studentQuickScore > 100) { state.studentQuickScore = 1; saveData(); }
             state.students.forEach(s => { if (s.groupId === undefined) s.groupId = null; });
             updateUI(); renderActions(); renderGroups(); renderTasks(); renderStudents(); renderGifts(); renderHistory(); renderPokedex();
@@ -2162,10 +2165,29 @@
         }
         function selectPet(id) { state.currentPetId = id; if(!state.petStats[id]) state.petStats[id] = { level: 1, exp: 0, mood: 50, hunger: 50, energy: 100, name: PET_DEX.find(p => p.id === id).name }; playClick(); updateUI(); renderPokedex(); saveData(); }
         function adjustGroupPts(d) { const i = document.getElementById('groupPtsInput'); i.value = (parseInt(i.value) || 0) + d; playClick(); renderGroups(); }
-        function renderGroups() { const g = document.getElementById('groupGrid'); if(!g) return; g.innerHTML = ''; const p = parseInt(document.getElementById('groupPtsInput').value) || 0; state.groups.forEach(grp => { g.innerHTML += `<div class="action-btn-wrapper"><button class="del-action-btn" onclick="deleteGroup('${grp.id}', event)">✖</button><div class="btn btn-blue selectable-text" style="width: 100%; height: 100%;" onclick="if(!window.getSelection().toString().trim()) scoreGroup('${grp.id}')"><span>🎯</span>${grp.name} <small>${p > 0 ? '+'+p : p}分</small></div></div>`; }); }
-        function addGroup() { const i = document.getElementById('newGroupName'); const n = i.value.trim(); if (n) { state.groups.push({ id: 'grp_' + Date.now(), name: n }); i.value = ''; playClick(); renderGroups(); renderStudents(); saveData(); } }
-        function deleteGroup(id, e) { e.stopPropagation(); state.groups = state.groups.filter(g => g.id !== id); state.students.forEach(s => { if(s.groupId === id) s.groupId = null; }); playClick(); renderGroups(); renderStudents(); saveData(); }
-        function updateStudentGroup(id, gid) { const s = state.students.find(x => x.id === id); if (s) { s.groupId = gid || null; saveData(); playClick(); } }
+        function normalizeDefaultGroups() {
+            const defaults = ['第一組','第二組','第三組','第四組','第五組','第六組'];
+            if (!Array.isArray(state.groups) || state.groups.length !== 6) return;
+            const isOldDefault = state.groups.every((g, i) => g && g.id === `grp_${i + 1}` && g.name === defaults[i]);
+            if (!isOldDefault) return;
+            const used = new Set((state.students || []).map(s => s.groupId).filter(Boolean));
+            state.groups = state.groups.filter(g => used.has(g.id));
+        }
+        function getOrCreateGroupByName(name) {
+            const clean = String(name || '').trim();
+            if (!clean) return null;
+            let group = state.groups.find(g => g.name === clean);
+            if (!group) {
+                group = { id: 'grp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), name: clean };
+                state.groups.push(group);
+            }
+            return group;
+        }
+        function renderGroups() { const g = document.getElementById('groupGrid'); if(!g) return; g.innerHTML = ''; const p = parseInt(document.getElementById('groupPtsInput').value) || 0; if(!state.groups.length){ g.innerHTML='<div style="color:#888; font-weight:bold; padding:10px;">尚未建立小組，可從 Excel 組別欄匯入，或手動新增組別。</div>'; return; } state.groups.forEach(grp => { g.innerHTML += `<div class="action-btn-wrapper"><button class="rename-action-btn" onclick="renameGroup('${grp.id}', event)">✏️</button><button class="del-action-btn" onclick="deleteGroup('${grp.id}', event)">✖</button><div class="btn btn-blue selectable-text" style="width: 100%; height: 100%;" onclick="if(!window.getSelection().toString().trim()) scoreGroup('${grp.id}')"><span>🎯</span>${grp.name} <small>${p > 0 ? '+'+p : p}分</small></div></div>`; }); }
+        function addGroup() { const i = document.getElementById('newGroupName'); const n = i.value.trim(); if (!n) return; if (state.groups.some(g => g.name === n)) return showModal("⚠️ 已有這個組別", "請換一個組別名稱。"); state.groups.push({ id: 'grp_' + Date.now(), name: n }); i.value = ''; playClick(); renderGroups(); renderStudents(); renderRanking(); saveData(); }
+        function renameGroup(id, e) { e.stopPropagation(); const group = state.groups.find(g => g.id === id); if(!group) return; const n = prompt('請輸入新的組別名稱：', group.name); if(n === null) return; const clean = n.trim(); if(!clean) return; if(state.groups.some(g => g.id !== id && g.name === clean)) return showModal("⚠️ 已有這個組別", "請換一個組別名稱。"); group.name = clean; playClick(); renderGroups(); renderStudents(); renderRanking(); saveData(); }
+        function deleteGroup(id, e) { e.stopPropagation(); const group = state.groups.find(g => g.id === id); if(!group) return; const count = state.students.filter(s => s.groupId === id).length; if(count && !confirm(`「${group.name}」目前有 ${count} 位學生。刪除組別後，這些學生會改為未分組，確定要刪除嗎？`)) return; state.groups = state.groups.filter(g => g.id !== id); state.students.forEach(s => { if(s.groupId === id) s.groupId = null; }); playClick(); renderGroups(); renderStudents(); renderRanking(); saveData(); }
+        function updateStudentGroup(id, gid) { const s = state.students.find(x => x.id === id); if (s) { s.groupId = gid || null; saveData(); playClick(); renderStudents(); renderRanking(); } }
         function scoreGroup(id) { const g = state.groups.find(x => x.id === id); const p = parseInt(document.getElementById('groupPtsInput').value) || 0; if(!g || p===0) return; const stu = state.students.filter(s => s.groupId === id); if(stu.length === 0) return showModal("⚠️ 小組沒人喔", "請先分配學生！"); stu.forEach(s => s.pts += p); givePoints(p, p>0?5:-5, p>0?'小組優良':'小組提醒', g.name); renderStudents(); saveData(); }
         function openClassScoreModal(t) { playClick(); currentClassScoreType = t; const ti = document.getElementById('classScoreTitle'); const b = document.getElementById('classScoreConfirmBtn'); const i = document.getElementById('classScoreInput'); i.value = '1'; if (t === 'add') { ti.innerText = `🌟 為全班加分`; ti.style.color = 'var(--success)'; b.style.background = 'var(--success)'; b.innerText = '確定加分'; } else { ti.innerText = `⚠️ 為全班扣分`; ti.style.color = 'var(--danger)'; b.style.background = 'var(--danger)'; b.innerText = '確定扣分'; } document.getElementById('classScoreModal').classList.add('active'); setTimeout(() => { i.focus(); i.select(); }, 100); }
         function confirmClassScore() { const v = parseInt(document.getElementById('classScoreInput').value); if (isNaN(v) || v <= 0) return showModal("⚠️ 錯誤", "請輸入>0數字！"); if(state.students.length === 0) { closeModal('classScoreModal'); setTimeout(() => showModal("⚠️ 沒人", "請先新增學生！"), 300); return; } const c = currentClassScoreType === 'add' ? v : -v; state.students.forEach(s => s.pts += c); givePoints(c, c>0 ? Math.min(v,5) : Math.max(-v,-5), c>0?'全班優良':'全班提醒'); renderStudents(); saveData(); closeModal('classScoreModal'); }
@@ -2269,7 +2291,8 @@
             pendingStudentImport=parseStudentImport(document.getElementById('studentImportText').value);
             if(!pendingStudentImport.length)return previewStudentImport();
             const mode=document.querySelector('input[name="studentImportMode"]:checked')?.value||'replace';
-            const existingSeats=new Set(state.students.map(s=>getStudentSeatNumber(s.name)).filter(n=>Number.isFinite(n)&&n!==Number.MAX_SAFE_INTEGER));
+            if (mode === 'replace') state.groups = [];
+            const existingSeats=new Set((mode === 'append' ? state.students : []).map(s=>getStudentSeatNumber(s.name)).filter(n=>Number.isFinite(n)&&n!==Number.MAX_SAFE_INTEGER));
             let skipped=0;
             const imported=pendingStudentImport.filter(s=>{
                 if(mode==='append'&&existingSeats.has(s.seat)){skipped++;return false;}
@@ -2277,8 +2300,7 @@
             }).map((s,i)=>{
                 let groupId=null;
                 if(s.groupName){
-                    let group=state.groups.find(g=>g.name===s.groupName);
-                    if(!group){group={id:'grp_'+Date.now()+'_'+i,name:s.groupName};state.groups.push(group);}
+                    let group=getOrCreateGroupByName(s.groupName);
                     groupId=group.id;
                 }
                 return {id:Date.now()+i,name:s.name,pts:0,groupId};
@@ -3172,3 +3194,5 @@
     </script>
 </body>
 </html>
+
+
