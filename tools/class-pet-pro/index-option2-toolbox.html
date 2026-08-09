@@ -2197,7 +2197,9 @@
                 return;
             }
             state.groups.forEach(grp => {
-                g.innerHTML += `<div class="action-btn-wrapper group-draggable" draggable="true" ondragstart="startGroupDrag(event, '${grp.id}')" ondragover="allowGroupDrop(event, '${grp.id}')" ondrop="dropGroup(event, '${grp.id}')" ondragend="endGroupDrag(event)" title="拖曳可調整小組順序"><button class="rename-action-btn" onclick="renameGroup('${grp.id}', event)">✏️</button><button class="del-action-btn" onclick="deleteGroup('${grp.id}', event)">✖</button><div class="btn btn-blue selectable-text" style="width: 100%; height: 100%;" onclick="if(!window.getSelection().toString().trim()) scoreGroup('${grp.id}')"><span>🎯</span>${grp.name} <small>${p > 0 ? '+'+p : p}分</small></div></div>`;
+                const dragAttrs = isGrpEditMode ? 'draggable="false" title="編輯模式：可改名或刪除小組"' : `draggable="true" ondragstart="startGroupDrag(event, '${grp.id}')" ondragover="allowGroupDrop(event, '${grp.id}')" ondrop="dropGroup(event, '${grp.id}')" ondragend="endGroupDrag(event)" title="拖曳可調整小組順序"`;
+                const dragClass = isGrpEditMode ? '' : ' group-draggable';
+                g.innerHTML += `<div class="action-btn-wrapper${dragClass}" ${dragAttrs}><button class="rename-action-btn" draggable="false" ondragstart="return false" onclick="renameGroup('${grp.id}', event)">✏️</button><button class="del-action-btn" draggable="false" ondragstart="return false" onclick="deleteGroup('${grp.id}', event)">✖</button><div class="btn btn-blue selectable-text" style="width: 100%; height: 100%;" onclick="if(!window.getSelection().toString().trim() && !isGrpEditMode) scoreGroup('${grp.id}')"><span>🎯</span>${grp.name} <small>${p > 0 ? '+'+p : p}分</small></div></div>`;
             });
         }
         function startGroupDrag(e, id) {
