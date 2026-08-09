@@ -2316,9 +2316,56 @@
             setTimeout(()=>showModal('✅ 已清空學生名單','目前學生名單、個人分數與分組資料已清除。'),250);
         }
 
-        function renderGifts() { const g = document.getElementById('giftGrid'); g.innerHTML = ''; state.gifts.forEach(gf => g.innerHTML += `<div class="action-btn-wrapper"><button class="del-action-btn" onclick="deleteGift('${gf.id}', event)">✖</button><div class="btn btn-yellow selectable-text" style="width:100%; height:100%; cursor:auto;"><span>${gf.icon}</span>${gf.name} <small>${gf.pts} 點</small></div></div>`); }
-        function addGift() { const iBtn = document.getElementById('giftIconBtn'); const n = document.getElementById('newGiftName').value.trim(); const p = parseInt(document.getElementById('newGiftPts').value) || 10; if(n) { state.gifts.push({ id: 'g_'+Date.now(), name: n, pts: Math.abs(p), icon: iBtn.innerText || '🎁' }); document.getElementById('newGiftName').value = ''; iBtn.innerText = '🎫'; playClick(); renderGifts(); saveData(); } }
-        function deleteGift(id, e) { e.stopPropagation(); state.gifts = state.gifts.filter(g => g.id !== id); playClick(); renderGifts(); saveData(); }
+        function renderGifts() {
+            const g = document.getElementById('giftGrid');
+            if (!Array.isArray(state.gifts)) state.gifts = [];
+            g.innerHTML = state.gifts.length ? state.gifts.map(gf => `<div class="action-btn-wrapper"><button class="rename-action-btn" onclick="editGift('${gf.id}', event)" title="修改禮物">✏️</button><button class="del-action-btn" onclick="deleteGift('${gf.id}', event)" title="刪除禮物">✖</button><div class="btn btn-yellow selectable-text" style="width:100%; height:100%; cursor:auto;"><span>${gf.icon || '🎁'}</span>${gf.name} <small>${gf.pts} 點</small></div></div>`).join('') : '<div style="grid-column:1/-1; padding:18px; border:3px dashed var(--ui-border); border-radius:12px; color:#777; font-weight:bold; text-align:center;">目前沒有兌換禮物，老師可以在上方新增項目。</div>';
+        }
+        function addGift() {
+            const iBtn = document.getElementById('giftIconBtn');
+            const nameInput = document.getElementById('newGiftName');
+            const ptsInput = document.getElementById('newGiftPts');
+            const n = nameInput.value.trim();
+            const p = Math.max(1, Math.abs(parseInt(ptsInput.value, 10) || 10));
+            if (!n) { showModal('⚠️ 尚未輸入禮物名稱', '請先輸入可兌換的禮物名稱。'); return; }
+            state.gifts.push({ id: 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), name: n, pts: p, icon: iBtn.innerText || '🎁' });
+            nameInput.value = '';
+            ptsInput.value = 10;
+            iBtn.innerText = '🎫';
+            playClick();
+            renderGifts();
+            saveData();
+        }
+        function editGift(id, e) {
+            e.stopPropagation();
+            const gift = state.gifts.find(g => g.id === id);
+            if (!gift) return;
+            const name = prompt('請輸入禮物名稱：', gift.name);
+            if (name === null) return;
+            const cleanName = name.trim();
+            if (!cleanName) { showModal('⚠️ 名稱不可空白', '請輸入禮物名稱。'); return; }
+            const ptsText = prompt('請輸入兌換所需點數：', gift.pts);
+            if (ptsText === null) return;
+            const pts = Math.max(1, Math.abs(parseInt(ptsText, 10) || gift.pts || 1));
+            const icon = prompt('請輸入禮物圖示：', gift.icon || '🎁');
+            if (icon === null) return;
+            gift.name = cleanName;
+            gift.pts = pts;
+            gift.icon = icon.trim() || '🎁';
+            playClick();
+            renderGifts();
+            saveData();
+        }
+        function deleteGift(id, e) {
+            e.stopPropagation();
+            const gift = state.gifts.find(g => g.id === id);
+            if (!gift) return;
+            if (!confirm(`確定要刪除「${gift.icon || '🎁'} ${gift.name}」嗎？`)) return;
+            state.gifts = state.gifts.filter(g => g.id !== id);
+            playClick();
+            renderGifts();
+            saveData();
+        }
         function openRedeemModal(id) { playClick(); const s = state.students.find(x => x.id === id); if(!s) return; document.getElementById('redeemStudentInfo').innerText = `🧑‍🎓 ${s.name} (${s.pts}分)`; const l = document.getElementById('redeemGiftList'); l.innerHTML = state.gifts.length ? state.gifts.map(g => `<button class="btn ${s.pts>=g.pts?'btn-green':'btn-gray'}" style="padding:10px; font-size:1rem; opacity:${s.pts>=g.pts?'1':'0.6'}" ${s.pts>=g.pts?`onclick="confirmRedeem(${s.id}, '${g.id}')"`:'disabled'}><span style="font-size:1.5rem;">${g.icon}</span>${g.name}<br><small>(-${g.pts}分)</small></button>`).join('') : '<div style="grid-column:span 2; color:#888;">無禮物</div>'; document.getElementById('redeemModal').classList.add('active'); }
         function confirmRedeem(sid, gid) { const s = state.students.find(x => x.id === sid); const g = state.gifts.find(x => x.id === gid); if(s && g && s.pts >= g.pts) { s.pts -= g.pts; closeModal('redeemModal'); addHistory(`[${s.name}] 兌換 ${g.icon} ${g.name} (-${g.pts}分)`); playLevelUp(); renderStudents(); saveData(); setTimeout(() => showModal("🎁 兌換成功！", `恭喜 ${s.name} 兌換【${g.icon} ${g.name}】！`), 300); } }
 
@@ -3194,5 +3241,3 @@
     </script>
 </body>
 </html>
-
-
