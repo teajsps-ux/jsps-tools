@@ -1048,7 +1048,7 @@
             if (!Array.isArray(state.groups)) { state.groups = []; saveData(); }
             normalizeDefaultGroups();
             if (!Number.isInteger(state.studentQuickScore) || state.studentQuickScore < 1 || state.studentQuickScore > 100) { state.studentQuickScore = 1; saveData(); }
-            state.students.forEach(s => { if (s.groupId === undefined) s.groupId = null; });
+            state.students.forEach(s => { if (s.groupId === undefined) s.groupId = null; if (!Array.isArray(s.groupIds)) s.groupIds = s.groupId ? [s.groupId] : []; s.groupId = s.groupIds[0] || null; });
             updateUI(); renderActions(); renderGroups(); renderTasks(); renderStudents(); renderGifts(); renderHistory(); renderPokedex();
         }
 
@@ -2127,7 +2127,7 @@
             if (!Array.isArray(state.groups) || state.groups.length !== 6) return;
             const isOldDefault = state.groups.every((g, i) => g && g.id === `grp_${i + 1}` && g.name === defaults[i]);
             if (!isOldDefault) return;
-            const used = new Set((state.students || []).map(s => s.groupId).filter(Boolean));
+            const used = new Set(); (state.students || []).forEach(s => { (Array.isArray(s.groupIds) ? s.groupIds : (s.groupId ? [s.groupId] : [])).forEach(id => used.add(id)); });
             state.groups = state.groups.filter(g => used.has(g.id));
         }
         function getOrCreateGroupByName(name) {
@@ -2139,6 +2139,40 @@
                 state.groups.push(group);
             }
             return group;
+        }
+        function splitGroupNames(text) {
+            return String(text || '').split(/[、,，\/／|｜+＋&＆]+/).map(s => s.trim()).filter(Boolean);
+        }
+        function getStudentGroupIds(student) {
+            if (!student) return [];
+            if (Array.isArray(student.groupIds)) return student.groupIds.filter(Boolean);
+            return student.groupId ? [student.groupId] : [];
+        }
+        function setStudentGroupIds(student, ids) {
+            const clean = [...new Set((ids || []).filter(Boolean))];
+            student.groupIds = clean;
+            student.groupId = clean[0] || null;
+        }
+        function studentInGroup(student, groupId) {
+            return getStudentGroupIds(student).includes(groupId);
+        }
+        function getStudentGroupNames(student) {
+            const ids = getStudentGroupIds(student);
+            return ids.map(id => state.groups.find(g => g.id === id)?.name).filter(Boolean);
+        }
+        function editStudentGroups(id) {
+            const student = state.students.find(s => s.id === id);
+            if (!student) return;
+            const current = getStudentGroupNames(student).join('、');
+            const input = prompt(`請輸入 ${student.name} 所屬組別，可用「、」或「/」分隔：`, current);
+            if (input === null) return;
+            const groupIds = splitGroupNames(input).map(name => getOrCreateGroupByName(name)?.id).filter(Boolean);
+            setStudentGroupIds(student, groupIds);
+            playClick();
+            renderGroups();
+            renderStudents();
+            renderRanking();
+            saveData();
         }
         let draggedGroupId = null;
         function renderGroups() {
@@ -2220,24 +2254,24 @@
             if(e) e.stopPropagation();
             const group = state.groups.find(g => g.id === id);
             if(!group) return;
-            const count = state.students.filter(s => s.groupId === id).length;
+            const count = state.students.filter(s => studentInGroup(s, id)).length;
             if(count && !confirm(`「${group.name}」目前有 ${count} 位學生。刪除組別後，這些學生會改為未分組，確定要刪除嗎？`)) return;
             if(!count && !confirm(`確定要刪除「${group.name}」嗎？`)) return;
             state.groups = state.groups.filter(g => g.id !== id);
-            state.students.forEach(s => { if(s.groupId === id) s.groupId = null; });
+            state.students.forEach(s => setStudentGroupIds(s, getStudentGroupIds(s).filter(gid => gid !== id)));
             playClick();
             renderGroups();
             renderStudents();
             renderRanking();
             saveData();
         }
-        function scoreGroup(id) { const g = state.groups.find(x => x.id === id); const p = parseInt(document.getElementById('groupPtsInput').value) || 0; if(!g || p===0) return; const stu = state.students.filter(s => s.groupId === id); if(stu.length === 0) return showModal("⚠️ 小組沒人喔", "請先分配學生！"); stu.forEach(s => s.pts += p); givePoints(p, p>0?5:-5, p>0?'小組優良':'小組提醒', g.name); renderStudents(); saveData(); }
+        function scoreGroup(id) { const g = state.groups.find(x => x.id === id); const p = parseInt(document.getElementById('groupPtsInput').value) || 0; if(!g || p===0) return; const stu = state.students.filter(s => studentInGroup(s, id)); if(stu.length === 0) return showModal("⚠️ 小組沒人喔", "請先分配學生！"); stu.forEach(s => s.pts += p); givePoints(p, p>0?5:-5, p>0?'小組優良':'小組提醒', g.name); renderStudents(); saveData(); }
         function openClassScoreModal(t) { playClick(); currentClassScoreType = t; const ti = document.getElementById('classScoreTitle'); const b = document.getElementById('classScoreConfirmBtn'); const i = document.getElementById('classScoreInput'); i.value = '1'; if (t === 'add') { ti.innerText = `🌟 為全班加分`; ti.style.color = 'var(--success)'; b.style.background = 'var(--success)'; b.innerText = '確定加分'; } else { ti.innerText = `⚠️ 為全班扣分`; ti.style.color = 'var(--danger)'; b.style.background = 'var(--danger)'; b.innerText = '確定扣分'; } document.getElementById('classScoreModal').classList.add('active'); setTimeout(() => { i.focus(); i.select(); }, 100); }
         function confirmClassScore() { const v = parseInt(document.getElementById('classScoreInput').value); if (isNaN(v) || v <= 0) return showModal("⚠️ 錯誤", "請輸入>0數字！"); if(state.students.length === 0) { closeModal('classScoreModal'); setTimeout(() => showModal("⚠️ 沒人", "請先新增學生！"), 300); return; } const c = currentClassScoreType === 'add' ? v : -v; state.students.forEach(s => s.pts += c); givePoints(c, c>0 ? Math.min(v,5) : Math.max(-v,-5), c>0?'全班優良':'全班提醒'); renderStudents(); saveData(); closeModal('classScoreModal'); }
 
         function renderRanking() {
             const gl = document.getElementById('groupRankList'); if(gl) {
-                const gs = state.groups.map(g => ({ ...g, totalPts: state.students.filter(s => s.groupId === g.id).reduce((sum, s) => sum + s.pts, 0) })).sort((a, b) => b.totalPts - a.totalPts);
+                const gs = state.groups.map(g => ({ ...g, totalPts: state.students.filter(s => studentInGroup(s, g.id)).reduce((sum, s) => sum + s.pts, 0) })).sort((a, b) => b.totalPts - a.totalPts);
                 gl.innerHTML = gs.length ? gs.map((g, i) => `<div class="rank-item ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}"><div class="rank-num">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`<span style="font-size:1.3rem; color:#888;">${i+1}</span>`}</div><div class="rank-name">${g.name}</div><div class="rank-pts">${g.totalPts} 點</div></div>`).join('') : '<div style="color: #888;">無資料</div>';
             }
             const sl = document.getElementById('studentRankList'); if(sl) {
@@ -2284,11 +2318,14 @@
             const quickScoreInput = document.getElementById('studentQuickScoreInput'); if (quickScoreInput) quickScoreInput.value = state.studentQuickScore || 1;
             const l = document.getElementById('studentList'); l.innerHTML = '';
             state.students.forEach(s => {
-                let opts = `<option value="">未分組</option>` + state.groups.map(g => `<option value="${g.id}" ${s.groupId===g.id?'selected':''}>${g.name}</option>`).join('');
-                l.innerHTML += `<div class="student-item"><div style="flex:1; display:flex; flex-direction:column; gap:4px; padding-right:8px;"><span class="selectable-text" style="word-break:break-word; line-height:1.3;" title="${s.name}">${s.name}</span><select onchange="updateStudentGroup(${s.id}, this.value)" style="display:${isStudentGroupEditorVisible?'block':'none'}; padding:2px 4px; border-radius:4px; border:2px solid var(--ui-border); background:white; font-size:0.85rem; font-weight:bold; color:var(--ui-border); width:fit-content;">${opts}</select></div><div class="student-actions"><span class="student-pts">${s.pts} 分</span><button onclick="openRedeemModal(${s.id})" style="color:var(--warning);" title="兌換">🎁</button><button onclick="generateStudentPraise('${s.name}', ${s.pts})" style="color:#a29bfe;" title="AI 鼓勵">✨</button><button onclick="quickAdjustStudentScore(${s.id}, 1)" style="color:var(--success)" title="加 ${state.studentQuickScore || 1} 分">+</button><button onclick="quickAdjustStudentScore(${s.id}, -1)" style="color:var(--danger)" title="扣 ${state.studentQuickScore || 1} 分">-</button><button class="student-del-btn" onclick="deleteStudent(${s.id})">✖</button></div></div>`;
+                const groupNames = getStudentGroupNames(s);
+                const groupLabel = groupNames.length ? groupNames.join('、') : '未分組';
+                const groupTags = `<div style="display:flex; flex-wrap:wrap; gap:3px; align-items:center; font-size:0.75rem; color:#6c5ce7; line-height:1.2; max-width:190px;">${groupLabel}</div>`;
+                const groupEditor = `<button onclick="editStudentGroups(${s.id})" style="display:${isStudentGroupEditorVisible?'inline-flex':'none'}; width:auto; height:auto; min-height:24px; padding:2px 8px; font-size:0.8rem; background:#fff; color:var(--ui-border); border:2px solid var(--ui-border); border-radius:6px; box-shadow:0 2px 0 var(--ui-border);">👥 設定分組</button>`;
+                l.innerHTML += `<div class="student-item"><div style="flex:1; display:flex; flex-direction:column; gap:4px; padding-right:8px;"><span class="selectable-text" style="word-break:break-word; line-height:1.3;" title="${s.name}">${s.name}</span>${groupTags}${groupEditor}</div><div class="student-actions"><span class="student-pts">${s.pts} 分</span><button onclick="openRedeemModal(${s.id})" style="color:var(--warning);" title="兌換">🎁</button><button onclick="generateStudentPraise('${s.name}', ${s.pts})" style="color:#a29bfe;" title="AI 鼓勵">✨</button><button onclick="quickAdjustStudentScore(${s.id}, 1)" style="color:var(--success)" title="加 ${state.studentQuickScore || 1} 分">+</button><button onclick="quickAdjustStudentScore(${s.id}, -1)" style="color:var(--danger)" title="扣 ${state.studentQuickScore || 1} 分">-</button><button class="student-del-btn" onclick="deleteStudent(${s.id})">✖</button></div></div>`;
             }); renderRanking(); syncDrawRoster();
         }
-        function addStudent() { const i = document.getElementById('newStudentName'); if(i.value.trim()) { state.students.push({ id: Date.now(), name: i.value.trim(), pts: 0, groupId: null }); i.value = ''; playClick(); renderStudents(); saveData(); } }
+        function addStudent() { const i = document.getElementById('newStudentName'); if(i.value.trim()) { state.students.push({ id: Date.now(), name: i.value.trim(), pts: 0, groupId: null, groupIds: [] }); i.value = ''; playClick(); renderStudents(); saveData(); } }
         function setStudentQuickScore(value) { const input = document.getElementById('studentQuickScoreInput'); const score = Math.max(1, Math.min(100, parseInt(value) || 1)); state.studentQuickScore = score; if (input) input.value = score; playClick(); saveData(); }
         function quickAdjustStudentScore(id, delta) { const s = state.students.find(x => x.id === id); if(!s) return; const score = state.studentQuickScore || 1; const c = delta > 0 ? score : -score; playClick(); s.pts += c; givePoints(c, c > 0 ? Math.min(score, 5) : Math.max(-score, -5), c > 0 ? '優良' : '提醒', s.name); renderStudents(); saveData(); }
         function openStudentScoreModal(id, type) { playClick(); const s = state.students.find(x => x.id === id); if(!s) return; currentScoreTarget = { id, type }; const t = document.getElementById('studentScoreTitle'); const b = document.getElementById('studentScoreConfirmBtn'); const i = document.getElementById('studentScoreInput'); i.value = '1'; if(type === 'add') { t.innerText = `➕ 為 ${s.name} 加分`; t.style.color = 'var(--success)'; b.style.background = 'var(--success)'; b.innerText = '加分'; } else { t.innerText = `➖ 為 ${s.name} 扣分`; t.style.color = 'var(--danger)'; b.style.background = 'var(--danger)'; b.innerText = '扣分'; } document.getElementById('studentScoreModal').classList.add('active'); setTimeout(() => { i.focus(); i.select(); }, 100); }
@@ -2341,12 +2378,11 @@
                 if(mode==='append'&&existingSeats.has(s.seat)){skipped++;return false;}
                 existingSeats.add(s.seat); return true;
             }).map((s,i)=>{
-                let groupId=null;
+                let groupIds=[];
                 if(s.groupName){
-                    let group=getOrCreateGroupByName(s.groupName);
-                    groupId=group.id;
+                    groupIds=splitGroupNames(s.groupName).map(name => getOrCreateGroupByName(name)?.id).filter(Boolean);
                 }
-                return {id:Date.now()+i,name:s.name,pts:0,groupId};
+                return {id:Date.now()+i,name:s.name,pts:0,groupId:groupIds[0]||null,groupIds};
             });
             state.students=mode==='replace'?imported:[...state.students,...imported];
             sortStudentsBySeat(); saveData(); renderGroups(); renderStudents(); playLevelUp();
