@@ -710,6 +710,8 @@
                     <label style="display:flex; align-items:center; gap:6px; padding:4px 10px; border:3px solid var(--ui-border); border-radius:8px; background:#fff; font-size:0.9rem; font-weight:bold; white-space:nowrap;">個人加扣分
                         <input type="number" id="studentQuickScoreInput" value="1" min="1" max="100" onchange="setStudentQuickScore(this.value)" style="width:52px; padding:4px; border:2px solid var(--ui-border); border-radius:6px; font-size:0.95rem; font-weight:bold; text-align:center;">
                     </label>
+                    <button class="sys-btn" style="width:auto; flex:none; margin:0; padding:8px 12px; background:#1dd1a1; color:#fff;" onclick="adjustSelectedSeats(1)">➕ 指定加分</button>
+                    <button class="sys-btn" style="width:auto; flex:none; margin:0; padding:8px 12px; background:#ff7675; color:#fff;" onclick="adjustSelectedSeats(-1)">➖ 指定扣分</button>
                     <button class="sys-btn" style="width:auto; flex:none; margin:0; padding:8px 12px; background:#74b9ff; color:#fff;" onclick="openStudentImportModal()">📋 批次匯入名單</button>
                     <button class="sys-btn" style="width:auto; flex:none; margin:0; padding:8px 12px; background:#ff7675; color:#fff;" onclick="openClearStudentsModal()">🗑️ 清空學生名單</button>
                 </div>
@@ -2344,7 +2346,55 @@
                 l.innerHTML += `<div class="student-item"><div style="flex:1; display:flex; flex-direction:column; gap:4px; padding-right:8px;"><span class="selectable-text" style="word-break:break-word; line-height:1.3;" title="${s.name}">${s.name}</span>${groupTags}${groupEditor}</div><div class="student-actions"><span class="student-pts">${s.pts} 分</span><button onclick="openRedeemModal(${s.id})" style="color:var(--warning);" title="兌換">🎁</button><button onclick="generateStudentPraise('${s.name}', ${s.pts})" style="color:#a29bfe;" title="AI 鼓勵">✨</button><button onclick="quickAdjustStudentScore(${s.id}, 1)" style="color:var(--success)" title="加 ${state.studentQuickScore || 1} 分">+</button><button onclick="quickAdjustStudentScore(${s.id}, -1)" style="color:var(--danger)" title="扣 ${state.studentQuickScore || 1} 分">-</button><button class="student-del-btn" onclick="deleteStudent(${s.id})">✖</button></div></div>`;
             }); renderRanking(); syncDrawRoster();
         }
-        function addStudent() { const i = document.getElementById('newStudentName'); if(i.value.trim()) { state.students.push({ id: Date.now(), name: i.value.trim(), pts: 0, groupId: null, groupIds: [] }); i.value = ''; playClick(); renderStudents(); saveData(); } }
+        function addStudent() {
+            const i = document.getElementById('newStudentName');
+            const name = i.value.trim();
+            if (!name) return;
+            if (parseSeatSelection(name).length) return showModal("⚠️ 偵測到座號清單", "如果要幫多位學生加扣分，請使用下方的「指定加分」或「指定扣分」。若要新增學生，請輸入完整姓名，例如：1號 王小明。");
+            const seat = getStudentSeatNumber(name);
+            if (Number.isFinite(seat) && seat !== Number.MAX_SAFE_INTEGER && state.students.some(s => getStudentSeatNumber(s.name) === seat)) return showModal("⚠️ 座號已存在", `目前已有 ${seat} 號學生，請先確認是否要刪除原學生再新增。`);
+            state.students.push({ id: Date.now(), name, pts: 0, groupId: null, groupIds: [] });
+            i.value = '';
+            playClick();
+            renderStudents();
+            saveData();
+        }
+        function parseSeatSelection(text) {
+            const raw = String(text || '').trim();
+            if (!raw) return [];
+            if (!/^\s*\d+\s*(?:號)?(?:\s*(?:[,，、;；\s]+|-|~|～|至)\s*\d+\s*(?:號)?)*\s*$/.test(raw)) return [];
+            const normalized = raw.replace(/號/g, '').replace(/[，、;；]/g, ',').replace(/\s+/g, ',');
+            const seats = [];
+            normalized.split(',').filter(Boolean).forEach(part => {
+                const range = part.match(/^(\d+)(?:-|~|～|至)(\d+)$/);
+                if (range) {
+                    const a = parseInt(range[1], 10), b = parseInt(range[2], 10);
+                    const start = Math.min(a, b), end = Math.max(a, b);
+                    for (let n = start; n <= end; n++) seats.push(n);
+                } else if (/^\d+$/.test(part)) {
+                    seats.push(parseInt(part, 10));
+                }
+            });
+            return [...new Set(seats)].filter(n => n > 0).sort((a, b) => a - b);
+        }
+        function adjustSelectedSeats(direction) {
+            const input = document.getElementById('newStudentName');
+            const seats = parseSeatSelection(input.value);
+            if (!seats.length) return showModal("⚠️ 請輸入座號", "請在上方輸入要加扣分的座號，例如：1,5,9 或 1-5。");
+            const targets = state.students.filter(s => seats.includes(getStudentSeatNumber(s.name)));
+            const foundSeats = new Set(targets.map(s => getStudentSeatNumber(s.name)));
+            const missing = seats.filter(n => !foundSeats.has(n));
+            if (!targets.length) return showModal("⚠️ 找不到學生", `找不到這些座號：${seats.join('、')}`);
+            const score = state.studentQuickScore || 1;
+            const change = direction > 0 ? score : -score;
+            targets.forEach(s => s.pts += change);
+            const names = targets.map(s => s.name).join('、');
+            givePoints(change, change > 0 ? Math.min(score, 5) : Math.max(-score, -5), change > 0 ? '指定加分' : '指定扣分', names);
+            input.value = '';
+            renderStudents();
+            saveData();
+            if (missing.length) setTimeout(() => showModal("⚠️ 部分座號未找到", `已處理：${targets.map(s => getStudentSeatNumber(s.name)).join('、')}號。\n未找到：${missing.join('、')}號。`), 250);
+        }
         function setStudentQuickScore(value) { const input = document.getElementById('studentQuickScoreInput'); const score = Math.max(1, Math.min(100, parseInt(value) || 1)); state.studentQuickScore = score; if (input) input.value = score; playClick(); saveData(); }
         function quickAdjustStudentScore(id, delta) { const s = state.students.find(x => x.id === id); if(!s) return; const score = state.studentQuickScore || 1; const c = delta > 0 ? score : -score; playClick(); s.pts += c; givePoints(c, c > 0 ? Math.min(score, 5) : Math.max(-score, -5), c > 0 ? '優良' : '提醒', s.name); renderStudents(); saveData(); }
         function openStudentScoreModal(id, type) { playClick(); const s = state.students.find(x => x.id === id); if(!s) return; currentScoreTarget = { id, type }; const t = document.getElementById('studentScoreTitle'); const b = document.getElementById('studentScoreConfirmBtn'); const i = document.getElementById('studentScoreInput'); i.value = '1'; if(type === 'add') { t.innerText = `➕ 為 ${s.name} 加分`; t.style.color = 'var(--success)'; b.style.background = 'var(--success)'; b.innerText = '加分'; } else { t.innerText = `➖ 為 ${s.name} 扣分`; t.style.color = 'var(--danger)'; b.style.background = 'var(--danger)'; b.innerText = '扣分'; } document.getElementById('studentScoreModal').classList.add('active'); setTimeout(() => { i.focus(); i.select(); }, 100); }
