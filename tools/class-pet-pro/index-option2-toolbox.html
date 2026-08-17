@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -105,7 +105,12 @@
         .rank-name { flex: 1; font-size: 1.2rem; word-break: break-word; }
         .rank-pts { font-size: 1.4rem; color: #1e3799; text-shadow: 1px 1px 0px white; }
         .action-btn-wrapper { position: relative; }
+        .action-btn-wrapper.group-draggable { cursor: grab; }
+        .action-btn-wrapper.group-draggable:active { cursor: grabbing; }
+        .action-btn-wrapper.group-dragging { opacity: 0.55; transform: scale(0.96); }
         .del-action-btn { display: none; position: absolute; top: -8px; right: -8px; background: var(--danger); color: white; border: 3px solid var(--ui-border); border-radius: 50%; width: 28px; height: 28px; font-size: 14px; font-weight: bold; cursor: pointer; justify-content: center; align-items: center; box-shadow: 0 3px 0 var(--ui-border); z-index: 10; }
+        .rename-action-btn { display: none; position: absolute; top: -8px; left: -8px; background: var(--warning); color: var(--ui-border); border: 3px solid var(--ui-border); border-radius: 50%; width: 28px; height: 28px; font-size: 14px; font-weight: bold; cursor: pointer; justify-content: center; align-items: center; box-shadow: 0 3px 0 var(--ui-border); z-index: 10; }
+        .action-grid.edit-mode .rename-action-btn { display: flex; }
         .student-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
         .student-item { display: flex; justify-content: space-between; align-items: center; background: #e6d4b8; padding: 8px 10px; border-radius: 10px; border: 3px solid var(--ui-border); font-weight: bold; color: var(--ui-border);}
         .student-pts { font-weight: bold; color: #1e3799; font-size: 1.05rem; text-shadow: 1px 1px 0px white;}
@@ -743,6 +748,8 @@
                     <label style="display:flex; align-items:center; gap:6px; padding:4px 10px; border:3px solid var(--ui-border); border-radius:8px; background:#fff; font-size:0.9rem; font-weight:bold; white-space:nowrap;">個人加扣分
                         <input type="number" id="studentQuickScoreInput" value="1" min="1" max="100" onchange="setStudentQuickScore(this.value)" style="width:52px; padding:4px; border:2px solid var(--ui-border); border-radius:6px; font-size:0.95rem; font-weight:bold; text-align:center;">
                     </label>
+                    <button class="sys-btn" style="width:auto; flex:none; margin:0; padding:8px 12px; background:#1dd1a1; color:#fff;" onclick="adjustSelectedSeats(1)">➕ 指定加分</button>
+                    <button class="sys-btn" style="width:auto; flex:none; margin:0; padding:8px 12px; background:#ff7675; color:#fff;" onclick="adjustSelectedSeats(-1)">➖ 指定扣分</button>
                     <button class="sys-btn" style="width:auto; flex:none; margin:0; padding:8px 12px; background:#74b9ff; color:#fff;" onclick="openStudentImportModal()">📋 批次匯入名單</button>
                     <button class="sys-btn" style="width:auto; flex:none; margin:0; padding:8px 12px; background:#ff7675; color:#fff;" onclick="openClearStudentsModal()">🗑️ 清空學生名單</button>
                 </div>
@@ -801,7 +808,7 @@
     <div class="modal-overlay" id="redeemModal"><div class="modal" style="max-width: 500px;"><h2 style="color: var(--warning); text-shadow: 2px 2px 0 var(--ui-border);">🎁 兌換禮物</h2><p id="redeemStudentInfo" style="font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;"></p><div id="redeemGiftList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 300px; overflow-y: auto; padding: 5px;"></div><button class="modal-btn" style="background: #a4b0be; margin-top: 20px;" onclick="closeModal('redeemModal')">取消</button></div></div>
     <div class="modal-overlay" id="studentScoreModal" style="z-index: 102;"><div class="modal" style="max-width: 400px;"><h2 id="studentScoreTitle" style="text-shadow: 2px 2px 0 var(--ui-border);">加分/扣分</h2><p id="studentScoreDesc" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 10px;">請輸入要調整的分數：</p><input type="number" id="studentScoreInput" value="1" min="1" max="100" onkeydown="if(event.key==='Enter') confirmStudentScore()" style="width: 60%; padding: 15px; border: 4px solid var(--ui-border); border-radius: 12px; font-size: 1.8rem; font-weight: bold; margin: 10px 0; text-align: center; font-family: inherit; color: var(--ui-border);"><div style="display: flex; gap: 15px; justify-content: center; margin-top: 15px;"><button class="modal-btn" style="background: #a4b0be;" onclick="closeModal('studentScoreModal')">取消</button><button class="modal-btn" id="studentScoreConfirmBtn" onclick="confirmStudentScore()">確定</button></div></div></div>
     <div class="modal-overlay" id="classScoreModal" style="z-index: 102;"><div class="modal" style="max-width: 400px;"><h2 id="classScoreTitle" style="text-shadow: 2px 2px 0 var(--ui-border);">全班加分/扣分</h2><p id="classScoreDesc" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 10px;">請輸入全班每人要調整的分數：</p><input type="number" id="classScoreInput" value="1" min="1" max="100" onkeydown="if(event.key==='Enter') confirmClassScore()" style="width: 60%; padding: 15px; border: 4px solid var(--ui-border); border-radius: 12px; font-size: 1.8rem; font-weight: bold; margin: 10px 0; text-align: center; font-family: inherit; color: var(--ui-border);"><div style="display: flex; gap: 15px; justify-content: center; margin-top: 15px;"><button class="modal-btn" style="background: #a4b0be;" onclick="closeModal('classScoreModal')">取消</button><button class="modal-btn" id="classScoreConfirmBtn" onclick="confirmClassScore()">確定</button></div></div></div>
-    <div class="modal-overlay" id="studentImportModal" style="z-index:104;"><div class="modal" style="width:620px; max-height:90vh; overflow-y:auto;"><h2 style="color:#0984e3;">📋 批次匯入學生名單</h2><p style="font-size:.95rem; line-height:1.6; text-align:left; margin-bottom:10px;">可直接從 Excel 複製三欄：<strong>座號、姓名、組別</strong>。系統會自動排序並完成分組。只有座號與姓名兩欄也可以使用。<br><strong>1　王小明　第一組</strong><br><strong>2　李小華　第二組</strong></p><textarea id="studentImportText" placeholder="1　王小明　第一組&#10;2　李小華　第二組&#10;3　陳美玲　第三組" style="width:100%; min-height:160px; padding:10px; border:3px solid var(--ui-border); border-radius:10px; font-size:1rem; line-height:1.5; resize:vertical;"></textarea><div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin:12px 0; font-weight:bold;"><label><input type="radio" name="studentImportMode" value="replace" checked> 取代目前名單</label><label><input type="radio" name="studentImportMode" value="append"> 加入目前名單</label></div><div id="studentImportPreview" style="display:none; text-align:left; background:#fff; border:2px dashed #74b9ff; border-radius:10px; padding:10px; max-height:180px; overflow-y:auto; line-height:1.5;"></div><div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"><button class="modal-btn" style="background:#74b9ff;" onclick="previewStudentImport()">🔍 預覽名單</button><button class="modal-btn" style="background:#1dd1a1;" onclick="confirmStudentImport()">✅ 確定匯入</button><button class="modal-btn" style="background:#a4b0be;" onclick="closeModal('studentImportModal')">取消</button></div></div></div>
+    <div class="modal-overlay" id="studentGroupsModal" style="z-index:105;"><div class="modal" style="width:520px; max-height:90vh; overflow-y:auto;"><h2 id="studentGroupsTitle" style="color:#6c5ce7; text-shadow:2px 2px 0 var(--ui-border);">👥 設定學生分組</h2><p style="font-size:1rem; color:#555; font-weight:bold; line-height:1.5;">勾選這位學生所屬的小組，可同時加入多個組別。</p><div id="studentGroupsChecklist" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin:15px 0; text-align:left;"></div><div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"><button class="modal-btn" style="background:#74b9ff;" onclick="selectAllStudentGroups(true)">全選</button><button class="modal-btn" style="background:#fdcb6e; color:var(--ui-border);" onclick="selectAllStudentGroups(false)">清空</button><button class="modal-btn" style="background:#a4b0be;" onclick="closeModal('studentGroupsModal')">取消</button><button class="modal-btn" style="background:#1dd1a1;" onclick="saveStudentGroupsFromModal()">儲存</button></div></div></div>    <div class="modal-overlay" id="studentImportModal" style="z-index:104;"><div class="modal" style="width:620px; max-height:90vh; overflow-y:auto;"><h2 style="color:#0984e3;">📋 批次匯入學生名單</h2><p style="font-size:.95rem; line-height:1.6; text-align:left; margin-bottom:10px;">可直接從 Excel 複製三欄：<strong>座號、姓名、組別</strong>。系統會自動排序並完成分組。只有座號與姓名兩欄也可以使用。<br><strong>1　王小明　第一組</strong><br><strong>2　李小華　第二組</strong></p><textarea id="studentImportText" placeholder="1　王小明　第一組&#10;2　李小華　第二組&#10;3　陳美玲　第三組" style="width:100%; min-height:160px; padding:10px; border:3px solid var(--ui-border); border-radius:10px; font-size:1rem; line-height:1.5; resize:vertical;"></textarea><div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin:12px 0; font-weight:bold;"><label><input type="radio" name="studentImportMode" value="replace" checked> 取代目前名單</label><label><input type="radio" name="studentImportMode" value="append"> 加入目前名單</label></div><div id="studentImportPreview" style="display:none; text-align:left; background:#fff; border:2px dashed #74b9ff; border-radius:10px; padding:10px; max-height:180px; overflow-y:auto; line-height:1.5;"></div><div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"><button class="modal-btn" style="background:#74b9ff;" onclick="previewStudentImport()">🔍 預覽名單</button><button class="modal-btn" style="background:#1dd1a1;" onclick="confirmStudentImport()">✅ 確定匯入</button><button class="modal-btn" style="background:#a4b0be;" onclick="closeModal('studentImportModal')">取消</button></div></div></div>
     <div class="modal-overlay" id="clearStudentsModal" style="z-index:104;"><div class="modal" style="max-width:460px;"><h2 style="color:var(--danger);">⚠️ 清空學生名單</h2><p style="font-size:1.1rem; line-height:1.6; font-weight:bold;">確定要刪除目前全部學生嗎？</p><p style="color:#555; line-height:1.6;">學生姓名、個人分數與分組資料都會清除。<br><strong style="color:var(--danger);">此操作無法復原。</strong></p><div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;"><button class="modal-btn" style="background:#a4b0be;" onclick="closeModal('clearStudentsModal')">取消</button><button class="modal-btn" style="background:var(--danger);" onclick="confirmClearStudents()">確定清空</button></div></div></div>
 
     <!-- 陳版 modals -->
@@ -924,7 +931,7 @@
                 lastDate: new Date().toLocaleDateString('zh-TW'),
                 currentPetId: 1, unlockedMaxId: 1,
                 petStats: { 1: { level: 1, exp: 0, mood: 50, hunger: 50, energy: 100, name: PET_DEX[0].name } },
-                groups: [{ id: 'grp_1', name: '第一組' }, { id: 'grp_2', name: '第二組' }, { id: 'grp_3', name: '第三組' }, { id: 'grp_4', name: '第四組' }, { id: 'grp_5', name: '第五組' }, { id: 'grp_6', name: '第六組' }],
+                groups: [],
                 studentQuickScore: 1,
                 students: Array.from({length: 35}, (_, i) => ({ id: i + 1, name: `${i + 1}號`, pts: 0, groupId: null })),
                 positiveActions: JSON.parse(JSON.stringify(defaultPositiveActions)),
@@ -947,7 +954,7 @@
             playClick();
             if(type === 'pos') { isPosEditMode = !isPosEditMode; document.getElementById('positiveGrid').classList.toggle('edit-mode'); }
             else if(type === 'neg') { isNegEditMode = !isNegEditMode; document.getElementById('negativeGrid').classList.toggle('edit-mode'); }
-            else if(type === 'grp') { isGrpEditMode = !isGrpEditMode; document.getElementById('groupGrid').classList.toggle('edit-mode'); }
+            else if(type === 'grp') { isGrpEditMode = !isGrpEditMode; document.getElementById('groupGrid').classList.toggle('edit-mode'); renderGroups(); }
             else if(type === 'gift') { isGiftEditMode = !isGiftEditMode; document.getElementById('giftGrid').classList.toggle('edit-mode'); }
             else if(type === 'stu') { isStuEditMode = !isStuEditMode; document.getElementById('studentList').classList.toggle('edit-mode'); }
             else if(type === 'task') { isTaskEditMode = !isTaskEditMode; document.getElementById('taskList').classList.toggle('edit-mode'); }
@@ -1078,9 +1085,10 @@
             if(!state.petStats[state.currentPetId]) state.petStats[state.currentPetId] = { level: 1, exp: 0, mood: 50, hunger: 50, energy: 100, name: PET_DEX.find(p => p.id === state.currentPetId).name };
             if (state.lastDate !== new Date().toLocaleDateString('zh-TW')) { state.tasks.forEach(t => t.done = false); state.lastDate = new Date().toLocaleDateString('zh-TW'); saveData(); }
             if (!state.gifts) { state.gifts = JSON.parse(JSON.stringify(defaultGifts)); saveData(); }
-            if (!state.groups) { state.groups = [{ id: 'grp_1', name: '第一組' }, { id: 'grp_2', name: '第二組' }, { id: 'grp_3', name: '第三組' }, { id: 'grp_4', name: '第四組' }, { id: 'grp_5', name: '第五組' }, { id: 'grp_6', name: '第六組' }]; saveData(); }
+            if (!Array.isArray(state.groups)) { state.groups = []; saveData(); }
+            normalizeDefaultGroups();
             if (!Number.isInteger(state.studentQuickScore) || state.studentQuickScore < 1 || state.studentQuickScore > 100) { state.studentQuickScore = 1; saveData(); }
-            state.students.forEach(s => { if (s.groupId === undefined) s.groupId = null; });
+            state.students.forEach(s => { if (s.groupId === undefined) s.groupId = null; if (!Array.isArray(s.groupIds)) s.groupIds = s.groupId ? [s.groupId] : []; s.groupId = s.groupIds[0] || null; });
             updateUI(); renderActions(); renderGroups(); renderTasks(); renderStudents(); renderGifts(); renderHistory(); renderPokedex();
         }
 
@@ -2162,17 +2170,175 @@
         }
         function selectPet(id) { state.currentPetId = id; if(!state.petStats[id]) state.petStats[id] = { level: 1, exp: 0, mood: 50, hunger: 50, energy: 100, name: PET_DEX.find(p => p.id === id).name }; playClick(); updateUI(); renderPokedex(); saveData(); }
         function adjustGroupPts(d) { const i = document.getElementById('groupPtsInput'); i.value = (parseInt(i.value) || 0) + d; playClick(); renderGroups(); }
-        function renderGroups() { const g = document.getElementById('groupGrid'); if(!g) return; g.innerHTML = ''; const p = parseInt(document.getElementById('groupPtsInput').value) || 0; state.groups.forEach(grp => { g.innerHTML += `<div class="action-btn-wrapper"><button class="del-action-btn" onclick="deleteGroup('${grp.id}', event)">✖</button><div class="btn btn-blue selectable-text" style="width: 100%; height: 100%;" onclick="if(!window.getSelection().toString().trim()) scoreGroup('${grp.id}')"><span>🎯</span>${grp.name} <small>${p > 0 ? '+'+p : p}分</small></div></div>`; }); }
-        function addGroup() { const i = document.getElementById('newGroupName'); const n = i.value.trim(); if (n) { state.groups.push({ id: 'grp_' + Date.now(), name: n }); i.value = ''; playClick(); renderGroups(); renderStudents(); saveData(); } }
-        function deleteGroup(id, e) { e.stopPropagation(); state.groups = state.groups.filter(g => g.id !== id); state.students.forEach(s => { if(s.groupId === id) s.groupId = null; }); playClick(); renderGroups(); renderStudents(); saveData(); }
-        function updateStudentGroup(id, gid) { const s = state.students.find(x => x.id === id); if (s) { s.groupId = gid || null; saveData(); playClick(); } }
-        function scoreGroup(id) { const g = state.groups.find(x => x.id === id); const p = parseInt(document.getElementById('groupPtsInput').value) || 0; if(!g || p===0) return; const stu = state.students.filter(s => s.groupId === id); if(stu.length === 0) return showModal("⚠️ 小組沒人喔", "請先分配學生！"); stu.forEach(s => s.pts += p); givePoints(p, p>0?5:-5, p>0?'小組優良':'小組提醒', g.name); renderStudents(); saveData(); }
+        function normalizeDefaultGroups() {
+            const defaults = ['第一組','第二組','第三組','第四組','第五組','第六組'];
+            if (!Array.isArray(state.groups) || state.groups.length !== 6) return;
+            const isOldDefault = state.groups.every((g, i) => g && g.id === `grp_${i + 1}` && g.name === defaults[i]);
+            if (!isOldDefault) return;
+            const used = new Set(); (state.students || []).forEach(s => { (Array.isArray(s.groupIds) ? s.groupIds : (s.groupId ? [s.groupId] : [])).forEach(id => used.add(id)); });
+            state.groups = state.groups.filter(g => used.has(g.id));
+        }
+        function getOrCreateGroupByName(name) {
+            const clean = String(name || '').trim();
+            if (!clean) return null;
+            let group = state.groups.find(g => g.name === clean);
+            if (!group) {
+                group = { id: 'grp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), name: clean };
+                state.groups.push(group);
+            }
+            return group;
+        }
+        function splitGroupNames(text) {
+            return String(text || '').split(/[、,，\/／|｜+＋&＆]+/).map(s => s.trim()).filter(Boolean);
+        }
+        function getStudentGroupIds(student) {
+            if (!student) return [];
+            if (Array.isArray(student.groupIds)) return student.groupIds.filter(Boolean);
+            return student.groupId ? [student.groupId] : [];
+        }
+        function setStudentGroupIds(student, ids) {
+            const clean = [...new Set((ids || []).filter(Boolean))];
+            student.groupIds = clean;
+            student.groupId = clean[0] || null;
+        }
+        function studentInGroup(student, groupId) {
+            return getStudentGroupIds(student).includes(groupId);
+        }
+        function getStudentGroupNames(student) {
+            const ids = getStudentGroupIds(student);
+            return ids.map(id => state.groups.find(g => g.id === id)?.name).filter(Boolean);
+        }
+        let currentStudentGroupEditId = null;
+        function editStudentGroups(id) {
+            const student = state.students.find(s => s.id === id);
+            if (!student) return;
+            currentStudentGroupEditId = id;
+            const title = document.getElementById('studentGroupsTitle');
+            if (title) title.innerText = `👥 設定 ${student.name} 的分組`;
+            renderStudentGroupsChecklist(student);
+            playClick();
+            document.getElementById('studentGroupsModal').classList.add('active');
+        }
+        function renderStudentGroupsChecklist(student) {
+            const box = document.getElementById('studentGroupsChecklist');
+            if (!box) return;
+            const selected = new Set(getStudentGroupIds(student));
+            box.innerHTML = state.groups.length ? state.groups.map(g => `<label style="display:flex; align-items:center; gap:8px; padding:10px; border:3px solid var(--ui-border); border-radius:10px; background:${selected.has(g.id)?'#dff9fb':'#fff'}; color:var(--ui-border); font-weight:bold; cursor:pointer;"><input type="checkbox" class="student-group-choice" value="${g.id}" ${selected.has(g.id)?'checked':''} style="width:22px; height:22px; accent-color:#1dd1a1;">${g.name}</label>`).join('') : '<div style="grid-column:1/-1; color:#888; font-weight:bold; text-align:center; padding:12px;">目前沒有小組，請先在上方新增組別。</div>';
+        }
+        function selectAllStudentGroups(checked) {
+            document.querySelectorAll('#studentGroupsChecklist .student-group-choice').forEach(input => input.checked = checked);
+            playClick();
+        }
+        function saveStudentGroupsFromModal() {
+            const student = state.students.find(s => s.id === currentStudentGroupEditId);
+            if (!student) return;
+            const groupIds = [...document.querySelectorAll('#studentGroupsChecklist .student-group-choice:checked')].map(input => input.value);
+            setStudentGroupIds(student, groupIds);
+            closeModal('studentGroupsModal');
+            playClick();
+            renderGroups();
+            renderStudents();
+            renderRanking();
+            saveData();
+        }
+        let draggedGroupId = null;
+        function renderGroups() {
+            const g = document.getElementById('groupGrid');
+            if(!g) return;
+            g.innerHTML = '';
+            const p = parseInt(document.getElementById('groupPtsInput').value) || 0;
+            if(!state.groups.length){
+                g.innerHTML='<div style="color:#888; font-weight:bold; padding:10px;">尚未建立小組，可從 Excel 組別欄匯入，或手動新增組別。</div>';
+                return;
+            }
+            state.groups.forEach(grp => {
+                const dragAttrs = isGrpEditMode ? 'draggable="false" title="編輯模式：可改名或刪除小組"' : `draggable="true" ondragstart="startGroupDrag(event, '${grp.id}')" ondragover="allowGroupDrop(event, '${grp.id}')" ondrop="dropGroup(event, '${grp.id}')" ondragend="endGroupDrag(event)" title="拖曳可調整小組順序"`;
+                const dragClass = isGrpEditMode ? '' : ' group-draggable';
+                g.innerHTML += `<div class="action-btn-wrapper${dragClass}" ${dragAttrs}><button class="rename-action-btn" draggable="false" ondragstart="return false" onclick="renameGroup('${grp.id}', event)">✏️</button><button class="del-action-btn" draggable="false" ondragstart="return false" onclick="deleteGroup('${grp.id}', event)">✖</button><div class="btn btn-blue selectable-text" style="width: 100%; height: 100%;" onclick="if(!window.getSelection().toString().trim() && !isGrpEditMode) scoreGroup('${grp.id}')"><span>🎯</span>${grp.name} <small>${p > 0 ? '+'+p : p}分</small></div></div>`;
+            });
+        }
+        function startGroupDrag(e, id) {
+            draggedGroupId = id;
+            e.currentTarget.classList.add('group-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', id);
+        }
+        function allowGroupDrop(e, targetId) {
+            if(!draggedGroupId || draggedGroupId === targetId) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+        function dropGroup(e, targetId) {
+            e.preventDefault();
+            const sourceId = e.dataTransfer.getData('text/plain') || draggedGroupId;
+            if(!sourceId || sourceId === targetId) return;
+            const from = state.groups.findIndex(g => g.id === sourceId);
+            const to = state.groups.findIndex(g => g.id === targetId);
+            if(from < 0 || to < 0) return;
+            const [moved] = state.groups.splice(from, 1);
+            state.groups.splice(to, 0, moved);
+            draggedGroupId = null;
+            playClick();
+            renderGroups();
+            renderStudents();
+            renderRanking();
+            saveData();
+        }
+        function endGroupDrag(e) {
+            e.currentTarget.classList.remove('group-dragging');
+            draggedGroupId = null;
+        }
+        function addGroup() {
+            const i = document.getElementById('newGroupName');
+            const n = i.value.trim();
+            if (!n) return showModal("⚠️ 尚未輸入組別名稱", "請先輸入新組別名稱。");
+            if (state.groups.some(g => g.name === n)) return showModal("⚠️ 已有這個組別", "請換一個組別名稱。");
+            state.groups.push({ id: 'grp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), name: n });
+            i.value = '';
+            playClick();
+            renderGroups();
+            renderStudents();
+            renderRanking();
+            saveData();
+        }
+        function renameGroup(id, e) {
+            if(e) e.stopPropagation();
+            const group = state.groups.find(g => g.id === id);
+            if(!group) return;
+            const n = prompt('請輸入新的組別名稱：', group.name);
+            if(n === null) return;
+            const clean = n.trim();
+            if(!clean) return showModal("⚠️ 名稱不可空白", "請輸入組別名稱。");
+            if(state.groups.some(g => g.id !== id && g.name === clean)) return showModal("⚠️ 已有這個組別", "請換一個組別名稱。");
+            group.name = clean;
+            playClick();
+            renderGroups();
+            renderStudents();
+            renderRanking();
+            saveData();
+        }
+        function deleteGroup(id, e) {
+            if(e) e.stopPropagation();
+            const group = state.groups.find(g => g.id === id);
+            if(!group) return;
+            const count = state.students.filter(s => studentInGroup(s, id)).length;
+            if(count && !confirm(`「${group.name}」目前有 ${count} 位學生。刪除組別後，這些學生會改為未分組，確定要刪除嗎？`)) return;
+            if(!count && !confirm(`確定要刪除「${group.name}」嗎？`)) return;
+            state.groups = state.groups.filter(g => g.id !== id);
+            state.students.forEach(s => setStudentGroupIds(s, getStudentGroupIds(s).filter(gid => gid !== id)));
+            playClick();
+            renderGroups();
+            renderStudents();
+            renderRanking();
+            saveData();
+        }
+        function scoreGroup(id) { const g = state.groups.find(x => x.id === id); const p = parseInt(document.getElementById('groupPtsInput').value) || 0; if(!g || p===0) return; const stu = state.students.filter(s => studentInGroup(s, id)); if(stu.length === 0) return showModal("⚠️ 小組沒人喔", "請先分配學生！"); stu.forEach(s => s.pts += p); givePoints(p, p>0?5:-5, p>0?'小組優良':'小組提醒', g.name); renderStudents(); saveData(); }
         function openClassScoreModal(t) { playClick(); currentClassScoreType = t; const ti = document.getElementById('classScoreTitle'); const b = document.getElementById('classScoreConfirmBtn'); const i = document.getElementById('classScoreInput'); i.value = '1'; if (t === 'add') { ti.innerText = `🌟 為全班加分`; ti.style.color = 'var(--success)'; b.style.background = 'var(--success)'; b.innerText = '確定加分'; } else { ti.innerText = `⚠️ 為全班扣分`; ti.style.color = 'var(--danger)'; b.style.background = 'var(--danger)'; b.innerText = '確定扣分'; } document.getElementById('classScoreModal').classList.add('active'); setTimeout(() => { i.focus(); i.select(); }, 100); }
         function confirmClassScore() { const v = parseInt(document.getElementById('classScoreInput').value); if (isNaN(v) || v <= 0) return showModal("⚠️ 錯誤", "請輸入>0數字！"); if(state.students.length === 0) { closeModal('classScoreModal'); setTimeout(() => showModal("⚠️ 沒人", "請先新增學生！"), 300); return; } const c = currentClassScoreType === 'add' ? v : -v; state.students.forEach(s => s.pts += c); givePoints(c, c>0 ? Math.min(v,5) : Math.max(-v,-5), c>0?'全班優良':'全班提醒'); renderStudents(); saveData(); closeModal('classScoreModal'); }
 
         function renderRanking() {
             const gl = document.getElementById('groupRankList'); if(gl) {
-                const gs = state.groups.map(g => ({ ...g, totalPts: state.students.filter(s => s.groupId === g.id).reduce((sum, s) => sum + s.pts, 0) })).sort((a, b) => b.totalPts - a.totalPts);
+                const gs = state.groups.map(g => ({ ...g, totalPts: state.students.filter(s => studentInGroup(s, g.id)).reduce((sum, s) => sum + s.pts, 0) })).sort((a, b) => b.totalPts - a.totalPts);
                 gl.innerHTML = gs.length ? gs.map((g, i) => `<div class="rank-item ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}"><div class="rank-num">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`<span style="font-size:1.3rem; color:#888;">${i+1}</span>`}</div><div class="rank-name">${g.name}</div><div class="rank-pts">${g.totalPts} 點</div></div>`).join('') : '<div style="color: #888;">無資料</div>';
             }
             const sl = document.getElementById('studentRankList'); if(sl) {
@@ -2219,11 +2385,62 @@
             const quickScoreInput = document.getElementById('studentQuickScoreInput'); if (quickScoreInput) quickScoreInput.value = state.studentQuickScore || 1;
             const l = document.getElementById('studentList'); l.innerHTML = '';
             state.students.forEach(s => {
-                let opts = `<option value="">未分組</option>` + state.groups.map(g => `<option value="${g.id}" ${s.groupId===g.id?'selected':''}>${g.name}</option>`).join('');
-                l.innerHTML += `<div class="student-item"><div style="flex:1; display:flex; flex-direction:column; gap:4px; padding-right:8px;"><span class="selectable-text" style="word-break:break-word; line-height:1.3;" title="${s.name}">${s.name}</span><select onchange="updateStudentGroup(${s.id}, this.value)" style="display:${isStudentGroupEditorVisible?'block':'none'}; padding:2px 4px; border-radius:4px; border:2px solid var(--ui-border); background:white; font-size:0.85rem; font-weight:bold; color:var(--ui-border); width:fit-content;">${opts}</select></div><div class="student-actions"><span class="student-pts">${s.pts} 分</span><button onclick="openRedeemModal(${s.id})" style="color:var(--warning);" title="兌換">🎁</button><button onclick="generateStudentPraise('${s.name}', ${s.pts})" style="color:#a29bfe;" title="AI 鼓勵">✨</button><button onclick="quickAdjustStudentScore(${s.id}, 1)" style="color:var(--success)" title="加 ${state.studentQuickScore || 1} 分">+</button><button onclick="quickAdjustStudentScore(${s.id}, -1)" style="color:var(--danger)" title="扣 ${state.studentQuickScore || 1} 分">-</button><button class="student-del-btn" onclick="deleteStudent(${s.id})">✖</button></div></div>`;
+                const groupNames = getStudentGroupNames(s);
+                const groupLabel = groupNames.length ? groupNames.join('、') : '未分組';
+                const groupTags = `<div style="display:flex; flex-wrap:wrap; gap:3px; align-items:center; font-size:0.75rem; color:#6c5ce7; line-height:1.2; max-width:190px;">${groupLabel}</div>`;
+                const groupEditor = `<button onclick="editStudentGroups(${s.id})" style="display:${isStudentGroupEditorVisible?'inline-flex':'none'}; width:auto; height:auto; min-height:24px; padding:2px 8px; font-size:0.8rem; background:#fff; color:var(--ui-border); border:2px solid var(--ui-border); border-radius:6px; box-shadow:0 2px 0 var(--ui-border);">👥 設定分組</button>`;
+                l.innerHTML += `<div class="student-item"><div style="flex:1; display:flex; flex-direction:column; gap:4px; padding-right:8px;"><span class="selectable-text" style="word-break:break-word; line-height:1.3;" title="${s.name}">${s.name}</span>${groupTags}${groupEditor}</div><div class="student-actions"><span class="student-pts">${s.pts} 分</span><button onclick="openRedeemModal(${s.id})" style="color:var(--warning);" title="兌換">🎁</button><button onclick="generateStudentPraise('${s.name}', ${s.pts})" style="color:#a29bfe;" title="AI 鼓勵">✨</button><button onclick="quickAdjustStudentScore(${s.id}, 1)" style="color:var(--success)" title="加 ${state.studentQuickScore || 1} 分">+</button><button onclick="quickAdjustStudentScore(${s.id}, -1)" style="color:var(--danger)" title="扣 ${state.studentQuickScore || 1} 分">-</button><button class="student-del-btn" onclick="deleteStudent(${s.id})">✖</button></div></div>`;
             }); renderRanking(); syncDrawRoster();
         }
-        function addStudent() { const i = document.getElementById('newStudentName'); if(i.value.trim()) { state.students.push({ id: Date.now(), name: i.value.trim(), pts: 0, groupId: null }); i.value = ''; playClick(); renderStudents(); saveData(); } }
+        function addStudent() {
+            const i = document.getElementById('newStudentName');
+            const name = i.value.trim();
+            if (!name) return;
+            if (parseSeatSelection(name).length) return showModal("⚠️ 偵測到座號清單", "如果要幫多位學生加扣分，請使用下方的「指定加分」或「指定扣分」。若要新增學生，請輸入完整姓名，例如：1號 王小明。");
+            const seat = getStudentSeatNumber(name);
+            if (Number.isFinite(seat) && seat !== Number.MAX_SAFE_INTEGER && state.students.some(s => getStudentSeatNumber(s.name) === seat)) return showModal("⚠️ 座號已存在", `目前已有 ${seat} 號學生，請先確認是否要刪除原學生再新增。`);
+            state.students.push({ id: Date.now(), name, pts: 0, groupId: null, groupIds: [] });
+            i.value = '';
+            playClick();
+            renderStudents();
+            saveData();
+        }
+        function parseSeatSelection(text) {
+            const raw = String(text || '').trim();
+            if (!raw) return [];
+            if (!/^\s*\d+\s*(?:號)?(?:\s*(?:[,，、;；\s]+|-|~|～|至)\s*\d+\s*(?:號)?)*\s*$/.test(raw)) return [];
+            const normalized = raw.replace(/號/g, '').replace(/[，、;；]/g, ',').replace(/\s+/g, ',');
+            const seats = [];
+            normalized.split(',').filter(Boolean).forEach(part => {
+                const range = part.match(/^(\d+)(?:-|~|～|至)(\d+)$/);
+                if (range) {
+                    const a = parseInt(range[1], 10), b = parseInt(range[2], 10);
+                    const start = Math.min(a, b), end = Math.max(a, b);
+                    for (let n = start; n <= end; n++) seats.push(n);
+                } else if (/^\d+$/.test(part)) {
+                    seats.push(parseInt(part, 10));
+                }
+            });
+            return [...new Set(seats)].filter(n => n > 0).sort((a, b) => a - b);
+        }
+        function adjustSelectedSeats(direction) {
+            const input = document.getElementById('newStudentName');
+            const seats = parseSeatSelection(input.value);
+            if (!seats.length) return showModal("⚠️ 請輸入座號", "請在上方輸入要加扣分的座號，例如：1,5,9 或 1-5。");
+            const targets = state.students.filter(s => seats.includes(getStudentSeatNumber(s.name)));
+            const foundSeats = new Set(targets.map(s => getStudentSeatNumber(s.name)));
+            const missing = seats.filter(n => !foundSeats.has(n));
+            if (!targets.length) return showModal("⚠️ 找不到學生", `找不到這些座號：${seats.join('、')}`);
+            const score = state.studentQuickScore || 1;
+            const change = direction > 0 ? score : -score;
+            targets.forEach(s => s.pts += change);
+            const names = targets.map(s => s.name).join('、');
+            givePoints(change, change > 0 ? Math.min(score, 5) : Math.max(-score, -5), change > 0 ? '指定加分' : '指定扣分', names);
+            input.value = '';
+            renderStudents();
+            saveData();
+            if (missing.length) setTimeout(() => showModal("⚠️ 部分座號未找到", `已處理：${targets.map(s => getStudentSeatNumber(s.name)).join('、')}號。\n未找到：${missing.join('、')}號。`), 250);
+        }
         function setStudentQuickScore(value) { const input = document.getElementById('studentQuickScoreInput'); const score = Math.max(1, Math.min(100, parseInt(value) || 1)); state.studentQuickScore = score; if (input) input.value = score; playClick(); saveData(); }
         function quickAdjustStudentScore(id, delta) { const s = state.students.find(x => x.id === id); if(!s) return; const score = state.studentQuickScore || 1; const c = delta > 0 ? score : -score; playClick(); s.pts += c; givePoints(c, c > 0 ? Math.min(score, 5) : Math.max(-score, -5), c > 0 ? '優良' : '提醒', s.name); renderStudents(); saveData(); }
         function openStudentScoreModal(id, type) { playClick(); const s = state.students.find(x => x.id === id); if(!s) return; currentScoreTarget = { id, type }; const t = document.getElementById('studentScoreTitle'); const b = document.getElementById('studentScoreConfirmBtn'); const i = document.getElementById('studentScoreInput'); i.value = '1'; if(type === 'add') { t.innerText = `➕ 為 ${s.name} 加分`; t.style.color = 'var(--success)'; b.style.background = 'var(--success)'; b.innerText = '加分'; } else { t.innerText = `➖ 為 ${s.name} 扣分`; t.style.color = 'var(--danger)'; b.style.background = 'var(--danger)'; b.innerText = '扣分'; } document.getElementById('studentScoreModal').classList.add('active'); setTimeout(() => { i.focus(); i.select(); }, 100); }
@@ -2269,19 +2486,18 @@
             pendingStudentImport=parseStudentImport(document.getElementById('studentImportText').value);
             if(!pendingStudentImport.length)return previewStudentImport();
             const mode=document.querySelector('input[name="studentImportMode"]:checked')?.value||'replace';
-            const existingSeats=new Set(state.students.map(s=>getStudentSeatNumber(s.name)).filter(n=>Number.isFinite(n)&&n!==Number.MAX_SAFE_INTEGER));
+            if (mode === 'replace') state.groups = [];
+            const existingSeats=new Set((mode === 'append' ? state.students : []).map(s=>getStudentSeatNumber(s.name)).filter(n=>Number.isFinite(n)&&n!==Number.MAX_SAFE_INTEGER));
             let skipped=0;
             const imported=pendingStudentImport.filter(s=>{
                 if(mode==='append'&&existingSeats.has(s.seat)){skipped++;return false;}
                 existingSeats.add(s.seat); return true;
             }).map((s,i)=>{
-                let groupId=null;
+                let groupIds=[];
                 if(s.groupName){
-                    let group=state.groups.find(g=>g.name===s.groupName);
-                    if(!group){group={id:'grp_'+Date.now()+'_'+i,name:s.groupName};state.groups.push(group);}
-                    groupId=group.id;
+                    groupIds=splitGroupNames(s.groupName).map(name => getOrCreateGroupByName(name)?.id).filter(Boolean);
                 }
-                return {id:Date.now()+i,name:s.name,pts:0,groupId};
+                return {id:Date.now()+i,name:s.name,pts:0,groupId:groupIds[0]||null,groupIds};
             });
             state.students=mode==='replace'?imported:[...state.students,...imported];
             sortStudentsBySeat(); saveData(); renderGroups(); renderStudents(); playLevelUp();
@@ -2294,9 +2510,56 @@
             setTimeout(()=>showModal('✅ 已清空學生名單','目前學生名單、個人分數與分組資料已清除。'),250);
         }
 
-        function renderGifts() { const g = document.getElementById('giftGrid'); g.innerHTML = ''; state.gifts.forEach(gf => g.innerHTML += `<div class="action-btn-wrapper"><button class="del-action-btn" onclick="deleteGift('${gf.id}', event)">✖</button><div class="btn btn-yellow selectable-text" style="width:100%; height:100%; cursor:auto;"><span>${gf.icon}</span>${gf.name} <small>${gf.pts} 點</small></div></div>`); }
-        function addGift() { const iBtn = document.getElementById('giftIconBtn'); const n = document.getElementById('newGiftName').value.trim(); const p = parseInt(document.getElementById('newGiftPts').value) || 10; if(n) { state.gifts.push({ id: 'g_'+Date.now(), name: n, pts: Math.abs(p), icon: iBtn.innerText || '🎁' }); document.getElementById('newGiftName').value = ''; iBtn.innerText = '🎫'; playClick(); renderGifts(); saveData(); } }
-        function deleteGift(id, e) { e.stopPropagation(); state.gifts = state.gifts.filter(g => g.id !== id); playClick(); renderGifts(); saveData(); }
+        function renderGifts() {
+            const g = document.getElementById('giftGrid');
+            if (!Array.isArray(state.gifts)) state.gifts = [];
+            g.innerHTML = state.gifts.length ? state.gifts.map(gf => `<div class="action-btn-wrapper"><button class="rename-action-btn" onclick="editGift('${gf.id}', event)" title="修改禮物">✏️</button><button class="del-action-btn" onclick="deleteGift('${gf.id}', event)" title="刪除禮物">✖</button><div class="btn btn-yellow selectable-text" style="width:100%; height:100%; cursor:auto;"><span>${gf.icon || '🎁'}</span>${gf.name} <small>${gf.pts} 點</small></div></div>`).join('') : '<div style="grid-column:1/-1; padding:18px; border:3px dashed var(--ui-border); border-radius:12px; color:#777; font-weight:bold; text-align:center;">目前沒有兌換禮物，老師可以在上方新增項目。</div>';
+        }
+        function addGift() {
+            const iBtn = document.getElementById('giftIconBtn');
+            const nameInput = document.getElementById('newGiftName');
+            const ptsInput = document.getElementById('newGiftPts');
+            const n = nameInput.value.trim();
+            const p = Math.max(1, Math.abs(parseInt(ptsInput.value, 10) || 10));
+            if (!n) { showModal('⚠️ 尚未輸入禮物名稱', '請先輸入可兌換的禮物名稱。'); return; }
+            state.gifts.push({ id: 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), name: n, pts: p, icon: iBtn.innerText || '🎁' });
+            nameInput.value = '';
+            ptsInput.value = 10;
+            iBtn.innerText = '🎫';
+            playClick();
+            renderGifts();
+            saveData();
+        }
+        function editGift(id, e) {
+            e.stopPropagation();
+            const gift = state.gifts.find(g => g.id === id);
+            if (!gift) return;
+            const name = prompt('請輸入禮物名稱：', gift.name);
+            if (name === null) return;
+            const cleanName = name.trim();
+            if (!cleanName) { showModal('⚠️ 名稱不可空白', '請輸入禮物名稱。'); return; }
+            const ptsText = prompt('請輸入兌換所需點數：', gift.pts);
+            if (ptsText === null) return;
+            const pts = Math.max(1, Math.abs(parseInt(ptsText, 10) || gift.pts || 1));
+            const icon = prompt('請輸入禮物圖示：', gift.icon || '🎁');
+            if (icon === null) return;
+            gift.name = cleanName;
+            gift.pts = pts;
+            gift.icon = icon.trim() || '🎁';
+            playClick();
+            renderGifts();
+            saveData();
+        }
+        function deleteGift(id, e) {
+            e.stopPropagation();
+            const gift = state.gifts.find(g => g.id === id);
+            if (!gift) return;
+            if (!confirm(`確定要刪除「${gift.icon || '🎁'} ${gift.name}」嗎？`)) return;
+            state.gifts = state.gifts.filter(g => g.id !== id);
+            playClick();
+            renderGifts();
+            saveData();
+        }
         function openRedeemModal(id) { playClick(); const s = state.students.find(x => x.id === id); if(!s) return; document.getElementById('redeemStudentInfo').innerText = `🧑‍🎓 ${s.name} (${s.pts}分)`; const l = document.getElementById('redeemGiftList'); l.innerHTML = state.gifts.length ? state.gifts.map(g => `<button class="btn ${s.pts>=g.pts?'btn-green':'btn-gray'}" style="padding:10px; font-size:1rem; opacity:${s.pts>=g.pts?'1':'0.6'}" ${s.pts>=g.pts?`onclick="confirmRedeem(${s.id}, '${g.id}')"`:'disabled'}><span style="font-size:1.5rem;">${g.icon}</span>${g.name}<br><small>(-${g.pts}分)</small></button>`).join('') : '<div style="grid-column:span 2; color:#888;">無禮物</div>'; document.getElementById('redeemModal').classList.add('active'); }
         function confirmRedeem(sid, gid) { const s = state.students.find(x => x.id === sid); const g = state.gifts.find(x => x.id === gid); if(s && g && s.pts >= g.pts) { s.pts -= g.pts; closeModal('redeemModal'); addHistory(`[${s.name}] 兌換 ${g.icon} ${g.name} (-${g.pts}分)`); playLevelUp(); renderStudents(); saveData(); setTimeout(() => showModal("🎁 兌換成功！", `恭喜 ${s.name} 兌換【${g.icon} ${g.name}】！`), 300); } }
 
