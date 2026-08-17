@@ -237,7 +237,8 @@
 
         let columnsData = ["聯絡簿", "第一本訂正", "背書", "打掃"]; // 預設任務
         let seatPositions = {}; // 鍵：座號，值：關卡索引
-        let draggedItem = null; // 全域滑鼠拖曳暫存物件
+        let draggedItem = null;
+        let touchItem = null;
 
         function serializeBoardState() {
             // 從 DOM 讀取最新的座號位置
@@ -886,8 +887,6 @@
             const clearAllBtn = document.getElementById('clear-all-btn');
             const checkboxContainer = document.getElementById('checkbox-container');
             const zhuyinBtn = document.getElementById('zhuyin-btn');
-
-            let touchItem = null;
 
             // --- 一鍵切換注音初始化 ---
             if (zhuyinBtn) {
